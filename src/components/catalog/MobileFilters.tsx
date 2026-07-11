@@ -13,8 +13,13 @@ export function MobileFilters({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Close when navigation changes the route (category picked)
-  useEffect(() => setOpen(false), [pathname]);
+  // Close when navigation changes the route (category picked) —
+  // state adjustment during render instead of an effect.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;

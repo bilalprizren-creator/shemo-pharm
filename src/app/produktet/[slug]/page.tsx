@@ -21,6 +21,7 @@ import {
 import { formatPrice } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import { Breadcrumbs, type Crumb } from "@/components/catalog/Breadcrumbs";
+import { BreadcrumbJsonLd, ProductJsonLd } from "@/components/seo/JsonLd";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductCarousel } from "@/components/product/ProductCarousel";
 import { ProductGallery } from "@/components/product/ProductGallery";
@@ -78,6 +79,23 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
+      <ProductJsonLd
+        name={product.name}
+        sku={product.sku}
+        image={product.images[0] ?? null}
+        category={mainCat ? categoryDisplayName(mainCat) : null}
+        slug={product.slug}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Ballina", url: "/" },
+          { name: "Produktet", url: "/produktet" },
+          ...(mainCat
+            ? [{ name: categoryDisplayName(mainCat), url: `/kategorite/${mainCat.slug}` }]
+            : []),
+          { name: product.name },
+        ]}
+      />
       <Breadcrumbs items={crumbs} />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">

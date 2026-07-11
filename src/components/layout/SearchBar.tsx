@@ -32,34 +32,44 @@ export function SearchBar({ autoFocus, onNavigate, className }: SearchBarProps) 
     setActive(-1);
   }, []);
 
-  // Debounced suggestions
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const q = query.trim();
-    if (q.length < 2) {
-      setResults([]);
-      setTotal(0);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/kerko?q=${encodeURIComponent(q)}`);
-        const data = (await res.json()) as { items: PublicProduct[]; total: number };
-        setResults(data.items);
-        setTotal(data.total);
-        setOpen(true);
-      } catch {
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 250);
-    return () => {
+  // Debounced suggestions — driven by the change handler, not an effect
+  const updateQuery = useCallback(
+    (value: string) => {
+      setQuery(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [query]);
+      const q = value.trim();
+      if (q.length < 2) {
+        setResults([]);
+        setTotal(0);
+        setLoading(false);
+        close();
+        return;
+      }
+      setLoading(true);
+      debounceRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/kerko?q=${encodeURIComponent(q)}`);
+          const data = (await res.json()) as { items: PublicProduct[]; total: number };
+          setResults(data.items);
+          setTotal(data.total);
+          setOpen(true);
+        } catch {
+          setResults([]);
+        } finally {
+          setLoading(false);
+        }
+      }, 250);
+    },
+    [close]
+  );
+
+  // Clear any pending request timer on unmount
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    []
+  );
 
   // Close when clicking outside
   useEffect(() => {
@@ -120,7 +130,7 @@ export function SearchBar({ autoFocus, onNavigate, className }: SearchBarProps) 
           placeholder="Kërko produkte, kode ose kategori…"
           autoFocus={autoFocus}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={onKeyDown}
           className="w-full h-11 rounded-full border border-ink-900/10 bg-white pl-10 pr-16 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
@@ -133,9 +143,7 @@ export function SearchBar({ autoFocus, onNavigate, className }: SearchBarProps) 
             <button
               type="button"
               onClick={() => {
-                setQuery("");
-                setResults([]);
-                close();
+                updateQuery("");
                 inputRef.current?.focus();
               }}
               aria-label="Pastro kërkimin"

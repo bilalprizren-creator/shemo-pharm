@@ -50,17 +50,22 @@ export function HeaderClient({
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
+    const raf = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
-  // Close overlays on navigation
-  useEffect(() => {
+  // Close overlays on navigation — state adjustment during render
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setCatOpen(false);
     setSearchOpen(false);
     setMobileOpen(false);
-  }, [pathname]);
+  }
 
   // Category dropdown: close on outside click / Escape
   useEffect(() => {
