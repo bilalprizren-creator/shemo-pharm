@@ -9,7 +9,14 @@ import { WishlistButton } from "./WishlistButton";
  * only the wishlist heart hydrates on the client. The whole card is one
  * link (stretched overlay) so nested interactive elements stay valid.
  */
-export function ProductCard({ product }: { product: CardProduct }) {
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: CardProduct;
+  /** Eager-load the image when the card is above the fold. */
+  priority?: boolean;
+}) {
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-ink-900/8 bg-white transition-shadow duration-200 hover:shadow-card-hover">
       <div className="relative aspect-square w-full bg-white">
@@ -19,6 +26,7 @@ export function ProductCard({ product }: { product: CardProduct }) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 280px"
+            priority={priority}
             className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04]"
           />
         ) : (

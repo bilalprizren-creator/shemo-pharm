@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SHEMO PHARM — Website
 
-## Getting Started
+Uebfaqja e re e SHEMO PHARM: depo farmaceutike dhe distributor me shumicë i
+produkteve dhe pajisjeve mjekësore në Prizren, Kosovë.
 
-First, run the development server:
+Ndërtuar me **Next.js 16 (App Router) + TypeScript + Tailwind CSS v4**.
+
+## Zhvillimi
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
+npm run build        # build produksioni
+npm run lint         # ESLint
+npm run export:catalog  # rifreskon katalogun nga faqja e vjetër (shih më poshtë)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Të dhënat e katalogut
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Produktet (2 049) dhe kategoritë (90) janë eksportuar nga WooCommerce Store API
+e faqes ekzistuese (`shemopharm.com/wp-json/wc/store/v1/…`) në
+`src/data/products.json` dhe `src/data/categories.json`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Rifreskimi: `npm run export:catalog` (script-i: `scripts/export-catalog.mjs`)
+- Fotografitë e produkteve mbeten të strehuara në `shemopharm.com/wp-content/uploads/…`
+  (shih `remotePatterns` në `next.config.ts`). **Para se të fiket faqja e vjetër,
+  fotografitë duhet të kopjohen** në një hosting të ri ose në `public/`.
 
-## Learn More
+## Llogaritë dhe çmimet (B2B)
 
-To learn more about Next.js, take a look at the following resources:
+Çmimet shfaqen **vetëm** për llogaritë e verifikuara — kontrolli bëhet gjithmonë
+në server (`src/lib/auth.ts` → `canSeePrices`). Vizitorët e paidentifikuar dhe
+llogaritë në pritje nuk marrin asnjë të dhënë çmimi në HTML apo API.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Përdoruesit ruhen në `data/users.json` (jashtë git-it).
+- Regjistrimet e reja marrin status `pending`; për t'i aprovuar, ndryshoni
+  statusin në `approved` në atë skedar (ose ndërtoni një panel administrimi).
+- Llogaria demo për testim: `demo@shemopharm.com` / `Demo2026!` (e aprovuar).
+- Në produksion vendosni `AUTH_SECRET` si variabël mjedisi (opsionale në dev —
+  gjenerohet automatikisht në `data/.auth-secret`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Llogaritë e klientëve nga faqja e vjetër WordPress **nuk mund të migrohen** pa
+qasje në bazën e të dhënave të saj; klientët duhet të regjistrohen sërish.
 
-## Deploy on Vercel
+## Formulari i kontaktit
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Mesazhet ruhen në `data/messages.json`. **TODO:** lidheni me email (SMTP ose
+shërbim transaksional) te `src/lib/contact-actions.ts` — validimi dhe UI mbeten
+të pandryshuara.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Çështje që presin konfirmim nga biznesi
+
+- Kuptimi i statistikës "200+ Distributor i autorizuar" nga faqja e vjetër —
+  aktualisht shfaqet si "200+ Partnerë dhe brende" (`src/lib/site.ts`).
+- URL-të e sakta të Instagram/YouTube (vetëm Facebook u verifikua).
+- Numri që pranon WhatsApp (supozuar 049 600 934).
+- Katalog PDF nuk ekziston — butoni "Katalogu" shfaqet automatikisht kur të
+  vendoset `catalogUrl` te `src/lib/site.ts`.

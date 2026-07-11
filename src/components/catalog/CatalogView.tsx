@@ -158,9 +158,9 @@ export async function CatalogView({
           ) : (
             <>
               <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
-                {cards.map((p) => (
+                {cards.map((p, i) => (
                   <li key={p.id}>
-                    <ProductCard product={p} />
+                    <ProductCard product={p} priority={i < 4} />
                   </li>
                 ))}
               </ul>
