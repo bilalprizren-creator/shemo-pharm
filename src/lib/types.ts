@@ -25,6 +25,12 @@ export interface PublicProduct {
   inStock: boolean;
 }
 
+/** Everything a product card needs. `price` is a formatted string that is
+ *  only populated server-side for approved sessions — otherwise null. */
+export interface CardProduct extends PublicProduct {
+  price: string | null;
+}
+
 export interface Category {
   id: number;
   name: string;

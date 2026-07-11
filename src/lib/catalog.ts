@@ -1,7 +1,8 @@
 import "server-only";
 import rawProducts from "@/data/products.json";
 import rawCategories from "@/data/categories.json";
-import type { Category, CategoryNode, Product } from "@/lib/types";
+import { formatPrice } from "@/lib/format";
+import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
 const products = rawProducts as Product[];
 const categories = rawCategories as Category[];
@@ -19,7 +20,11 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   "cajra-me-filter": "Çajra me filtër",
   prezervativ: "Prezervativë",
   "te-tjera": "Të tjera",
+  "te-ndryshme": "Të ndryshme",
+  "te-ndryshme-atc-natyral": "Të ndryshme",
+  "te-ndryshme-prezervativ": "Të ndryshme",
   "te-ndryshme-suplements-effervescent": "Të ndryshme",
+  "te-tjera-ersa-med-ortoped": "Të tjera",
 };
 
 export function categoryDisplayName(cat: Category): string {
@@ -162,12 +167,30 @@ export function getRelatedProducts(product: Product, limit = 8): Product[] {
  * Deterministic homepage selection: products with images, spread across
  * the given category so rows do not repeat the same items.
  */
-export function getShowcaseProducts(categorySlug: string, limit = 8): Product[] {
+export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[] {
   const { items } = getProducts({ categorySlug, perPage: 200 });
   const withImages = items.filter((p) => p.images.length > 0);
   if (withImages.length <= limit) return withImages.slice(0, limit);
   const step = Math.floor(withImages.length / limit);
   return Array.from({ length: limit }, (_, i) => withImages[i * step]);
+}
+
+/**
+ * Shapes a product for the card components. Prices are attached here and
+ * nowhere else — pass showPrices only after checking the session server-side.
+ */
+export function toCardProduct(product: Product, showPrices: boolean): CardProduct {
+  const cat = primaryCategory(product);
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    sku: product.sku,
+    image: product.images[0] ?? null,
+    categoryName: cat ? categoryDisplayName(cat) : null,
+    inStock: product.inStock,
+    price: showPrices ? formatPrice(product.priceCents) : null,
+  };
 }
 
 /** Curated homepage category cards mapped to real catalog slugs. */
