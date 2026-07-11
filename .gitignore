@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Design reference screenshots (not part of the app)
+reference/
+
+# Server-only data stores
+data/users.json
+data/messages.json

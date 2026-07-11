@@ -1,0 +1,632 @@
+[
+ {
+  "id": 250,
+  "name": "Alkool dhe Antiseptik",
+  "slug": "alkool-dhe-antiseptik",
+  "parent": 0,
+  "count": 24
+ },
+ {
+  "id": 227,
+  "name": "Antibakterial",
+  "slug": "antibakterial",
+  "parent": 221,
+  "count": 14
+ },
+ {
+  "id": 187,
+  "name": "Aparatura",
+  "slug": "aparatura",
+  "parent": 0,
+  "count": 111
+ },
+ {
+  "id": 214,
+  "name": "ATC Natyral",
+  "slug": "atc-natyral",
+  "parent": 0,
+  "count": 59
+ },
+ {
+  "id": 352,
+  "name": "Autan",
+  "slug": "autan",
+  "parent": 0,
+  "count": 3
+ },
+ {
+  "id": 259,
+  "name": "Balsam",
+  "slug": "balsam-krauterhof",
+  "parent": 251,
+  "count": 10
+ },
+ {
+  "id": 248,
+  "name": "Barnat",
+  "slug": "barnat",
+  "parent": 0,
+  "count": 243
+ },
+ {
+  "id": 343,
+  "name": "Bio Tree Baby",
+  "slug": "bio-tree-baby",
+  "parent": 0,
+  "count": 25
+ },
+ {
+  "id": 252,
+  "name": "Bioblas",
+  "slug": "bioblas",
+  "parent": 222,
+  "count": 19
+ },
+ {
+  "id": 207,
+  "name": "Bonbona",
+  "slug": "bonbona",
+  "parent": 205,
+  "count": 8
+ },
+ {
+  "id": 216,
+  "name": "Çajra me filter",
+  "slug": "cajra-me-filter",
+  "parent": 214,
+  "count": 5
+ },
+ {
+  "id": 215,
+  "name": "Çajra Mjekësore",
+  "slug": "cajra-mjekesore",
+  "parent": 214,
+  "count": 16
+ },
+ {
+  "id": 196,
+  "name": "Cansin",
+  "slug": "cansin",
+  "parent": 0,
+  "count": 100
+ },
+ {
+  "id": 210,
+  "name": "Capsula",
+  "slug": "capsula",
+  "parent": 205,
+  "count": 18
+ },
+ {
+  "id": 353,
+  "name": "Chicco",
+  "slug": "chicco",
+  "parent": 0,
+  "count": 16
+ },
+ {
+  "id": 191,
+  "name": "Comfort",
+  "slug": "comfort",
+  "parent": 187,
+  "count": 10
+ },
+ {
+  "id": 225,
+  "name": "Dentare",
+  "slug": "dentare",
+  "parent": 221,
+  "count": 66
+ },
+ {
+  "id": 194,
+  "name": "Diabetike",
+  "slug": "diabetike",
+  "parent": 187,
+  "count": 15
+ },
+ {
+  "id": 202,
+  "name": "Dolphi",
+  "slug": "dolphi",
+  "parent": 15,
+  "count": 8
+ },
+ {
+  "id": 236,
+  "name": "Dorë",
+  "slug": "dore-dore",
+  "parent": 234,
+  "count": 4
+ },
+ {
+  "id": 234,
+  "name": "Dorë",
+  "slug": "dore",
+  "parent": 231,
+  "count": 55
+ },
+ {
+  "id": 189,
+  "name": "Dr. Frei",
+  "slug": "dr-frei",
+  "parent": 187,
+  "count": 15
+ },
+ {
+  "id": 249,
+  "name": "Dr. Luigi",
+  "slug": "dr-luigi",
+  "parent": 247,
+  "count": 8
+ },
+ {
+  "id": 206,
+  "name": "Eferveta",
+  "slug": "eferveta",
+  "parent": 205,
+  "count": 22
+ },
+ {
+  "id": 211,
+  "name": "Eferveta (Kruger, Heliusan)",
+  "slug": "eferveta-kruger-heliusan",
+  "parent": 204,
+  "count": 10
+ },
+ {
+  "id": 231,
+  "name": "Ersa Med (Ortopedi)",
+  "slug": "ersa-med-ortopedi",
+  "parent": 0,
+  "count": 237
+ },
+ {
+  "id": 200,
+  "name": "Fasha",
+  "slug": "fasha",
+  "parent": 196,
+  "count": 32
+ },
+ {
+  "id": 197,
+  "name": "Fllastera",
+  "slug": "fllastera",
+  "parent": 196,
+  "count": 35
+ },
+ {
+  "id": 193,
+  "name": "Freely",
+  "slug": "freely",
+  "parent": 187,
+  "count": 2
+ },
+ {
+  "id": 224,
+  "name": "Froika",
+  "slug": "froika",
+  "parent": 221,
+  "count": 68
+ },
+ {
+  "id": 199,
+  "name": "Gaza",
+  "slug": "gaza",
+  "parent": 196,
+  "count": 13
+ },
+ {
+  "id": 240,
+  "name": "Gisht",
+  "slug": "gisht-kembe",
+  "parent": 238,
+  "count": 8
+ },
+ {
+  "id": 235,
+  "name": "Gisht",
+  "slug": "gisht",
+  "parent": 234,
+  "count": 13
+ },
+ {
+  "id": 242,
+  "name": "Gjuri",
+  "slug": "gjuri",
+  "parent": 238,
+  "count": 25
+ },
+ {
+  "id": 354,
+  "name": "Haribo",
+  "slug": "haribo",
+  "parent": 0,
+  "count": 10
+ },
+ {
+  "id": 228,
+  "name": "Higjienike",
+  "slug": "higjienike",
+  "parent": 221,
+  "count": 96
+ },
+ {
+  "id": 244,
+  "name": "Hollaopke",
+  "slug": "hollaopke",
+  "parent": 238,
+  "count": 6
+ },
+ {
+  "id": 245,
+  "name": "Karrige dhe ndihmëse për ecje",
+  "slug": "karrige-dhe-ndihmese-per-ecje",
+  "parent": 231,
+  "count": 18
+ },
+ {
+  "id": 238,
+  "name": "Këmbë",
+  "slug": "kembe",
+  "parent": 231,
+  "count": 92
+ },
+ {
+  "id": 221,
+  "name": "Kozmetikë",
+  "slug": "kozmetike",
+  "parent": 0,
+  "count": 468
+ },
+ {
+  "id": 264,
+  "name": "Kozmetikë",
+  "slug": "kozmetike-swiss-energy",
+  "parent": 205,
+  "count": 6
+ },
+ {
+  "id": 268,
+  "name": "Kozmetikë",
+  "slug": "kozmetike-labella",
+  "parent": 226,
+  "count": 24
+ },
+ {
+  "id": 237,
+  "name": "Krah",
+  "slug": "krah",
+  "parent": 234,
+  "count": 30
+ },
+ {
+  "id": 251,
+  "name": "Krauterhof",
+  "slug": "krauterhof",
+  "parent": 0,
+  "count": 52
+ },
+ {
+  "id": 260,
+  "name": "Krem",
+  "slug": "krem",
+  "parent": 251,
+  "count": 23
+ },
+ {
+  "id": 262,
+  "name": "Krem",
+  "slug": "krem-swiss-energy",
+  "parent": 205,
+  "count": 3
+ },
+ {
+  "id": 229,
+  "name": "Krema",
+  "slug": "krema",
+  "parent": 221,
+  "count": 58
+ },
+ {
+  "id": 226,
+  "name": "Labella",
+  "slug": "labella",
+  "parent": 221,
+  "count": 61
+ },
+ {
+  "id": 261,
+  "name": "Labellë",
+  "slug": "labelle",
+  "parent": 251,
+  "count": 1
+ },
+ {
+  "id": 198,
+  "name": "Leukoplasta",
+  "slug": "leukoplasta",
+  "parent": 196,
+  "count": 11
+ },
+ {
+  "id": 201,
+  "name": "Love Plus",
+  "slug": "love-plus",
+  "parent": 15,
+  "count": 3
+ },
+ {
+  "id": 247,
+  "name": "Mbathje Ortopedike",
+  "slug": "mbathje-ortopedike",
+  "parent": 0,
+  "count": 18
+ },
+ {
+  "id": 344,
+  "name": "Mr. White",
+  "slug": "mr-white",
+  "parent": 0,
+  "count": 35
+ },
+ {
+  "id": 241,
+  "name": "Nyje",
+  "slug": "nyje",
+  "parent": 238,
+  "count": 11
+ },
+ {
+  "id": 208,
+  "name": "Omega 3",
+  "slug": "omega-3",
+  "parent": 205,
+  "count": 7
+ },
+ {
+  "id": 356,
+  "name": "Orbit",
+  "slug": "orbit",
+  "parent": 0,
+  "count": 13
+ },
+ {
+  "id": 328,
+  "name": "Ortopedi",
+  "slug": "ortopedi",
+  "parent": 205,
+  "count": 27
+ },
+ {
+  "id": 220,
+  "name": "Paisje Medicinale",
+  "slug": "paisje-medicinale",
+  "parent": 0,
+  "count": 125
+ },
+ {
+  "id": 357,
+  "name": "Pampers",
+  "slug": "pampers",
+  "parent": 0,
+  "count": 6
+ },
+ {
+  "id": 256,
+  "name": "Pëlhurë",
+  "slug": "pelhure",
+  "parent": 196,
+  "count": 3
+ },
+ {
+  "id": 209,
+  "name": "Për Fëmijë",
+  "slug": "per-femije",
+  "parent": 205,
+  "count": 9
+ },
+ {
+  "id": 349,
+  "name": "Pika",
+  "slug": "pika",
+  "parent": 248,
+  "count": 13
+ },
+ {
+  "id": 15,
+  "name": "Prezervativ",
+  "slug": "prezervativ",
+  "parent": 0,
+  "count": 160
+ },
+ {
+  "id": 232,
+  "name": "Qafore",
+  "slug": "qafore",
+  "parent": 231,
+  "count": 11
+ },
+ {
+  "id": 243,
+  "name": "Qorape",
+  "slug": "qorape",
+  "parent": 238,
+  "count": 15
+ },
+ {
+  "id": 253,
+  "name": "Restorex",
+  "slug": "restorex",
+  "parent": 222,
+  "count": 7
+ },
+ {
+  "id": 346,
+  "name": "Senti2",
+  "slug": "senti2",
+  "parent": 220,
+  "count": 30
+ },
+ {
+  "id": 257,
+  "name": "Serum",
+  "slug": "serum",
+  "parent": 251,
+  "count": 7
+ },
+ {
+  "id": 258,
+  "name": "Shampo",
+  "slug": "shampo-krauterhof",
+  "parent": 251,
+  "count": 7
+ },
+ {
+  "id": 222,
+  "name": "Shampo",
+  "slug": "shampo",
+  "parent": 221,
+  "count": 59
+ },
+ {
+  "id": 188,
+  "name": "Shemo",
+  "slug": "shemo",
+  "parent": 187,
+  "count": 15
+ },
+ {
+  "id": 233,
+  "name": "Shoka dhe Korseta",
+  "slug": "shoka-dhe-korseta",
+  "parent": 231,
+  "count": 32
+ },
+ {
+  "id": 239,
+  "name": "Shtroje",
+  "slug": "shtroje",
+  "parent": 238,
+  "count": 6
+ },
+ {
+  "id": 347,
+  "name": "Shurupa",
+  "slug": "shurupa",
+  "parent": 248,
+  "count": 19
+ },
+ {
+  "id": 213,
+  "name": "Soda Bikarboni",
+  "slug": "soda-bikarboni",
+  "parent": 204,
+  "count": 6
+ },
+ {
+  "id": 355,
+  "name": "Solgar",
+  "slug": "solgar",
+  "parent": 0,
+  "count": 6
+ },
+ {
+  "id": 212,
+  "name": "Suplemente",
+  "slug": "suplemente",
+  "parent": 204,
+  "count": 183
+ },
+ {
+  "id": 204,
+  "name": "Suplements & Effervescent",
+  "slug": "suplements-effervescent",
+  "parent": 0,
+  "count": 348
+ },
+ {
+  "id": 348,
+  "name": "Supositore",
+  "slug": "supositore",
+  "parent": 248,
+  "count": 2
+ },
+ {
+  "id": 205,
+  "name": "Swiss Energy",
+  "slug": "swiss-energy",
+  "parent": 204,
+  "count": 113
+ },
+ {
+  "id": 351,
+  "name": "Tampon",
+  "slug": "tampon",
+  "parent": 0,
+  "count": 3
+ },
+ {
+  "id": 300,
+  "name": "të ndryshme",
+  "slug": "te-ndryshme-atc-natyral",
+  "parent": 214,
+  "count": 18
+ },
+ {
+  "id": 266,
+  "name": "Te ndryshme",
+  "slug": "te-ndryshme-prezervativ",
+  "parent": 15,
+  "count": 25
+ },
+ {
+  "id": 265,
+  "name": "Te ndryshme",
+  "slug": "te-ndryshme-suplements-effervescent",
+  "parent": 204,
+  "count": 10
+ },
+ {
+  "id": 195,
+  "name": "Të ndryshme",
+  "slug": "te-ndryshme",
+  "parent": 187,
+  "count": 34
+ },
+ {
+  "id": 230,
+  "name": "Të tjera",
+  "slug": "te-tjera",
+  "parent": 221,
+  "count": 12
+ },
+ {
+  "id": 246,
+  "name": "Të tjera",
+  "slug": "te-tjera-ersa-med-ortoped",
+  "parent": 231,
+  "count": 21
+ },
+ {
+  "id": 254,
+  "name": "Tio Medical",
+  "slug": "tio-medical",
+  "parent": 247,
+  "count": 10
+ },
+ {
+  "id": 218,
+  "name": "Vajëra",
+  "slug": "vajera",
+  "parent": 214,
+  "count": 17
+ },
+ {
+  "id": 219,
+  "name": "Vajra",
+  "slug": "vajra",
+  "parent": 0,
+  "count": 13
+ }
+]
