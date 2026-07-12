@@ -12,10 +12,17 @@ interface SearchBarProps {
   autoFocus?: boolean;
   /** Called after a result or the full-search action is chosen. */
   onNavigate?: () => void;
+  /** Renders an attached "Kërko" submit button (desktop header style). */
+  withButton?: boolean;
   className?: string;
 }
 
-export function SearchBar({ autoFocus, onNavigate, className }: SearchBarProps) {
+export function SearchBar({
+  autoFocus,
+  onNavigate,
+  withButton = false,
+  className,
+}: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProduct[]>([]);
@@ -127,15 +134,30 @@ export function SearchBar({ autoFocus, onNavigate, className }: SearchBarProps) 
           aria-controls="kerko-sugjerimet"
           aria-autocomplete="list"
           aria-label="Kërko produkte"
-          placeholder="Kërko produkte, kode ose kategori…"
+          placeholder="Kërko produkte, marka, kategori…"
           autoFocus={autoFocus}
           value={query}
           onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={onKeyDown}
-          className="w-full h-11 rounded-full border border-ink-900/10 bg-white pl-10 pr-16 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
+          className={`h-11 w-full border border-ink-900/10 bg-white pl-10 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden ${
+            withButton ? "rounded-l-lg rounded-r-none border-r-0 pr-10" : "rounded-lg pr-16"
+          }`}
         />
-        <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+        {withButton && (
+          <button
+            type="button"
+            onClick={goToFullSearch}
+            className="absolute right-0 top-0 h-11 rounded-r-lg bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          >
+            Kërko
+          </button>
+        )}
+        <div
+          className={`absolute top-1/2 flex -translate-y-1/2 items-center gap-1 ${
+            withButton ? "right-[4.6rem]" : "right-2"
+          }`}
+        >
           {loading && (
             <Loader2 aria-hidden className="size-4 animate-spin text-brand-600" />
           )}

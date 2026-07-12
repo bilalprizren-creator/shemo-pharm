@@ -9,6 +9,7 @@ import {
   Mail,
   MessageCircle,
   Phone,
+  ShoppingBag,
   User,
   X,
 } from "lucide-react";
@@ -18,9 +19,12 @@ import type { NavCategory } from "./HeaderClient";
 const LINKS = [
   { href: "/", label: "Ballina" },
   { href: "/produktet", label: "Produktet" },
+  { href: "/markat", label: "Markat" },
+  { href: "/oferta", label: "Oferta" },
   { href: "/rreth-nesh", label: "Rreth nesh" },
   { href: "/kontakti", label: "Kontakti" },
-  { href: "/lista-e-deshirave", label: "Lista e dëshirave", icon: Heart },
+  { href: "/lista-e-deshirave", label: "Të preferuarat", icon: Heart },
+  { href: "/shporta", label: "Shporta", icon: ShoppingBag },
 ];
 
 export function MobileNav({

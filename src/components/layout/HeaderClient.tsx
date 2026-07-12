@@ -5,20 +5,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BadgeCheck,
   ChevronDown,
   Heart,
-  Mail,
   Menu,
-  Phone,
   Search,
+  ShieldCheck,
+  ShoppingBag,
+  Stethoscope,
   User,
   BookOpen,
-  Clock,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { SearchBar } from "./SearchBar";
 import { MobileNav } from "./MobileNav";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
+import { useCart } from "@/components/cart/CartProvider";
 
 export interface NavCategory {
   slug: string;
@@ -29,9 +31,51 @@ export interface NavCategory {
 const NAV_LINKS = [
   { href: "/", label: "Ballina" },
   { href: "/produktet", label: "Produktet" },
+  { href: "/markat", label: "Markat" },
+  { href: "/oferta", label: "Oferta" },
   { href: "/rreth-nesh", label: "Rreth nesh" },
   { href: "/kontakti", label: "Kontakti" },
 ];
+
+/** Verifiable trust points for the top utility bar (no invented claims). */
+const TRUST_POINTS = [
+  { icon: ShieldCheck, text: "Distributor i licencuar nga MSh e Kosovës" },
+  { icon: BadgeCheck, text: "2000+ produkte nga brende ndërkombëtare" },
+  { icon: Stethoscope, text: "Këshillim profesional" },
+];
+
+function IconAction({
+  href,
+  label,
+  icon: Icon,
+  badge,
+}: {
+  href: string;
+  label: string;
+  icon: typeof Heart;
+  badge?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-ink-700 transition-colors hover:text-brand-700"
+    >
+      <span className="relative">
+        <Icon className="size-5.5" strokeWidth={1.75} aria-hidden />
+        {badge !== undefined && badge > 0 && (
+          <span
+            aria-hidden
+            className="absolute -right-2 -top-1.5 flex min-w-4.5 items-center justify-center rounded-full bg-accent-500 px-1 text-[10px] font-bold leading-4 text-white"
+          >
+            {badge > 99 ? "99" : badge}
+          </span>
+        )}
+      </span>
+      <span className="hidden text-xs font-medium lg:block">{label}</span>
+      <span className="sr-only lg:hidden">{label}</span>
+    </Link>
+  );
+}
 
 export function HeaderClient({
   categories,
@@ -46,7 +90,8 @@ export function HeaderClient({
   const [searchOpen, setSearchOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
-  const { count, ready } = useWishlist();
+  const { count: wishCount, ready: wishReady } = useWishlist();
+  const { count: cartCount, ready: cartReady } = useCart();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -90,49 +135,35 @@ export function HeaderClient({
   return (
     <>
       <header className="sticky top-0 z-40">
-        {/* Utility bar */}
+        {/* Utility bar — dark plum, verifiable trust points */}
         <div
-          className={`hidden bg-ink-900 text-white/90 transition-[max-height,opacity] duration-300 md:block ${
+          className={`hidden bg-plum-900 text-white/85 transition-[max-height,opacity] duration-300 md:block ${
             scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-10 opacity-100"
           }`}
         >
-          <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-xs lg:px-6">
-            <p className="truncate">
-              Depo farmaceutike dhe distributor me shumicë në Kosovë
-            </p>
-            <div className="flex items-center gap-5">
-              <a
-                href={SITE.phones[0].href}
-                className="flex items-center gap-1.5 hover:text-white"
+          <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-6 px-4 text-xs lg:px-6">
+            {TRUST_POINTS.map((t, i) => (
+              <span
+                key={t.text}
+                className={`flex items-center gap-1.5 ${i === 1 ? "hidden lg:flex" : ""}`}
               >
-                <Phone className="size-3.5" aria-hidden />
-                {SITE.phones[0].label}
-              </a>
-              <a
-                href={`mailto:${SITE.emails[0]}`}
-                className="hidden items-center gap-1.5 hover:text-white lg:flex"
-              >
-                <Mail className="size-3.5" aria-hidden />
-                {SITE.emails[0]}
-              </a>
-              <span className="hidden items-center gap-1.5 xl:flex">
-                <Clock className="size-3.5" aria-hidden />
-                {SITE.hours}
+                <t.icon className="size-3.5 text-accent-400" aria-hidden />
+                {t.text}
               </span>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Main row */}
+        {/* Main row: logo — search — actions */}
         <div className="border-b border-ink-900/8 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/85">
           <div
-            className={`mx-auto flex max-w-7xl items-center gap-3 px-4 transition-[height] duration-300 lg:gap-6 lg:px-6 ${
-              scrolled ? "h-16" : "h-16 lg:h-20"
+            className={`mx-auto flex max-w-7xl items-center gap-3 px-4 transition-[height] duration-300 lg:gap-8 lg:px-6 ${
+              scrolled ? "h-16" : "h-16 lg:h-[4.75rem]"
             }`}
           >
             <Link
               href="/"
-              className="flex shrink-0 items-center"
+              className="flex shrink-0 flex-col items-start"
               aria-label="SHEMO PHARM — Ballina"
             >
               <Image
@@ -142,54 +173,56 @@ export function HeaderClient({
                 height={56}
                 priority
                 className={`w-auto transition-[height] duration-300 ${
-                  scrolled ? "h-10" : "h-10 lg:h-12"
+                  scrolled ? "h-9" : "h-9 lg:h-11"
                 }`}
               />
+              <span
+                className={`mt-0.5 hidden text-[9px] font-medium uppercase tracking-wide text-ink-400 xl:block ${
+                  scrolled ? "xl:hidden" : ""
+                }`}
+              >
+                {SITE.tagline}
+              </span>
             </Link>
 
-            <SearchBar className="hidden min-w-0 flex-1 lg:block lg:max-w-xl lg:mx-auto" />
+            <SearchBar
+              withButton
+              className="hidden min-w-0 flex-1 lg:block lg:max-w-2xl lg:mx-auto"
+            />
 
-            <div className="ml-auto flex items-center gap-1 lg:ml-0 lg:gap-2">
+            <div className="ml-auto flex items-center gap-0.5 lg:ml-0 lg:gap-1.5">
               <button
                 type="button"
                 onClick={() => setSearchOpen((v) => !v)}
                 aria-label="Kërko produkte"
                 aria-expanded={searchOpen}
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
+                className="flex size-11 items-center justify-center rounded-lg text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
               >
                 <Search className="size-5.5" aria-hidden />
               </button>
 
-              <Link
-                href="/lista-e-deshirave"
-                aria-label={`Lista e dëshirave${count > 0 ? ` (${count} produkte)` : ""}`}
-                className="relative flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700"
-              >
-                <Heart className="size-5.5" aria-hidden />
-                {ready && count > 0 && (
-                  <span
-                    aria-hidden
-                    className="absolute right-1 top-1 flex size-4.5 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white"
-                  >
-                    {count > 99 ? "99" : count}
-                  </span>
-                )}
-              </Link>
-
-              <Link
+              <IconAction
                 href={user ? "/llogaria" : "/kycu"}
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 xl:size-auto xl:gap-2 xl:rounded-full xl:px-4 xl:py-2.5"
-              >
-                <User className="size-5.5 xl:size-5" aria-hidden />
-                <span className="hidden text-sm font-medium xl:block">
-                  {user ? "Llogaria" : "Kyçu / Regjistrohu"}
-                </span>
-              </Link>
+                label="Logaria"
+                icon={User}
+              />
+              <IconAction
+                href="/lista-e-deshirave"
+                label="Të preferuarat"
+                icon={Heart}
+                badge={wishReady ? wishCount : 0}
+              />
+              <IconAction
+                href="/shporta"
+                label="Shporta"
+                icon={ShoppingBag}
+                badge={cartReady ? cartCount : 0}
+              />
 
               {SITE.catalogUrl && (
                 <a
                   href={SITE.catalogUrl}
-                  className="hidden items-center gap-2 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 md:flex"
+                  className="hidden items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 xl:flex"
                 >
                   <BookOpen className="size-4" aria-hidden />
                   Katalogu
@@ -200,7 +233,7 @@ export function HeaderClient({
                 type="button"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Hap menynë"
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
+                className="flex size-11 items-center justify-center rounded-lg text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
               >
                 <Menu className="size-6" aria-hidden />
               </button>
@@ -213,18 +246,19 @@ export function HeaderClient({
             className="hidden border-t border-ink-900/6 lg:block"
           >
             <div className="mx-auto flex h-12 max-w-7xl items-center gap-1 px-4 lg:px-6">
-              <div ref={catRef} className="relative mr-2">
+              <div ref={catRef} className="relative mr-3">
                 <button
                   type="button"
                   onClick={() => setCatOpen((v) => !v)}
                   aria-expanded={catOpen}
                   aria-haspopup="true"
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                     catOpen
                       ? "bg-brand-600 text-white"
                       : "bg-brand-50 text-brand-800 hover:bg-brand-100"
                   }`}
                 >
+                  <Menu className="size-4.5" aria-hidden />
                   Kategoritë
                   <ChevronDown
                     className={`size-4 transition-transform ${catOpen ? "rotate-180" : ""}`}
@@ -233,7 +267,7 @@ export function HeaderClient({
                 </button>
 
                 {catOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-2 w-[560px] rounded-2xl border border-ink-900/8 bg-white p-3 shadow-drawer">
+                  <div className="absolute left-0 top-full z-50 mt-2 w-[560px] rounded-xl border border-ink-900/8 bg-white p-3 shadow-drawer">
                     <ul className="grid grid-cols-2 gap-0.5">
                       {featuredCategories.map((c) => (
                         <li key={c.slug}>
@@ -267,10 +301,10 @@ export function HeaderClient({
                     key={l.href}
                     href={l.href}
                     aria-current={current ? "page" : undefined}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`relative px-3.5 py-3 text-sm font-medium transition-colors ${
                       current
-                        ? "text-brand-700"
-                        : "text-ink-700 hover:bg-ink-900/4 hover:text-ink-900"
+                        ? "font-semibold text-brand-700 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-brand-600"
+                        : "text-ink-700 hover:text-brand-700"
                     }`}
                   >
                     {l.label}
