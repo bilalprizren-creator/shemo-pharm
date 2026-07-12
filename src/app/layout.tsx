@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { StickyMobileBar } from "@/components/layout/StickyMobileBar";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
+import { CartProvider } from "@/components/cart/CartProvider";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import "./globals.css";
 
@@ -49,18 +50,20 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <OrganizationJsonLd />
         <WishlistProvider>
-          <a
-            href="#permbajtja"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-card"
-          >
-            Kalo te përmbajtja
-          </a>
-          <Header />
-          <main id="permbajtja" className="flex-1 pb-16 md:pb-0">
-            {children}
-          </main>
-          <Footer />
-          <StickyMobileBar />
+          <CartProvider>
+            <a
+              href="#permbajtja"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-card"
+            >
+              Kalo te përmbajtja
+            </a>
+            <Header />
+            <main id="permbajtja" className="flex-1 pb-16 md:pb-0">
+              {children}
+            </main>
+            <Footer />
+            <StickyMobileBar />
+          </CartProvider>
         </WishlistProvider>
       </body>
     </html>

@@ -26,6 +26,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { ProductCarousel } from "@/components/product/ProductCarousel";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { WishlistButton } from "@/components/product/WishlistButton";
+import { AddToCartWithQty } from "@/components/cart/AddToCartButton";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -137,28 +138,38 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </dl>
 
-          <div className="mt-6 rounded-2xl border border-ink-900/8 bg-white p-5">
+          <div className="mt-6 rounded-xl border border-ink-900/8 bg-white p-5">
             {showPrices ? (
               <>
                 <p className="text-sm text-ink-400">Çmimi me shumicë</p>
-                <p className="mt-1 text-3xl font-extrabold text-brand-800">
-                  {formatPrice(product.priceCents)}
+                <p className="mt-1 flex items-baseline gap-2.5">
+                  <span className="text-3xl font-extrabold text-ink-900">
+                    {formatPrice(product.priceCents)}
+                  </span>
+                  {product.regularCents > product.priceCents && (
+                    <s className="text-base font-medium text-ink-300">
+                      {formatPrice(product.regularCents)}
+                    </s>
+                  )}
                 </p>
               </>
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="flex items-center gap-2 font-medium text-ink-700">
-                  <Lock className="size-4.5 text-accent-600" aria-hidden />
+                  <Lock className="size-4.5 text-brand-600" aria-hidden />
                   Çmimet janë të dukshme vetëm për klientët e kyçur
                 </p>
                 <Link
                   href="/kycu"
-                  className="inline-flex min-h-11 items-center rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
+                  className="inline-flex min-h-11 items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
                 >
                   Kyçu për të parë çmimin
                 </Link>
               </div>
             )}
+            <div className="mt-4 border-t border-ink-900/6 pt-4">
+              <AddToCartWithQty productId={product.id} productName={product.name} />
+            </div>
           </div>
 
           {(product.shortDescription || product.description) && (

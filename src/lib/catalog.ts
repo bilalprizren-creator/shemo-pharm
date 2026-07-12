@@ -181,6 +181,7 @@ export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[]
  */
 export function toCardProduct(product: Product, showPrices: boolean): CardProduct {
   const cat = primaryCategory(product);
+  const hasDiscount = product.regularCents > product.priceCents;
   return {
     id: product.id,
     name: product.name,
@@ -190,7 +191,18 @@ export function toCardProduct(product: Product, showPrices: boolean): CardProduc
     categoryName: cat ? categoryDisplayName(cat) : null,
     inStock: product.inStock,
     price: showPrices ? formatPrice(product.priceCents) : null,
+    oldPrice: showPrices && hasDiscount ? formatPrice(product.regularCents) : null,
+    discountPct: hasDiscount
+      ? Math.round((1 - product.priceCents / product.regularCents) * 100)
+      : null,
   };
+}
+
+/** Products with a genuine sale price (regular > current). */
+export function getDiscountedProducts(limit = 24): Product[] {
+  return products
+    .filter((p) => p.regularCents > p.priceCents)
+    .slice(0, limit);
 }
 
 /** Curated homepage category cards mapped to real catalog slugs. */

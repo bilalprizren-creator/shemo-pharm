@@ -25,10 +25,14 @@ export interface PublicProduct {
   inStock: boolean;
 }
 
-/** Everything a product card needs. `price` is a formatted string that is
- *  only populated server-side for approved sessions — otherwise null. */
+/** Everything a product card needs. `price`/`oldPrice` are formatted strings
+ *  that are only populated server-side for approved sessions — otherwise null.
+ *  `discountPct` carries no absolute price and may render publicly; it is
+ *  only non-null when the export contains a real sale price. */
 export interface CardProduct extends PublicProduct {
   price: string | null;
+  oldPrice: string | null;
+  discountPct: number | null;
 }
 
 export interface Category {

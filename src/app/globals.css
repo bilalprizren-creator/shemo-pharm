@@ -1,31 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand turquoise — sampled from the SHEMO logo (#14B590) */
-  --color-brand-50: #f0fbf8;
-  --color-brand-100: #d7f4ec;
-  --color-brand-200: #aee8d8;
-  --color-brand-300: #7cd8c0;
-  --color-brand-400: #43c3a4;
-  --color-brand-500: #14b590;
-  --color-brand-600: #0e9678;
-  --color-brand-700: #0d7862;
-  --color-brand-800: #0c5f4f;
-  --color-brand-900: #0a4e41;
-  --color-brand-950: #052c25;
+  /* Primary purple — sampled from the SHEMO logo (#834B9B) */
+  --color-brand-50: #f9f6fb;
+  --color-brand-100: #f1e9f6;
+  --color-brand-200: #e2d3ec;
+  --color-brand-300: #cab0da;
+  --color-brand-400: #ab84c3;
+  --color-brand-500: #9260ac;
+  --color-brand-600: #834b9b;
+  --color-brand-700: #6c3d80;
+  --color-brand-800: #5a3369;
+  --color-brand-900: #4b2c57;
+  --color-brand-950: #2f1837;
 
-  /* Brand purple — sampled from the SHEMO logo (#834B9B) */
-  --color-accent-50: #f9f6fb;
-  --color-accent-100: #f1e9f6;
-  --color-accent-200: #e2d3ec;
-  --color-accent-300: #cab0da;
-  --color-accent-400: #ab84c3;
-  --color-accent-500: #9260ac;
-  --color-accent-600: #834b9b;
-  --color-accent-700: #6c3d80;
-  --color-accent-800: #5a3369;
-  --color-accent-900: #4b2c57;
-  --color-accent-950: #2f1837;
+  /* Secondary turquoise — sampled from the SHEMO logo (#14B590) */
+  --color-accent-50: #f0fbf8;
+  --color-accent-100: #d7f4ec;
+  --color-accent-200: #aee8d8;
+  --color-accent-300: #7cd8c0;
+  --color-accent-400: #43c3a4;
+  --color-accent-500: #14b590;
+  --color-accent-600: #0e9678;
+  --color-accent-700: #0d7862;
+  --color-accent-800: #0c5f4f;
+  --color-accent-900: #0a4e41;
+  --color-accent-950: #052c25;
+
+  /* Dark plum surfaces (top utility bar, footer) */
+  --color-plum-800: #3b2b52;
+  --color-plum-900: #2b2140;
+  --color-plum-950: #211a2e;
 
   /* Ink — charcoal from the logo lettering (#606062) */
   --color-ink-900: #2c2c30;
