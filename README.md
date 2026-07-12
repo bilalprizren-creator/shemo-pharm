@@ -42,11 +42,32 @@ llogaritë në pritje nuk marrin asnjë të dhënë çmimi në HTML apo API.
 Llogaritë e klientëve nga faqja e vjetër WordPress **nuk mund të migrohen** pa
 qasje në bazën e të dhënave të saj; klientët duhet të regjistrohen sërish.
 
-## Formulari i kontaktit
+## Shporta (kërkesë porosie)
 
-Mesazhet ruhen në `data/messages.json`. **TODO:** lidheni me email (SMTP ose
-shërbim transaksional) te `src/lib/contact-actions.ts` — validimi dhe UI mbeten
-të pandryshuara.
+Shporta nuk është checkout: mbledh produkte + sasi në localStorage dhe e dërgon
+porosinë si tekst përmes WhatsApp ose email (`/shporta`). Totali shfaqet vetëm
+për llogaritë e verifikuara (çmimet vijnë gjithmonë të kontrolluara nga serveri
+përmes `/api/lista`).
+
+## Oferta
+
+`/oferta` shfaq produktet me çmim të ulur real nga eksporti (aktualisht 0) dhe
+një listë të kuruar në `src/data/offers.json` — shtoni slug-e produktesh aty
+për t'i publikuar si oferta. Asnjë përqindje zbritjeje nuk shpiket.
+
+## Formulari i kontaktit dhe newsletter
+
+Mesazhet ruhen në `data/messages.json`, abonimet në `data/newsletter.json`.
+**TODO:** lidhini me email/mjet marketingu te `src/lib/contact-actions.ts` dhe
+`src/lib/newsletter-actions.ts` — validimi dhe UI mbeten të pandryshuara.
+
+## Fotografitë
+
+- `public/photos/depo.jpg` — foto reale e njësisë së SHEMO (nga faqja e vjetër).
+- `public/photos/keshillim.jpg` — foto stock (Unsplash, licencë falas) si
+  vendmbajtëse derisa të ketë fotografi reale të ekipit.
+- `public/logo-symbol.svg` — simboli i logos i nxjerrë nga `logo.svg` origjinal
+  (pa rivizatim), i përdorur në footer-in e errët.
 
 ## Çështje që presin konfirmim nga biznesi
 
@@ -56,3 +77,6 @@ të pandryshuara.
 - Numri që pranon WhatsApp (supozuar 049 600 934).
 - Katalog PDF nuk ekziston — butoni "Katalogu" shfaqet automatikisht kur të
   vendoset `catalogUrl` te `src/lib/site.ts`.
+- Harta te `/kontakti` pinon adresën e verifikuar (Rr. Ernest Koliqi 165/A).
+  Google ka edhe një listim biznesi "Shemo" me rrugë tjetër (21 Pushkatarët) —
+  kur biznesi konfirmon listimin e saktë, ndërroni query-n te `kontakti/page.tsx`.
