@@ -115,7 +115,7 @@ export default function ContactPage() {
           </a>
         </div>
 
-        <div className="rounded-3xl border border-ink-900/8 bg-white p-6 sm:p-8">
+        <div className="rounded-2xl border border-ink-900/8 bg-white p-6 sm:p-8">
           <h2 className="text-xl font-bold text-ink-900">Dërgoni një mesazh</h2>
           <p className="mt-1.5 mb-6 text-sm text-ink-500">
             Plotësoni formularin dhe do t&apos;ju kontaktojmë sa më shpejt.
@@ -123,6 +123,39 @@ export default function ContactPage() {
           <ContactForm />
         </div>
       </div>
+
+      <section aria-labelledby="harta-titulli" className="mt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <h2 id="harta-titulli" className="text-xl font-bold text-ink-900">
+            Na gjeni në Prizren
+          </h2>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}, Kosovo`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            Hape në Google Maps
+          </a>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-ink-900/8 bg-white shadow-card">
+          {/* Pins the verified street address. Google also lists a "Shemo"
+              business entry nearby with a different street — once the business
+              confirms its exact Maps listing, swap the query for it. */}
+          <iframe
+            title="Harta — SHEMO PHARM, Rr. Ernest Koliqi 165/A, Prizren"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(
+              `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}, Kosovo`
+            )}&output=embed&hl=sq`}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            className="h-[380px] w-full border-0 sm:h-[440px]"
+          />
+        </div>
+      </section>
     </div>
   );
 }

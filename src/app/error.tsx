@@ -22,7 +22,7 @@ export default function ErrorPage({
       <button
         type="button"
         onClick={reset}
-        className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+        className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
       >
         <RotateCcw className="size-4.5" aria-hidden />
         Provo përsëri

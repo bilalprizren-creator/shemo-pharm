@@ -97,14 +97,14 @@ export default async function AccountPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href="/produktet"
-          className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
         >
           <ShoppingBag className="size-4.5" aria-hidden />
           Shfleto produktet
         </Link>
         <Link
           href="/lista-e-deshirave"
-          className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/12 bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+          className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-ink-900/12 bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
         >
           <Heart className="size-4.5 text-brand-600" aria-hidden />
           Lista e dëshirave
@@ -112,7 +112,7 @@ export default async function AccountPage() {
         <form action={logoutAction}>
           <button
             type="submit"
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/12 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition-colors hover:border-red-300 hover:text-red-700"
+            className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-ink-900/12 bg-white px-6 py-3 text-sm font-semibold text-ink-700 transition-colors hover:border-red-300 hover:text-red-700"
           >
             <LogOut className="size-4.5" aria-hidden />
             Dilni

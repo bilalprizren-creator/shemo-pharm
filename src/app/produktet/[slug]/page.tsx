@@ -191,21 +191,21 @@ export default async function ProductPage({ params }: Props) {
                 href={`${SITE.whatsapp}?text=${whatsappText}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
               >
                 <MessageCircle className="size-4.5" aria-hidden />
                 Porosit përmes WhatsApp
               </a>
               <a
                 href={SITE.phones[0].href}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+                className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
               >
                 <Phone className="size-4.5 text-brand-600" aria-hidden />
                 Na telefononi
               </a>
               <a
                 href={`mailto:${SITE.emails[0]}?subject=${mailSubject}`}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+                className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
               >
                 <Mail className="size-4.5 text-brand-600" aria-hidden />
                 Email

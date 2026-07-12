@@ -4,7 +4,7 @@ import { SITE } from "@/lib/site";
 
 export function ContactCta() {
   return (
-    <section aria-labelledby="cta-titulli" className="relative overflow-hidden bg-ink-900">
+    <section aria-labelledby="cta-titulli" className="relative overflow-hidden bg-plum-950">
       <div
         aria-hidden
         className="absolute -left-24 top-0 size-96 rounded-full bg-brand-600/20 blur-3xl"
@@ -29,14 +29,14 @@ export function ContactCta() {
             href={SITE.whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-400"
+            className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-400"
           >
             <MessageCircle className="size-4.5" aria-hidden />
             Na shkruani në WhatsApp
           </a>
           <a
             href={SITE.phones[0].href}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             <Phone className="size-4.5" aria-hidden />
             {SITE.phones[0].label}

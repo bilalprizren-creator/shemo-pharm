@@ -141,7 +141,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={pending}
-        className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+        className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
       >
         {pending ? (
           <Loader2 className="size-4.5 animate-spin" aria-hidden />

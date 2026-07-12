@@ -163,7 +163,7 @@ export function MobileNav({
           <Link
             href={user ? "/llogaria" : "/kycu"}
             onClick={onClose}
-            className="mb-3 flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
+            className="mb-3 flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
           >
             <User className="size-4.5" aria-hidden />
             {user ? `Llogaria (${user.name})` : "Kyçu / Regjistrohu"}
