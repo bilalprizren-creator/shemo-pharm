@@ -17,6 +17,7 @@ import {
   getShowcaseProducts,
   HOME_CATEGORIES,
 } from "@/lib/catalog";
+import { CardSlider } from "@/components/ui/CardSlider";
 
 const ICONS: Record<string, LucideIcon> = {
   stethoscope: Stethoscope,
@@ -58,39 +59,41 @@ export function CategoryCards() {
         </Link>
       </div>
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4 xl:grid-cols-8">
+      <CardSlider
+        label="Kategoritë popullore"
+        itemWidthClassName="w-[38%] sm:w-[26%] md:w-[19%] lg:w-[15%]"
+      >
         {cards.map((c) => {
           const Icon = ICONS[c.icon] ?? Pill;
           return (
-            <li key={c.slug}>
-              <Link
-                href={`/kategorite/${c.slug}`}
-                className="group flex h-full flex-col items-center rounded-xl border border-ink-900/6 bg-surface px-3 py-5 text-center transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white hover:shadow-card-hover"
-              >
-                <span className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border border-ink-900/6 bg-white">
-                  {c.image ? (
-                    <Image
-                      src={c.image}
-                      alt=""
-                      fill
-                      sizes="80px"
-                      className="object-contain p-3 transition-transform duration-300 group-hover:scale-110"
-                    />
-                  ) : (
-                    <Icon className="size-8 text-brand-600" strokeWidth={1.5} aria-hidden />
-                  )}
-                </span>
-                <span className="mt-3 line-clamp-2 text-sm font-semibold leading-tight text-ink-900">
-                  {c.title}
-                </span>
-                <span className="mt-1 text-xs font-medium text-accent-600">
-                  {c.count} produkte
-                </span>
-              </Link>
-            </li>
+            <Link
+              key={c.slug}
+              href={`/kategorite/${c.slug}`}
+              className="group flex h-full flex-col items-center rounded-xl border border-ink-900/6 bg-surface px-3 py-5 text-center transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white hover:shadow-card-hover"
+            >
+              <span className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border border-ink-900/6 bg-white">
+                {c.image ? (
+                  <Image
+                    src={c.image}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className="object-contain p-3 transition-transform duration-300 group-hover:scale-110"
+                  />
+                ) : (
+                  <Icon className="size-8 text-brand-600" strokeWidth={1.5} aria-hidden />
+                )}
+              </span>
+              <span className="mt-3 line-clamp-2 text-sm font-semibold leading-tight text-ink-900">
+                {c.title}
+              </span>
+              <span className="mt-1 text-xs font-medium text-accent-600">
+                {c.count} produkte
+              </span>
+            </Link>
           );
         })}
-      </ul>
+      </CardSlider>
     </section>
   );
 }

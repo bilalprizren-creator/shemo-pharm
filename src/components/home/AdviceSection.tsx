@@ -30,7 +30,7 @@ export function AdviceSection() {
           </p>
           <Link
             href="/kontakti"
-            className="mt-7 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className="mt-7 inline-flex min-h-12 items-center rounded-full bg-brand-600 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
             Na Kontaktoni
           </Link>

@@ -142,7 +142,7 @@ export default function AboutPage() {
           </p>
           <Link
             href="/kontakti"
-            className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className="mt-6 inline-flex min-h-12 items-center rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
             Na kontaktoni për bashkëpunim
           </Link>

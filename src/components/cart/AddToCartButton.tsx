@@ -88,7 +88,7 @@ export function AddToCartWithQty({
           setTimeout(() => setAdded(false), 1500);
         }}
         aria-label={`Shto "${productName}" në shportë`}
-        className={`inline-flex min-h-12 items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-colors ${
+        className={`inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors ${
           added ? "bg-accent-500" : "bg-brand-600 hover:bg-brand-700"
         }`}
       >

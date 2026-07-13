@@ -222,7 +222,7 @@ export function HeaderClient({
               {SITE.catalogUrl && (
                 <a
                   href={SITE.catalogUrl}
-                  className="hidden items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 xl:flex"
+                  className="hidden items-center gap-2 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 xl:flex"
                 >
                   <BookOpen className="size-4" aria-hidden />
                   Katalogu

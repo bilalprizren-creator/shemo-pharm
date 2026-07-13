@@ -32,7 +32,7 @@ export function NewsletterBar() {
         {state.success ? (
           <p
             role="status"
-            className="flex items-center gap-2 rounded-lg bg-white/10 px-5 py-3 text-sm font-semibold text-white"
+            className="flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white"
           >
             <CircleCheck className="size-5 text-accent-300" aria-hidden />
             Faleminderit! Jeni abonuar me sukses.

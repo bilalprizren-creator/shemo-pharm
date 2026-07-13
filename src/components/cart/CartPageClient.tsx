@@ -85,7 +85,7 @@ export function CartPageClient() {
         </p>
         <Link
           href="/produktet"
-          className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="mt-6 inline-flex min-h-11 items-center rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           Shfleto produktet
         </Link>
@@ -213,14 +213,14 @@ export function CartPageClient() {
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
           >
             <MessageCircle className="size-4.5" aria-hidden />
             Dërgo porosinë në WhatsApp
           </a>
           <a
             href={mailHref}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
           >
             <Mail className="size-4.5 text-brand-600" aria-hidden />
             Dërgo me email

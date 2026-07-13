@@ -69,6 +69,19 @@ Mesazhet ruhen në `data/messages.json`, abonimet në `data/newsletter.json`.
 - `public/logo-symbol.svg` — simboli i logos i nxjerrë nga `logo.svg` origjinal
   (pa rivizatim), i përdorur në footer-in e errët.
 
+## Dizajni
+
+Hero-ja dhe theksuesit e ndritshëm janë frymëzuar nga Jara Pharmacy (projekt
+tjetër i të njëjtit zhvillues), por të ripunuar plotësisht me logon dhe
+ngjyrat origjinale të SHEMO (mor #834B9B, bruz #14B590 — token-et në
+`src/app/globals.css`). Përdoret `framer-motion` për reveal-e të buta gjatë
+scroll-it (respekton `prefers-reduced-motion`). Disa seksione në ballinë janë
+slider horizontal me shigjeta (`src/components/ui/CardSlider.tsx`, e
+përdorur nga kategoritë, "Pse SHEMO PHARM", produktet dhe markat).
+
+Nuk ka hartë/lokacion në `/kontakti` — SHEMO ka një njësi të vetme, kontakti
+mbulohet nga telefoni, WhatsApp, email dhe formulari.
+
 ## Çështje që presin konfirmim nga biznesi
 
 - Kuptimi i statistikës "200+ Distributor i autorizuar" nga faqja e vjetër —
@@ -77,6 +90,3 @@ Mesazhet ruhen në `data/messages.json`, abonimet në `data/newsletter.json`.
 - Numri që pranon WhatsApp (supozuar 049 600 934).
 - Katalog PDF nuk ekziston — butoni "Katalogu" shfaqet automatikisht kur të
   vendoset `catalogUrl` te `src/lib/site.ts`.
-- Harta te `/kontakti` pinon adresën e verifikuar (Rr. Ernest Koliqi 165/A).
-  Google ka edhe një listim biznesi "Shemo" me rrugë tjetër (21 Pushkatarët) —
-  kur biznesi konfirmon listimin e saktë, ndërroni query-n te `kontakti/page.tsx`.

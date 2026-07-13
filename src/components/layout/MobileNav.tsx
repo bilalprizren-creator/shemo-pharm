@@ -137,7 +137,7 @@ export function MobileNav({
                       <Link
                         href={`/kategorite/${c.slug}`}
                         onClick={onClose}
-                        className="flex min-h-11 items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm text-ink-700 hover:bg-brand-50"
+                        className="flex min-h-11 items-center justify-between gap-2 rounded-full px-3 py-2.5 text-sm text-ink-700 hover:bg-brand-50"
                       >
                         <span className="truncate">{c.name}</span>
                         <span className="shrink-0 text-xs text-ink-400">{c.count}</span>
@@ -148,7 +148,7 @@ export function MobileNav({
                     <Link
                       href="/kategorite"
                       onClick={onClose}
-                      className="flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-50"
+                      className="flex min-h-11 items-center rounded-full px-3 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-50"
                     >
                       Shiko të gjitha kategoritë
                     </Link>
@@ -163,7 +163,7 @@ export function MobileNav({
           <Link
             href={user ? "/llogaria" : "/kycu"}
             onClick={onClose}
-            className="mb-3 flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
+            className="mb-3 flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
           >
             <User className="size-4.5" aria-hidden />
             {user ? `Llogaria (${user.name})` : "Kyçu / Regjistrohu"}
@@ -173,7 +173,7 @@ export function MobileNav({
               <a
                 key={p.href}
                 href={p.href}
-                className="flex min-h-11 items-center gap-3 rounded-lg px-2 py-2 text-ink-700 hover:bg-brand-50"
+                className="flex min-h-11 items-center gap-3 rounded-full px-2 py-2 text-ink-700 hover:bg-brand-50"
               >
                 <Phone className="size-4.5 text-brand-600" aria-hidden />
                 {p.label}
@@ -183,14 +183,14 @@ export function MobileNav({
               href={SITE.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-11 items-center gap-3 rounded-lg px-2 py-2 text-ink-700 hover:bg-brand-50"
+              className="flex min-h-11 items-center gap-3 rounded-full px-2 py-2 text-ink-700 hover:bg-brand-50"
             >
               <MessageCircle className="size-4.5 text-brand-600" aria-hidden />
               WhatsApp
             </a>
             <a
               href={`mailto:${SITE.emails[0]}`}
-              className="flex min-h-11 items-center gap-3 rounded-lg px-2 py-2 text-ink-700 hover:bg-brand-50"
+              className="flex min-h-11 items-center gap-3 rounded-full px-2 py-2 text-ink-700 hover:bg-brand-50"
             >
               <Mail className="size-4.5 text-brand-600" aria-hidden />
               {SITE.emails[0]}
