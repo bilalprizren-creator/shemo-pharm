@@ -43,6 +43,11 @@ next-env.d.ts
 # Design reference screenshots (not part of the app)
 reference/
 
-# Server-only data stores
+# Server-only data stores and secrets
 data/users.json
 data/messages.json
+data/newsletter.json
+data/.auth-secret
+
+.vercel
+.env*
