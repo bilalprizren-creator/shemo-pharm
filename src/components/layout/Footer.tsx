@@ -4,6 +4,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { categoryDisplayName, getTopCategories } from "@/lib/catalog";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
 
 const NAV = [
   { href: "/", label: "Ballina" },
@@ -53,6 +54,17 @@ export function Footer() {
             >
               <FacebookIcon className="size-4.5" />
             </a>
+            {SITE.social.instagram && (
+              <a
+                href={SITE.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="SHEMO PHARM në Instagram"
+                className="flex size-10 items-center justify-center rounded-lg bg-white/8 text-white/80 transition-colors hover:bg-brand-600 hover:text-white"
+              >
+                <InstagramIcon className="size-4.5" />
+              </a>
+            )}
           </div>
         </div>
 

@@ -31,9 +31,8 @@ export const SITE = {
 
   social: {
     facebook: "https://www.facebook.com/shemofarm/",
-    // TODO: Instagram and YouTube profiles exist on the old site but the exact
-    // URLs could not be verified — add them here once confirmed.
-    instagram: null as string | null,
+    instagram: "https://www.instagram.com/shemopharmshpk/",
+    // TODO: no YouTube profile could be verified — add it here once confirmed.
     youtube: null as string | null,
   },
 

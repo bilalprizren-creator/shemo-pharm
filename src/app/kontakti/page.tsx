@@ -4,6 +4,7 @@ import { SITE } from "@/lib/site";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
 
 export const metadata: Metadata = {
   title: "Kontakti",
@@ -59,20 +60,23 @@ export default function ContactPage() {
             </span>
           </a>
 
-          <a
-            href={`mailto:${SITE.emails[0]}`}
-            className="flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-5 transition-colors hover:border-brand-300"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <Mail className="size-5" aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm text-ink-400">Email</span>
-              <span className="block truncate font-semibold text-ink-900">
-                {SITE.emails[0]}
+          {SITE.emails.map((email) => (
+            <a
+              key={email}
+              href={`mailto:${email}`}
+              className="flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-5 transition-colors hover:border-brand-300"
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                <Mail className="size-5" aria-hidden />
               </span>
-            </span>
-          </a>
+              <span className="min-w-0">
+                <span className="block text-sm text-ink-400">Email</span>
+                <span className="block truncate font-semibold text-ink-900">
+                  {email}
+                </span>
+              </span>
+            </a>
+          ))}
 
           <div className="flex items-start gap-4 rounded-2xl border border-ink-900/8 bg-white p-5">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
@@ -113,6 +117,25 @@ export default function ContactPage() {
               <span className="block font-semibold text-ink-900">@shemofarm</span>
             </span>
           </a>
+
+          {SITE.social.instagram && (
+            <a
+              href={SITE.social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 rounded-2xl border border-ink-900/8 bg-white p-5 transition-colors hover:border-brand-300"
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                <InstagramIcon className="size-5" />
+              </span>
+              <span>
+                <span className="block text-sm text-ink-400">Instagram</span>
+                <span className="block font-semibold text-ink-900">
+                  @shemopharmshpk
+                </span>
+              </span>
+            </a>
+          )}
         </div>
 
         <div className="rounded-2xl border border-ink-900/8 bg-white p-6 sm:p-8">
