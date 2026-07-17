@@ -12,14 +12,10 @@ import {
   Sparkles,
   Stethoscope,
 } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
-/** Verifiable trust points shown inline under the hero CTAs. */
-const TRUST_POINTS = [
-  { icon: ShieldCheck, text: "Distributor i licencuar" },
-  { icon: Stethoscope, text: "Këshillim profesional" },
-  { icon: MessageCircle, text: "Porosi përmes WhatsApp" },
-];
+const TRUST_ICONS = [ShieldCheck, Stethoscope, MessageCircle];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -36,8 +32,13 @@ const fadeUp = {
  * display headline + pill CTAs, right column with a large pharmacist
  * portrait and floating proof cards (real store photo, product count).
  */
-export function Hero() {
+export function Hero({ dict }: { dict: Dictionary }) {
   const reduceMotion = useReducedMotion();
+  const trustPoints = [
+    dict.hero.trustLicensed,
+    dict.hero.trustAdvice,
+    dict.hero.trustWhatsapp,
+  ];
   const variants = reduceMotion ? undefined : fadeUp;
   const initial = reduceMotion ? undefined : "hidden";
 
@@ -77,7 +78,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-accent-300"
           >
             <Sparkles className="size-3.5" aria-hidden />
-            {SITE.tagline}
+            {dict.site.tagline}
           </motion.p>
 
           <motion.h1
@@ -88,9 +89,9 @@ export function Hero() {
             variants={variants}
             className="mt-6 max-w-2xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl"
           >
-            Shëndeti juaj,
+            {dict.hero.h1a}
             <br />
-            <span className="text-gradient-accent">prioriteti ynë.</span>
+            <span className="text-gradient-accent">{dict.hero.h1b}</span>
           </motion.h1>
 
           <motion.p
@@ -101,9 +102,7 @@ export function Hero() {
             variants={variants}
             className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg"
           >
-            Më shumë se 2000 produkte farmaceutike dhe medicinale të zgjedhura
-            me kujdes — furnizim i besueshëm për barnatore, institucione dhe
-            familje në gjithë Kosovën.
+            {dict.hero.sub}
           </motion.p>
 
           <motion.div
@@ -115,21 +114,21 @@ export function Hero() {
             className="mt-9 flex flex-wrap items-center gap-3"
           >
             <Link
-              href="/produktet"
+              href={langHref(dict.lang, "/produktet")}
               className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-accent-500 px-7 py-3 text-sm font-semibold text-plum-950 shadow-lg shadow-accent-500/25 transition-all hover:bg-accent-400 hover:shadow-accent-400/30"
             >
-              Shiko Produktet
+              {dict.hero.ctaProducts}
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-0.5"
                 aria-hidden
               />
             </Link>
             <Link
-              href="/kontakti"
+              href={langHref(dict.lang, "/kontakti")}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
             >
               <Phone className="size-4" aria-hidden />
-              Na Kontaktoni
+              {dict.hero.ctaContact}
             </Link>
           </motion.div>
 
@@ -141,15 +140,18 @@ export function Hero() {
             variants={variants}
             className="mt-10 flex flex-wrap gap-x-8 gap-y-3"
           >
-            {TRUST_POINTS.map((t) => (
-              <li
-                key={t.text}
-                className="flex items-center gap-2 text-sm text-white/80"
-              >
-                <t.icon className="size-4 shrink-0 text-accent-400" aria-hidden />
-                {t.text}
-              </li>
-            ))}
+            {trustPoints.map((text, i) => {
+              const Icon = TRUST_ICONS[i] ?? ShieldCheck;
+              return (
+                <li
+                  key={text}
+                  className="flex items-center gap-2 text-sm text-white/80"
+                >
+                  <Icon className="size-4 shrink-0 text-accent-400" aria-hidden />
+                  {text}
+                </li>
+              );
+            })}
           </motion.ul>
         </div>
 
@@ -164,7 +166,7 @@ export function Hero() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40">
             <Image
               src="/photos/hero-farmaciste.jpg"
-              alt="Farmaciste profesionale para rafteve me produkte"
+              alt={dict.hero.portraitAlt}
               fill
               priority
               sizes="(max-width: 1024px) 28rem, 40vw"
@@ -187,14 +189,14 @@ export function Hero() {
             <div className="relative aspect-[4/3]">
               <Image
                 src="/photos/depo.jpg"
-                alt="Depoja e SHEMO PHARM në Prizren"
+                alt={dict.hero.depotAlt}
                 fill
                 sizes="208px"
                 className="object-cover"
               />
             </div>
             <figcaption className="px-3 py-2 text-[11px] font-medium text-white/80">
-              Depoja jonë në Prizren
+              {dict.hero.depotCaption}
             </figcaption>
           </motion.figure>
 
@@ -211,10 +213,10 @@ export function Hero() {
             </span>
             <span>
               <span className="block font-display text-lg font-bold leading-none text-ink-900">
-                2000+
+                {dict.hero.stockValue}
               </span>
               <span className="mt-0.5 block text-xs font-medium text-ink-500">
-                produkte në stok
+                {dict.hero.stockLabel}
               </span>
             </span>
           </motion.div>

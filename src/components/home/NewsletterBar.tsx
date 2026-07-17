@@ -6,10 +6,11 @@ import {
   subscribeAction,
   type NewsletterFormState,
 } from "@/lib/newsletter-actions";
+import type { Dictionary } from "@/lib/dictionaries";
 
 const initialState: NewsletterFormState = {};
 
-export function NewsletterBar() {
+export function NewsletterBar({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(subscribeAction, initialState);
 
   return (
@@ -32,11 +33,9 @@ export function NewsletterBar() {
               id="newsletter-titulli"
               className="font-display text-xl font-bold tracking-tight text-white"
             >
-              Qëndroni të informuar
+              {dict.home.newsletterTitle}
             </h2>
-            <p className="text-sm text-white/70">
-              Abonohuni për produktet e reja dhe njoftimet e SHEMO PHARM.
-            </p>
+            <p className="text-sm text-white/70">{dict.home.newsletterSub}</p>
           </div>
         </div>
 
@@ -46,24 +45,24 @@ export function NewsletterBar() {
             className="relative flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white"
           >
             <CircleCheck className="size-5 text-accent-300" aria-hidden />
-            Faleminderit! Jeni abonuar me sukses.
+            {dict.home.newsletterSuccess}
           </p>
         ) : (
           <form action={formAction} className="relative w-full max-w-md">
             <div className="flex rounded-full bg-white p-1.5 shadow-lg shadow-plum-950/20">
               <label htmlFor="newsletter-email" className="sr-only">
-                Adresa juaj e email-it
+                {dict.home.newsletterEmailLabel}
               </label>
               <input
                 id="newsletter-email"
                 name="email"
                 type="email"
                 required
-                placeholder="Email juaj"
+                placeholder={dict.home.newsletterPlaceholder}
                 className="h-10 w-full rounded-full border-0 bg-transparent px-4 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
               />
               <div className="hidden" aria-hidden="true">
-                <label htmlFor="newsletter-website">Mos e plotësoni</label>
+                <label htmlFor="newsletter-website">{dict.common.honeypotLabel}</label>
                 <input
                   id="newsletter-website"
                   name="website"
@@ -72,13 +71,14 @@ export function NewsletterBar() {
                   autoComplete="off"
                 />
               </div>
+              <input type="hidden" name="lang" value={dict.lang} />
               <button
                 type="submit"
                 disabled={pending}
                 className="flex h-10 shrink-0 items-center gap-2 rounded-full bg-accent-500 px-6 text-sm font-semibold text-plum-950 transition-colors hover:bg-accent-400 disabled:opacity-70"
               >
                 {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
-                Abonohu
+                {dict.home.newsletterButton}
               </button>
             </div>
             {state.error && (

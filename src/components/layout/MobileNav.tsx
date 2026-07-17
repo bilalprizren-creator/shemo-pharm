@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ChevronDown,
   Heart,
@@ -14,33 +15,39 @@ import {
   X,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { langHref, switchLangPath, fmt } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 import type { NavCategory } from "./HeaderClient";
 
-const LINKS = [
-  { href: "/", label: "Ballina" },
-  { href: "/produktet", label: "Produktet" },
-  { href: "/markat", label: "Markat" },
-  { href: "/oferta", label: "Oferta" },
-  { href: "/rreth-nesh", label: "Rreth nesh" },
-  { href: "/kontakti", label: "Kontakti" },
-  { href: "/lista-e-deshirave", label: "Të preferuarat", icon: Heart },
-  { href: "/shporta", label: "Shporta", icon: ShoppingBag },
-];
+const LINK_PATHS = [
+  { href: "/", key: "home" },
+  { href: "/produktet", key: "products" },
+  { href: "/markat", key: "brands" },
+  { href: "/oferta", key: "offers" },
+  { href: "/rreth-nesh", key: "about" },
+  { href: "/kontakti", key: "contact" },
+  { href: "/lista-e-deshirave", key: "wishlist", icon: Heart },
+  { href: "/shporta", key: "cart", icon: ShoppingBag },
+] as const;
 
 export function MobileNav({
   open,
   onClose,
   categories,
   user,
+  dict,
 }: {
   open: boolean;
   onClose: () => void;
   categories: NavCategory[];
   user: { name: string } | null;
+  dict: Dictionary;
 }) {
   const [catsOpen, setCatsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
+  const lang = dict.lang;
 
   // Scroll lock + initial focus + Escape + focus trap
   useEffect(() => {
@@ -78,10 +85,15 @@ export function MobileNav({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menyja">
+    <div
+      className="fixed inset-0 z-50 lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label={dict.nav.menuLabel}
+    >
       <button
         type="button"
-        aria-label="Mbyll menynë"
+        aria-label={dict.nav.closeMenu}
         onClick={onClose}
         className="absolute inset-0 bg-ink-900/45"
         tabIndex={-1}
@@ -92,28 +104,51 @@ export function MobileNav({
       >
         <div className="flex items-center justify-between border-b border-ink-900/8 px-4 py-3.5">
           <Image src="/logo.svg" alt="SHEMO PHARM" width={124} height={44} className="h-9 w-auto" />
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Mbyll menynë"
-            className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-ink-900/5"
-          >
-            <X className="size-6" aria-hidden />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Language pill */}
+            <div
+              aria-label={dict.nav.langLabel}
+              className="flex items-center rounded-full border border-ink-900/10 p-0.5 text-xs font-bold"
+            >
+              {(["sq", "en"] as const).map((l) => (
+                <Link
+                  key={l}
+                  href={switchLangPath(pathname, l)}
+                  onClick={onClose}
+                  aria-current={lang === l ? "true" : undefined}
+                  className={`rounded-full px-2.5 py-1.5 uppercase ${
+                    lang === l ? "bg-brand-600 text-white" : "text-ink-500"
+                  }`}
+                >
+                  {l}
+                </Link>
+              ))}
+            </div>
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label={dict.nav.closeMenu}
+              className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-ink-900/5"
+            >
+              <X className="size-6" aria-hidden />
+            </button>
+          </div>
         </div>
 
-        <nav aria-label="Navigimi" className="flex-1 px-2 py-3">
+        <nav aria-label={dict.nav.mainLabel} className="flex-1 px-2 py-3">
           <ul>
-            {LINKS.map((l) => (
+            {LINK_PATHS.map((l) => (
               <li key={l.href}>
                 <Link
-                  href={l.href}
+                  href={langHref(lang, l.href)}
                   onClick={onClose}
                   className="flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-medium text-ink-900 hover:bg-brand-50"
                 >
-                  {l.icon && <l.icon className="size-4.5 text-brand-600" aria-hidden />}
-                  {l.label}
+                  {"icon" in l && l.icon && (
+                    <l.icon className="size-4.5 text-brand-600" aria-hidden />
+                  )}
+                  {dict.nav[l.key]}
                 </Link>
               </li>
             ))}
@@ -124,7 +159,7 @@ export function MobileNav({
                 aria-expanded={catsOpen}
                 className="flex min-h-12 w-full items-center justify-between rounded-xl px-4 py-3 text-[15px] font-medium text-ink-900 hover:bg-brand-50"
               >
-                Kategoritë
+                {dict.nav.categories}
                 <ChevronDown
                   className={`size-5 text-ink-400 transition-transform ${catsOpen ? "rotate-180" : ""}`}
                   aria-hidden
@@ -135,7 +170,7 @@ export function MobileNav({
                   {categories.map((c) => (
                     <li key={c.slug}>
                       <Link
-                        href={`/kategorite/${c.slug}`}
+                        href={langHref(lang, `/kategorite/${c.slug}`)}
                         onClick={onClose}
                         className="flex min-h-11 items-center justify-between gap-2 rounded-full px-3 py-2.5 text-sm text-ink-700 hover:bg-brand-50"
                       >
@@ -146,11 +181,11 @@ export function MobileNav({
                   ))}
                   <li>
                     <Link
-                      href="/kategorite"
+                      href={langHref(lang, "/kategorite")}
                       onClick={onClose}
                       className="flex min-h-11 items-center rounded-full px-3 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-50"
                     >
-                      Shiko të gjitha kategoritë
+                      {dict.nav.allCategories}
                     </Link>
                   </li>
                 </ul>
@@ -161,12 +196,14 @@ export function MobileNav({
 
         <div className="border-t border-ink-900/8 px-4 py-4">
           <Link
-            href={user ? "/llogaria" : "/kycu"}
+            href={langHref(lang, user ? "/llogaria" : "/kycu")}
             onClick={onClose}
             className="mb-3 flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700"
           >
             <User className="size-4.5" aria-hidden />
-            {user ? `Llogaria (${user.name})` : "Kyçu / Regjistrohu"}
+            {user
+              ? fmt(dict.nav.accountWithName, { name: user.name })
+              : dict.nav.loginRegister}
           </Link>
           <div className="space-y-1 text-sm">
             {SITE.phones.map((p) => (

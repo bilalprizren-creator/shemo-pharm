@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductCarousel } from "@/components/product/ProductCarousel";
 import type { CardProduct } from "@/lib/types";
@@ -10,14 +12,17 @@ export function ProductRow({
   eyebrow,
   href,
   products,
+  dict,
   tinted = false,
 }: {
   title: string;
   subtitle?: string;
   /** Small uppercase label above the heading, e.g. "Të rejat". */
   eyebrow?: string;
+  /** Unprefixed path — the language prefix is added here. */
   href: string;
   products: CardProduct[];
+  dict: Dictionary;
   tinted?: boolean;
 }) {
   if (products.length === 0) return null;
@@ -25,7 +30,7 @@ export function ProductRow({
   return (
     <section
       aria-label={title}
-      className={tinted ? "bg-lavender/60" : undefined}
+      className={tinted ? "bg-mint/70" : undefined}
     >
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
         <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
@@ -41,10 +46,10 @@ export function ProductRow({
             {subtitle && <p className="mt-1.5 text-sm text-ink-500 sm:text-base">{subtitle}</p>}
           </div>
           <Link
-            href={href}
+            href={langHref(dict.lang, href)}
             className="group inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
           >
-            Shiko të gjitha
+            {dict.common.viewAll}
             <ArrowRight
               className="size-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden
@@ -53,7 +58,7 @@ export function ProductRow({
         </div>
         <ProductCarousel label={title}>
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} dict={dict} />
           ))}
         </ProductCarousel>
       </div>

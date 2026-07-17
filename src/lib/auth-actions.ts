@@ -13,10 +13,18 @@ import {
   writeUsers,
   type StoredUser,
 } from "@/lib/auth";
+import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { getDictionary, type Dictionary } from "@/lib/dictionaries";
 
 export interface AuthFormState {
   error?: string;
   fieldErrors?: Record<string, string>;
+}
+
+/** Locale comes from a hidden form field so messages match the page. */
+function formLang(formData: FormData): Lang {
+  const lang = String(formData.get("lang") ?? "sq");
+  return isLang(lang) ? lang : "sq";
 }
 
 /** Simple in-memory rate limit per IP: 10 attempts / 10 minutes. */
@@ -40,61 +48,69 @@ async function rateLimited(): Promise<boolean> {
   return entry.count > LIMIT;
 }
 
-const GENERIC_ERROR = "Email-i ose fjalëkalimi është i pasaktë.";
-
-const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Shkruani një email të vlefshëm."),
-  password: z.string().min(1, "Shkruani fjalëkalimin."),
-});
+function loginSchema(dict: Dictionary) {
+  return z.object({
+    email: z.string().trim().toLowerCase().email(dict.actions.vEmail),
+    password: z.string().min(1, dict.actions.vPassword),
+  });
+}
 
 export async function loginAction(
   _prev: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const lang = formLang(formData);
+  const dict = getDictionary(lang);
+
   if (await rateLimited()) {
-    return { error: "Shumë tentativa. Provoni përsëri pas disa minutash." };
+    return { error: dict.actions.tooManyAttempts };
   }
 
-  const parsed = loginSchema.safeParse({
+  const parsed = loginSchema(dict).safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: GENERIC_ERROR };
+    return { error: dict.actions.invalidCredentials };
   }
 
   const user = findUser(parsed.data.email);
   if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
-    return { error: GENERIC_ERROR };
+    return { error: dict.actions.invalidCredentials };
   }
 
   await createSessionCookie(user);
-  redirect("/llogaria");
+  redirect(langHref(lang, "/llogaria"));
 }
 
-const registerSchema = z
-  .object({
-    name: z.string().trim().min(2, "Shkruani emrin dhe mbiemrin."),
-    company: z.string().trim().max(120).optional().or(z.literal("")),
-    phone: z.string().trim().min(6, "Shkruani numrin e telefonit."),
-    email: z.string().trim().toLowerCase().email("Shkruani një email të vlefshëm."),
-    password: z.string().min(8, "Fjalëkalimi duhet të ketë të paktën 8 karaktere."),
-    confirm: z.string(),
-  })
-  .refine((v) => v.password === v.confirm, {
-    message: "Fjalëkalimet nuk përputhen.",
-    path: ["confirm"],
-  });
+function registerSchema(dict: Dictionary) {
+  return z
+    .object({
+      name: z.string().trim().min(2, dict.actions.vName),
+      company: z.string().trim().max(120).optional().or(z.literal("")),
+      phone: z.string().trim().min(6, dict.actions.vPhone),
+      email: z.string().trim().toLowerCase().email(dict.actions.vEmail),
+      password: z.string().min(8, dict.actions.vPasswordMin),
+      confirm: z.string(),
+    })
+    .refine((v) => v.password === v.confirm, {
+      message: dict.actions.vPasswordMatch,
+      path: ["confirm"],
+    });
+}
 
 export async function registerAction(
   _prev: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const lang = formLang(formData);
+  const dict = getDictionary(lang);
+
   if (await rateLimited()) {
-    return { error: "Shumë tentativa. Provoni përsëri pas disa minutash." };
+    return { error: dict.actions.tooManyAttempts };
   }
 
-  const parsed = registerSchema.safeParse({
+  const parsed = registerSchema(dict).safeParse({
     name: formData.get("name"),
     company: formData.get("company"),
     phone: formData.get("phone"),
@@ -115,7 +131,7 @@ export async function registerAction(
   const users = readUsers();
   if (users.some((u) => u.email.toLowerCase() === parsed.data.email)) {
     return {
-      fieldErrors: { email: "Ekziston një llogari me këtë email. Provoni të kyçeni." },
+      fieldErrors: { email: dict.actions.emailTaken },
     };
   }
 
@@ -130,7 +146,7 @@ export async function registerAction(
   };
   writeUsers([...users, user]);
   await createSessionCookie(user);
-  redirect("/llogaria");
+  redirect(langHref(lang, "/llogaria"));
 }
 
 export async function logoutAction(): Promise<void> {

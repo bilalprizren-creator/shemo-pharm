@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { fmt } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
 function pageHref(basePath: string, params: URLSearchParams, page: number): string {
   const next = new URLSearchParams(params);
@@ -15,11 +17,14 @@ export function Pagination({
   params,
   page,
   totalPages,
+  dict,
 }: {
+  /** Already language-prefixed by the caller. */
   basePath: string;
   params: URLSearchParams;
   page: number;
   totalPages: number;
+  dict: Dictionary;
 }) {
   if (totalPages <= 1) return null;
 
@@ -35,13 +40,13 @@ export function Pagination({
   }
 
   return (
-    <nav aria-label="Faqet e produkteve" className="mt-10 flex justify-center">
+    <nav aria-label={dict.catalog.paginationLabel} className="mt-10 flex justify-center">
       <ul className="flex flex-wrap items-center gap-1.5">
         <li>
           {page > 1 ? (
             <Link
               href={pageHref(basePath, params, page - 1)}
-              aria-label="Faqja e mëparshme"
+              aria-label={dict.catalog.prevPage}
               className="flex size-11 items-center justify-center rounded-full border border-ink-900/10 bg-white text-ink-700 hover:border-brand-400 hover:text-brand-700"
             >
               <ChevronLeft className="size-4.5" aria-hidden />
@@ -64,7 +69,7 @@ export function Pagination({
             <li key={item}>
               <Link
                 href={pageHref(basePath, params, item)}
-                aria-label={`Faqja ${item}`}
+                aria-label={fmt(dict.catalog.pageN, { n: item })}
                 aria-current={item === page ? "page" : undefined}
                 className={`flex size-11 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
                   item === page
@@ -81,7 +86,7 @@ export function Pagination({
           {page < totalPages ? (
             <Link
               href={pageHref(basePath, params, page + 1)}
-              aria-label="Faqja tjetër"
+              aria-label={dict.catalog.nextPage}
               className="flex size-11 items-center justify-center rounded-full border border-ink-900/10 bg-white text-ink-700 hover:border-brand-400 hover:text-brand-700"
             >
               <ChevronRight className="size-4.5" aria-hidden />

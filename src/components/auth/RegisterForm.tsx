@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { CircleAlert, Loader2, UserPlus } from "lucide-react";
 import { registerAction, type AuthFormState } from "@/lib/auth-actions";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
 const initialState: AuthFormState = {};
 
@@ -12,18 +14,22 @@ function Field({
   label,
   error,
   optional,
+  optionalLabel,
   ...input
 }: {
   id: string;
   label: string;
   error?: string;
   optional?: boolean;
+  optionalLabel?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-ink-900">
         {label}
-        {optional && <span className="ml-1 font-normal text-ink-400">(opsionale)</span>}
+        {optional && (
+          <span className="ml-1 font-normal text-ink-400">{optionalLabel}</span>
+        )}
       </label>
       <input
         id={id}
@@ -44,7 +50,7 @@ function Field({
   );
 }
 
-export function RegisterForm() {
+export function RegisterForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
   const fe = state.fieldErrors ?? {};
 
@@ -60,9 +66,11 @@ export function RegisterForm() {
         </p>
       )}
 
+      <input type="hidden" name="lang" value={dict.lang} />
+
       <Field
         id="name"
-        label="Emri dhe mbiemri"
+        label={dict.contactForm.name}
         type="text"
         autoComplete="name"
         required
@@ -70,15 +78,16 @@ export function RegisterForm() {
       />
       <Field
         id="company"
-        label="Kompania ose barnatorja"
+        label={dict.contactForm.company}
         type="text"
         autoComplete="organization"
         optional
+        optionalLabel={dict.common.optional}
         error={fe.company}
       />
       <Field
         id="phone"
-        label="Numri i telefonit"
+        label={dict.contactForm.phone}
         type="tel"
         autoComplete="tel"
         required
@@ -87,7 +96,7 @@ export function RegisterForm() {
       />
       <Field
         id="email"
-        label="Email"
+        label={dict.auth.email}
         type="email"
         autoComplete="email"
         required
@@ -96,7 +105,7 @@ export function RegisterForm() {
       />
       <Field
         id="password"
-        label="Fjalëkalimi"
+        label={dict.auth.password}
         type="password"
         autoComplete="new-password"
         required
@@ -104,7 +113,7 @@ export function RegisterForm() {
       />
       <Field
         id="confirm"
-        label="Përsërit fjalëkalimin"
+        label={dict.auth.confirmPassword}
         type="password"
         autoComplete="new-password"
         required
@@ -121,18 +130,20 @@ export function RegisterForm() {
         ) : (
           <UserPlus className="size-4.5" aria-hidden />
         )}
-        Regjistrohu
+        {dict.auth.registerButton}
       </button>
 
       <p className="text-center text-[13px] leading-relaxed text-ink-400">
-        Pas regjistrimit, llogaria juaj kërkon verifikim nga ekipi i SHEMO PHARM
-        përpara se çmimet të bëhen të dukshme.
+        {dict.auth.pendingNote}
       </p>
 
       <p className="text-center text-sm text-ink-500">
-        Keni llogari?{" "}
-        <Link href="/kycu" className="font-semibold text-brand-700 hover:text-brand-800">
-          Kyçu
+        {dict.auth.haveAccount}{" "}
+        <Link
+          href={langHref(dict.lang, "/kycu")}
+          className="font-semibold text-brand-700 hover:text-brand-800"
+        >
+          {dict.auth.loginButton}
         </Link>
       </p>
     </form>

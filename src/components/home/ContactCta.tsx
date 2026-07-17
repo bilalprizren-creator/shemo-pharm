@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle, Phone } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
-export function ContactCta() {
+export function ContactCta({ dict }: { dict: Dictionary }) {
   return (
     <section aria-labelledby="cta-titulli" className="relative overflow-hidden bg-plum-950">
       <div aria-hidden className="absolute inset-0">
@@ -29,11 +31,10 @@ export function ContactCta() {
           id="cta-titulli"
           className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl"
         >
-          Keni nevojë për ndihmë në zgjedhjen e produkteve?
+          {dict.cta.title}
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-white/70 sm:text-lg">
-          Kontaktoni ekipin tonë për informacione rreth produkteve,
-          disponueshmërisë dhe bashkëpunimit.
+          {dict.cta.sub}
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
@@ -43,7 +44,7 @@ export function ContactCta() {
             className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-400"
           >
             <MessageCircle className="size-4.5" aria-hidden />
-            Na shkruani në WhatsApp
+            {dict.cta.whatsapp}
           </a>
           <a
             href={SITE.phones[0].href}
@@ -53,10 +54,10 @@ export function ContactCta() {
             {SITE.phones[0].label}
           </a>
           <Link
-            href="/kontakti"
+            href={langHref(dict.lang, "/kontakti")}
             className="inline-flex min-h-12 items-center gap-2 px-4 py-3 text-sm font-semibold text-white/85 hover:text-white"
           >
-            Kontakti
+            {dict.cta.contact}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

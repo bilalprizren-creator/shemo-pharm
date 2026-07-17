@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, Loader2 } from "lucide-react";
 import type { CardProduct } from "@/lib/types";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useWishlist } from "./WishlistProvider";
 
-export function WishlistPageClient() {
+export function WishlistPageClient({ dict }: { dict: Dictionary }) {
   const { ids, ready } = useWishlist();
   const [items, setItems] = useState<CardProduct[] | null>(null);
   const [error, setError] = useState(false);
@@ -35,9 +37,7 @@ export function WishlistPageClient() {
   if (error) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center">
-        <p className="font-semibold text-red-800">
-          Lista nuk u ngarkua. Provoni ta rifreskoni faqen.
-        </p>
+        <p className="font-semibold text-red-800">{dict.wishlistPage.loadFailed}</p>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export function WishlistPageClient() {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-ink-400">
         <Loader2 className="size-5 animate-spin" aria-hidden />
-        Duke ngarkuar…
+        {dict.common.loading}
       </div>
     );
   }
@@ -57,15 +57,17 @@ export function WishlistPageClient() {
         <span className="flex size-16 items-center justify-center rounded-full bg-brand-50">
           <Heart className="size-7 text-brand-600" strokeWidth={1.5} aria-hidden />
         </span>
-        <h2 className="mt-4 text-lg font-bold text-ink-900">Lista juaj është bosh</h2>
+        <h2 className="mt-4 text-lg font-bold text-ink-900">
+          {dict.wishlistPage.emptyTitle}
+        </h2>
         <p className="mt-1.5 max-w-sm text-sm text-ink-500">
-          Shtoni produkte në listën e dëshirave duke klikuar ikonën e zemrës.
+          {dict.wishlistPage.emptyText}
         </p>
         <Link
-          href="/produktet"
+          href={langHref(dict.lang, "/produktet")}
           className="mt-6 inline-flex min-h-11 items-center rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
-          Shfleto produktet
+          {dict.common.browseProducts}
         </Link>
       </div>
     );
@@ -75,7 +77,7 @@ export function WishlistPageClient() {
     <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
       {resolved.map((p) => (
         <li key={p.id}>
-          <ProductCard product={p} />
+          <ProductCard product={p} dict={dict} />
         </li>
       ))}
     </ul>

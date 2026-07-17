@@ -4,10 +4,12 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { CircleAlert, Loader2, LogIn } from "lucide-react";
 import { loginAction, type AuthFormState } from "@/lib/auth-actions";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
 const initialState: AuthFormState = {};
 
-export function LoginForm() {
+export function LoginForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
@@ -22,9 +24,11 @@ export function LoginForm() {
         </p>
       )}
 
+      <input type="hidden" name="lang" value={dict.lang} />
+
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-ink-900">
-          Email
+          {dict.auth.email}
         </label>
         <input
           id="email"
@@ -39,7 +43,7 @@ export function LoginForm() {
 
       <div>
         <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-ink-900">
-          Fjalëkalimi
+          {dict.auth.password}
         </label>
         <input
           id="password"
@@ -61,16 +65,16 @@ export function LoginForm() {
         ) : (
           <LogIn className="size-4.5" aria-hidden />
         )}
-        Kyçu
+        {dict.auth.loginButton}
       </button>
 
       <p className="text-center text-sm text-ink-500">
-        Nuk keni llogari?{" "}
+        {dict.auth.noAccount}{" "}
         <Link
-          href="/regjistrohu"
+          href={langHref(dict.lang, "/regjistrohu")}
           className="font-semibold text-brand-700 hover:text-brand-800"
         >
-          Regjistrohu
+          {dict.auth.registerButton}
         </Link>
       </p>
     </form>

@@ -6,18 +6,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, X, Loader2, PackageSearch } from "lucide-react";
 import type { PublicProduct } from "@/lib/types";
+import { langHref, fmt, type Lang } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
 interface SearchBarProps {
-  /** Autofocus the input when rendered (used inside the mobile sheet). */
+  lang: Lang;
+  dict: Dictionary;
+  /** Autofocus the input when rendered (used inside the overlay/sheet). */
   autoFocus?: boolean;
   /** Called after a result or the full-search action is chosen. */
   onNavigate?: () => void;
-  /** Renders an attached "Kërko" submit button (desktop header style). */
+  /** Renders an attached submit button (desktop header style). */
   withButton?: boolean;
   className?: string;
 }
 
 export function SearchBar({
+  lang,
+  dict,
   autoFocus,
   onNavigate,
   withButton = false,
@@ -92,7 +98,7 @@ export function SearchBar({
     if (!q) return;
     close();
     onNavigate?.();
-    router.push(`/produktet?kerko=${encodeURIComponent(q)}`);
+    router.push(`${langHref(lang, "/produktet")}?kerko=${encodeURIComponent(q)}`);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -112,7 +118,7 @@ export function SearchBar({
       if (active >= 0 && results[active]) {
         close();
         onNavigate?.();
-        router.push(`/produktet/${results[active].slug}`);
+        router.push(langHref(lang, `/produktet/${results[active].slug}`));
       } else {
         goToFullSearch();
       }
@@ -133,24 +139,24 @@ export function SearchBar({
           aria-expanded={open && results.length > 0}
           aria-controls="kerko-sugjerimet"
           aria-autocomplete="list"
-          aria-label="Kërko produkte"
-          placeholder="Kërko produkte, marka, kategori…"
+          aria-label={dict.search.label}
+          placeholder={dict.search.placeholder}
           autoFocus={autoFocus}
           value={query}
           onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={onKeyDown}
           className={`h-11 w-full border border-ink-900/10 bg-white pl-10 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden ${
-            withButton ? "rounded-l-lg rounded-r-none border-r-0 pr-10" : "rounded-lg pr-16"
+            withButton ? "rounded-l-full rounded-r-none border-r-0 pr-10" : "rounded-full pr-16"
           }`}
         />
         {withButton && (
           <button
             type="button"
             onClick={goToFullSearch}
-            className="absolute right-0 top-0 h-11 rounded-r-lg bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className="absolute right-0 top-0 h-11 rounded-r-full bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
-            Kërko
+            {dict.search.button}
           </button>
         )}
         <div
@@ -168,7 +174,7 @@ export function SearchBar({
                 updateQuery("");
                 inputRef.current?.focus();
               }}
-              aria-label="Pastro kërkimin"
+              aria-label={dict.search.clear}
               className="flex size-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-900/5 hover:text-ink-700"
             >
               <X className="size-4" aria-hidden />
@@ -181,13 +187,13 @@ export function SearchBar({
         <div
           id="kerko-sugjerimet"
           role="listbox"
-          aria-label="Sugjerime kërkimi"
+          aria-label={dict.search.suggestionsLabel}
           className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-ink-900/8 bg-white shadow-drawer"
         >
           {results.length === 0 && !loading ? (
             <div className="flex items-center gap-3 px-4 py-5 text-sm text-ink-500">
               <PackageSearch className="size-5 shrink-0 text-ink-300" aria-hidden />
-              Asnjë produkt nuk u gjet për &ldquo;{query.trim()}&rdquo;
+              {fmt(dict.search.noResults, { q: query.trim() })}
             </div>
           ) : (
             <>
@@ -195,7 +201,7 @@ export function SearchBar({
                 {results.map((p, i) => (
                   <li key={p.id} role="option" aria-selected={i === active}>
                     <Link
-                      href={`/produktet/${p.slug}`}
+                      href={langHref(lang, `/produktet/${p.slug}`)}
                       onClick={() => {
                         close();
                         onNavigate?.();
@@ -222,7 +228,7 @@ export function SearchBar({
                           {p.name}
                         </span>
                         <span className="block truncate text-xs text-ink-400">
-                          {[p.sku && `Kodi: ${p.sku}`, p.categoryName]
+                          {[p.sku && `${dict.common.code}: ${p.sku}`, p.categoryName]
                             .filter(Boolean)
                             .join(" · ")}
                         </span>
@@ -236,7 +242,7 @@ export function SearchBar({
                 onClick={goToFullSearch}
                 className="block w-full border-t border-ink-900/6 bg-surface px-4 py-3 text-center text-sm font-semibold text-brand-700 hover:bg-brand-50"
               >
-                Shiko të gjitha rezultatet ({total})
+                {fmt(dict.search.viewAllResults, { total })}
               </button>
             </>
           )}

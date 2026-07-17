@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import type { CategoryNode } from "@/lib/types";
+import { langHref } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 
 /**
  * Category filter list used in the desktop sidebar and the mobile sheet.
@@ -11,10 +13,12 @@ export function CategoryFilter({
   tree,
   activeSlug,
   displayName,
+  dict,
 }: {
   tree: CategoryNode[];
   activeSlug?: string;
   displayName: Record<string, string>;
+  dict: Dictionary;
 }) {
   const containsActive = (node: CategoryNode): boolean =>
     node.slug === activeSlug || node.children.some(containsActive);
@@ -24,7 +28,7 @@ export function CategoryFilter({
     const name = displayName[node.slug] ?? node.name;
     const link = (
       <Link
-        href={`/kategorite/${node.slug}`}
+        href={langHref(dict.lang, `/kategorite/${node.slug}`)}
         aria-current={isActive ? "page" : undefined}
         className={`flex min-h-10 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
           isActive
@@ -64,11 +68,11 @@ export function CategoryFilter({
   };
 
   return (
-    <nav aria-label="Filtro sipas kategorisë">
+    <nav aria-label={dict.catalog.filterByCategory}>
       <ul className="space-y-0.5">
         <li>
           <Link
-            href="/produktet"
+            href={langHref(dict.lang, "/produktet")}
             aria-current={!activeSlug ? "page" : undefined}
             className={`flex min-h-10 items-center rounded-lg px-3 py-2 text-sm transition-colors ${
               !activeSlug
@@ -76,7 +80,7 @@ export function CategoryFilter({
                 : "text-ink-700 hover:bg-brand-50 hover:text-brand-800"
             }`}
           >
-            Të gjitha produktet
+            {dict.catalog.allProducts}
           </Link>
         </li>
         {tree.map((n) => renderNode(n, 0))}

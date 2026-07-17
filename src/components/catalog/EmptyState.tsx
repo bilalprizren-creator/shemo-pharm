@@ -2,15 +2,16 @@ import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
 export function EmptyState({
-  title = "Asnjë produkt nuk u gjet",
-  text = "Provoni një kërkim tjetër ose shfletoni kategoritë tona.",
-  actionLabel = "Shiko të gjitha produktet",
-  actionHref = "/produktet",
+  title,
+  text,
+  actionLabel,
+  actionHref,
 }: {
-  title?: string;
-  text?: string;
-  actionLabel?: string;
-  actionHref?: string;
+  title: string;
+  text: string;
+  actionLabel: string;
+  /** Already language-prefixed by the caller. */
+  actionHref: string;
 }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ink-900/12 bg-white px-6 py-16 text-center">

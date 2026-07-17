@@ -7,9 +7,12 @@ import { Package } from "lucide-react";
 export function ProductGallery({
   images,
   name,
+  labels,
 }: {
   images: string[];
   name: string;
+  /** Localized list label + "{i} of {total}" template. */
+  labels: { list: string; image: string };
 }) {
   const [index, setIndex] = useState(0);
   const current = images[index] ?? images[0];
@@ -34,13 +37,15 @@ export function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <ul className="mt-3 flex gap-2.5 overflow-x-auto pb-1" aria-label="Imazhet e produktit">
+        <ul className="mt-3 flex gap-2.5 overflow-x-auto pb-1" aria-label={labels.list}>
           {images.map((src, i) => (
             <li key={src}>
               <button
                 type="button"
                 onClick={() => setIndex(i)}
-                aria-label={`Imazhi ${i + 1} nga ${images.length}`}
+                aria-label={labels.image
+                  .replace("{i}", String(i + 1))
+                  .replace("{total}", String(images.length))}
                 aria-current={i === index}
                 className={`relative size-18 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition-colors ${
                   i === index

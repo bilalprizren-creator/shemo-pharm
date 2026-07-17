@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { CircleAlert, CircleCheck, Loader2, Send } from "lucide-react";
 import { contactAction, type ContactFormState } from "@/lib/contact-actions";
+import type { Dictionary } from "@/lib/dictionaries";
 
 const initialState: ContactFormState = {};
 
@@ -11,6 +12,7 @@ function Field({
   label,
   error,
   optional,
+  optionalLabel,
   textarea,
   ...input
 }: {
@@ -18,6 +20,7 @@ function Field({
   label: string;
   error?: string;
   optional?: boolean;
+  optionalLabel?: string;
   textarea?: boolean;
 } & React.InputHTMLAttributes<HTMLInputElement> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
@@ -28,7 +31,9 @@ function Field({
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-ink-900">
         {label}
-        {optional && <span className="ml-1 font-normal text-ink-400">(opsionale)</span>}
+        {optional && (
+          <span className="ml-1 font-normal text-ink-400">{optionalLabel}</span>
+        )}
       </label>
       {textarea ? (
         <textarea
@@ -59,7 +64,7 @@ function Field({
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(contactAction, initialState);
   const startedAtRef = useRef<HTMLInputElement>(null);
   const fe = state.fieldErrors ?? {};
@@ -77,11 +82,10 @@ export function ContactForm() {
       >
         <CircleCheck className="size-10 text-brand-600" aria-hidden />
         <h3 className="mt-4 text-lg font-bold text-ink-900">
-          Mesazhi u dërgua me sukses
+          {dict.contactForm.successTitle}
         </h3>
         <p className="mt-1.5 max-w-sm text-sm text-ink-500">
-          Faleminderit që na kontaktuat! Ekipi i SHEMO PHARM do t&apos;ju
-          përgjigjet sa më shpejt.
+          {dict.contactForm.successText}
         </p>
       </div>
     );
@@ -101,24 +105,33 @@ export function ContactForm() {
 
       {/* Spam protection: honeypot + render timestamp */}
       <div className="hidden" aria-hidden="true">
-        <label htmlFor="website">Mos e plotësoni këtë fushë</label>
+        <label htmlFor="website">{dict.common.honeypotLabel}</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <input ref={startedAtRef} type="hidden" name="startedAt" defaultValue="" />
+      <input type="hidden" name="lang" value={dict.lang} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="name" label="Emri dhe mbiemri" type="text" autoComplete="name" required error={fe.name} />
+        <Field
+          id="name"
+          label={dict.contactForm.name}
+          type="text"
+          autoComplete="name"
+          required
+          error={fe.name}
+        />
         <Field
           id="company"
-          label="Kompania ose barnatorja"
+          label={dict.contactForm.company}
           type="text"
           autoComplete="organization"
           optional
+          optionalLabel={dict.common.optional}
           error={fe.company}
         />
         <Field
           id="phone"
-          label="Numri i telefonit"
+          label={dict.contactForm.phone}
           type="tel"
           autoComplete="tel"
           required
@@ -127,7 +140,7 @@ export function ContactForm() {
         />
         <Field
           id="email"
-          label="Email"
+          label={dict.contactForm.email}
           type="email"
           autoComplete="email"
           required
@@ -135,8 +148,8 @@ export function ContactForm() {
           error={fe.email}
         />
       </div>
-      <Field id="subject" label="Subjekti" type="text" required error={fe.subject} />
-      <Field id="message" label="Mesazhi" textarea required error={fe.message} />
+      <Field id="subject" label={dict.contactForm.subject} type="text" required error={fe.subject} />
+      <Field id="message" label={dict.contactForm.message} textarea required error={fe.message} />
 
       <button
         type="submit"
@@ -148,7 +161,7 @@ export function ContactForm() {
         ) : (
           <Send className="size-4.5" aria-hidden />
         )}
-        Dërgo mesazhin
+        {dict.contactForm.submit}
       </button>
     </form>
   );

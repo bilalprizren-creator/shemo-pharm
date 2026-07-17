@@ -3,10 +3,18 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import { isLang, type Lang } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 export interface NewsletterFormState {
   success?: boolean;
   error?: string;
+}
+
+/** Locale comes from a hidden form field so messages match the page. */
+function formLang(formData: FormData): Lang {
+  const lang = String(formData.get("lang") ?? "sq");
+  return isLang(lang) ? lang : "sq";
 }
 
 const SUBSCRIBERS_FILE = path.join(process.cwd(), "data", "newsletter.json");
@@ -19,6 +27,8 @@ export async function subscribeAction(
   _prev: NewsletterFormState,
   formData: FormData
 ): Promise<NewsletterFormState> {
+  const dict = getDictionary(formLang(formData));
+
   // Honeypot — bots fill the hidden field, humans never do.
   if (formData.get("website")) {
     return { success: true };
@@ -31,7 +41,7 @@ export async function subscribeAction(
     .email()
     .safeParse(formData.get("email"));
   if (!parsed.success) {
-    return { error: "Shkruani një adresë email të vlefshme." };
+    return { error: dict.actions.newsletterInvalid };
   }
 
   try {
@@ -52,7 +62,7 @@ export async function subscribeAction(
       writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 1));
     }
   } catch {
-    return { error: "Regjistrimi dështoi. Ju lutemi provoni përsëri." };
+    return { error: dict.actions.newsletterFailed };
   }
 
   return { success: true };

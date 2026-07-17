@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { SITE } from "@/lib/site";
 import type { CardProduct } from "@/lib/types";
+import { langHref, fmt } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/dictionaries";
 import { useCart } from "./CartProvider";
 
 /** Parses "12,34 €" (server-formatted) back to cents for the local total. */
@@ -27,10 +29,11 @@ function formatCents(cents: number): string {
   return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
-export function CartPageClient() {
+export function CartPageClient({ dict }: { dict: Dictionary }) {
   const { lines, setQty, remove, clear, ready } = useCart();
   const [items, setItems] = useState<CardProduct[] | null>(null);
   const [error, setError] = useState(false);
+  const lang = dict.lang;
 
   const ids = useMemo(() => lines.map((l) => l.id), [lines]);
 
@@ -57,9 +60,7 @@ export function CartPageClient() {
   if (error) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-10 text-center">
-        <p className="font-semibold text-red-800">
-          Shporta nuk u ngarkua. Provoni ta rifreskoni faqen.
-        </p>
+        <p className="font-semibold text-red-800">{dict.cartPage.loadFailed}</p>
       </div>
     );
   }
@@ -68,7 +69,7 @@ export function CartPageClient() {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-ink-400">
         <Loader2 className="size-5 animate-spin" aria-hidden />
-        Duke ngarkuar…
+        {dict.common.loading}
       </div>
     );
   }
@@ -79,15 +80,17 @@ export function CartPageClient() {
         <span className="flex size-16 items-center justify-center rounded-full bg-brand-50">
           <ShoppingBag className="size-7 text-brand-600" strokeWidth={1.5} aria-hidden />
         </span>
-        <h2 className="mt-4 text-lg font-bold text-ink-900">Shporta juaj është bosh</h2>
+        <h2 className="mt-4 text-lg font-bold text-ink-900">
+          {dict.cartPage.emptyTitle}
+        </h2>
         <p className="mt-1.5 max-w-sm text-sm text-ink-500">
-          Shtoni produkte në shportë dhe dërgoni porosinë përmes WhatsApp ose email.
+          {dict.cartPage.emptyText}
         </p>
         <Link
-          href="/produktet"
+          href={langHref(lang, "/produktet")}
           className="mt-6 inline-flex min-h-11 items-center rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
-          Shfleto produktet
+          {dict.common.browseProducts}
         </Link>
       </div>
     );
@@ -102,13 +105,13 @@ export function CartPageClient() {
   const orderLines = resolved
     .map(
       (p, i) =>
-        `${i + 1}. ${p.name}${p.sku ? ` (Kodi: ${p.sku})` : ""} — ${qtyOf(p.id)} copë`
+        `${i + 1}. ${p.name}${p.sku ? ` (${dict.common.code}: ${p.sku})` : ""} — ${qtyOf(p.id)} ${dict.common.piece}`
     )
     .join("\n");
-  const orderText = `Përshëndetje! Dëshiroj të porosis:\n\n${orderLines}\n\nJu lutem konfirmoni disponueshmërinë dhe çmimet. Faleminderit!`;
+  const orderText = `${dict.cartPage.orderGreeting}\n\n${orderLines}\n\n${dict.cartPage.orderClosing}`;
   const whatsappHref = `${SITE.whatsapp}?text=${encodeURIComponent(orderText)}`;
   const mailHref = `mailto:${SITE.emails[0]}?subject=${encodeURIComponent(
-    "Porosi e re nga uebfaqja"
+    dict.cartPage.orderMailSubject
   )}&body=${encodeURIComponent(orderText)}`;
 
   return (
@@ -117,7 +120,7 @@ export function CartPageClient() {
         {resolved.map((p) => (
           <li key={p.id} className="flex items-center gap-3 p-3.5 sm:gap-4 sm:p-4">
             <Link
-              href={`/produktet/${p.slug}`}
+              href={langHref(lang, `/produktet/${p.slug}`)}
               className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 bg-white sm:size-20"
             >
               {p.image ? (
@@ -129,13 +132,15 @@ export function CartPageClient() {
 
             <div className="min-w-0 flex-1">
               <Link
-                href={`/produktet/${p.slug}`}
+                href={langHref(lang, `/produktet/${p.slug}`)}
                 className="line-clamp-2 text-sm font-semibold text-ink-900 hover:text-brand-700"
               >
                 {p.name}
               </Link>
               <p className="mt-0.5 text-xs text-ink-400">
-                {[p.sku && `Kodi: ${p.sku}`, p.categoryName].filter(Boolean).join(" · ")}
+                {[p.sku && `${dict.common.code}: ${p.sku}`, p.categoryName]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
               {p.price && (
                 <p className="mt-1 text-sm font-bold text-brand-800">{p.price}</p>
@@ -147,7 +152,7 @@ export function CartPageClient() {
                 <button
                   type="button"
                   onClick={() => setQty(p.id, qtyOf(p.id) - 1)}
-                  aria-label={`Zvogëlo sasinë për ${p.name}`}
+                  aria-label={fmt(dict.cartPage.decreaseFor, { name: p.name })}
                   className="flex size-9 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
                 >
                   <Minus className="size-3.5" aria-hidden />
@@ -158,7 +163,7 @@ export function CartPageClient() {
                 <button
                   type="button"
                   onClick={() => setQty(p.id, qtyOf(p.id) + 1)}
-                  aria-label={`Rrit sasinë për ${p.name}`}
+                  aria-label={fmt(dict.cartPage.increaseFor, { name: p.name })}
                   className="flex size-9 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50"
                 >
                   <Plus className="size-3.5" aria-hidden />
@@ -167,11 +172,11 @@ export function CartPageClient() {
               <button
                 type="button"
                 onClick={() => remove(p.id)}
-                aria-label={`Hiq ${p.name} nga shporta`}
+                aria-label={fmt(dict.cartPage.removeFor, { name: p.name })}
                 className="flex items-center gap-1 text-xs font-medium text-ink-400 hover:text-red-600"
               >
                 <Trash2 className="size-3.5" aria-hidden />
-                Hiq
+                {dict.cartPage.removeWord}
               </button>
             </div>
           </li>
@@ -179,32 +184,37 @@ export function CartPageClient() {
       </ul>
 
       <aside className="rounded-xl border border-ink-900/8 bg-white p-5 lg:sticky lg:top-40">
-        <h2 className="text-lg font-bold text-ink-900">Përmbledhja e porosisë</h2>
+        <h2 className="text-lg font-bold text-ink-900">{dict.cartPage.summary}</h2>
         <dl className="mt-3 space-y-1.5 text-sm text-ink-500">
           <div className="flex justify-between">
-            <dt>Produkte</dt>
+            <dt>{dict.cartPage.productsRow}</dt>
             <dd className="font-semibold text-ink-900">{resolved.length}</dd>
           </div>
           <div className="flex justify-between">
-            <dt>Sasia totale</dt>
+            <dt>{dict.cartPage.totalQty}</dt>
             <dd className="font-semibold text-ink-900">
-              {lines.reduce((s, l) => s + l.qty, 0)} copë
+              {lines.reduce((s, l) => s + l.qty, 0)} {dict.common.piece}
             </dd>
           </div>
           {pricesVisible && (
             <div className="flex justify-between border-t border-ink-900/8 pt-2 text-base">
-              <dt className="font-semibold text-ink-900">Totali (orientues)</dt>
+              <dt className="font-semibold text-ink-900">
+                {dict.cartPage.totalEstimate}
+              </dt>
               <dd className="font-extrabold text-brand-800">{formatCents(totalCents)}</dd>
             </div>
           )}
         </dl>
 
         {!pricesVisible && (
-          <p className="mt-3 rounded-lg bg-lavender px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-500">
-            <Link href="/kycu" className="font-semibold text-brand-700 hover:underline">
-              Kyçuni
+          <p className="mt-3 rounded-lg bg-mint px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-500">
+            <Link
+              href={langHref(lang, "/kycu")}
+              className="font-semibold text-brand-700 hover:underline"
+            >
+              {dict.cartPage.loginWord}
             </Link>{" "}
-            për të parë çmimet me shumicë dhe totalin e porosisë.
+            {dict.cartPage.loginForTotals}
           </p>
         )}
 
@@ -216,27 +226,26 @@ export function CartPageClient() {
             className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
           >
             <MessageCircle className="size-4.5" aria-hidden />
-            Dërgo porosinë në WhatsApp
+            {dict.cartPage.sendWhatsapp}
           </a>
           <a
             href={mailHref}
             className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
           >
             <Mail className="size-4.5 text-brand-600" aria-hidden />
-            Dërgo me email
+            {dict.cartPage.sendEmail}
           </a>
           <button
             type="button"
             onClick={clear}
             className="w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
           >
-            Zbraz shportën
+            {dict.cartPage.clearCart}
           </button>
         </div>
 
         <p className="mt-4 text-[12px] leading-relaxed text-ink-400">
-          Kjo është një kërkesë porosie — ekipi i SHEMO PHARM ju kontakton për të
-          konfirmuar disponueshmërinë, çmimet dhe dërgesën.
+          {dict.cartPage.note}
         </p>
       </aside>
     </div>
