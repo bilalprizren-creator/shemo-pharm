@@ -72,6 +72,16 @@ export default async function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Full page loads (reload included) must start at the top. Setting
+            scrollRestoration="manual" during the new load proved unreliable,
+            so instead the scroll position is zeroed right before unload —
+            the browser then stores 0 and every restore lands on the header. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{window.addEventListener("beforeunload",function(){window.scrollTo(0,0);});}catch(e){}',
+          }}
+        />
         <OrganizationJsonLd />
         <WishlistProvider>
           <CartProvider>
