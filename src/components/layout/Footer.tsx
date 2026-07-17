@@ -22,6 +22,11 @@ export function Footer() {
 
   return (
     <footer className="bg-plum-950 text-white/70">
+      {/* Brand hairline: teal→purple sweep separating page from footer */}
+      <div
+        aria-hidden
+        className="h-1 bg-gradient-to-r from-accent-500 via-accent-400 to-brand-500"
+      />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.4fr] lg:gap-8 lg:px-6 lg:py-16">
         <div>
           {/* Original logo mark + wordmark as real text so it stays legible

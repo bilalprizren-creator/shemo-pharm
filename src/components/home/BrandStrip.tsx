@@ -13,7 +13,13 @@ export function BrandStrip() {
       className="mx-auto max-w-7xl px-4 py-14 lg:px-6 lg:py-20"
     >
       <div className="mb-8 text-center">
-        <h2 id="brendet-titulli" className="text-2xl font-extrabold text-ink-900 sm:text-3xl">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-accent-600">
+          Partnerët tanë
+        </p>
+        <h2
+          id="brendet-titulli"
+          className="mt-2 font-display text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl"
+        >
           Brendet që distribuojmë
         </h2>
         <p className="mt-2 text-sm text-ink-500 sm:text-base">

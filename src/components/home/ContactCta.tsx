@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle, Phone } from "lucide-react";
 import { SITE } from "@/lib/site";
@@ -5,6 +6,16 @@ import { SITE } from "@/lib/site";
 export function ContactCta() {
   return (
     <section aria-labelledby="cta-titulli" className="relative overflow-hidden bg-plum-950">
+      <div aria-hidden className="absolute inset-0">
+        <Image
+          src="/photos/depo-distribuim.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover opacity-[0.14]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-plum-950/80 via-plum-950/60 to-plum-950/90" />
+      </div>
       <div
         aria-hidden
         className="absolute -left-24 top-0 size-96 rounded-full bg-brand-600/20 blur-3xl"
@@ -16,7 +27,7 @@ export function ContactCta() {
       <div className="relative mx-auto max-w-4xl px-4 py-16 text-center lg:px-6 lg:py-20">
         <h2
           id="cta-titulli"
-          className="text-2xl font-extrabold text-white sm:text-3xl lg:text-4xl"
+          className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl"
         >
           Keni nevojë për ndihmë në zgjedhjen e produkteve?
         </h2>

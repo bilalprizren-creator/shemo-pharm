@@ -53,7 +53,7 @@ export function UspBand() {
           </p>
           <h2
             id="pse-shemo-titulli"
-            className="mt-2 text-2xl font-extrabold text-ink-900 sm:text-3xl"
+            className="mt-2 font-display text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl"
           >
             Besim që ndërtohet çdo ditë
           </h2>
@@ -70,11 +70,13 @@ export function UspBand() {
           {ITEMS.map((item, i) => (
             <div
               key={item.title}
-              className="flex h-full flex-col rounded-xl border border-ink-900/6 bg-white p-5"
+              className="group flex h-full flex-col rounded-2xl border border-ink-900/6 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
             >
               <span
-                className={`flex size-12 items-center justify-center rounded-full ${
-                  i % 2 === 0 ? "bg-accent-50 text-accent-600" : "bg-brand-50 text-brand-600"
+                className={`flex size-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${
+                  i % 2 === 0
+                    ? "bg-gradient-to-br from-accent-50 to-accent-100 text-accent-700"
+                    : "bg-gradient-to-br from-brand-50 to-brand-100 text-brand-700"
                 }`}
               >
                 <item.icon className="size-5.5" strokeWidth={1.75} aria-hidden />

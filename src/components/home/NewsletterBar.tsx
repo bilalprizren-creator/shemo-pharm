@@ -13,14 +13,25 @@ export function NewsletterBar() {
   const [state, formAction, pending] = useActionState(subscribeAction, initialState);
 
   return (
-    <section aria-labelledby="newsletter-titulli" className="bg-brand-700">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-5 px-4 py-8 lg:flex-row lg:justify-between lg:px-6">
-        <div className="flex items-center gap-4">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+    <section aria-labelledby="newsletter-titulli" className="px-4 pb-14 lg:px-6 lg:pb-20">
+      <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-6 overflow-hidden rounded-3xl bg-gradient-to-br from-brand-700 via-brand-800 to-plum-900 px-6 py-10 shadow-float lg:flex-row lg:justify-between lg:px-12">
+        <div
+          aria-hidden
+          className="absolute -right-20 -top-24 size-72 rounded-full bg-accent-500/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="absolute -bottom-24 -left-16 size-64 rounded-full bg-brand-400/20 blur-3xl"
+        />
+        <div className="relative flex items-center gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
             <Mail className="size-5.5" aria-hidden />
           </span>
           <div>
-            <h2 id="newsletter-titulli" className="text-lg font-bold text-white">
+            <h2
+              id="newsletter-titulli"
+              className="font-display text-xl font-bold tracking-tight text-white"
+            >
               Qëndroni të informuar
             </h2>
             <p className="text-sm text-white/70">
@@ -32,14 +43,14 @@ export function NewsletterBar() {
         {state.success ? (
           <p
             role="status"
-            className="flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white"
+            className="relative flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white"
           >
             <CircleCheck className="size-5 text-accent-300" aria-hidden />
             Faleminderit! Jeni abonuar me sukses.
           </p>
         ) : (
-          <form action={formAction} className="w-full max-w-md">
-            <div className="flex">
+          <form action={formAction} className="relative w-full max-w-md">
+            <div className="flex rounded-full bg-white p-1.5 shadow-lg shadow-plum-950/20">
               <label htmlFor="newsletter-email" className="sr-only">
                 Adresa juaj e email-it
               </label>
@@ -49,7 +60,7 @@ export function NewsletterBar() {
                 type="email"
                 required
                 placeholder="Email juaj"
-                className="h-12 w-full rounded-l-lg border-0 bg-white px-4 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent-400"
+                className="h-10 w-full rounded-full border-0 bg-transparent px-4 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
               />
               <div className="hidden" aria-hidden="true">
                 <label htmlFor="newsletter-website">Mos e plotësoni</label>
@@ -64,7 +75,7 @@ export function NewsletterBar() {
               <button
                 type="submit"
                 disabled={pending}
-                className="flex h-12 shrink-0 items-center gap-2 rounded-r-lg bg-accent-500 px-6 text-sm font-semibold text-white transition-colors hover:bg-accent-600 disabled:opacity-70"
+                className="flex h-10 shrink-0 items-center gap-2 rounded-full bg-accent-500 px-6 text-sm font-semibold text-plum-950 transition-colors hover:bg-accent-400 disabled:opacity-70"
               >
                 {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
                 Abonohu

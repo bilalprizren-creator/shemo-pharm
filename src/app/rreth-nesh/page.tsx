@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   BadgeCheck,
@@ -55,19 +56,36 @@ export default function AboutPage() {
       <section className="bg-gradient-to-br from-mint via-white to-lavender">
         <div className="mx-auto max-w-7xl px-4 py-10 lg:px-6 lg:py-16">
           <Breadcrumbs items={[{ label: "Rreth nesh" }]} />
-          <div className="mt-6 max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-700">
-              Rreth nesh
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl lg:text-5xl">
-              Ne kujdesemi për ju
-            </h1>
-            <p className="mt-5 text-lg leading-relaxed text-ink-500">
-              {SITE.legalName} operon si {SITE.taglineLong.toLowerCase()} për
-              territorin e Kosovës. Kompania është e licencuar nga Agjencia për
-              Produkte dhe Pajisje Mjekësore, pranë Ministrisë së Shëndetësisë
-              së Kosovës.
-            </p>
+          <div className="mt-6 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-wider text-brand-700">
+                Rreth nesh
+              </p>
+              <h1 className="mt-2 text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                Ne kujdesemi për ju
+              </h1>
+              <p className="mt-5 text-lg leading-relaxed text-ink-500">
+                {SITE.legalName} operon si {SITE.taglineLong.toLowerCase()} për
+                territorin e Kosovës. Kompania është e licencuar nga Agjencia për
+                Produkte dhe Pajisje Mjekësore, pranë Ministrisë së Shëndetësisë
+                së Kosovës.
+              </p>
+            </div>
+            <figure className="relative">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-float">
+                <Image
+                  src="/photos/depo.jpg"
+                  alt="Depoja e SHEMO PHARM në Prizren"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 92vw, 520px"
+                  className="object-cover"
+                />
+              </div>
+              <figcaption className="mt-3 text-center text-sm text-ink-400">
+                Depoja jonë në Prizren — Rr. Ernest Koliqi 165/A
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
