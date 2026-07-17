@@ -39,10 +39,11 @@
   --color-ink-400: #7d7d82;
   --color-ink-300: #a3a3a8;
 
-  /* Soft section tints — surface carries the logo-teal cast site-wide */
-  --color-mint: #eaf7f2;
+  /* Soft section tints — mint family derived from the logo teal #14B590.
+     Deliberately visible (not near-white): the page should read green. */
+  --color-mint: #d7efe5;
   --color-lavender: #f8f5fa;
-  --color-surface: #f3faf7;
+  --color-surface: #e8f4ee;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;

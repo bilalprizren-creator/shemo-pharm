@@ -25,7 +25,7 @@ export function ProductCard({
 }) {
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-ink-900/8 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
-      <div className="relative aspect-square w-full bg-gradient-to-b from-white to-surface">
+      <div className="relative aspect-square w-full bg-gradient-to-b from-white to-surface/50">
         {product.image ? (
           <Image
             src={product.image}
