@@ -51,9 +51,10 @@ export const en: Dictionary = {
   header: {
     trust: [
       "Licensed distributor by the Kosovo Ministry of Health",
-      "2000+ products from international brands",
-      "Professional advice",
+      "Delivery across Kosovo",
     ],
+    requestQuote: "Request a quote",
+    partnerLogin: "Partner login",
     searchOpen: "Search products",
     megaPromoTitle: "Special offers",
     megaPromoText: "Special prices for pharmacies and business partners.",
@@ -71,47 +72,111 @@ export const en: Dictionary = {
   },
 
   hero: {
-    h1a: "Your health,",
-    h1b: "our priority.",
-    sub: "More than 2000 carefully selected pharmaceutical and medical products — reliable supply for pharmacies, institutions and families across Kosovo.",
+    eyebrow: "Licensed distributor of pharmaceutical products and medical devices",
+    h1a: "Your reliable partner",
+    h1b: "for health, care and professional supply.",
+    sub: "Over 2000 pharmaceutical and medical products, partnerships with well-known brands, professional advice and dependable supply for pharmacies, institutions and families across Kosovo.",
     ctaProducts: "View Products",
     ctaContact: "Contact Us",
     trustLicensed: "Licensed distributor",
     trustAdvice: "Professional advice",
-    trustWhatsapp: "Order via WhatsApp",
-    portraitAlt: "Professional pharmacist in front of product shelves",
+    trustSupply: "Delivery across Kosovo",
+    badge: "Licensed by the Kosovo Ministry of Health",
+    imageAlt:
+      "A SHEMO Pharm pharmacist advising a mother and her daughter at the counter",
     depotAlt: "The SHEMO PHARM warehouse in Prizren",
-    depotCaption: "Our warehouse in Prizren",
-    stockValue: "2000+",
-    stockLabel: "products in stock",
   },
 
   stats: {
     label: "Company figures",
-    labels: ["Clients", "Products", "Partners and brands", "Pharmacies"],
+    labels: ["Clients", "Products", "Partners and brands", "Pharmacies and depots"],
   },
 
   home: {
     categoriesEyebrow: "Our catalog",
-    categoriesTitle: "Popular Categories",
+    categoriesTitle: "Main categories",
+    categoriesSub:
+      "Choose by category and quickly find the products you need.",
+    categoryCards: {
+      "paisje-medicinale": {
+        title: "Medical devices",
+        blurb: "Devices and materials for professional use",
+      },
+      aparatura: {
+        title: "Equipment",
+        blurb: "Measuring instruments and medical technology",
+      },
+      "ersa-med-ortopedi": {
+        title: "Orthopedic products",
+        blurb: "Supports, braces and orthopedic solutions",
+      },
+      "suplements-effervescent": {
+        title: "Supplements",
+        blurb: "Vitamins, minerals and dietary supplements",
+      },
+      kozmetike: {
+        title: "Cosmetics and personal care",
+        blurb: "Skincare and hygiene products",
+      },
+      barnat: {
+        title: "Medicines",
+        blurb: "Pharmaceutical products from well-known brands",
+      },
+      "alkool-dhe-antiseptik": {
+        title: "Hygiene and antiseptics",
+        blurb: "Disinfectants and antiseptic products",
+      },
+      "atc-natyral": {
+        title: "Natural products",
+        blurb: "Medicinal teas and herbal products",
+      },
+    },
     featuredEyebrow: "Picked for you",
     featuredTitle: "Featured Products",
     featuredSubtitle: "A selection from our catalog",
-    devicesEyebrow: "Devices",
-    devicesTitle: "Medical devices and equipment",
-    devicesSubtitle: "Medical technology for professional and home use",
-    uspEyebrow: "Quality. Trust. Care.",
-    uspTitle: "Trust built every day",
-    uspSub: "Professional care, selected products and dependable service for pharmacies and partners.",
-    uspLabel: "Why SHEMO PHARM",
-    usp: [
-      { title: "Licensed distributor", text: "By the Kosovo Ministry of Health agency" },
-      { title: "Original products", text: "From well-known international brands" },
-      { title: "Professional advice", text: "Our team is here for you" },
-      { title: "Over 2000 products", text: "A wide selection in our catalog" },
-      { title: "Supply for pharmacies", text: "A reliable wholesale partnership" },
-      { title: "Easy ordering", text: "Via WhatsApp or phone" },
+    whyEyebrow: "Why SHEMO Pharm",
+    whyTitle: "Why partners trust us",
+    whySub:
+      "Serving pharmacies, institutions and healthcare professionals — with a wide catalog, dependable supply and professional advice.",
+    whyItems: [
+      {
+        title: "Licensed distributor",
+        text: "Licensed by the Agency for Medical Products and Devices, Kosovo MoH.",
+      },
+      {
+        title: "Wide catalog",
+        text: "Over 2000 pharmaceutical, medical and personal-care products.",
+      },
+      {
+        title: "200+ partner brands",
+        text: "Partnerships with well-known international and local brands.",
+      },
+      {
+        title: "Professional advice",
+        text: "Our team helps you choose the right products for your needs.",
+      },
+      {
+        title: "Dependable supply",
+        text: "Reliable, on-time deliveries across all of Kosovo.",
+      },
+      {
+        title: "Physical network",
+        text: "3 pharmacies and 2 depots for fast access and secure stock.",
+      },
     ],
+    networkEyebrow: "Our network",
+    networkTitle: "A reliable network for supply and distribution",
+    networkSub:
+      "With 3 pharmacies and 2 depots, SHEMO Pharm provides dependable supply, fast access to products and professional support for clients across Kosovo.",
+    networkPharmacies: "Pharmacies",
+    networkDepots: "Depots",
+    networkPoints: [
+      "Nationwide coverage with fast, reliable deliveries",
+      "Professional storage and handling of medical products",
+      "Dependable supply for pharmacies, institutions and professionals",
+    ],
+    networkImageAlt: "SHEMO Pharm central distribution depot",
+    networkImageAlt2: "Inside the SHEMO Pharm depot",
     adviceEyebrow: "Professional advice",
     adviceTitle1: "Professional advice",
     adviceTitle2: "whenever you need it.",
@@ -128,12 +193,6 @@ export const en: Dictionary = {
     brandsEyebrow: "Our partners",
     brandsTitle: "Brands we distribute",
     brandsSub: "We work with well-known international brands",
-    newsletterTitle: "Stay informed",
-    newsletterSub: "Subscribe for new products and SHEMO PHARM announcements.",
-    newsletterEmailLabel: "Your email address",
-    newsletterPlaceholder: "Your email",
-    newsletterButton: "Subscribe",
-    newsletterSuccess: "Thank you! You have subscribed successfully.",
   },
 
   cta: {
@@ -410,7 +469,5 @@ export const en: Dictionary = {
     sendFailed: "Sending failed. Please try again.",
     contactTechProblem:
       "The message was not sent due to a technical problem. Please call us or message us on WhatsApp.",
-    newsletterInvalid: "Enter a valid email address.",
-    newsletterFailed: "Subscription failed. Please try again.",
   },
 };

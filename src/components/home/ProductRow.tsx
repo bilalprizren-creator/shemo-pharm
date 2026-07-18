@@ -30,7 +30,7 @@ export function ProductRow({
   return (
     <section
       aria-label={title}
-      className={tinted ? "bg-mint/70" : undefined}
+      className={tinted ? "bg-surface-deep" : undefined}
     >
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
         <div className="mb-7 flex flex-wrap items-end justify-between gap-3">

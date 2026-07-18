@@ -55,9 +55,10 @@ export const sq = {
   header: {
     trust: [
       "Distributor i licencuar nga MSh e Kosovës",
-      "2000+ produkte nga brende ndërkombëtare",
-      "Këshillim profesional",
+      "Furnizim në gjithë Kosovën",
     ],
+    requestQuote: "Kërko ofertë",
+    partnerLogin: "Hyrja për partnerë",
     searchOpen: "Kërko produkte",
     megaPromoTitle: "Oferta të veçanta",
     megaPromoText: "Çmime të veçanta për barnatore dhe partnerë biznesi.",
@@ -75,47 +76,111 @@ export const sq = {
   },
 
   hero: {
-    h1a: "Shëndeti juaj,",
-    h1b: "prioriteti ynë.",
-    sub: "Më shumë se 2000 produkte farmaceutike dhe medicinale të zgjedhura me kujdes — furnizim i besueshëm për barnatore, institucione dhe familje në gjithë Kosovën.",
+    eyebrow: "Distributor i licencuar i produkteve farmaceutike dhe pajisjeve mjekësore",
+    h1a: "Partneri juaj i besueshëm",
+    h1b: "për shëndet, kujdes dhe furnizim profesional.",
+    sub: "Mbi 2000 produkte farmaceutike dhe medicinale, partneritete me brende të njohura, këshillim profesional dhe furnizim të besueshëm për barnatore, institucione dhe familje në gjithë Kosovën.",
     ctaProducts: "Shiko Produktet",
     ctaContact: "Na Kontaktoni",
     trustLicensed: "Distributor i licencuar",
     trustAdvice: "Këshillim profesional",
-    trustWhatsapp: "Porosi përmes WhatsApp",
-    portraitAlt: "Farmaciste profesionale para rafteve me produkte",
+    trustSupply: "Furnizim në gjithë Kosovën",
+    badge: "I licencuar nga MSh e Kosovës",
+    imageAlt:
+      "Farmacistja e SHEMO Pharm duke këshilluar një nënë dhe vajzën e saj në barnatore",
     depotAlt: "Depoja e SHEMO PHARM në Prizren",
-    depotCaption: "Depoja jonë në Prizren",
-    stockValue: "2000+",
-    stockLabel: "produkte në stok",
   },
 
   stats: {
     label: "Shifrat e kompanisë",
-    labels: ["Klientë", "Produkte", "Partnerë dhe brende", "Barnatore"],
+    labels: ["Klientë", "Produkte", "Partnerë dhe brende", "Barnatore dhe depo"],
   },
 
   home: {
     categoriesEyebrow: "Katalogu ynë",
-    categoriesTitle: "Kategoritë Popullore",
+    categoriesTitle: "Kategoritë kryesore",
+    categoriesSub:
+      "Zgjidhni sipas kategorisë dhe gjeni shpejt produktet që ju nevojiten.",
+    categoryCards: {
+      "paisje-medicinale": {
+        title: "Pajisje mjekësore",
+        blurb: "Pajisje dhe materiale për përdorim profesional",
+      },
+      aparatura: {
+        title: "Aparatura",
+        blurb: "Aparate matëse dhe teknologji mjekësore",
+      },
+      "ersa-med-ortopedi": {
+        title: "Produkte ortopedike",
+        blurb: "Mbështetëse, banda dhe zgjidhje ortopedike",
+      },
+      "suplements-effervescent": {
+        title: "Suplemente",
+        blurb: "Vitamina, minerale dhe suplemente ushqimore",
+      },
+      kozmetike: {
+        title: "Kozmetikë dhe kujdes personal",
+        blurb: "Produkte për kujdesin e lëkurës dhe higjienën",
+      },
+      barnat: {
+        title: "Barnat",
+        blurb: "Produkte farmaceutike nga brende të njohura",
+      },
+      "alkool-dhe-antiseptik": {
+        title: "Higjienë dhe antiseptikë",
+        blurb: "Dezinfektues dhe produkte antiseptike",
+      },
+      "atc-natyral": {
+        title: "Produkte natyrale",
+        blurb: "Çajra mjekësore dhe produkte bimore",
+      },
+    },
     featuredEyebrow: "Të zgjedhura për ju",
     featuredTitle: "Produktet e Veçuara",
     featuredSubtitle: "Një përzgjedhje nga katalogu ynë",
-    devicesEyebrow: "Aparatura",
-    devicesTitle: "Pajisje dhe aparatura mjekësore",
-    devicesSubtitle: "Teknologji mjekësore për përdorim profesional dhe shtëpiak",
-    uspEyebrow: "Cilësi. Besim. Kujdes.",
-    uspTitle: "Besim që ndërtohet çdo ditë",
-    uspSub: "Kujdes profesional, produkte të zgjedhura dhe shërbim i qëndrueshëm për barnatore dhe partnerë.",
-    uspLabel: "Pse SHEMO PHARM",
-    usp: [
-      { title: "Distributor i licencuar", text: "Nga Agjencia e MSh së Kosovës" },
-      { title: "Produkte origjinale", text: "Nga brende ndërkombëtare të njohura" },
-      { title: "Këshillim profesional", text: "Ekipi ynë është këtu për ju" },
-      { title: "Mbi 2000 produkte", text: "Zgjedhje e gjerë në katalogun tonë" },
-      { title: "Furnizim për barnatore", text: "Partneritet i besueshëm me shumicë" },
-      { title: "Porosi të lehta", text: "Përmes WhatsApp ose telefonit" },
+    whyEyebrow: "Pse SHEMO Pharm",
+    whyTitle: "Pse partnerët na besojnë neve?",
+    whySub:
+      "Shërbim për barnatore, institucione dhe profesionistë shëndetësorë — me katalog të gjerë, furnizim të qëndrueshëm dhe këshillim profesional.",
+    whyItems: [
+      {
+        title: "Distributor i licencuar",
+        text: "I licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, MSh e Kosovës.",
+      },
+      {
+        title: "Katalog i gjerë",
+        text: "Mbi 2000 produkte farmaceutike, medicinale dhe të kujdesit personal.",
+      },
+      {
+        title: "200+ brende partnere",
+        text: "Bashkëpunime me brende të njohura ndërkombëtare dhe vendore.",
+      },
+      {
+        title: "Këshillim profesional",
+        text: "Ekipi ynë ju ndihmon të zgjidhni produktet e duhura për ju.",
+      },
+      {
+        title: "Furnizim i qëndrueshëm",
+        text: "Dërgesa të besueshme dhe në kohë në gjithë Kosovën.",
+      },
+      {
+        title: "Rrjet fizik",
+        text: "3 barnatore dhe 2 depo për qasje të shpejtë dhe stok të sigurt.",
+      },
     ],
+    networkEyebrow: "Rrjeti ynë",
+    networkTitle: "Rrjet i besueshëm për furnizim dhe shpërndarje",
+    networkSub:
+      "Me 3 barnatore dhe 2 depo, SHEMO Pharm ofron furnizim të qëndrueshëm, qasje të shpejtë në produkte dhe mbështetje profesionale për klientë në gjithë Kosovën.",
+    networkPharmacies: "Barnatore",
+    networkDepots: "Depo",
+    networkPoints: [
+      "Mbulim në gjithë Kosovën me dërgesa të shpejta dhe të besueshme",
+      "Ruajtje dhe menaxhim profesional i produkteve mjekësore",
+      "Furnizim i qëndrueshëm për barnatore, institucione dhe profesionistë",
+    ],
+    networkImageAlt: "Depoja qendrore e SHEMO Pharm për shpërndarje",
+    networkImageAlt2: "Ambientet e depos së SHEMO Pharm",
     adviceEyebrow: "Këshillim profesional",
     adviceTitle1: "Këshillim profesional",
     adviceTitle2: "kurdo që keni nevojë.",
@@ -132,12 +197,6 @@ export const sq = {
     brandsEyebrow: "Partnerët tanë",
     brandsTitle: "Brendet që distribuojmë",
     brandsSub: "Bashkëpunojmë me brende të njohura ndërkombëtare",
-    newsletterTitle: "Qëndroni të informuar",
-    newsletterSub: "Abonohuni për produktet e reja dhe njoftimet e SHEMO PHARM.",
-    newsletterEmailLabel: "Adresa juaj e email-it",
-    newsletterPlaceholder: "Email juaj",
-    newsletterButton: "Abonohu",
-    newsletterSuccess: "Faleminderit! Jeni abonuar me sukses.",
   },
 
   cta: {
@@ -414,8 +473,6 @@ export const sq = {
     sendFailed: "Dërgimi dështoi. Ju lutemi provoni përsëri.",
     contactTechProblem:
       "Mesazhi nuk u dërgua për shkak të një problemi teknik. Ju lutemi na telefononi ose na shkruani në WhatsApp.",
-    newsletterInvalid: "Shkruani një adresë email të vlefshme.",
-    newsletterFailed: "Regjistrimi dështoi. Ju lutemi provoni përsëri.",
   },
 };
 

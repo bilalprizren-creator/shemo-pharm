@@ -176,6 +176,56 @@ export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[]
 }
 
 /**
+ * Curated homepage picks — SHEMO's own branded devices, which have clean,
+ * standardized local renders (see LOCAL_IMAGES). Falls back to the showcase
+ * sampler if a slug is ever missing so the row is never short.
+ */
+export const FEATURED_SLUGS = [
+  // Row 1 — SHEMO-branded devices
+  "tensiometer-digjital-krahu-shemo-shm-500-0018",
+  "pulseoximeter-shm-300-0002",
+  "compressor-nebulizer-shm-100-0012",
+  "mesh-nebulizer-shm-200-0013",
+  // Row 2 — vitamins & supplements
+  "a-z-vitamine-lutein-q10-60-tab-7159",
+  "calcium-vitamin-c-a20-eff",
+  "gummy-monsters-multivitamins-a60-7601",
+  "alpherol-vitamin-e-400iu-30-softgel-1007",
+];
+
+export function getFeaturedProducts(limit = 4): Product[] {
+  const curated = FEATURED_SLUGS.map((s) => getProductBySlug(s)).filter(
+    (p): p is Product => Boolean(p)
+  );
+  if (curated.length >= limit) return curated.slice(0, limit);
+  const fill = getShowcaseProducts(undefined, limit * 2).filter(
+    (p) => !curated.some((c) => c.id === p.id)
+  );
+  return [...curated, ...fill].slice(0, limit);
+}
+
+/**
+ * Standardized local product renders (square, white background) that override
+ * the remote WordPress image for the curated set. Keyed by SKU — the Jara
+ * render filenames encode the same SKU. Any product not listed keeps its
+ * remote image.
+ */
+const LOCAL_IMAGES: Record<string, string> = {
+  "0018": "/products/0018-tensiometer-shm-500.png",
+  "0002": "/products/0002-pulseoximeter-shm-300.png",
+  "0012": "/products/0012-compressor-nebulizer-shm-100.png",
+  "0013": "/products/0013-mesh-nebulizer-shm-200.png",
+  "7159": "/products/7159-az-vitamine.png",
+  "3204": "/products/3204-calcium-vitamin-c.png",
+  "7601": "/products/7601-gummy-monsters-multivitamin.png",
+  "1007": "/products/1007-alpherol-vitamin-e.png",
+};
+
+export function productImage(product: Product): string | null {
+  return LOCAL_IMAGES[product.sku] ?? product.images[0] ?? null;
+}
+
+/**
  * Shapes a product for the card components. Prices are attached here and
  * nowhere else — pass showPrices only after checking the session server-side.
  */
@@ -187,7 +237,7 @@ export function toCardProduct(product: Product, showPrices: boolean): CardProduc
     name: product.name,
     slug: product.slug,
     sku: product.sku,
-    image: product.images[0] ?? null,
+    image: productImage(product),
     categoryName: cat ? categoryDisplayName(cat) : null,
     inStock: product.inStock,
     price: showPrices ? formatPrice(product.priceCents) : null,
@@ -205,59 +255,18 @@ export function getDiscountedProducts(limit = 24): Product[] {
     .slice(0, limit);
 }
 
-/** Curated homepage category cards mapped to real catalog slugs. */
-export const HOME_CATEGORIES: {
-  slug: string;
-  title: string;
-  blurb: string;
-  icon: string;
-}[] = [
-  {
-    slug: "paisje-medicinale",
-    title: "Pajisje mjekësore",
-    blurb: "Pajisje dhe materiale për përdorim profesional",
-    icon: "stethoscope",
-  },
-  {
-    slug: "aparatura",
-    title: "Aparatura",
-    blurb: "Aparate matëse dhe teknologji mjekësore",
-    icon: "activity",
-  },
-  {
-    slug: "ersa-med-ortopedi",
-    title: "Produkte ortopedike",
-    blurb: "Mbështetëse, banda dhe zgjidhje ortopedike",
-    icon: "footprints",
-  },
-  {
-    slug: "suplements-effervescent",
-    title: "Suplemente",
-    blurb: "Vitamina, minerale dhe suplemente ushqimore",
-    icon: "pill",
-  },
-  {
-    slug: "kozmetike",
-    title: "Kozmetikë dhe kujdes personal",
-    blurb: "Produkte për kujdesin e lëkurës dhe higjienën",
-    icon: "sparkles",
-  },
-  {
-    slug: "barnat",
-    title: "Barnat",
-    blurb: "Produkte farmaceutike nga brende të njohura",
-    icon: "cross",
-  },
-  {
-    slug: "alkool-dhe-antiseptik",
-    title: "Higjienë dhe antiseptikë",
-    blurb: "Dezinfektues dhe produkte antiseptike",
-    icon: "droplets",
-  },
-  {
-    slug: "atc-natyral",
-    title: "Produkte natyrale",
-    blurb: "Çajra mjekësore dhe produkte bimore",
-    icon: "leaf",
-  },
+/**
+ * Curated homepage category cards mapped to real catalog slugs. Titles and
+ * blurbs live in the dictionaries (home.categoryCards[slug]) so both locales
+ * are covered; the icon key maps to a lucide icon in the CategoryGrid.
+ */
+export const HOME_CATEGORIES: { slug: string; icon: string }[] = [
+  { slug: "paisje-medicinale", icon: "stethoscope" },
+  { slug: "aparatura", icon: "activity" },
+  { slug: "ersa-med-ortopedi", icon: "footprints" },
+  { slug: "suplements-effervescent", icon: "pill" },
+  { slug: "kozmetike", icon: "sparkles" },
+  { slug: "barnat", icon: "cross" },
+  { slug: "alkool-dhe-antiseptik", icon: "droplets" },
+  { slug: "atc-natyral", icon: "leaf" },
 ];

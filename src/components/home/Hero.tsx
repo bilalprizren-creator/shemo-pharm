@@ -5,69 +5,50 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
-  MessageCircle,
-  Package,
   Phone,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
+  Truck,
 } from "lucide-react";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
-const TRUST_ICONS = [ShieldCheck, Stethoscope, MessageCircle];
+const TRUST_ICONS = [ShieldCheck, Stethoscope, Truck];
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 16 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, delay: i * 0.08, ease: "easeOut" as const },
+    transition: { duration: 0.5, delay: i * 0.08, ease: "easeOut" as const },
   }),
 };
 
 /**
- * Full-bleed dark hero: warehouse photo as a faint texture layer under a
- * plum gradient, blueprint grid, glow blobs; left column with oversized
- * display headline + pill CTAs, right column with a large pharmacist
- * portrait and floating proof cards (real store photo, product count).
+ * Light, warm two-column hero: strong copy + CTAs on the left, the pharmacist
+ * advising a mother and daughter on the right in an elegant framed card with a
+ * single "licensed distributor" badge. Restrained motion, no floating collage.
  */
 export function Hero({ dict }: { dict: Dictionary }) {
   const reduceMotion = useReducedMotion();
-  const trustPoints = [
-    dict.hero.trustLicensed,
-    dict.hero.trustAdvice,
-    dict.hero.trustWhatsapp,
-  ];
   const variants = reduceMotion ? undefined : fadeUp;
   const initial = reduceMotion ? undefined : "hidden";
 
+  const trustPoints = [
+    dict.hero.trustLicensed,
+    dict.hero.trustAdvice,
+    dict.hero.trustSupply,
+  ];
+
   return (
-    <section className="relative overflow-hidden bg-plum-950">
-      {/* Layer 1: moody warehouse texture, kept very dark so text stays readable */}
-      <div aria-hidden className="absolute inset-0">
-        <Image
-          src="/photos/depo-distribuim.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover opacity-[0.16]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-plum-950/85 via-plum-950/70 to-plum-950" />
-      </div>
-      {/* Layer 2: blueprint grid + glow blobs */}
-      <div aria-hidden className="bg-grid-faint absolute inset-0" />
+    <section className="relative overflow-hidden bg-surface">
       <div
         aria-hidden
-        className="absolute -left-24 -top-24 size-96 rounded-full bg-accent-500/25 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="absolute -right-16 top-1/3 size-80 rounded-full bg-brand-500/30 blur-3xl"
+        className="absolute inset-0 bg-[radial-gradient(42rem_26rem_at_88%_-2%,rgb(20_181_144/0.08),transparent_62%),radial-gradient(36rem_24rem_at_6%_108%,rgb(131_75_155/0.06),transparent_60%)]"
       />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-24 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:px-6 lg:pb-28 lg:pt-20">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-14 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:px-6 lg:pb-20 lg:pt-16">
+        {/* Copy column */}
         <div>
           <motion.p
             custom={0}
@@ -75,10 +56,10 @@ export function Hero({ dict }: { dict: Dictionary }) {
             whileInView="show"
             viewport={{ once: true }}
             variants={variants}
-            className="inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-accent-300"
+            className="flex max-w-md items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-accent-700"
           >
-            <Sparkles className="size-3.5" aria-hidden />
-            {dict.site.tagline}
+            <ShieldCheck className="size-4 shrink-0" aria-hidden />
+            {dict.hero.eyebrow}
           </motion.p>
 
           <motion.h1
@@ -87,11 +68,10 @@ export function Hero({ dict }: { dict: Dictionary }) {
             whileInView="show"
             viewport={{ once: true }}
             variants={variants}
-            className="mt-6 max-w-2xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl"
+            className="mt-5 max-w-2xl font-display text-[2rem] font-bold leading-[1.08] tracking-tight text-ink-900 sm:text-[2.6rem] lg:text-[3.2rem]"
           >
-            {dict.hero.h1a}
-            <br />
-            <span className="text-gradient-accent">{dict.hero.h1b}</span>
+            {dict.hero.h1a}{" "}
+            <span className="text-brand-600">{dict.hero.h1b}</span>
           </motion.h1>
 
           <motion.p
@@ -100,7 +80,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
             whileInView="show"
             viewport={{ once: true }}
             variants={variants}
-            className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg"
+            className="mt-5 max-w-xl text-base leading-relaxed text-ink-500 sm:text-lg"
           >
             {dict.hero.sub}
           </motion.p>
@@ -111,11 +91,11 @@ export function Hero({ dict }: { dict: Dictionary }) {
             whileInView="show"
             viewport={{ once: true }}
             variants={variants}
-            className="mt-9 flex flex-wrap items-center gap-3"
+            className="mt-8 flex flex-wrap items-center gap-3"
           >
             <Link
               href={langHref(dict.lang, "/produktet")}
-              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-accent-500 px-7 py-3 text-sm font-semibold text-plum-950 shadow-lg shadow-accent-500/25 transition-all hover:bg-accent-400 hover:shadow-accent-400/30"
+              className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 transition-colors hover:bg-brand-700"
             >
               {dict.hero.ctaProducts}
               <ArrowRight
@@ -125,7 +105,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
             </Link>
             <Link
               href={langHref(dict.lang, "/kontakti")}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/15 bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-300 hover:text-brand-700"
             >
               <Phone className="size-4" aria-hidden />
               {dict.hero.ctaContact}
@@ -138,16 +118,16 @@ export function Hero({ dict }: { dict: Dictionary }) {
             whileInView="show"
             viewport={{ once: true }}
             variants={variants}
-            className="mt-10 flex flex-wrap gap-x-8 gap-y-3"
+            className="mt-9 flex flex-wrap gap-x-6 gap-y-3"
           >
             {trustPoints.map((text, i) => {
               const Icon = TRUST_ICONS[i] ?? ShieldCheck;
               return (
                 <li
                   key={text}
-                  className="flex items-center gap-2 text-sm text-white/80"
+                  className="flex items-center gap-2 text-sm font-medium text-ink-700"
                 >
-                  <Icon className="size-4 shrink-0 text-accent-400" aria-hidden />
+                  <Icon className="size-4 shrink-0 text-accent-600" aria-hidden />
                   {text}
                 </li>
               );
@@ -155,71 +135,39 @@ export function Hero({ dict }: { dict: Dictionary }) {
           </motion.ul>
         </div>
 
-        {/* Portrait column with floating proof cards */}
+        {/* Photo column */}
         <motion.div
-          initial={reduceMotion ? undefined : { opacity: 0, y: 28 }}
+          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.65, delay: 0.15, ease: "easeOut" }}
-          className="relative mx-auto hidden w-full max-w-md sm:block lg:max-w-none"
+          transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
+          className="relative"
         >
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line shadow-card-hover">
             <Image
-              src="/photos/hero-farmaciste.jpg"
-              alt={dict.hero.portraitAlt}
+              src="/photos/hero-barnatore.jpg"
+              alt={dict.hero.imageAlt}
               fill
               priority
-              sizes="(max-width: 1024px) 28rem, 40vw"
-              className="object-cover object-[center_22%]"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-plum-950/45 via-transparent to-transparent"
+              sizes="(max-width: 1024px) 92vw, 46vw"
+              className="object-cover"
             />
           </div>
 
-          {/* Floating: real warehouse photo — authentic proof */}
-          <motion.figure
-            initial={reduceMotion ? undefined : { opacity: 0, y: 16, rotate: -4 }}
-            whileInView={{ opacity: 1, y: 0, rotate: -3 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55, delay: 0.4, ease: "easeOut" }}
-            className="absolute -left-6 bottom-8 w-44 overflow-hidden rounded-2xl border border-white/15 bg-plum-900 shadow-float lg:-left-10 lg:w-52"
-          >
-            <div className="relative aspect-[4/3]">
-              <Image
-                src="/photos/depo.jpg"
-                alt={dict.hero.depotAlt}
-                fill
-                sizes="208px"
-                className="object-cover"
-              />
-            </div>
-            <figcaption className="px-3 py-2 text-[11px] font-medium text-white/80">
-              {dict.hero.depotCaption}
-            </figcaption>
-          </motion.figure>
-
-          {/* Floating: product-count chip */}
-          <motion.div
-            initial={reduceMotion ? undefined : { opacity: 0, y: -14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55, delay: 0.55, ease: "easeOut" }}
-            className="absolute -right-3 top-8 flex items-center gap-3 rounded-2xl border border-white/15 bg-white/95 px-4 py-3 shadow-float backdrop-blur lg:-right-6"
-          >
-            <span className="flex size-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
-              <Package className="size-5" aria-hidden />
+          {/* Single licensed-distributor badge */}
+          <div className="absolute -bottom-4 left-4 flex items-center gap-3 rounded-2xl border border-line bg-white/95 px-4 py-3 shadow-float backdrop-blur sm:left-6">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
+              <ShieldCheck className="size-5" aria-hidden />
             </span>
-            <span>
-              <span className="block font-display text-lg font-bold leading-none text-ink-900">
-                {dict.hero.stockValue}
+            <span className="leading-tight">
+              <span className="block text-sm font-semibold text-ink-900">
+                {dict.hero.trustLicensed}
               </span>
-              <span className="mt-0.5 block text-xs font-medium text-ink-500">
-                {dict.hero.stockLabel}
+              <span className="mt-0.5 block text-xs text-ink-500">
+                {dict.hero.badge}
               </span>
             </span>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>

@@ -24,8 +24,8 @@ export function ProductCard({
   priority?: boolean;
 }) {
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-ink-900/8 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
-      <div className="relative aspect-square w-full bg-gradient-to-b from-white to-surface/50">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
+      <div className="relative aspect-square w-full bg-white">
         {product.image ? (
           <Image
             src={product.image}
@@ -61,7 +61,7 @@ export function ProductCard({
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 border-t border-ink-900/6 p-4">
+      <div className="flex flex-1 flex-col gap-1 border-t border-line p-4">
         <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-ink-900">
           <Link
             href={langHref(dict.lang, `/produktet/${product.slug}`)}

@@ -12,10 +12,7 @@ import type { Dictionary } from "@/lib/dictionaries";
  */
 export function AdviceSection({ dict }: { dict: Dictionary }) {
   return (
-    <section
-      aria-labelledby="keshillim-titulli"
-      className="bg-gradient-to-b from-surface to-mint"
-    >
+    <section aria-labelledby="keshillim-titulli" className="bg-white">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 lg:grid-cols-2 lg:gap-16 lg:px-6 lg:py-20">
         <div className="max-w-lg">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-accent-600">
@@ -63,7 +60,7 @@ export function AdviceSection({ dict }: { dict: Dictionary }) {
         </div>
 
         <div className="relative">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-white shadow-card">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-card">
             <Image
               src="/photos/keshillim.jpg"
               alt={dict.home.adviceImageAlt}
@@ -72,7 +69,7 @@ export function AdviceSection({ dict }: { dict: Dictionary }) {
               className="object-cover"
             />
           </div>
-          <div className="absolute -bottom-5 right-4 w-72 max-w-[calc(100%-1rem)] rounded-2xl border border-ink-900/8 bg-white p-4 shadow-float sm:right-8">
+          <div className="absolute -bottom-5 right-4 w-72 max-w-[calc(100%-1rem)] rounded-2xl border border-line bg-white p-4 shadow-float sm:right-8">
             <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
               <Clock className="size-4 text-brand-600" aria-hidden />
               {dict.home.hoursTitle}

@@ -136,6 +136,17 @@ export function MobileNav({
           </div>
         </div>
 
+        <div className="border-b border-line px-4 py-3">
+          <Link
+            href={langHref(lang, "/kontakti")}
+            onClick={onClose}
+            className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700"
+          >
+            <MessageCircle className="size-4.5" aria-hidden />
+            {dict.header.requestQuote}
+          </Link>
+        </div>
+
         <nav aria-label={dict.nav.mainLabel} className="flex-1 px-2 py-3">
           <ul>
             {LINK_PATHS.map((l) => (

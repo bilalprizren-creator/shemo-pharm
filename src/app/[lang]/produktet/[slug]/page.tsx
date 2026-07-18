@@ -256,7 +256,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
 
-          <p className="mt-8 rounded-xl bg-mint px-4 py-3 text-[13px] leading-relaxed text-ink-500">
+          <p className="mt-8 rounded-xl bg-tint px-4 py-3 text-[13px] leading-relaxed text-ink-500">
             {dict.product.infoNote}
           </p>
         </div>

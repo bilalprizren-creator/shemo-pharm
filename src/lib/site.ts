@@ -46,7 +46,8 @@ export const SITE = {
     // TODO: the old site said "200+ Distributor i autorizuar" — meaning unclear.
     // Neutral wording used until the business confirms what the figure counts.
     { value: "200+", label: "Partnerë dhe brende" },
-    { value: "3+", label: "Barnatore" },
+    // Physical network: 3 pharmacies + 2 depots.
+    { value: "3 + 2", label: "Barnatore dhe depo" },
   ],
 } as const;
 

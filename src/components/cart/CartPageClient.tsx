@@ -207,7 +207,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
         </dl>
 
         {!pricesVisible && (
-          <p className="mt-3 rounded-lg bg-mint px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-500">
+          <p className="mt-3 rounded-lg bg-tint px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-500">
             <Link
               href={langHref(lang, "/kycu")}
               className="font-semibold text-brand-700 hover:underline"

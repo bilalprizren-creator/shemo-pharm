@@ -41,7 +41,7 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-mint via-white to-accent-50">
+      <section className="bg-gradient-to-br from-surface via-white to-accent-50/40">
         <div className="mx-auto max-w-7xl px-4 py-10 lg:px-6 lg:py-16">
           <Breadcrumbs items={[{ label: dict.aboutPage.title }]} dict={dict} />
           <div className="mt-6 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -104,7 +104,7 @@ export default async function AboutPage({ params }: Props) {
         </div>
       </section>
 
-      <section aria-labelledby="vlerat-titulli" className="bg-mint">
+      <section aria-labelledby="vlerat-titulli" className="bg-surface-deep">
         <div className="mx-auto max-w-7xl px-4 py-14 lg:px-6 lg:py-20">
           <h2
             id="vlerat-titulli"

@@ -11,8 +11,10 @@ import {
   BadgePercent,
   ChevronDown,
   Heart,
+  LogIn,
   Menu,
   Package,
+  Phone,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -20,6 +22,7 @@ import {
   User,
 } from "lucide-react";
 import { langHref, switchLangPath, type Lang } from "@/lib/i18n";
+import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { SearchBar } from "./SearchBar";
 import { MobileNav } from "./MobileNav";
@@ -75,23 +78,39 @@ function IconAction({
   );
 }
 
-/** SQ|EN pill — swaps the locale prefix while keeping the current path. */
-function LangSwitch({ lang, label }: { lang: Lang; label: string }) {
+/** SQ|EN pill — swaps the locale prefix while keeping the current path.
+ *  `tone="dark"` renders a ghost variant for the dark utility bar. */
+function LangSwitch({
+  lang,
+  label,
+  tone = "light",
+}: {
+  lang: Lang;
+  label: string;
+  tone?: "light" | "dark";
+}) {
   const pathname = usePathname();
+  const dark = tone === "dark";
   return (
     <div
       aria-label={label}
-      className="flex items-center rounded-full border border-ink-900/10 bg-white p-0.5 text-xs font-bold"
+      className={`flex items-center rounded-full p-0.5 text-[11px] font-bold ${
+        dark ? "border border-white/20" : "border border-ink-900/10 bg-white"
+      }`}
     >
       {(["sq", "en"] as const).map((l) => (
         <Link
           key={l}
           href={switchLangPath(pathname, l)}
           aria-current={lang === l ? "true" : undefined}
-          className={`rounded-full px-2.5 py-1.5 uppercase transition-colors ${
+          className={`rounded-full px-2 py-1 uppercase transition-colors ${
             lang === l
-              ? "bg-brand-600 text-white"
-              : "text-ink-500 hover:text-brand-700"
+              ? dark
+                ? "bg-white/15 text-white"
+                : "bg-brand-600 text-white"
+              : dark
+                ? "text-white/70 hover:text-white"
+                : "text-ink-500 hover:text-brand-700"
           }`}
         >
           {l}
@@ -119,8 +138,17 @@ export function HeaderClient({
   const headerRef = useRef<HTMLElement>(null);
   const lang = dict.lang;
 
+  // Collapse the utility bar on scroll with hysteresis. Collapsing shrinks the
+  // sticky header by ~52px, and the browser's scroll anchoring nudges scrollY by
+  // that much to keep content stable. A single threshold gets re-crossed by that
+  // nudge → the bar flutters. The wide dead zone (16–96px, 80 > 52) absorbs it.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const COLLAPSE_AT = 96;
+    const EXPAND_AT = 16;
+    const onScroll = () =>
+      setScrolled((prev) =>
+        prev ? window.scrollY > EXPAND_AT : window.scrollY > COLLAPSE_AT
+      );
     const raf = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -166,30 +194,55 @@ export function HeaderClient({
   return (
     <>
       <header ref={headerRef} className="sticky top-0 z-40">
-        {/* Utility bar — dark plum, verifiable trust points */}
+        {/* Utility bar — dark plum: trust line (left), B2B actions (right) */}
         <div
           className={`hidden bg-plum-900 text-white/85 transition-[max-height,opacity] duration-300 md:block ${
             scrolled ? "max-h-0 overflow-hidden opacity-0" : "max-h-10 opacity-100"
           }`}
         >
           <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-6 px-4 text-xs lg:px-6">
-            {dict.header.trust.map((text, i) => {
-              const Icon = TRUST_ICONS[i] ?? ShieldCheck;
-              return (
-                <span
-                  key={text}
-                  className={`flex items-center gap-1.5 ${i === 1 ? "hidden lg:flex" : ""}`}
-                >
-                  <Icon className="size-3.5 text-accent-400" aria-hidden />
-                  {text}
-                </span>
-              );
-            })}
+            <div className="flex items-center gap-5">
+              {dict.header.trust.map((text, i) => {
+                const Icon = TRUST_ICONS[i] ?? ShieldCheck;
+                return (
+                  <span
+                    key={text}
+                    className={`flex items-center gap-1.5 ${i === 1 ? "hidden lg:flex" : ""}`}
+                  >
+                    <Icon className="size-3.5 text-accent-400" aria-hidden />
+                    {text}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-4">
+              <a
+                href={SITE.phones[0].href}
+                className="flex items-center gap-1.5 transition-colors hover:text-white"
+              >
+                <Phone className="size-3.5 text-accent-400" aria-hidden />
+                {SITE.phones[0].label}
+              </a>
+              <span aria-hidden className="h-3.5 w-px bg-white/20" />
+              <Link
+                href={langHref(lang, "/kycu")}
+                className="flex items-center gap-1.5 font-semibold transition-colors hover:text-white"
+              >
+                <LogIn className="size-3.5 text-accent-400" aria-hidden />
+                {dict.header.partnerLogin}
+              </Link>
+              <span aria-hidden className="h-3.5 w-px bg-white/20" />
+              <LangSwitch lang={lang} label={dict.nav.langLabel} tone="dark" />
+            </div>
           </div>
         </div>
 
-        {/* Single main row: logo — nav — search pill — icons — language */}
-        <div className="border-b border-ink-900/8 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/85">
+        {/* Single main row: logo — nav — search — quote CTA — icons */}
+        <div
+          className={`border-b border-line bg-white/95 backdrop-blur transition-shadow supports-backdrop-filter:bg-white/85 ${
+            scrolled ? "shadow-card" : ""
+          }`}
+        >
           <div
             className={`mx-auto flex max-w-7xl items-center gap-2 px-4 transition-[height] duration-300 lg:gap-4 lg:px-6 ${
               scrolled ? "h-16" : "h-16 lg:h-20"
@@ -258,7 +311,7 @@ export function HeaderClient({
             </nav>
 
             <div className="ml-auto flex items-center gap-1 lg:gap-2">
-              {/* Search pill (desktop) / icon (mobile) */}
+              {/* Search — icon toggle opens the full-width overlay */}
               <button
                 type="button"
                 onClick={() => {
@@ -267,20 +320,18 @@ export function HeaderClient({
                 }}
                 aria-label={dict.header.searchOpen}
                 aria-expanded={searchOpen}
-                className="hidden min-w-56 items-center gap-2.5 rounded-full border border-ink-900/10 bg-surface px-4 py-2.5 text-sm text-ink-400 transition-colors hover:border-accent-400 hover:text-ink-700 lg:flex"
-              >
-                <Search className="size-4.5 text-accent-600" aria-hidden />
-                {dict.search.placeholder}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSearchOpen((v) => !v)}
-                aria-label={dict.header.searchOpen}
-                aria-expanded={searchOpen}
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
+                className="flex size-11 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700"
               >
                 <Search className="size-5.5" aria-hidden />
               </button>
+
+              {/* Primary B2B action — request a quote */}
+              <Link
+                href={langHref(lang, "/kontakti")}
+                className="mr-1 hidden min-h-10 items-center gap-1.5 rounded-full bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 xl:inline-flex"
+              >
+                {dict.header.requestQuote}
+              </Link>
 
               <IconAction
                 href={langHref(lang, user ? "/llogaria" : "/kycu")}
@@ -289,10 +340,6 @@ export function HeaderClient({
               />
               <WishlistAction lang={lang} label={dict.nav.wishlist} />
               <CartAction lang={lang} label={dict.nav.cart} />
-
-              <div className="hidden lg:block">
-                <LangSwitch lang={lang} label={dict.nav.langLabel} />
-              </div>
 
               <button
                 type="button"

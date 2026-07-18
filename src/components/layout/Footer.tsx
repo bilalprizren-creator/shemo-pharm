@@ -41,7 +41,7 @@ export function Footer({ dict }: { dict: Dictionary }) {
             <Image
               src="/logo-symbol.svg"
               alt=""
-              width={38}
+              width={47}
               height={51}
               className="h-12 w-auto"
             />
