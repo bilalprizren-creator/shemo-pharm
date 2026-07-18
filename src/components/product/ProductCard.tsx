@@ -70,14 +70,15 @@ export function ProductCard({
             {product.name}
           </Link>
         </h3>
-        {product.categoryName && (
+        {(product.categoryName || product.sku) && (
           <p className="truncate text-xs font-medium text-brand-600">
             {product.categoryName}
-          </p>
-        )}
-        {product.sku && (
-          <p className="text-xs text-ink-400">
-            {dict.common.code}: {product.sku}
+            {product.categoryName && product.sku ? " · " : ""}
+            {product.sku && (
+              <span className="font-normal text-ink-400">
+                {dict.common.code} {product.sku}
+              </span>
+            )}
           </p>
         )}
 

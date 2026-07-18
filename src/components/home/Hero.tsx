@@ -5,15 +5,15 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  Package,
   Phone,
   ShieldCheck,
-  Stethoscope,
   Truck,
 } from "lucide-react";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
-const TRUST_ICONS = [ShieldCheck, Stethoscope, Truck];
+const TRUST_ICONS = [ShieldCheck, Package, Truck];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -36,7 +36,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
 
   const trustPoints = [
     dict.hero.trustLicensed,
-    dict.hero.trustAdvice,
+    dict.hero.trustProducts,
     dict.hero.trustSupply,
   ];
 

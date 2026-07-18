@@ -40,14 +40,16 @@ export const SITE = {
    *  once a real catalog file is available — the header button appears automatically. */
   catalogUrl: null as string | null,
 
+  // Five discrete company figures. The physical network (3 pharmacies + 2 depots)
+  // is shown as two separate stats — never as a combined "3 + 2".
   stats: [
     { value: "1200+", label: "Klientë" },
     { value: "2000+", label: "Produkte" },
     // TODO: the old site said "200+ Distributor i autorizuar" — meaning unclear.
     // Neutral wording used until the business confirms what the figure counts.
-    { value: "200+", label: "Partnerë dhe brende" },
-    // Physical network: 3 pharmacies + 2 depots.
-    { value: "3 + 2", label: "Barnatore dhe depo" },
+    { value: "200+", label: "Brende partnere" },
+    { value: "3", label: "Barnatore" },
+    { value: "2", label: "Depo" },
   ],
 } as const;
 
@@ -72,3 +74,25 @@ export const BRANDS = [
   { name: "Bebeevan", image: "/brands/bebeevan.png" },
   { name: "Alg", image: "/brands/alg.png" },
 ] as const;
+
+/**
+ * Curated subset of the most recognizable partner brands shown on the homepage
+ * strip (the full list stays available on /markat). Kept to ~10 so the section
+ * reads calm and premium, with a consistent visual area per logo.
+ */
+const HOME_BRAND_NAMES = [
+  "Swiss Energy",
+  "Dr. Frei",
+  "Kräuterhof",
+  "Sudocrem",
+  "EuroPharma",
+  "Cansin",
+  "ATC Natyral",
+  "Support Line",
+  "Comfort Plus",
+  "Foot Guard",
+];
+
+export const HOME_BRANDS = HOME_BRAND_NAMES.map((name) =>
+  BRANDS.find((b) => b.name === name)
+).filter((b): b is (typeof BRANDS)[number] => Boolean(b));

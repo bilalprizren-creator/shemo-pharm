@@ -6,9 +6,14 @@ import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
 /**
- * "Këshillim profesional" split section. The photo is licensed stock
- * (Pexels) until real team photography is available; the working-hours
- * card shows only the verified hours.
+ * "Këshillim profesional" split section. The working-hours card shows only the
+ * verified hours.
+ *
+ * TODO(image): /photos/keshillim.jpg is a PLACEHOLDER (two people in white coats
+ * in a lab-like setting) and does not show real SHEMO Pharm consultation.
+ * Replace with a real SHEMO photo — an employee advising a customer, a pharmacist
+ * on the phone, or an employee processing an order — once one is available.
+ * Do not substitute lab, hospital or generic medical stock imagery.
  */
 export function AdviceSection({ dict }: { dict: Dictionary }) {
   return (
@@ -54,13 +59,14 @@ export function AdviceSection({ dict }: { dict: Dictionary }) {
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-ink-900/10 bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-accent-400 hover:text-accent-700"
             >
               <MessageCircle className="size-4.5 text-accent-500" aria-hidden />
-              WhatsApp
+              {dict.home.adviceWhatsapp}
             </a>
           </div>
         </div>
 
         <div className="relative">
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-card">
+            {/* TODO(image): placeholder — replace with a real SHEMO consultation photo. */}
             <Image
               src="/photos/keshillim.jpg"
               alt={dict.home.adviceImageAlt}

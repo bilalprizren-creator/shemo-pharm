@@ -22,7 +22,7 @@ export default async function HomePage({
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
-  const featured = getFeaturedProducts(8).map((p) =>
+  const featured = getFeaturedProducts(4).map((p) =>
     toCardProduct(p, showPrices)
   );
 

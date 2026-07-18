@@ -1,18 +1,18 @@
 import Image from "next/image";
-import { BRANDS } from "@/lib/site";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { HOME_BRANDS } from "@/lib/site";
+import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
-import { CardSlider } from "@/components/ui/CardSlider";
 
 /**
- * Partner-brand logos as a restrained, borderless strip: grayscale until
- * hover. No autoplay — user-driven scroll only.
+ * Curated partner-brand logos as a calm, even grid — grayscale until hover,
+ * with a consistent visual area per cell so no single logo dominates and the
+ * section never becomes a dense logo wall. The full brand list stays on /markat.
  */
 export function BrandStrip({ dict }: { dict: Dictionary }) {
   return (
-    <section
-      aria-labelledby="brendet-titulli"
-      className="bg-surface"
-    >
+    <section aria-labelledby="brendet-titulli" className="bg-surface">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 lg:py-16">
         <div className="mb-7 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-accent-700">
@@ -25,26 +25,37 @@ export function BrandStrip({ dict }: { dict: Dictionary }) {
             {dict.home.brandsTitle}
           </h2>
         </div>
-        <CardSlider
-          label={dict.home.brandsTitle}
-          itemWidthClassName="w-[30%] sm:w-[20%] md:w-[15%] lg:w-[12%]"
-        >
-          {BRANDS.map((b) => (
-            <div
+
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:gap-4">
+          {HOME_BRANDS.map((b) => (
+            <li
               key={b.name}
-              className="flex h-16 items-center justify-center px-2"
+              className="flex h-20 items-center justify-center rounded-xl border border-line bg-white px-4"
               title={b.name}
             >
               <Image
                 src={b.image}
                 alt={b.name}
-                width={120}
-                height={64}
-                className="max-h-12 w-auto object-contain opacity-55 grayscale transition-all duration-200 hover:opacity-100 hover:grayscale-0"
+                width={140}
+                height={72}
+                className="max-h-10 w-auto object-contain opacity-60 grayscale transition-all duration-200 hover:opacity-100 hover:grayscale-0"
               />
-            </div>
+            </li>
           ))}
-        </CardSlider>
+        </ul>
+
+        <div className="mt-7 text-center">
+          <Link
+            href={langHref(dict.lang, "/markat")}
+            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+          >
+            {dict.home.brandsCta}
+            <ArrowRight
+              className="size-4 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </Link>
+        </div>
       </div>
     </section>
   );

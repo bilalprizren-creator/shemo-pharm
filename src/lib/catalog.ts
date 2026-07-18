@@ -181,13 +181,14 @@ export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[]
  * sampler if a slug is ever missing so the row is never short.
  */
 export const FEATURED_SLUGS = [
-  // Row 1 — SHEMO-branded devices
+  // Homepage picks — exactly four, spanning different categories:
+  // three SHEMO devices + one recognizable supplement.
   "tensiometer-digjital-krahu-shemo-shm-500-0018",
   "pulseoximeter-shm-300-0002",
   "compressor-nebulizer-shm-100-0012",
-  "mesh-nebulizer-shm-200-0013",
-  // Row 2 — vitamins & supplements
   "a-z-vitamine-lutein-q10-60-tab-7159",
+  // Fallback pool (used only if a pick above is missing).
+  "mesh-nebulizer-shm-200-0013",
   "calcium-vitamin-c-a20-eff",
   "gummy-monsters-multivitamins-a60-7601",
   "alpherol-vitamin-e-400iu-30-softgel-1007",
@@ -226,6 +227,23 @@ export function productImage(product: Product): string | null {
 }
 
 /**
+ * Standardized display names for the curated homepage products (keyed by SKU),
+ * following the "product type/function – brand and model" format with correct
+ * Albanian spelling. The raw catalog data in products.json stays untouched —
+ * this only affects what the card shows. Brand names and model codes are kept.
+ */
+const PRODUCT_DISPLAY_NAMES: Record<string, string> = {
+  "0018": "Tensiometër digjital për krah – SHEMO SHM-500",
+  "0002": "Pulseoksimetër – SHEMO SHM-300",
+  "0012": "Nebulizator me kompresor – SHEMO SHM-100",
+  "7159": "A-Z Vitamina + Lutein & Q10 – 60 tableta",
+};
+
+export function productDisplayName(product: Product): string {
+  return PRODUCT_DISPLAY_NAMES[product.sku] ?? product.name;
+}
+
+/**
  * Shapes a product for the card components. Prices are attached here and
  * nowhere else — pass showPrices only after checking the session server-side.
  */
@@ -234,7 +252,7 @@ export function toCardProduct(product: Product, showPrices: boolean): CardProduc
   const hasDiscount = product.regularCents > product.priceCents;
   return {
     id: product.id,
-    name: product.name,
+    name: productDisplayName(product),
     slug: product.slug,
     sku: product.sku,
     image: productImage(product),

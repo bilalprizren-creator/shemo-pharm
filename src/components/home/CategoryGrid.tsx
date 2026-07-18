@@ -68,7 +68,7 @@ export function CategoryGrid({ dict }: { dict: Dictionary }) {
           </Link>
         </div>
 
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
+        <ul className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4">
           {cards.map((c) => {
             const Icon = ICONS[c.icon] ?? Pill;
             return (

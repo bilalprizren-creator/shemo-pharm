@@ -44,7 +44,7 @@ export const sq = {
     menuLabel: "Menyja",
     openMenu: "Hap menynë",
     closeMenu: "Mbyll menynë",
-    quickLinks: "Linqe të Shpejta",
+    quickLinks: "Linqe të shpejta",
     allCategories: "Shiko të gjitha kategoritë",
     loginRegister: "Kyçu / Regjistrohu",
     accountWithName: "Llogaria ({name})",
@@ -62,7 +62,7 @@ export const sq = {
     searchOpen: "Kërko produkte",
     megaPromoTitle: "Oferta të veçanta",
     megaPromoText: "Çmime të veçanta për barnatore dhe partnerë biznesi.",
-    megaPromoCta: "Shiko Ofertat",
+    megaPromoCta: "Shiko ofertat",
   },
 
   search: {
@@ -76,14 +76,14 @@ export const sq = {
   },
 
   hero: {
-    eyebrow: "Distributor i licencuar i produkteve farmaceutike dhe pajisjeve mjekësore",
-    h1a: "Partneri juaj i besueshëm",
-    h1b: "për shëndet, kujdes dhe furnizim profesional.",
-    sub: "Mbi 2000 produkte farmaceutike dhe medicinale, partneritete me brende të njohura, këshillim profesional dhe furnizim të besueshëm për barnatore, institucione dhe familje në gjithë Kosovën.",
-    ctaProducts: "Shiko Produktet",
-    ctaContact: "Na Kontaktoni",
+    eyebrow: "Distributor i licencuar farmaceutik në Kosovë",
+    h1a: "Furnizim farmaceutik",
+    h1b: "që i beson Kosova.",
+    sub: "Mbi 2,000 produkte dhe furnizim profesional për barnatore, institucione dhe partnerë shëndetësorë në gjithë Kosovën.",
+    ctaProducts: "Shiko produktet",
+    ctaContact: "Na kontaktoni",
     trustLicensed: "Distributor i licencuar",
-    trustAdvice: "Këshillim profesional",
+    trustProducts: "2000+ produkte",
     trustSupply: "Furnizim në gjithë Kosovën",
     badge: "I licencuar nga MSh e Kosovës",
     imageAlt:
@@ -93,7 +93,7 @@ export const sq = {
 
   stats: {
     label: "Shifrat e kompanisë",
-    labels: ["Klientë", "Produkte", "Partnerë dhe brende", "Barnatore dhe depo"],
+    labels: ["Klientë", "Produkte", "Brende partnere", "Barnatore", "Depo"],
   },
 
   home: {
@@ -136,8 +136,9 @@ export const sq = {
       },
     },
     featuredEyebrow: "Të zgjedhura për ju",
-    featuredTitle: "Produktet e Veçuara",
+    featuredTitle: "Produktet e veçuara",
     featuredSubtitle: "Një përzgjedhje nga katalogu ynë",
+    featuredCta: "Shiko katalogun me 2,000+ produkte",
     whyEyebrow: "Pse SHEMO Pharm",
     whyTitle: "Pse partnerët na besojnë neve?",
     whySub:
@@ -145,14 +146,14 @@ export const sq = {
     whyItems: [
       {
         title: "Distributor i licencuar",
-        text: "I licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, MSh e Kosovës.",
+        text: "I licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, Ministria e Shëndetësisë e Kosovës.",
       },
       {
         title: "Katalog i gjerë",
-        text: "Mbi 2000 produkte farmaceutike, medicinale dhe të kujdesit personal.",
+        text: "Gamë e plotë produktesh farmaceutike, medicinale dhe të kujdesit personal në një vend.",
       },
       {
-        title: "200+ brende partnere",
+        title: "Brende të njohura",
         text: "Bashkëpunime me brende të njohura ndërkombëtare dhe vendore.",
       },
       {
@@ -165,7 +166,7 @@ export const sq = {
       },
       {
         title: "Rrjet fizik",
-        text: "3 barnatore dhe 2 depo për qasje të shpejtë dhe stok të sigurt.",
+        text: "Barnatore dhe depo për qasje të shpejtë dhe stok të sigurt në gjithë Kosovën.",
       },
     ],
     networkEyebrow: "Rrjeti ynë",
@@ -179,24 +180,26 @@ export const sq = {
       "Ruajtje dhe menaxhim profesional i produkteve mjekësore",
       "Furnizim i qëndrueshëm për barnatore, institucione dhe profesionistë",
     ],
-    networkImageAlt: "Depoja qendrore e SHEMO Pharm për shpërndarje",
-    networkImageAlt2: "Ambientet e depos së SHEMO Pharm",
+    networkImageAlt: "Depoja dhe qendra e distribuimit",
+    networkImageAlt2: "Një nga barnatoret tona",
     adviceEyebrow: "Këshillim profesional",
     adviceTitle1: "Këshillim profesional",
     adviceTitle2: "kurdo që keni nevojë.",
-    adviceSub: "Ekipi ynë është gjithmonë i gatshëm t'ju ndihmojë — profesionalisht dhe pa komplikime.",
+    adviceSub: "Ekipi ynë ju ndihmon të gjeni produktet dhe zgjidhjet më të përshtatshme për barnatoren, institucionin ose familjen tuaj.",
+    adviceWhatsapp: "Bisedo në WhatsApp",
     adviceServices: [
       "Rekomandime produktesh sipas nevojës suaj",
       "Informacion mbi disponueshmërinë dhe stokun",
       "Porosi me shumicë për barnatore dhe institucione",
     ],
     adviceImageAlt: "Ekipi duke pranuar porosi në telefon dhe duke punuar në kompjuter",
-    hoursTitle: "Orari i Punës",
-    hoursDays: "E Hënë – E Premte",
+    hoursTitle: "Orari i punës",
+    hoursDays: "E hënë – E premte",
     hoursTime: "09:00 – 18:00",
     brandsEyebrow: "Partnerët tanë",
     brandsTitle: "Brendet që distribuojmë",
     brandsSub: "Bashkëpunojmë me brende të njohura ndërkombëtare",
+    brandsCta: "Shiko të gjitha brendet",
   },
 
   cta: {
@@ -210,17 +213,17 @@ export const sq = {
     blurb:
       "SHEMO PHARM furnizon barnatore dhe partnerë profesionalë në Kosovë me produkte mjekësore, ortopedike, suplemente dhe artikuj të kujdesit personal nga brende të njohura ndërkombëtare.",
     categories: "Kategoritë",
-    contactTitle: "Na Kontaktoni",
+    contactTitle: "Na kontaktoni",
     facebookAria: "SHEMO PHARM në Facebook",
     instagramAria: "SHEMO PHARM në Instagram",
     rights: "© {year} SHEMO PHARM. Të gjitha të drejtat e rezervuara.",
     licensed:
-      "Licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore — Ministria e Shëndetësisë e Kosovës",
+      "Licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, Ministria e Shëndetësisë e Kosovës",
   },
 
   product: {
     codeLabel: "Kodi i produktit:",
-    loginForPrice: "Kyçu për çmimin",
+    loginForPrice: "Kyçu për të parë çmimin",
     outOfStock: "Pa stok",
     inStock: "Në stok",
     availability: "Disponueshmëria:",
