@@ -18,8 +18,8 @@ const NAV_PATHS = [
   { href: "/kontakti", key: "contact" },
 ] as const;
 
-export function Footer({ dict }: { dict: Dictionary }) {
-  const topCategories = getTopCategories().slice(0, 6);
+export async function Footer({ dict }: { dict: Dictionary }) {
+  const topCategories = (await getTopCategories()).slice(0, 6);
   const year = new Date().getFullYear();
 
   return (

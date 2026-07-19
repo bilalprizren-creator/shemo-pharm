@@ -12,6 +12,10 @@ export interface Product {
   inStock: boolean;
   description: string;
   shortDescription: string;
+  /** Admin overrides (from the DB). Null when not set. */
+  displayName: string | null;
+  imageOverride: string | null;
+  featured: boolean;
 }
 
 /** Product data that is safe to send to any visitor — never contains prices. */
@@ -41,6 +45,8 @@ export interface Category {
   slug: string;
   parent: number;
   count: number;
+  /** Admin override for the display name (from the DB). Null when not set. */
+  displayName: string | null;
 }
 
 export interface CategoryNode extends Category {

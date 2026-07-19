@@ -1,5 +1,5 @@
 import { canSeePrices, getSession } from "@/lib/auth";
-import { getFeaturedProducts, toCardProduct } from "@/lib/catalog";
+import { getFeaturedProducts, toCardProducts } from "@/lib/catalog";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Hero } from "@/components/home/Hero";
@@ -22,8 +22,9 @@ export default async function HomePage({
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
-  const featured = getFeaturedProducts(4).map((p) =>
-    toCardProduct(p, showPrices)
+  const featured = await toCardProducts(
+    await getFeaturedProducts(4),
+    showPrices
   );
 
   return (

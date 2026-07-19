@@ -1,34 +1,32 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
-import path from "node:path";
+import { sql } from "@/lib/db";
 
 /**
- * Lightweight B2B auth: users live in data/users.json (gitignored),
- * sessions are signed JWTs in an HTTP-only cookie. Prices are only
- * rendered for sessions whose account status is "approved".
- *
- * NOTE: accounts from the old WordPress site cannot be migrated (no DB
- * access) — customers register anew and are approved by the SHEMO team.
+ * B2B auth: users live in the Postgres `users` table, sessions are signed
+ * JWTs in an HTTP-only cookie. Prices are only rendered for sessions whose
+ * account status is "approved"; the admin panel is gated on role "admin".
  */
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-const SECRET_FILE = path.join(DATA_DIR, ".auth-secret");
 const COOKIE_NAME = "shemo_session";
 const SESSION_DAYS = 7;
 
 export type UserStatus = "pending" | "approved";
+export type UserRole = "customer" | "admin";
 
 export interface StoredUser {
+  id: number;
   email: string;
   passwordHash: string; // salt:hash (scrypt)
   name: string;
   company: string;
   phone: string;
   status: UserStatus;
+  role: UserRole;
   createdAt: string;
 }
 
@@ -36,16 +34,29 @@ export interface Session {
   email: string;
   name: string;
   status: UserStatus;
+  role: UserRole;
+}
+
+interface UserRow {
+  id: number;
+  email: string;
+  password_hash: string;
+  name: string;
+  company: string;
+  phone: string;
+  status: string;
+  role: string;
+  created_at: string | Date;
 }
 
 function getSecret(): Uint8Array {
-  const fromEnv = process.env.AUTH_SECRET;
-  if (fromEnv) return new TextEncoder().encode(fromEnv);
-  mkdirSync(DATA_DIR, { recursive: true });
-  if (!existsSync(SECRET_FILE)) {
-    writeFileSync(SECRET_FILE, randomBytes(32).toString("hex"), { flag: "wx" });
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "AUTH_SECRET is not set. Add it to .env.local (and to the Vercel project env)."
+    );
   }
-  return new TextEncoder().encode(readFileSync(SECRET_FILE, "utf8").trim());
+  return new TextEncoder().encode(secret);
 }
 
 export function hashPassword(password: string): string {
@@ -61,57 +72,58 @@ export function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(candidate, Buffer.from(hash, "hex"));
 }
 
-/** Demo account so price visibility can be tested before real approvals exist. */
-const DEMO_USER: Omit<StoredUser, "passwordHash"> & { password: string } = {
-  email: "demo@shemopharm.com",
-  password: "Demo2026!",
-  name: "Llogari Demo",
-  company: "Barnatore Demo",
-  phone: "",
-  status: "approved",
-  createdAt: "2026-01-01T00:00:00.000Z",
-};
-
-export function readUsers(): StoredUser[] {
-  mkdirSync(DATA_DIR, { recursive: true });
-  if (!existsSync(USERS_FILE)) {
-    const seed: StoredUser[] = [
-      {
-        email: DEMO_USER.email,
-        passwordHash: hashPassword(DEMO_USER.password),
-        name: DEMO_USER.name,
-        company: DEMO_USER.company,
-        phone: DEMO_USER.phone,
-        status: DEMO_USER.status,
-        createdAt: DEMO_USER.createdAt,
-      },
-    ];
-    writeFileSync(USERS_FILE, JSON.stringify(seed, null, 1));
-    return seed;
-  }
-  try {
-    return JSON.parse(readFileSync(USERS_FILE, "utf8")) as StoredUser[];
-  } catch {
-    return [];
-  }
+function mapUser(r: UserRow): StoredUser {
+  return {
+    id: r.id,
+    email: r.email,
+    passwordHash: r.password_hash,
+    name: r.name,
+    company: r.company,
+    phone: r.phone,
+    status: r.status === "approved" ? "approved" : "pending",
+    role: r.role === "admin" ? "admin" : "customer",
+    createdAt:
+      r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
 }
 
-export function writeUsers(users: StoredUser[]): void {
-  mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(USERS_FILE, JSON.stringify(users, null, 1));
+export async function findUser(email: string): Promise<StoredUser | undefined> {
+  const rows = (await sql`
+    SELECT * FROM users WHERE email = ${email.trim().toLowerCase()} LIMIT 1
+  `) as UserRow[];
+  return rows[0] ? mapUser(rows[0]) : undefined;
 }
 
-export function findUser(email: string): StoredUser | undefined {
-  return readUsers().find(
-    (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-  );
+export interface NewUser {
+  email: string;
+  passwordHash: string;
+  name: string;
+  company: string;
+  phone: string;
 }
 
-export async function createSessionCookie(user: StoredUser): Promise<void> {
+/** Creates a customer account with status "pending" (awaits admin approval). */
+export async function createUser(data: NewUser): Promise<StoredUser> {
+  const rows = (await sql`
+    INSERT INTO users (email, password_hash, name, company, phone, status, role)
+    VALUES (${data.email.trim().toLowerCase()}, ${data.passwordHash}, ${data.name},
+            ${data.company}, ${data.phone}, 'pending', 'customer')
+    RETURNING *
+  `) as UserRow[];
+  return mapUser(rows[0]);
+}
+
+export async function createSessionCookie(user: {
+  email: string;
+  name: string;
+  status: UserStatus;
+  role: UserRole;
+}): Promise<void> {
   const token = await new SignJWT({
     email: user.email,
     name: user.name,
     status: user.status,
+    role: user.role,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -133,7 +145,8 @@ export async function clearSessionCookie(): Promise<void> {
   jar.delete(COOKIE_NAME);
 }
 
-export async function getSession(): Promise<Session | null> {
+/** The current session, memoized per request. Reads only the signed cookie. */
+export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
   if (!token) return null;
@@ -144,13 +157,31 @@ export async function getSession(): Promise<Session | null> {
       email: payload.email,
       name: typeof payload.name === "string" ? payload.name : "",
       status: payload.status === "approved" ? "approved" : "pending",
+      role: payload.role === "admin" ? "admin" : "customer",
     };
   } catch {
     return null;
   }
-}
+});
 
 /** The single gate for price visibility — enforced server-side everywhere. */
 export function canSeePrices(session: Session | null): boolean {
   return session?.status === "approved";
+}
+
+export function isAdmin(session: Session | null): boolean {
+  return session?.role === "admin";
+}
+
+/**
+ * Admin-only guard for the DAL. Call at the top of every admin page, layout,
+ * Server Action and route handler — layouts do not re-render on navigation,
+ * so authorization must be re-checked close to each data access / mutation.
+ */
+export async function requireAdmin(): Promise<Session> {
+  const session = await getSession();
+  if (!isAdmin(session)) {
+    redirect("/admin/login");
+  }
+  return session as Session;
 }

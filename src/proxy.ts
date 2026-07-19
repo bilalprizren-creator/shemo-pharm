@@ -25,9 +25,10 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip API routes, Next internals, metadata routes and any file with an
-  // extension (public/ assets like /logo.svg, /photos/*.jpg, /brands/*.png).
+  // Skip API routes, the admin panel (lives outside the locale tree), Next
+  // internals, metadata routes and any file with an extension (public/
+  // assets like /logo.svg, /photos/*.jpg, /brands/*.png).
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|opengraph-image|.*\\..*).*)",
+    "/((?!api|admin|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|opengraph-image|.*\\..*).*)",
   ],
 };

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BRANDS } from "@/lib/site";
-import { getCategoryBySlug } from "@/lib/catalog";
+import { getAllCategories } from "@/lib/catalog";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
@@ -33,15 +33,16 @@ const BRAND_CATEGORY: Record<string, string> = {
   "Swiss Energy": "swiss-energy",
 };
 
-function brandHref(name: string): string {
-  const slug = BRAND_CATEGORY[name];
-  if (slug && getCategoryBySlug(slug)) return `/kategorite/${slug}`;
-  return `/produktet?kerko=${encodeURIComponent(name.split(" ")[0])}`;
-}
-
 export default async function BrandsPage({ params }: Props) {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
+
+  const slugs = new Set((await getAllCategories()).map((c) => c.slug));
+  const brandHref = (name: string): string => {
+    const slug = BRAND_CATEGORY[name];
+    if (slug && slugs.has(slug)) return `/kategorite/${slug}`;
+    return `/produktet?kerko=${encodeURIComponent(name.split(" ")[0])}`;
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">

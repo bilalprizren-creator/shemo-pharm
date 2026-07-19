@@ -16,7 +16,7 @@ import {
   getProductBySlug,
   getRelatedProducts,
   primaryCategory,
-  toCardProduct,
+  toCardProducts,
 } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 import { SITE } from "@/lib/site";
@@ -37,9 +37,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
-  const cat = primaryCategory(product);
+  const cat = await primaryCategory(product);
   return {
     title: product.name,
     description: `${product.name}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
@@ -59,13 +59,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { lang, slug } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
-  const all = getAllCategories();
+  const all = await getAllCategories();
   const productCategories = all.filter((c) => product.categoryIds.includes(c.id));
   const mainCat = productCategories[0];
 
@@ -77,8 +77,9 @@ export default async function ProductPage({ params }: Props) {
     { label: product.name },
   ];
 
-  const related = getRelatedProducts(product, 8).map((p) =>
-    toCardProduct(p, showPrices)
+  const related = await toCardProducts(
+    await getRelatedProducts(product, 8),
+    showPrices
   );
 
   const whatsappText = encodeURIComponent(

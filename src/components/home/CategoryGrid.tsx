@@ -31,12 +31,16 @@ const ICONS: Record<string, LucideIcon> = {
  * with consistent iconography, titles and blurbs from the dictionary. No
  * product packshots and no slider, so every card reads equal and premium.
  */
-export function CategoryGrid({ dict }: { dict: Dictionary }) {
-  const cards = HOME_CATEGORIES.map((c) => ({
-    ...c,
-    copy: dict.home.categoryCards[c.slug as keyof typeof dict.home.categoryCards],
-    count: getCategoryBySlug(c.slug)?.count ?? 0,
-  })).filter((c) => c.count > 0 && c.copy);
+export async function CategoryGrid({ dict }: { dict: Dictionary }) {
+  const cards = (
+    await Promise.all(
+      HOME_CATEGORIES.map(async (c) => ({
+        ...c,
+        copy: dict.home.categoryCards[c.slug as keyof typeof dict.home.categoryCards],
+        count: (await getCategoryBySlug(c.slug))?.count ?? 0,
+      }))
+    )
+  ).filter((c) => c.count > 0 && c.copy);
 
   return (
     <section aria-labelledby="kategorite-titulli" className="bg-white">

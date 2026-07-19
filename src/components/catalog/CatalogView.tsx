@@ -6,7 +6,7 @@ import {
   getAllCategories,
   getCategoryTree,
   getProducts,
-  toCardProduct,
+  toCardProducts,
   type ProductSort,
 } from "@/lib/catalog";
 import { langHref, fmt } from "@/lib/i18n";
@@ -61,12 +61,12 @@ export async function CatalogView({
     : "emri-asc";
   const page = Math.max(1, Number(searchParams.faqja) || 1);
 
-  const result = getProducts({ categorySlug, query, sort, page, perPage: 24 });
-  const cards = result.items.map((p) => toCardProduct(p, showPrices));
+  const result = await getProducts({ categorySlug, query, sort, page, perPage: 24 });
+  const cards = await toCardProducts(result.items, showPrices);
 
-  const tree = getCategoryTree();
+  const tree = await getCategoryTree();
   const displayName = Object.fromEntries(
-    getAllCategories().map((c) => [c.slug, categoryDisplayName(c)])
+    (await getAllCategories()).map((c) => [c.slug, categoryDisplayName(c)])
   );
 
   // Preserved across pagination links

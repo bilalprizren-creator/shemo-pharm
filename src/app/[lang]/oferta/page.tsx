@@ -6,7 +6,7 @@ import {
   getDiscountedProducts,
   getProductBySlug,
   getShowcaseProducts,
-  toCardProduct,
+  toCardProducts,
 } from "@/lib/catalog";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
@@ -42,18 +42,20 @@ export default async function OffersPage({ params }: Props) {
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
-  const curated = (rawOffers as string[])
-    .map((slug) => getProductBySlug(slug))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
-  const discounted = getDiscountedProducts(48).filter(
+  const curatedResolved = await Promise.all(
+    (rawOffers as string[]).map((slug) => getProductBySlug(slug))
+  );
+  const curated = curatedResolved.filter(
+    (p): p is NonNullable<typeof p> => Boolean(p)
+  );
+  const discounted = (await getDiscountedProducts(48)).filter(
     (p) => !curated.some((c) => c.id === p.id)
   );
-  const offers = [...curated, ...discounted].map((p) =>
-    toCardProduct(p, showPrices)
-  );
+  const offers = await toCardProducts([...curated, ...discounted], showPrices);
 
-  const featured = getShowcaseProducts(undefined, 8).map((p) =>
-    toCardProduct(p, showPrices)
+  const featured = await toCardProducts(
+    await getShowcaseProducts(undefined, 8),
+    showPrices
   );
 
   return (

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoriesPage({ params }: Props) {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const tree = getCategoryTree().filter((c) => c.count > 0);
+  const tree = (await getCategoryTree()).filter((c) => c.count > 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">

@@ -22,7 +22,7 @@ function entry(
   };
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     entry("", "weekly", 1),
     entry("/produktet", "daily", 0.9),
@@ -33,11 +33,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/kontakti", "monthly", 0.6),
   ];
 
-  const categories: MetadataRoute.Sitemap = getAllCategories()
+  const categories: MetadataRoute.Sitemap = (await getAllCategories())
     .filter((c) => c.count > 0)
     .map((c) => entry(`/kategorite/${c.slug}`, "weekly", 0.7));
 
-  const { items } = getProducts({ perPage: 3000 });
+  const { items } = await getProducts({ perPage: 3000 });
   const products: MetadataRoute.Sitemap = items.map((p) =>
     entry(`/produktet/${p.slug}`, "weekly", 0.5)
   );

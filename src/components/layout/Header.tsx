@@ -9,12 +9,15 @@ import { HeaderClient, type NavCategory } from "./HeaderClient";
 
 export async function Header({ dict }: { dict: Dictionary }) {
   const session = await getSession();
-  const categories: NavCategory[] = getTopCategories().map((c) => ({
-    slug: c.slug,
-    name: categoryDisplayName(c),
-    count: c.count,
-    image: getShowcaseProducts(c.slug, 1)[0]?.images[0] ?? null,
-  }));
+  const top = await getTopCategories();
+  const categories: NavCategory[] = await Promise.all(
+    top.map(async (c) => ({
+      slug: c.slug,
+      name: categoryDisplayName(c),
+      count: c.count,
+      image: (await getShowcaseProducts(c.slug, 1))[0]?.images[0] ?? null,
+    }))
+  );
 
   return (
     <HeaderClient

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canSeePrices, getSession } from "@/lib/auth";
-import { getProducts, toCardProduct } from "@/lib/catalog";
+import { getProducts, toCardProducts } from "@/lib/catalog";
 
 /**
  * Resolves wishlist ids (kept in localStorage) into card data.
@@ -20,13 +20,13 @@ export async function GET(request: NextRequest) {
   const showPrices = canSeePrices(session);
 
   const wanted = new Set(ids);
-  const { items } = getProducts({ perPage: 3000 });
+  const { items } = await getProducts({ perPage: 3000 });
   const found = items.filter((p) => wanted.has(p.id));
   // Preserve the order items were added to the wishlist
   found.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
 
   return NextResponse.json(
-    { items: found.map((p) => toCardProduct(p, showPrices)) },
+    { items: await toCardProducts(found, showPrices) },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

@@ -21,7 +21,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const cat = getCategoryBySlug(slug);
+  const cat = await getCategoryBySlug(slug);
   if (!cat) return {};
   const name = categoryDisplayName(cat);
   return {
@@ -41,8 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** Breadcrumb trail: parent categories up to the root. */
-function categoryCrumbs(slug: string, categoriesLabel: string): Crumb[] {
-  const all = getAllCategories();
+async function categoryCrumbs(slug: string, categoriesLabel: string): Promise<Crumb[]> {
+  const all = await getAllCategories();
   const chain: Crumb[] = [];
   let current = all.find((c) => c.slug === slug);
   while (current) {
@@ -59,16 +59,17 @@ function categoryCrumbs(slug: string, categoriesLabel: string): Crumb[] {
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { lang, slug } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const cat = getCategoryBySlug(slug);
+  const cat = await getCategoryBySlug(slug);
   if (!cat) notFound();
 
   const sp = await searchParams;
+  const crumbs = await categoryCrumbs(slug, dict.categoriesPage.title);
   return (
     <CatalogView
       title={categoryDisplayName(cat)}
       basePath={`/kategorite/${slug}`}
       categorySlug={slug}
-      crumbs={categoryCrumbs(slug, dict.categoriesPage.title)}
+      crumbs={crumbs}
       searchParams={sp}
       dict={dict}
     />

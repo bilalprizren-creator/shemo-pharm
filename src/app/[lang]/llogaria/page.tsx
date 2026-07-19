@@ -33,7 +33,7 @@ export default async function AccountPage({ params }: Props) {
   const session = await getSession();
   if (!session) redirect(langHref(dict.lang, "/kycu"));
 
-  const user = findUser(session.email);
+  const user = await findUser(session.email);
   const approved = session.status === "approved";
 
   return (

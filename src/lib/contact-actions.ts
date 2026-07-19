@@ -1,8 +1,7 @@
 "use server";
 
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
-import path from "node:path";
 import { z } from "zod";
+import { sql } from "@/lib/db";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
 
@@ -29,26 +28,24 @@ function schema(dict: Dictionary) {
   });
 }
 
-const MESSAGES_FILE = path.join(process.cwd(), "data", "messages.json");
-
 /**
- * TODO(SMTP): no email credentials exist yet, so submissions are stored in
- * data/messages.json. Wire this up to the business inbox (e.g. nodemailer or
- * a transactional service) once SMTP details are provided — the form and
- * validation stay unchanged.
+ * Submissions land in the contact_messages table and are read in the admin
+ * panel (/admin/mesazhet). TODO(SMTP): additionally forward to the business
+ * inbox once SMTP credentials are provided — form and validation stay as is.
  */
-function storeMessage(entry: Record<string, string>): void {
-  mkdirSync(path.dirname(MESSAGES_FILE), { recursive: true });
-  let messages: unknown[] = [];
-  if (existsSync(MESSAGES_FILE)) {
-    try {
-      messages = JSON.parse(readFileSync(MESSAGES_FILE, "utf8"));
-    } catch {
-      messages = [];
-    }
-  }
-  messages.push({ ...entry, receivedAt: new Date().toISOString() });
-  writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 1));
+async function storeMessage(entry: {
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<void> {
+  await sql`
+    INSERT INTO contact_messages (name, company, phone, email, subject, message)
+    VALUES (${entry.name}, ${entry.company}, ${entry.phone}, ${entry.email},
+            ${entry.subject}, ${entry.message})
+  `;
 }
 
 export async function contactAction(
@@ -86,7 +83,7 @@ export async function contactAction(
   }
 
   try {
-    storeMessage({
+    await storeMessage({
       name: parsed.data.name,
       company: parsed.data.company || "",
       phone: parsed.data.phone,

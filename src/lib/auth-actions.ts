@@ -6,12 +6,10 @@ import { z } from "zod";
 import {
   clearSessionCookie,
   createSessionCookie,
+  createUser,
   findUser,
   hashPassword,
-  readUsers,
   verifyPassword,
-  writeUsers,
-  type StoredUser,
 } from "@/lib/auth";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
@@ -74,7 +72,7 @@ export async function loginAction(
     return { error: dict.actions.invalidCredentials };
   }
 
-  const user = findUser(parsed.data.email);
+  const user = await findUser(parsed.data.email);
   if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
     return { error: dict.actions.invalidCredentials };
   }
@@ -128,23 +126,19 @@ export async function registerAction(
     return { fieldErrors };
   }
 
-  const users = readUsers();
-  if (users.some((u) => u.email.toLowerCase() === parsed.data.email)) {
+  if (await findUser(parsed.data.email)) {
     return {
       fieldErrors: { email: dict.actions.emailTaken },
     };
   }
 
-  const user: StoredUser = {
+  const user = await createUser({
     email: parsed.data.email,
     passwordHash: hashPassword(parsed.data.password),
     name: parsed.data.name,
     company: parsed.data.company || "",
     phone: parsed.data.phone,
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  };
-  writeUsers([...users, user]);
+  });
   await createSessionCookie(user);
   redirect(langHref(lang, "/llogaria"));
 }

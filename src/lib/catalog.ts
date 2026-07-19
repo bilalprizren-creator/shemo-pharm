@@ -1,51 +1,130 @@
 import "server-only";
-import rawProducts from "@/data/products.json";
-import rawCategories from "@/data/categories.json";
+import { cache } from "react";
+import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
-const products = rawProducts as Product[];
-const categories = rawCategories as Category[];
+/**
+ * Catalog access layer. Products and categories live in Postgres (see
+ * src/lib/db.ts); this module loads them once per request and runs the same
+ * in-memory query/sort/selection logic the site has always used. Public
+ * pages read the session cookie (for price gating) and are therefore
+ * dynamically rendered, so each request sees fresh catalog data and admin
+ * edits appear immediately — no cross-request cache to invalidate.
+ */
+
+interface CatalogData {
+  products: Product[];
+  categories: Category[];
+}
+
+interface ProductRow {
+  id: number;
+  name: string;
+  slug: string;
+  sku: string | null;
+  price_cents: number;
+  regular_cents: number;
+  on_sale: boolean;
+  currency: string;
+  images: unknown;
+  category_ids: unknown;
+  in_stock: boolean;
+  description: string | null;
+  short_description: string | null;
+  display_name: string | null;
+  image_override: string | null;
+  featured: boolean;
+}
+
+interface CategoryRow {
+  id: number;
+  name: string;
+  slug: string;
+  parent: number;
+  count: number;
+  display_name: string | null;
+}
+
+async function fetchCatalog(): Promise<CatalogData> {
+  const productRows = (await sql`
+    SELECT p.id, p.name, p.slug, p.sku, p.price_cents, p.regular_cents,
+           p.on_sale, p.currency, p.images, p.in_stock, p.description,
+           p.short_description, p.display_name, p.image_override, p.featured,
+           COALESCE(
+             array_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL),
+             '{}'::int[]
+           ) AS category_ids
+    FROM products p
+    LEFT JOIN product_categories pc ON pc.product_id = p.id
+    WHERE p.hidden = false
+    GROUP BY p.id
+    ORDER BY p.id
+  `) as ProductRow[];
+
+  const categoryRows = (await sql`
+    SELECT id, name, slug, parent, count, display_name FROM categories
+  `) as CategoryRow[];
+
+  const products: Product[] = productRows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    sku: r.sku ?? "",
+    priceCents: r.price_cents,
+    regularCents: r.regular_cents,
+    onSale: r.on_sale,
+    currency: r.currency,
+    images: Array.isArray(r.images) ? (r.images as string[]) : [],
+    categoryIds: Array.isArray(r.category_ids) ? (r.category_ids as number[]) : [],
+    inStock: r.in_stock,
+    description: r.description ?? "",
+    shortDescription: r.short_description ?? "",
+    displayName: r.display_name,
+    imageOverride: r.image_override,
+    featured: r.featured,
+  }));
+
+  const categories: Category[] = categoryRows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    parent: r.parent,
+    count: r.count,
+    displayName: r.display_name,
+  }));
+
+  return { products, categories };
+}
+
+/** Per-request memoization: one DB round trip per render, shared by all callers. */
+const loadCatalog = cache(fetchCatalog);
 
 /**
- * Albanian display-name corrections for category names coming from the old
- * site (spelling/terminology only — brand names stay untouched).
+ * Albanian display-name override for a category — the admin-editable
+ * display_name column, falling back to the raw catalog name.
  */
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
-  "paisje-medicinale": "Pajisje mjekësore",
-  "suplements-effervescent": "Suplemente & Efervescente",
-  "alkool-dhe-antiseptik": "Alkool dhe antiseptikë",
-  "mbathje-ortopedike": "Mbathje ortopedike",
-  "cajra-mjekesore": "Çajra mjekësore",
-  "cajra-me-filter": "Çajra me filtër",
-  prezervativ: "Prezervativë",
-  "te-tjera": "Të tjera",
-  "te-ndryshme": "Të ndryshme",
-  "te-ndryshme-atc-natyral": "Të ndryshme",
-  "te-ndryshme-prezervativ": "Të ndryshme",
-  "te-ndryshme-suplements-effervescent": "Të ndryshme",
-  "te-tjera-ersa-med-ortoped": "Të tjera",
-};
-
 export function categoryDisplayName(cat: Category): string {
-  return CATEGORY_DISPLAY_NAMES[cat.slug] ?? cat.name;
+  return cat.displayName ?? cat.name;
 }
 
-export function getAllCategories(): Category[] {
-  return categories;
+export async function getAllCategories(): Promise<Category[]> {
+  return (await loadCatalog()).categories;
 }
 
-export function getCategoryBySlug(slug: string): Category | undefined {
-  return categories.find((c) => c.slug === slug);
+export async function getCategoryBySlug(slug: string): Promise<Category | undefined> {
+  return (await loadCatalog()).categories.find((c) => c.slug === slug);
 }
 
-export function getTopCategories(): Category[] {
+export async function getTopCategories(): Promise<Category[]> {
+  const { categories } = await loadCatalog();
   return categories
     .filter((c) => c.parent === 0 && c.count > 0)
     .sort((a, b) => b.count - a.count);
 }
 
-export function getCategoryTree(): CategoryNode[] {
+export async function getCategoryTree(): Promise<CategoryNode[]> {
+  const { categories } = await loadCatalog();
   const byParent = new Map<number, Category[]>();
   for (const c of categories) {
     const list = byParent.get(c.parent) ?? [];
@@ -60,7 +139,7 @@ export function getCategoryTree(): CategoryNode[] {
 }
 
 /** A category id plus every descendant id — products are tagged on leaves. */
-function categoryIdWithDescendants(id: number): Set<number> {
+function categoryIdWithDescendants(id: number, categories: Category[]): Set<number> {
   const ids = new Set<number>([id]);
   let added = true;
   while (added) {
@@ -102,20 +181,21 @@ export function searchProducts(list: Product[], query: string): Product[] {
   });
 }
 
-export function getProducts({
+export async function getProducts({
   categorySlug,
   query,
   sort = "emri-asc",
   page = 1,
   perPage = 24,
   inStockOnly = false,
-}: ProductQuery = {}): ProductPage {
+}: ProductQuery = {}): Promise<ProductPage> {
+  const { products, categories } = await loadCatalog();
   let list = products;
 
   if (categorySlug) {
-    const cat = getCategoryBySlug(categorySlug);
+    const cat = categories.find((c) => c.slug === categorySlug);
     if (!cat) return { items: [], total: 0, page: 1, totalPages: 0 };
-    const ids = categoryIdWithDescendants(cat.id);
+    const ids = categoryIdWithDescendants(cat.id, categories);
     list = list.filter((p) => p.categoryIds.some((id) => ids.has(id)));
   }
 
@@ -141,19 +221,21 @@ export function getProducts({
   return { items, total, page: safePage, totalPages };
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  return (await loadCatalog()).products.find((p) => p.slug === slug);
 }
 
-export function getProductCount(): number {
-  return products.length;
+export async function getProductCount(): Promise<number> {
+  return (await loadCatalog()).products.length;
 }
 
-export function primaryCategory(product: Product): Category | undefined {
+export async function primaryCategory(product: Product): Promise<Category | undefined> {
+  const { categories } = await loadCatalog();
   return categories.find((c) => product.categoryIds.includes(c.id));
 }
 
-export function getRelatedProducts(product: Product, limit = 8): Product[] {
+export async function getRelatedProducts(product: Product, limit = 8): Promise<Product[]> {
+  const { products } = await loadCatalog();
   const related = products.filter(
     (p) =>
       p.id !== product.id &&
@@ -167,8 +249,11 @@ export function getRelatedProducts(product: Product, limit = 8): Product[] {
  * Deterministic homepage selection: products with images, spread across
  * the given category so rows do not repeat the same items.
  */
-export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[] {
-  const { items } = getProducts({ categorySlug, perPage: 200 });
+export async function getShowcaseProducts(
+  categorySlug?: string,
+  limit = 8
+): Promise<Product[]> {
+  const { items } = await getProducts({ categorySlug, perPage: 200 });
   const withImages = items.filter((p) => p.images.length > 0);
   if (withImages.length <= limit) return withImages.slice(0, limit);
   const step = Math.floor(withImages.length / limit);
@@ -176,79 +261,51 @@ export function getShowcaseProducts(categorySlug?: string, limit = 8): Product[]
 }
 
 /**
- * Curated homepage picks — SHEMO's own branded devices, which have clean,
- * standardized local renders (see LOCAL_IMAGES). Falls back to the showcase
- * sampler if a slug is ever missing so the row is never short.
+ * Curated display order for the homepage picks. The set of featured products
+ * now comes from the DB (products.featured); this only keeps the original
+ * left-to-right order for the seeded SHEMO devices. Admin-added featured
+ * products sort after these, then by name.
  */
-export const FEATURED_SLUGS = [
-  // Homepage picks — exactly four, spanning different categories:
-  // three SHEMO devices + one recognizable supplement.
+const FEATURED_ORDER = [
   "tensiometer-digjital-krahu-shemo-shm-500-0018",
   "pulseoximeter-shm-300-0002",
   "compressor-nebulizer-shm-100-0012",
   "a-z-vitamine-lutein-q10-60-tab-7159",
-  // Fallback pool (used only if a pick above is missing).
-  "mesh-nebulizer-shm-200-0013",
-  "calcium-vitamin-c-a20-eff",
-  "gummy-monsters-multivitamins-a60-7601",
-  "alpherol-vitamin-e-400iu-30-softgel-1007",
 ];
 
-export function getFeaturedProducts(limit = 4): Product[] {
-  const curated = FEATURED_SLUGS.map((s) => getProductBySlug(s)).filter(
-    (p): p is Product => Boolean(p)
+export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
+  const { products } = await loadCatalog();
+  const featured = products
+    .filter((p) => p.featured)
+    .sort((a, b) => {
+      const ra = FEATURED_ORDER.indexOf(a.slug);
+      const rb = FEATURED_ORDER.indexOf(b.slug);
+      const ka = ra === -1 ? Number.MAX_SAFE_INTEGER : ra;
+      const kb = rb === -1 ? Number.MAX_SAFE_INTEGER : rb;
+      return ka - kb || a.name.localeCompare(b.name, "sq");
+    });
+  if (featured.length >= limit) return featured.slice(0, limit);
+  const fill = (await getShowcaseProducts(undefined, limit * 2)).filter(
+    (p) => !featured.some((f) => f.id === p.id)
   );
-  if (curated.length >= limit) return curated.slice(0, limit);
-  const fill = getShowcaseProducts(undefined, limit * 2).filter(
-    (p) => !curated.some((c) => c.id === p.id)
-  );
-  return [...curated, ...fill].slice(0, limit);
+  return [...featured, ...fill].slice(0, limit);
 }
 
-/**
- * Standardized local product renders (square, white background) that override
- * the remote WordPress image for the curated set. Keyed by SKU — the Jara
- * render filenames encode the same SKU. Any product not listed keeps its
- * remote image.
- */
-const LOCAL_IMAGES: Record<string, string> = {
-  "0018": "/products/0018-tensiometer-shm-500.png",
-  "0002": "/products/0002-pulseoximeter-shm-300.png",
-  "0012": "/products/0012-compressor-nebulizer-shm-100.png",
-  "0013": "/products/0013-mesh-nebulizer-shm-200.png",
-  "7159": "/products/7159-az-vitamine.png",
-  "3204": "/products/3204-calcium-vitamin-c.png",
-  "7601": "/products/7601-gummy-monsters-multivitamin.png",
-  "1007": "/products/1007-alpherol-vitamin-e.png",
-};
-
+/** The product's image: admin override first, then the first catalog image. */
 export function productImage(product: Product): string | null {
-  return LOCAL_IMAGES[product.sku] ?? product.images[0] ?? null;
+  return product.imageOverride ?? product.images[0] ?? null;
 }
 
-/**
- * Standardized display names for the curated homepage products (keyed by SKU),
- * following the "product type/function – brand and model" format with correct
- * Albanian spelling. The raw catalog data in products.json stays untouched —
- * this only affects what the card shows. Brand names and model codes are kept.
- */
-const PRODUCT_DISPLAY_NAMES: Record<string, string> = {
-  "0018": "Tensiometër digjital për krah – SHEMO SHM-500",
-  "0002": "Pulseoksimetër – SHEMO SHM-300",
-  "0012": "Nebulizator me kompresor – SHEMO SHM-100",
-  "7159": "A-Z Vitamina + Lutein & Q10 – 60 tableta",
-};
-
+/** The product's display name: admin override first, then the catalog name. */
 export function productDisplayName(product: Product): string {
-  return PRODUCT_DISPLAY_NAMES[product.sku] ?? product.name;
+  return product.displayName ?? product.name;
 }
 
-/**
- * Shapes a product for the card components. Prices are attached here and
- * nowhere else — pass showPrices only after checking the session server-side.
- */
-export function toCardProduct(product: Product, showPrices: boolean): CardProduct {
-  const cat = primaryCategory(product);
+function buildCard(
+  product: Product,
+  showPrices: boolean,
+  categoryName: string | null
+): CardProduct {
   const hasDiscount = product.regularCents > product.priceCents;
   return {
     id: product.id,
@@ -256,7 +313,7 @@ export function toCardProduct(product: Product, showPrices: boolean): CardProduc
     slug: product.slug,
     sku: product.sku,
     image: productImage(product),
-    categoryName: cat ? categoryDisplayName(cat) : null,
+    categoryName,
     inStock: product.inStock,
     price: showPrices ? formatPrice(product.priceCents) : null,
     oldPrice: showPrices && hasDiscount ? formatPrice(product.regularCents) : null,
@@ -266,11 +323,40 @@ export function toCardProduct(product: Product, showPrices: boolean): CardProduc
   };
 }
 
+/**
+ * Shapes products for the card components. Prices are attached here and
+ * nowhere else — pass showPrices only after checking the session server-side.
+ */
+export async function toCardProducts(
+  list: Product[],
+  showPrices: boolean
+): Promise<CardProduct[]> {
+  const { categories } = await loadCatalog();
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  return list.map((product) => {
+    let cat: Category | undefined;
+    for (const id of product.categoryIds) {
+      const found = byId.get(id);
+      if (found) {
+        cat = found;
+        break;
+      }
+    }
+    return buildCard(product, showPrices, cat ? categoryDisplayName(cat) : null);
+  });
+}
+
+export async function toCardProduct(
+  product: Product,
+  showPrices: boolean
+): Promise<CardProduct> {
+  return (await toCardProducts([product], showPrices))[0];
+}
+
 /** Products with a genuine sale price (regular > current). */
-export function getDiscountedProducts(limit = 24): Product[] {
-  return products
-    .filter((p) => p.regularCents > p.priceCents)
-    .slice(0, limit);
+export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
+  const { products } = await loadCatalog();
+  return products.filter((p) => p.regularCents > p.priceCents).slice(0, limit);
 }
 
 /**

@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "export:catalog": "node scripts/export-catalog.mjs"
+    "export:catalog": "node scripts/export-catalog.mjs",
+    "seed:db": "node scripts/seed-db.mjs"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "framer-motion": "^12.42.2",
     "jose": "^6.2.3",
     "lucide-react": "^1.24.0",
