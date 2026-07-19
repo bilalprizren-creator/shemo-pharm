@@ -56,18 +56,18 @@ export default async function BrandsPage({ params }: Props) {
           <li key={b.name}>
             <Link
               href={langHref(dict.lang, brandHref(b.name))}
-              className="group flex h-full flex-col items-center rounded-xl border border-ink-900/8 bg-white p-6 text-center transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card-hover"
+              className="group flex h-full flex-col items-center rounded-xl border border-ink-900/8 bg-white p-4 text-center transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-card-hover sm:p-5"
             >
-              <span className="flex h-20 items-center justify-center">
+              <span className="flex h-20 items-center justify-center sm:h-24">
                 <Image
                   src={b.image}
                   alt={b.name}
-                  width={140}
-                  height={84}
-                  className="max-h-16 w-auto object-contain opacity-75 grayscale transition-all duration-200 group-hover:opacity-100 group-hover:grayscale-0"
+                  width={180}
+                  height={96}
+                  className="max-h-20 w-auto max-w-full object-contain sm:max-h-24"
                 />
               </span>
-              <span className="mt-3 font-semibold text-ink-900">{b.name}</span>
+              <span className="mt-2.5 font-semibold text-ink-900">{b.name}</span>
               <span className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-brand-700 opacity-0 transition-opacity group-hover:opacity-100">
                 {dict.common.viewProducts}
                 <ArrowRight className="size-3.5" aria-hidden />

@@ -30,15 +30,15 @@ export function BrandStrip({ dict }: { dict: Dictionary }) {
           {HOME_BRANDS.map((b) => (
             <li
               key={b.name}
-              className="flex h-20 items-center justify-center rounded-xl border border-line bg-white px-4"
+              className="brand-logo-cell flex h-16 items-center justify-center rounded-xl border border-line bg-white px-5 sm:h-[4.5rem]"
               title={b.name}
             >
               <Image
                 src={b.image}
                 alt={b.name}
-                width={140}
-                height={72}
-                className="max-h-10 w-auto object-contain opacity-60 grayscale transition-all duration-200 hover:opacity-100 hover:grayscale-0"
+                width={150}
+                height={60}
+                className="brand-logo max-h-12 w-auto max-w-[120px] object-contain sm:max-h-14 sm:max-w-[140px]"
               />
             </li>
           ))}

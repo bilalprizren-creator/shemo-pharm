@@ -102,3 +102,22 @@ h4 {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* Partner-brand logos (homepage strip only).
+   On hover-capable pointers the logos are shown lightly desaturated and regain
+   their full official colour when the card is hovered. Touch devices have no
+   reliable hover, so there the logos always stay in full colour. The full
+   /markat page never uses this class — its logos are always full colour.
+   The reduced-motion block above already neutralizes the transition. */
+@media (hover: hover) and (pointer: fine) {
+  .brand-logo {
+    filter: grayscale(1);
+    opacity: 0.85;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+  .brand-logo-cell:hover .brand-logo,
+  .brand-logo-cell:focus-visible .brand-logo {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+}
