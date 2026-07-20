@@ -5,6 +5,7 @@ import {
   Inbox,
   LayoutDashboard,
   Package,
+  ShoppingBag,
   UserCheck,
 } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
@@ -12,6 +13,7 @@ import { adminLogoutAction } from "@/lib/admin-actions";
 
 const NAV = [
   { href: "/admin", label: "Paneli", icon: LayoutDashboard },
+  { href: "/admin/porosite", label: "Porositë", icon: ShoppingBag },
   { href: "/admin/kerkesat", label: "Kërkesat B2B", icon: UserCheck },
   { href: "/admin/produktet", label: "Produktet", icon: Package },
   { href: "/admin/mesazhet", label: "Mesazhet", icon: Inbox },

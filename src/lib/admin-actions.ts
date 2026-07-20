@@ -318,6 +318,28 @@ export async function deleteMessageAction(formData: FormData): Promise<void> {
   revalidatePath("/admin");
 }
 
+/* ------------------------------- Orders ---------------------------------- */
+
+export async function markOrderHandledAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return;
+  // With unhandled=1 the button reopens the order.
+  const markUnhandled = formData.get("unhandled") === "1";
+  await sql`UPDATE orders SET is_handled = ${!markUnhandled} WHERE id = ${id}`;
+  revalidatePath("/admin/porosite");
+  revalidatePath("/admin");
+}
+
+export async function deleteOrderAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return;
+  await sql`DELETE FROM orders WHERE id = ${id}`;
+  revalidatePath("/admin/porosite");
+  revalidatePath("/admin");
+}
+
 /* ---------------------------- Access helper ------------------------------ */
 
 /** Used by the login page to bounce already-authenticated admins to /admin. */

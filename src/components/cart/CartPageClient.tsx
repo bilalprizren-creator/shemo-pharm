@@ -19,6 +19,7 @@ import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
+import { logOrderAction } from "@/lib/order-actions";
 
 /** Parses "12,34 €" (server-formatted) back to cents for the local total. */
 function priceToCents(price: string): number {
@@ -114,6 +115,18 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
   const mailHref = `mailto:${SITE.emails[0]}?subject=${encodeURIComponent(
     dict.cartPage.orderMailSubject
   )}&body=${encodeURIComponent(orderText)}`;
+
+  /**
+   * Mirror the order into the DB (visible in /admin/porosite) as the external
+   * app opens. Fire-and-forget: a logging failure must never stop the
+   * customer from sending the WhatsApp/email itself.
+   */
+  const logOrder = (channel: "whatsapp" | "email") => {
+    logOrderAction({
+      channel,
+      lines: lines.map((l) => ({ id: l.id, qty: l.qty })),
+    }).catch(() => {});
+  };
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
@@ -227,6 +240,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => logOrder("whatsapp")}
             className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
           >
             <MessageCircle className="size-4.5" aria-hidden />
@@ -234,6 +248,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
           </a>
           <a
             href={mailHref}
+            onClick={() => logOrder("email")}
             className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
           >
             <Mail className="size-4.5 text-brand-600" aria-hidden />

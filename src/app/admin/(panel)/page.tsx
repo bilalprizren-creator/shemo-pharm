@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Inbox, Package, UserCheck, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Inbox,
+  Package,
+  ShoppingBag,
+  UserCheck,
+  Users,
+} from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 
@@ -9,6 +16,7 @@ interface Stats {
   products: number;
   hidden_products: number;
   unread_messages: number;
+  open_orders: number;
 }
 
 export default async function AdminDashboardPage() {
@@ -20,10 +28,19 @@ export default async function AdminDashboardPage() {
       (SELECT count(*) FROM users WHERE role = 'customer' AND status = 'approved')::int AS approved_users,
       (SELECT count(*) FROM products)::int                                              AS products,
       (SELECT count(*) FROM products WHERE hidden)::int                                 AS hidden_products,
-      (SELECT count(*) FROM contact_messages WHERE NOT is_read)::int                    AS unread_messages
+      (SELECT count(*) FROM contact_messages WHERE NOT is_read)::int                    AS unread_messages,
+      (SELECT count(*) FROM orders WHERE NOT is_handled)::int                           AS open_orders
   `) as Stats[];
 
   const cards = [
+    {
+      href: "/admin/porosite",
+      label: "Porosi të hapura",
+      value: stats.open_orders,
+      hint: "nga shporta e uebfaqes",
+      icon: ShoppingBag,
+      highlight: stats.open_orders > 0,
+    },
     {
       href: "/admin/kerkesat",
       label: "Kërkesa në pritje",
@@ -59,7 +76,7 @@ export default async function AdminDashboardPage() {
         Menaxhoni kërkesat e klientëve B2B, katalogun e produkteve dhe mesazhet.
       </p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
           <Link
             key={c.href}
