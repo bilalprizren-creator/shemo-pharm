@@ -29,7 +29,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const BRAND_CATEGORY: Record<string, string> = {
   Cansin: "cansin",
   "Kräuterhof": "krauterhof",
-  "ATC Natyral": "atc-natyral",
   "Swiss Energy": "swiss-energy",
 };
 
