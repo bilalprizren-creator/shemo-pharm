@@ -202,6 +202,7 @@ export default async function ProductPage({ params }: Props) {
                   increase: dict.product.increaseQty,
                   decrease: dict.product.decreaseQty,
                   qty: dict.product.qtyLabel,
+                  qtyInput: dict.product.qtyInput,
                 }}
               />
             </div>

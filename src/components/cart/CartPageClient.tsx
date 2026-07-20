@@ -18,6 +18,7 @@ import type { CardProduct } from "@/lib/types";
 import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { useCart } from "./CartProvider";
+import { QtyInput } from "./QtyInput";
 
 /** Parses "12,34 €" (server-formatted) back to cents for the local total. */
 function priceToCents(price: string): number {
@@ -157,9 +158,12 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
                 >
                   <Minus className="size-3.5" aria-hidden />
                 </button>
-                <span className="w-8 text-center text-sm font-bold text-ink-900">
-                  {qtyOf(p.id)}
-                </span>
+                <QtyInput
+                  value={qtyOf(p.id)}
+                  onChange={(qty) => setQty(p.id, qty)}
+                  label={dict.cartPage.qtyInput}
+                  className="w-12"
+                />
                 <button
                   type="button"
                   onClick={() => setQty(p.id, qtyOf(p.id) + 1)}

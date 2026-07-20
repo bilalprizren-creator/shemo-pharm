@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCart } from "./CartProvider";
+import { MAX_QTY, QtyInput } from "./QtyInput";
 
 /** Compact square button used on product cards (screenshot style). */
 export function AddToCartIconButton({
@@ -51,6 +52,7 @@ export interface AddToCartQtyLabels {
   increase: string;
   decrease: string;
   qty: string;
+  qtyInput: string;
 }
 
 /** Quantity stepper + add button for the product detail page. */
@@ -76,16 +78,15 @@ export function AddToCartWithQty({
         >
           <Minus className="size-4" aria-hidden />
         </button>
-        <span
-          aria-live="polite"
-          aria-label={labels.qty.replace("{qty}", String(qty))}
-          className="w-10 text-center text-sm font-bold text-ink-900"
-        >
-          {qty}
-        </span>
+        <QtyInput
+          value={qty}
+          onChange={setQtyState}
+          label={labels.qtyInput}
+          className="w-14"
+        />
         <button
           type="button"
-          onClick={() => setQtyState((q) => Math.min(999, q + 1))}
+          onClick={() => setQtyState((q) => Math.min(MAX_QTY, q + 1))}
           aria-label={labels.increase}
           className="flex size-11 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50 hover:text-brand-700"
         >

@@ -113,18 +113,13 @@ export async function createUser(data: NewUser): Promise<StoredUser> {
   return mapUser(rows[0]);
 }
 
-export async function createSessionCookie(user: {
-  email: string;
-  name: string;
-  status: UserStatus;
-  role: UserRole;
-}): Promise<void> {
-  const token = await new SignJWT({
-    email: user.email,
-    name: user.name,
-    status: user.status,
-    role: user.role,
-  })
+/**
+ * Signs the session cookie. Only the email is stored: it identifies the user,
+ * and everything else (name, status, role) is looked up live in getSession().
+ * Putting authorization state in the token would let it go stale.
+ */
+export async function createSessionCookie(user: { email: string }): Promise<void> {
+  const token = await new SignJWT({ email: user.email })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DAYS}d`)
@@ -145,7 +140,15 @@ export async function clearSessionCookie(): Promise<void> {
   jar.delete(COOKIE_NAME);
 }
 
-/** The current session, memoized per request. Reads only the signed cookie. */
+/**
+ * The current session, memoized per request.
+ *
+ * The cookie proves *who* the visitor is; status and role are read fresh from
+ * the database on every request so an approval, a downgrade or a deleted
+ * account takes effect immediately. Trusting the JWT's own status claim would
+ * mean an admin approval only reached the customer after they logged out and
+ * back in — the token lives for SESSION_DAYS.
+ */
 export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
@@ -153,11 +156,13 @@ export const getSession = cache(async (): Promise<Session | null> => {
   try {
     const { payload } = await jwtVerify(token, getSecret());
     if (typeof payload.email !== "string") return null;
+    const user = await findUser(payload.email);
+    if (!user) return null; // account deleted since the token was issued
     return {
-      email: payload.email,
-      name: typeof payload.name === "string" ? payload.name : "",
-      status: payload.status === "approved" ? "approved" : "pending",
-      role: payload.role === "admin" ? "admin" : "customer",
+      email: user.email,
+      name: user.name,
+      status: user.status,
+      role: user.role,
     };
   } catch {
     return null;

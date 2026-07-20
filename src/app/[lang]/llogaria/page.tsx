@@ -34,7 +34,7 @@ export default async function AccountPage({ params }: Props) {
   if (!session) redirect(langHref(dict.lang, "/kycu"));
 
   const user = await findUser(session.email);
-  const approved = session.status === "approved";
+  const approved = user?.status === "approved";
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 lg:py-16">
