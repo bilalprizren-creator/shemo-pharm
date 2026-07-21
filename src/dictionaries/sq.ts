@@ -362,7 +362,10 @@ export const sq = {
     phone: "Numri i telefonit",
     email: "Email",
     subject: "Subjekti",
+    subjectPlaceholder: "p.sh. Pyetje për disponueshmërinë e një produkti",
     message: "Mesazhi",
+    messagePlaceholder:
+      "p.sh. Përshëndetje! Interesohem për produktin “A-Z Vitamine” (kodi 7159) — a e keni në stok dhe cili është çmimi me shumicë për 50 copë? Ju lutem më kontaktoni në numrin e mësipërm.",
     submit: "Dërgo mesazhin",
     successTitle: "Mesazhi u dërgua me sukses",
     successText:

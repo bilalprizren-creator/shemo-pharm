@@ -148,8 +148,22 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
           error={fe.email}
         />
       </div>
-      <Field id="subject" label={dict.contactForm.subject} type="text" required error={fe.subject} />
-      <Field id="message" label={dict.contactForm.message} textarea required error={fe.message} />
+      <Field
+        id="subject"
+        label={dict.contactForm.subject}
+        type="text"
+        required
+        placeholder={dict.contactForm.subjectPlaceholder}
+        error={fe.subject}
+      />
+      <Field
+        id="message"
+        label={dict.contactForm.message}
+        textarea
+        required
+        placeholder={dict.contactForm.messagePlaceholder}
+        error={fe.message}
+      />
 
       <button
         type="submit"

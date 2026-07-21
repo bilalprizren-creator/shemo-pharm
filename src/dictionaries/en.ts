@@ -358,7 +358,10 @@ export const en: Dictionary = {
     phone: "Phone number",
     email: "Email",
     subject: "Subject",
+    subjectPlaceholder: "e.g. Question about product availability",
     message: "Message",
+    messagePlaceholder:
+      "e.g. Hello! I am interested in the product “A-Z Vitamine” (code 7159) — is it in stock, and what is the wholesale price for 50 pieces? Please contact me at the number above.",
     submit: "Send message",
     successTitle: "Message sent successfully",
     successText:
