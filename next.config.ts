@@ -1,16 +1,11 @@
 import type { NextConfig } from "next";
+import { REMOTE_IMAGE_PATTERNS } from "./src/lib/images";
 
 const nextConfig: NextConfig = {
   images: {
-    // Product photography stays hosted on the existing site for now.
-    // Mirror the uploads folder before decommissioning the old WordPress.
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "shemopharm.com",
-        pathname: "/wp-content/uploads/**",
-      },
-    ],
+    // Single source of truth — the admin form and the catalog layer validate
+    // against the same list, so an unconfigured host can never reach next/image.
+    remotePatterns: [...REMOTE_IMAGE_PATTERNS],
   },
 };
 

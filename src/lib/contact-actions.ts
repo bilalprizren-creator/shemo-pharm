@@ -4,6 +4,7 @@ import { z } from "zod";
 import { sql } from "@/lib/db";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 
 export interface ContactFormState {
   success?: boolean;
@@ -53,6 +54,12 @@ export async function contactAction(
   formData: FormData
 ): Promise<ContactFormState> {
   const dict = getDictionary(formLang(formData));
+
+  // Honeypot and time trap stop naive bots; the limit stops a patient one from
+  // filling contact_messages.
+  if (await rateLimited("contact", { limit: 5, windowMs: TEN_MINUTES_MS })) {
+    return { error: dict.actions.tooManyAttempts };
+  }
 
   // Honeypot: real users never fill this hidden field.
   if (formData.get("website")) {

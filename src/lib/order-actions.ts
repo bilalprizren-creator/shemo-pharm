@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 
 /**
  * Logs a cart order into the `orders` table the moment the customer opens
@@ -31,6 +32,10 @@ export async function logOrderAction(input: {
   channel: "whatsapp" | "email";
   lines: { id: number; qty: number }[];
 }): Promise<void> {
+  // Guests may order (prices stay hidden), so the action cannot require a
+  // session — the limit keeps a script from filling /admin/porosite with noise.
+  if (await rateLimited("order", { limit: 10, windowMs: TEN_MINUTES_MS })) return;
+
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success) return;
   const { channel, lines } = parsed.data;

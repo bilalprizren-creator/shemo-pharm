@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
+import { isAllowedImageSrc } from "@/lib/images";
 import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
 /**
@@ -75,13 +76,21 @@ async function fetchCatalog(): Promise<CatalogData> {
     regularCents: r.regular_cents,
     onSale: r.on_sale,
     currency: r.currency,
-    images: Array.isArray(r.images) ? (r.images as string[]) : [],
+    // next/image throws for hosts that are not configured, which would take
+    // the whole page down — drop anything unexpected and fall back to the
+    // placeholder instead. The admin form rejects such URLs up front.
+    images: Array.isArray(r.images)
+      ? (r.images as string[]).filter(isAllowedImageSrc)
+      : [],
     categoryIds: Array.isArray(r.category_ids) ? (r.category_ids as number[]) : [],
     inStock: r.in_stock,
     description: r.description ?? "",
     shortDescription: r.short_description ?? "",
     displayName: r.display_name,
-    imageOverride: r.image_override,
+    imageOverride:
+      r.image_override && isAllowedImageSrc(r.image_override)
+        ? r.image_override
+        : null,
     featured: r.featured,
   }));
 

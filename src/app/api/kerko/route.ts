@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProducts, primaryCategory, categoryDisplayName } from "@/lib/catalog";
+import { MINUTE_MS, rateLimited } from "@/lib/rate-limit";
 import type { PublicProduct } from "@/lib/types";
 
 /**
@@ -7,6 +8,12 @@ import type { PublicProduct } from "@/lib/types";
  * Returns only public fields — never prices.
  */
 export async function GET(request: NextRequest) {
+  // Every call loads the catalog, so the endpoint gets a ceiling well above
+  // what a fast typist reaches (the search bar debounces by 250 ms).
+  if (await rateLimited("search", { limit: 60, windowMs: MINUTE_MS })) {
+    return NextResponse.json({ items: [], total: 0 }, { status: 429 });
+  }
+
   const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) {
     return NextResponse.json({ items: [] });

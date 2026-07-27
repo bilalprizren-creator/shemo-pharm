@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/lib/auth";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 
 export interface AuthFormState {
   error?: string;
@@ -25,26 +25,8 @@ function formLang(formData: FormData): Lang {
   return isLang(lang) ? lang : "sq";
 }
 
-/** Simple in-memory rate limit per IP: 10 attempts / 10 minutes. */
-const attempts = new Map<string, { count: number; resetAt: number }>();
-const LIMIT = 10;
-const WINDOW_MS = 10 * 60 * 1000;
-
-async function rateLimited(): Promise<boolean> {
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "local";
-  const now = Date.now();
-  const entry = attempts.get(ip);
-  if (!entry || now > entry.resetAt) {
-    attempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > LIMIT;
-}
+/** Per IP: 10 login/registration attempts per 10 minutes. */
+const AUTH_LIMIT = { limit: 10, windowMs: TEN_MINUTES_MS };
 
 function loginSchema(dict: Dictionary) {
   return z.object({
@@ -60,7 +42,7 @@ export async function loginAction(
   const lang = formLang(formData);
   const dict = getDictionary(lang);
 
-  if (await rateLimited()) {
+  if (await rateLimited("auth", AUTH_LIMIT)) {
     return { error: dict.actions.tooManyAttempts };
   }
 
@@ -104,7 +86,7 @@ export async function registerAction(
   const lang = formLang(formData);
   const dict = getDictionary(lang);
 
-  if (await rateLimited()) {
+  if (await rateLimited("auth", AUTH_LIMIT)) {
     return { error: dict.actions.tooManyAttempts };
   }
 

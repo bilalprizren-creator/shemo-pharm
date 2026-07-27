@@ -13,6 +13,8 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { isAllowedImageSrc } from "@/lib/images";
+import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 
 /**
  * All admin mutations live here. Every action re-checks authorization with
@@ -32,6 +34,12 @@ export async function adminLoginAction(
   _prev: AdminFormState,
   formData: FormData
 ): Promise<AdminFormState> {
+  // The admin password is the most valuable credential here — same ceiling as
+  // the customer login, counted in its own bucket.
+  if (await rateLimited("admin-auth", { limit: 10, windowMs: TEN_MINUTES_MS })) {
+    return { error: "Shumë tentativa. Provoni përsëri pas disa minutash." };
+  }
+
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!email || !password) {
@@ -91,6 +99,19 @@ export async function rejectUserAction(formData: FormData): Promise<void> {
 
 /* ------------------------------ Products -------------------------------- */
 
+/**
+ * Only hosts next/image is configured for — anything else would throw while
+ * rendering the public product page instead of just showing a broken picture.
+ */
+const IMAGE_SRC_ERROR =
+  "Lejohen vetëm foto nga shemopharm.com ose shtigje si /products/foto.png";
+
+const imageLines = (raw: string): string[] =>
+  raw
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const productSchema = z.object({
   name: z.string().trim().min(2, "Emri duhet të ketë të paktën 2 shkronja."),
   sku: z.string().trim().max(40).optional().or(z.literal("")),
@@ -100,8 +121,19 @@ const productSchema = z.object({
   featured: z.coerce.boolean(),
   hidden: z.coerce.boolean(),
   displayName: z.string().trim().max(200).optional().or(z.literal("")),
-  imageOverride: z.string().trim().max(500).optional().or(z.literal("")),
-  images: z.string().max(5000).optional().or(z.literal("")),
+  imageOverride: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => !v || isAllowedImageSrc(v), IMAGE_SRC_ERROR)
+    .optional()
+    .or(z.literal("")),
+  images: z
+    .string()
+    .max(5000)
+    .refine((v) => imageLines(v).every(isAllowedImageSrc), IMAGE_SRC_ERROR)
+    .optional()
+    .or(z.literal("")),
   shortDescription: z.string().trim().max(2000).optional().or(z.literal("")),
   description: z.string().trim().max(8000).optional().or(z.literal("")),
 });
@@ -120,11 +152,7 @@ function slugify(name: string): string {
 
 function parseImages(raw: string | undefined): string[] {
   if (!raw) return [];
-  return raw
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter((s) => /^(https?:\/\/|\/)/.test(s))
-    .slice(0, 10);
+  return imageLines(raw).filter(isAllowedImageSrc).slice(0, 10);
 }
 
 function parseCategoryIds(formData: FormData): number[] {
