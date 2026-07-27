@@ -10,38 +10,46 @@ export function AddToCartIconButton({
   productId,
   productName,
   label,
+  addedLabel,
   className,
 }: {
   productId: number;
   productName: string;
   /** Localized aria label; falls back to Albanian when omitted. */
   label?: string;
+  /** Announced to screen readers after adding — the icon swap alone is silent. */
+  addedLabel?: string;
   className?: string;
 }) {
   const { add } = useCart();
   const [added, setAdded] = useState(false);
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        add(productId);
-        setAdded(true);
-        setTimeout(() => setAdded(false), 1200);
-      }}
-      aria-label={label ?? `Shto "${productName}" në shportë`}
-      className={`flex size-9 items-center justify-center rounded-lg transition-colors ${
-        added
-          ? "bg-accent-500 text-white"
-          : "bg-brand-600 text-white hover:bg-brand-700"
-      } ${className ?? ""}`}
-    >
-      {added ? (
-        <Check className="size-4.5" aria-hidden />
-      ) : (
-        <ShoppingBag className="size-4.5" aria-hidden />
-      )}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          add(productId);
+          setAdded(true);
+          setTimeout(() => setAdded(false), 1200);
+        }}
+        aria-label={label ?? `Shto "${productName}" në shportë`}
+        className={`flex size-9 items-center justify-center rounded-lg transition-colors ${
+          added
+            ? "bg-accent-500 text-white"
+            : "bg-brand-600 text-white hover:bg-brand-700"
+        } ${className ?? ""}`}
+      >
+        {added ? (
+          <Check className="size-4.5" aria-hidden />
+        ) : (
+          <ShoppingBag className="size-4.5" aria-hidden />
+        )}
+      </button>
+      <span role="status" className="sr-only">
+        {added ? (addedLabel ?? "U shtua në shportë") : ""}
+      </span>
+    </>
   );
 }
 
@@ -117,6 +125,9 @@ export function AddToCartWithQty({
           </>
         )}
       </button>
+      <span role="status" className="sr-only">
+        {added ? labels.added : ""}
+      </span>
     </div>
   );
 }

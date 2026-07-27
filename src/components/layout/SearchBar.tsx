@@ -39,6 +39,7 @@ export function SearchBar({
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -50,6 +51,8 @@ export function SearchBar({
     (value: string) => {
       setQuery(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      // A slower earlier request must never overwrite newer suggestions.
+      abortRef.current?.abort();
       const q = value.trim();
       if (q.length < 2) {
         setResults([]);
@@ -60,26 +63,32 @@ export function SearchBar({
       }
       setLoading(true);
       debounceRef.current = setTimeout(async () => {
+        const controller = new AbortController();
+        abortRef.current = controller;
         try {
-          const res = await fetch(`/api/kerko?q=${encodeURIComponent(q)}`);
+          const res = await fetch(`/api/kerko?q=${encodeURIComponent(q)}`, {
+            signal: controller.signal,
+          });
           const data = (await res.json()) as { items: PublicProduct[]; total: number };
           setResults(data.items);
           setTotal(data.total);
           setOpen(true);
         } catch {
+          if (controller.signal.aborted) return; // superseded by a newer query
           setResults([]);
         } finally {
-          setLoading(false);
+          if (!controller.signal.aborted) setLoading(false);
         }
       }, 250);
     },
     [close]
   );
 
-  // Clear any pending request timer on unmount
+  // Clear any pending request timer and in-flight request on unmount
   useEffect(
     () => () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
     },
     []
   );

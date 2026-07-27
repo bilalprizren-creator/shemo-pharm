@@ -102,6 +102,7 @@ export function ProductCard({
             productId={product.id}
             productName={product.name}
             label={fmt(dict.product.addToCartAria, { name: product.name })}
+            addedLabel={dict.product.addedToCart}
             className="z-10 shrink-0"
           />
         </div>

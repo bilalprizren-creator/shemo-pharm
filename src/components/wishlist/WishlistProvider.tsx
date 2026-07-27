@@ -44,9 +44,24 @@ function toggleId(id: number): void {
   listeners.forEach((l) => l());
 }
 
+/**
+ * Another tab changed the wishlist: drop the memo so the next snapshot
+ * re-reads localStorage, instead of the two tabs overwriting each other.
+ * (key === null means storage was cleared.)
+ */
+function onStorage(e: StorageEvent): void {
+  if (e.key !== null && e.key !== STORAGE_KEY) return;
+  cache = null;
+  listeners.forEach((l) => l());
+}
+
 function subscribe(listener: () => void): () => void {
+  if (listeners.size === 0) window.addEventListener("storage", onStorage);
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) window.removeEventListener("storage", onStorage);
+  };
 }
 
 interface WishlistContextValue {

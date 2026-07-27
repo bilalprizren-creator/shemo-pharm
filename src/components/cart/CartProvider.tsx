@@ -80,9 +80,24 @@ function clearCart(): void {
   persist([]);
 }
 
+/**
+ * Another tab changed the basket: drop the memo so the next snapshot re-reads
+ * localStorage. Without this the two tabs drift apart and whichever writes
+ * last overwrites the other's lines. (key === null means storage was cleared.)
+ */
+function onStorage(e: StorageEvent): void {
+  if (e.key !== null && e.key !== STORAGE_KEY) return;
+  cache = null;
+  listeners.forEach((l) => l());
+}
+
 function subscribe(listener: () => void): () => void {
+  if (listeners.size === 0) window.addEventListener("storage", onStorage);
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) window.removeEventListener("storage", onStorage);
+  };
 }
 
 interface CartContextValue {
