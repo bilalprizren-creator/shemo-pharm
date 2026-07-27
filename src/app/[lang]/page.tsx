@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
 import { canSeePrices, getSession } from "@/lib/auth";
 import { getFeaturedProducts, toCardProducts } from "@/lib/catalog";
-import { isLang, type Lang } from "@/lib/i18n";
+import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Hero } from "@/components/home/Hero";
 import { TrustStats } from "@/components/home/TrustStats";
@@ -10,6 +11,25 @@ import { WhyShemo } from "@/components/home/WhyShemo";
 import { NetworkSection } from "@/components/home/NetworkSection";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { AdviceSection } from "@/components/home/AdviceSection";
+
+/**
+ * Title and description are inherited from the layout — only the canonical and
+ * the language alternates are set here, so / and /en each declare themselves.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
+  return {
+    alternates: {
+      canonical: langHref(dict.lang, "/"),
+      languages: { sq: "/", en: "/en" },
+    },
+  };
+}
 
 export default async function HomePage({
   params,
