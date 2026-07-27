@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Package,
@@ -15,25 +12,17 @@ import type { Dictionary } from "@/lib/dictionaries";
 
 const TRUST_ICONS = [ShieldCheck, Package, Truck];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.08, ease: "easeOut" as const },
-  }),
-};
-
 /**
  * Light, warm two-column hero: strong copy + CTAs on the left, the pharmacist
  * advising a mother and daughter on the right in an elegant framed card with a
  * single "licensed distributor" badge. Restrained motion, no floating collage.
+ *
+ * The entrance is the CSS `.rise` animation (see globals.css) with a staggered
+ * animation-delay, not a JS one: the hero is the most important surface on the
+ * site and must be readable from the first paint, without hydration and even
+ * if JavaScript never runs. That also keeps this a server component.
  */
 export function Hero({ dict }: { dict: Dictionary }) {
-  const reduceMotion = useReducedMotion();
-  const variants = reduceMotion ? undefined : fadeUp;
-  const initial = reduceMotion ? undefined : "hidden";
-
   const trustPoints = [
     dict.hero.trustLicensed,
     dict.hero.trustProducts,
@@ -50,48 +39,29 @@ export function Hero({ dict }: { dict: Dictionary }) {
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-14 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:px-6 lg:pb-20 lg:pt-16">
         {/* Copy column */}
         <div>
-          <motion.p
-            custom={0}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={variants}
-            className="flex max-w-md items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-accent-700"
-          >
+          <p className="rise flex max-w-md items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-accent-700">
             <ShieldCheck className="size-4 shrink-0" aria-hidden />
             {dict.hero.eyebrow}
-          </motion.p>
+          </p>
 
-          <motion.h1
-            custom={1}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={variants}
-            className="mt-5 max-w-2xl font-display text-[2rem] font-bold leading-[1.08] tracking-tight text-ink-900 sm:text-[2.6rem] lg:text-[3.2rem]"
+          <h1
+            style={{ animationDelay: "80ms" }}
+            className="rise mt-5 max-w-2xl font-display text-[2rem] font-bold leading-[1.08] tracking-tight text-ink-900 sm:text-[2.6rem] lg:text-[3.2rem]"
           >
             {dict.hero.h1a}{" "}
             <span className="text-brand-600">{dict.hero.h1b}</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            custom={2}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={variants}
-            className="mt-5 max-w-xl text-base leading-relaxed text-ink-500 sm:text-lg"
+          <p
+            style={{ animationDelay: "160ms" }}
+            className="rise mt-5 max-w-xl text-base leading-relaxed text-ink-500 sm:text-lg"
           >
             {dict.hero.sub}
-          </motion.p>
+          </p>
 
-          <motion.div
-            custom={3}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={variants}
-            className="mt-8 flex flex-wrap items-center gap-3"
+          <div
+            style={{ animationDelay: "240ms" }}
+            className="rise mt-8 flex flex-wrap items-center gap-3"
           >
             <Link
               href={langHref(dict.lang, "/produktet")}
@@ -110,15 +80,11 @@ export function Hero({ dict }: { dict: Dictionary }) {
               <Phone className="size-4" aria-hidden />
               {dict.hero.ctaContact}
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.ul
-            custom={4}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={variants}
-            className="mt-9 flex flex-wrap gap-x-6 gap-y-3"
+          <ul
+            style={{ animationDelay: "320ms" }}
+            className="rise mt-9 flex flex-wrap gap-x-6 gap-y-3"
           >
             {trustPoints.map((text, i) => {
               const Icon = TRUST_ICONS[i] ?? ShieldCheck;
@@ -132,17 +98,11 @@ export function Hero({ dict }: { dict: Dictionary }) {
                 </li>
               );
             })}
-          </motion.ul>
+          </ul>
         </div>
 
         {/* Photo column */}
-        <motion.div
-          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-          className="relative"
-        >
+        <div className="rise relative" style={{ animationDelay: "150ms" }}>
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line shadow-card-hover">
             <Image
               src="/photos/hero-barnatore.jpg"
@@ -168,7 +128,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
               </span>
             </span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

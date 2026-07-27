@@ -89,10 +89,30 @@ h4 {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Entrance for the hero: a CSS animation rather than a JS one, so the copy is
+   painted with the first frame and stays readable if JavaScript never runs.
+   Stagger with an inline animation-delay; the reduced-motion block above
+   collapses the duration, leaving the element in its final, visible state. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.5s ease-out both;
 }
 
 /* Utility: hide scrollbar on horizontal product rows while keeping scroll */
