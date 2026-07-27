@@ -51,6 +51,11 @@ export async function generateMetadata({
       siteName: SITE.name,
       title: dict.site.titleDefault,
       description: dict.site.description,
+      // Declaring openGraph here suppresses the app/opengraph-image.tsx file
+      // convention for this branch, so the generated card is named explicitly.
+      // It stays at the bare /opengraph-image path (the proxy matcher skips it),
+      // which keeps the URL free of the /sq -> / redirect.
+      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
   };
 }
