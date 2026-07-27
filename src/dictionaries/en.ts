@@ -168,7 +168,7 @@ export const en: Dictionary = {
     networkEyebrow: "Our network",
     networkTitle: "A reliable network for supply and distribution",
     networkSub:
-      "With 3 pharmacies and 2 depots, SHEMO Pharm provides dependable supply, fast access to products and professional support for clients across Kosovo.",
+      "With 12 pharmacies and 2 depots, SHEMO Pharm provides dependable supply, fast access to products and professional support for clients across Kosovo.",
     networkPharmacies: "Pharmacies",
     networkDepots: "Depots",
     networkPoints: [

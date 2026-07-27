@@ -172,7 +172,7 @@ export const sq = {
     networkEyebrow: "Rrjeti ynë",
     networkTitle: "Rrjet i besueshëm për furnizim dhe shpërndarje",
     networkSub:
-      "Me 3 barnatore dhe 2 depo, SHEMO Pharm ofron furnizim të qëndrueshëm, qasje të shpejtë në produkte dhe mbështetje profesionale për klientë në gjithë Kosovën.",
+      "Me 12 barnatore dhe 2 depo, SHEMO Pharm ofron furnizim të qëndrueshëm, qasje të shpejtë në produkte dhe mbështetje profesionale për klientë në gjithë Kosovën.",
     networkPharmacies: "Barnatore",
     networkDepots: "Depo",
     networkPoints: [

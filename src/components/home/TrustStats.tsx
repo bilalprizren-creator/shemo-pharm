@@ -14,7 +14,7 @@ const STAT_ICONS: LucideIcon[] = [Users, Package, Handshake, Building2, Warehous
 
 /**
  * Compact company-figures band — a restrained white strip with hairline
- * dividers and one small icon per figure. Five discrete stats (never "3 + 2").
+ * dividers and one small icon per figure. Five discrete stats (never "12 + 2").
  * Used on the homepage right under <Hero /> and standalone on /rreth-nesh.
  */
 export function TrustStats({ dict }: { dict: Dictionary }) {

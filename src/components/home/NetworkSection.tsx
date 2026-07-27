@@ -4,7 +4,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 
 /**
  * "Rrjet i besueshëm për furnizim dhe shpërndarje" — communicates the physical
- * network (3 pharmacies + 2 depots) with stat chips, coverage bullets and a
+ * network (12 pharmacies + 2 depots) with stat chips, coverage bullets and a
  * layered pair of real warehouse photos.
  */
 export function NetworkSection({ dict }: { dict: Dictionary }) {
@@ -29,7 +29,7 @@ export function NetworkSection({ dict }: { dict: Dictionary }) {
             <div className="flex items-center gap-3 rounded-xl border border-line bg-surface-deep px-4 py-3">
               <MapPin className="size-5 text-brand-600" aria-hidden />
               <span className="leading-tight">
-                <span className="font-display text-xl font-bold text-brand-700">3</span>{" "}
+                <span className="font-display text-xl font-bold text-brand-700">12</span>{" "}
                 <span className="text-sm font-medium text-ink-600">
                   {dict.home.networkPharmacies}
                 </span>
