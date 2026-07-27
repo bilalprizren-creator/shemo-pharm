@@ -79,11 +79,11 @@ export const sq = {
     eyebrow: "Distributor i licencuar farmaceutik në Kosovë",
     h1a: "Furnizim farmaceutik",
     h1b: "që i beson Kosova.",
-    sub: "Mbi 2,000 produkte dhe furnizim profesional për barnatore, institucione dhe partnerë shëndetësorë në gjithë Kosovën.",
+    sub: "Mbi 3,000 produkte dhe furnizim profesional për barnatore, institucione dhe partnerë shëndetësorë në gjithë Kosovën.",
     ctaProducts: "Shiko produktet",
     ctaContact: "Na kontaktoni",
     trustLicensed: "Distributor i licencuar",
-    trustProducts: "2000+ produkte",
+    trustProducts: "3000+ produkte",
     trustSupply: "Furnizim në gjithë Kosovën",
     badge: "I licencuar nga MSh e Kosovës",
     imageAlt:
@@ -138,7 +138,7 @@ export const sq = {
     featuredEyebrow: "Të zgjedhura për ju",
     featuredTitle: "Produktet e veçuara",
     featuredSubtitle: "Një përzgjedhje nga katalogu ynë",
-    featuredCta: "Shiko katalogun me 2,000+ produkte",
+    featuredCta: "Shiko katalogun me 3,000+ produkte",
     whyEyebrow: "Pse SHEMO Pharm",
     whyTitle: "Pse partnerët na besojnë neve?",
     whySub:

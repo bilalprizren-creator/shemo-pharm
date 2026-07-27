@@ -75,11 +75,11 @@ export const en: Dictionary = {
     eyebrow: "Licensed pharmaceutical distributor in Kosovo",
     h1a: "The pharmaceutical supply",
     h1b: "Kosovo trusts.",
-    sub: "Over 2,000 products and professional supply for pharmacies, institutions and healthcare partners across Kosovo.",
+    sub: "Over 3,000 products and professional supply for pharmacies, institutions and healthcare partners across Kosovo.",
     ctaProducts: "View products",
     ctaContact: "Contact us",
     trustLicensed: "Licensed distributor",
-    trustProducts: "2,000+ products",
+    trustProducts: "3,000+ products",
     trustSupply: "Delivery across Kosovo",
     badge: "Licensed by the Kosovo Ministry of Health",
     imageAlt:
@@ -134,7 +134,7 @@ export const en: Dictionary = {
     featuredEyebrow: "Picked for you",
     featuredTitle: "Featured products",
     featuredSubtitle: "A selection from our catalog",
-    featuredCta: "Browse the 2,000+ product catalog",
+    featuredCta: "Browse the 3,000+ product catalog",
     whyEyebrow: "Why SHEMO Pharm",
     whyTitle: "Why partners trust us",
     whySub:
