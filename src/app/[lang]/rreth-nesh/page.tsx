@@ -112,13 +112,13 @@ export default async function AboutPage({ params }: Props) {
           >
             {dict.aboutPage.valuesTitle}
           </h2>
-          <ul className="mx-auto mt-8 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mx-auto mt-8 flex max-w-5xl flex-wrap justify-center gap-4">
             {dict.aboutPage.values.map((v, i) => {
               const Icon = VALUE_ICONS[i] ?? BadgeCheck;
               return (
                 <li
                   key={v.title}
-                  className="rounded-2xl border border-ink-900/6 bg-white p-6 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
+                  className="w-full rounded-2xl border border-ink-900/6 bg-white p-6 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]"
                 >
                   <Icon className="size-6 text-brand-600" strokeWidth={1.75} aria-hidden />
                   <h3 className="mt-3 font-bold text-ink-900">{v.title}</h3>
