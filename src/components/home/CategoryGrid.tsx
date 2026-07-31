@@ -11,7 +11,7 @@ import {
   Stethoscope,
   type LucideIcon,
 } from "lucide-react";
-import { getCategoryBySlug, HOME_CATEGORIES } from "@/lib/catalog";
+import { categoryDisplayName, getCategoryBySlug, HOME_CATEGORIES } from "@/lib/catalog";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
@@ -32,15 +32,23 @@ const ICONS: Record<string, LucideIcon> = {
  * product packshots and no slider, so every card reads equal and premium.
  */
 export async function CategoryGrid({ dict }: { dict: Dictionary }) {
+  // The title comes from the category itself, never from the dictionary: the
+  // two used to disagree (ersa-med-ortopedi read "Produkte ortopedike" here but
+  // "Ersa Med (Ortopedi)" in the nav, footer, filter and breadcrumbs). Only the
+  // blurb is copy, so it stays translated.
   const cards = (
     await Promise.all(
-      HOME_CATEGORIES.map(async (c) => ({
-        ...c,
-        copy: dict.home.categoryCards[c.slug as keyof typeof dict.home.categoryCards],
-        count: (await getCategoryBySlug(c.slug))?.count ?? 0,
-      }))
+      HOME_CATEGORIES.map(async (c) => {
+        const category = await getCategoryBySlug(c.slug);
+        return {
+          ...c,
+          title: category ? categoryDisplayName(category) : null,
+          blurb: dict.home.categoryCards[c.slug as keyof typeof dict.home.categoryCards],
+          count: category?.count ?? 0,
+        };
+      })
     )
-  ).filter((c) => c.count > 0 && c.copy);
+  ).filter((c) => c.count > 0 && c.title && c.blurb);
 
   return (
     <section aria-labelledby="kategorite-titulli" className="bg-white">
@@ -85,10 +93,10 @@ export async function CategoryGrid({ dict }: { dict: Dictionary }) {
                     <Icon className="size-6" strokeWidth={1.5} aria-hidden />
                   </span>
                   <h3 className="mt-4 font-semibold leading-snug text-ink-900">
-                    {c.copy.title}
+                    {c.title}
                   </h3>
                   <p className="mt-1 line-clamp-2 text-sm leading-snug text-ink-500">
-                    {c.copy.blurb}
+                    {c.blurb}
                   </p>
                   <span className="mt-auto flex items-center justify-between pt-4 text-xs font-semibold text-brand-700">
                     {c.count} {dict.common.productsSuffix}

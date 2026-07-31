@@ -45,6 +45,8 @@ interface CategoryRow {
   parent: number;
   count: number;
   display_name: string | null;
+  kind: string;
+  sort: number;
 }
 
 async function fetchCatalog(): Promise<CatalogData> {
@@ -64,7 +66,7 @@ async function fetchCatalog(): Promise<CatalogData> {
   `) as ProductRow[];
 
   const categoryRows = (await sql`
-    SELECT id, name, slug, parent, count, display_name FROM categories
+    SELECT id, name, slug, parent, count, display_name, kind, sort FROM categories
   `) as CategoryRow[];
 
   const products: Product[] = productRows.map((r) => ({
@@ -101,6 +103,8 @@ async function fetchCatalog(): Promise<CatalogData> {
     parent: r.parent,
     count: r.count,
     displayName: r.display_name,
+    kind: r.kind === "brand" ? "brand" : "type",
+    sort: r.sort ?? 0,
   }));
 
   return { products, categories };
@@ -125,24 +129,45 @@ export async function getCategoryBySlug(slug: string): Promise<Category | undefi
   return (await loadCatalog()).categories.find((c) => c.slug === slug);
 }
 
+/** Curated order first, then size — so the nav stops reshuffling with stock. */
+function byCuratedOrder(a: Category, b: Category): number {
+  return a.sort - b.sort || b.count - a.count;
+}
+
+/**
+ * The product-type roots the site navigates. Brands are deliberately excluded:
+ * they are a parallel taxonomy shown on /markat, not a way to browse by what a
+ * product is. Their pages stay reachable — getCategoryBySlug resolves every
+ * slug, so /kategorite/cansin still lists Cansin's products.
+ */
 export async function getTopCategories(): Promise<Category[]> {
   const { categories } = await loadCatalog();
   return categories
-    .filter((c) => c.parent === 0 && c.count > 0)
+    .filter((c) => c.parent === 0 && c.count > 0 && c.kind === "type")
+    .sort(byCuratedOrder);
+}
+
+/** Every partner brand that has products, largest first. Used by /markat. */
+export async function getBrandCategories(): Promise<Category[]> {
+  const { categories } = await loadCatalog();
+  return categories
+    .filter((c) => c.kind === "brand" && c.parent === 0 && c.count > 0)
     .sort((a, b) => b.count - a.count);
 }
 
+/** The type tree, for the sidebar filter and /kategorite. Brands are omitted. */
 export async function getCategoryTree(): Promise<CategoryNode[]> {
   const { categories } = await loadCatalog();
   const byParent = new Map<number, Category[]>();
   for (const c of categories) {
+    if (c.kind !== "type") continue;
     const list = byParent.get(c.parent) ?? [];
     list.push(c);
     byParent.set(c.parent, list);
   }
   const build = (parent: number): CategoryNode[] =>
     (byParent.get(parent) ?? [])
-      .sort((a, b) => b.count - a.count)
+      .sort(byCuratedOrder)
       .map((c) => ({ ...c, children: build(c.id) }));
   return build(0);
 }
@@ -374,12 +399,12 @@ export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
  * are covered; the icon key maps to a lucide icon in the CategoryGrid.
  */
 export const HOME_CATEGORIES: { slug: string; icon: string }[] = [
-  { slug: "paisje-medicinale", icon: "stethoscope" },
-  { slug: "aparatura", icon: "activity" },
-  { slug: "ersa-med-ortopedi", icon: "footprints" },
+  { slug: "barnat", icon: "cross" },
   { slug: "suplements-effervescent", icon: "pill" },
   { slug: "kozmetike", icon: "sparkles" },
-  { slug: "barnat", icon: "cross" },
+  { slug: "ortopedi", icon: "footprints" },
+  { slug: "paisje-medicinale", icon: "stethoscope" },
   { slug: "alkool-dhe-antiseptik", icon: "droplets" },
-  { slug: "atc-natyral", icon: "leaf" },
+  { slug: "fasha", icon: "activity" },
+  { slug: "vajra", icon: "leaf" },
 ];

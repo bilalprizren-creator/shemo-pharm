@@ -174,17 +174,44 @@ async function syncProductCategories(
       ON CONFLICT DO NOTHING
     `;
   }
-  // Keep the per-category product counts the sidebar shows in sync.
+  await recountCategories();
+}
+
+/**
+ * Recompute every category's product count.
+ *
+ * A product counts for a category if it is tagged on that category OR on any
+ * descendant of it — the same definition scripts/fix-categories.mjs writes, and
+ * the one the site reads: browsing a category lists its whole subtree
+ * (catalog.ts categoryIdWithDescendants). Counting only direct links would
+ * collapse every parent (kozmetike 481 -> 280) and, since `count > 0` gates
+ * visibility in the nav, homepage, /kategorite and the sitemap, drop categories
+ * out of the UI.
+ *
+ * Each product is counted once per category even when tagged on both the parent
+ * and one of its children (805 of 2049 products sit in several branches), hence
+ * count(DISTINCT p.id). The depth guard is insurance: a cycle in `parent` would
+ * otherwise make the recursion run forever inside an admin save.
+ */
+async function recountCategories(): Promise<void> {
   await sql`
-    UPDATE categories c SET count = sub.n
-    FROM (
-      SELECT c2.id, count(pc.product_id)::int AS n
-      FROM categories c2
-      LEFT JOIN product_categories pc ON pc.category_id = c2.id
+    WITH RECURSIVE subtree AS (
+      SELECT id AS root, id AS node, 0 AS depth FROM categories
+      UNION ALL
+      SELECT s.root, c.id, s.depth + 1
+      FROM subtree s
+      JOIN categories c ON c.parent = s.node
+      WHERE s.depth < 10
+    ), tallied AS (
+      SELECT s.root AS id, count(DISTINCT p.id)::int AS n
+      FROM subtree s
+      LEFT JOIN product_categories pc ON pc.category_id = s.node
       LEFT JOIN products p ON p.id = pc.product_id AND p.hidden = false
-      GROUP BY c2.id
-    ) sub
-    WHERE c.id = sub.id AND c.count IS DISTINCT FROM sub.n
+      GROUP BY s.root
+    )
+    UPDATE categories c SET count = t.n
+    FROM tallied t
+    WHERE c.id = t.id AND c.count IS DISTINCT FROM t.n
   `;
 }
 

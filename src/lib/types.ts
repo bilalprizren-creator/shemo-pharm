@@ -39,6 +39,13 @@ export interface CardProduct extends PublicProduct {
   discountPct: number | null;
 }
 
+/**
+ * `type` categories form the product tree the site navigates; `brand` ones are
+ * a parallel, flat list that only /markat reads. The WooCommerce export mixed
+ * both into one tree — see scripts/restructure-categories.mjs.
+ */
+export type CategoryKind = "type" | "brand";
+
 export interface Category {
   id: number;
   name: string;
@@ -47,6 +54,9 @@ export interface Category {
   count: number;
   /** Admin override for the display name (from the DB). Null when not set. */
   displayName: string | null;
+  kind: CategoryKind;
+  /** Manual ordering within a level; ties fall back to count. */
+  sort: number;
 }
 
 export interface CategoryNode extends Category {

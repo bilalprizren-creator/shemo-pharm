@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BRANDS } from "@/lib/site";
-import { getAllCategories } from "@/lib/catalog";
+import { getBrandCategories } from "@/lib/catalog";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
@@ -25,21 +25,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Brands that have their own category in the catalog link straight to it. */
-const BRAND_CATEGORY: Record<string, string> = {
-  Cansin: "cansin",
-  "Kräuterhof": "krauterhof",
-  "Swiss Energy": "swiss-energy",
-};
+/** "Kräuterhof" -> "krauterhof", "TIO Medikal" -> "tio-medikal". */
+function brandKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ë/g, "e")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export default async function BrandsPage({ params }: Props) {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
 
-  const slugs = new Set((await getAllCategories()).map((c) => c.slug));
+  // Brands are real categories now (kind = 'brand'), so a partner logo links to
+  // its actual products instead of a name search. Matching is by normalised
+  // name against both the slug and the display name — "TIO Medikal" is filed
+  // under the slug `tio-medical`. Brands with no category still fall back to
+  // the search, which is what every brand did before.
+  const brandCategories = await getBrandCategories();
+  const byKey = new Map<string, string>();
+  for (const c of brandCategories) {
+    byKey.set(c.slug, c.slug);
+    byKey.set(brandKey(c.displayName ?? c.name), c.slug);
+  }
   const brandHref = (name: string): string => {
-    const slug = BRAND_CATEGORY[name];
-    if (slug && slugs.has(slug)) return `/kategorite/${slug}`;
+    const slug = byKey.get(brandKey(name));
+    if (slug) return `/kategorite/${slug}`;
     return `/produktet?kerko=${encodeURIComponent(name.split(" ")[0])}`;
   };
 

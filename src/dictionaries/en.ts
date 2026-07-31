@@ -97,39 +97,16 @@ export const en: Dictionary = {
     categoriesTitle: "Main categories",
     categoriesSub:
       "Choose by category and quickly find the products you need.",
+    /** Blurbs only — the card title is the category's own display name. */
     categoryCards: {
-      "paisje-medicinale": {
-        title: "Medical devices",
-        blurb: "Devices and materials for professional use",
-      },
-      aparatura: {
-        title: "Equipment",
-        blurb: "Measuring instruments and medical technology",
-      },
-      "ersa-med-ortopedi": {
-        title: "Orthopedic products",
-        blurb: "Supports, braces and orthopedic solutions",
-      },
-      "suplements-effervescent": {
-        title: "Supplements",
-        blurb: "Vitamins, minerals and dietary supplements",
-      },
-      kozmetike: {
-        title: "Cosmetics and personal care",
-        blurb: "Skincare and hygiene products",
-      },
-      barnat: {
-        title: "Medicines",
-        blurb: "Pharmaceutical products from well-known brands",
-      },
-      "alkool-dhe-antiseptik": {
-        title: "Hygiene and antiseptics",
-        blurb: "Disinfectants and antiseptic products",
-      },
-      "atc-natyral": {
-        title: "Natural products",
-        blurb: "Medicinal teas and herbal products",
-      },
+      barnat: "Pharmaceutical products from well-known brands",
+      "suplements-effervescent": "Vitamins, minerals and dietary supplements",
+      kozmetike: "Skincare and hygiene products",
+      ortopedi: "Supports, braces and orthopedic solutions",
+      "paisje-medicinale": "Measuring instruments and devices for professional use",
+      "alkool-dhe-antiseptik": "Disinfectants and antiseptic products",
+      fasha: "Bandages, plasters and wound-care materials",
+      vajra: "Natural oils and medicinal teas",
     },
     featuredEyebrow: "Picked for you",
     featuredTitle: "Featured products",

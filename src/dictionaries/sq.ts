@@ -101,39 +101,16 @@ export const sq = {
     categoriesTitle: "Kategoritë kryesore",
     categoriesSub:
       "Zgjidhni sipas kategorisë dhe gjeni shpejt produktet që ju nevojiten.",
+    /** Blurbs only — the card title is the category's own display name. */
     categoryCards: {
-      "paisje-medicinale": {
-        title: "Pajisje mjekësore",
-        blurb: "Pajisje dhe materiale për përdorim profesional",
-      },
-      aparatura: {
-        title: "Aparatura",
-        blurb: "Aparate matëse dhe teknologji mjekësore",
-      },
-      "ersa-med-ortopedi": {
-        title: "Produkte ortopedike",
-        blurb: "Mbështetëse, banda dhe zgjidhje ortopedike",
-      },
-      "suplements-effervescent": {
-        title: "Suplemente",
-        blurb: "Vitamina, minerale dhe suplemente ushqimore",
-      },
-      kozmetike: {
-        title: "Kozmetikë dhe kujdes personal",
-        blurb: "Produkte për kujdesin e lëkurës dhe higjienën",
-      },
-      barnat: {
-        title: "Barnat",
-        blurb: "Produkte farmaceutike nga brende të njohura",
-      },
-      "alkool-dhe-antiseptik": {
-        title: "Higjienë dhe antiseptikë",
-        blurb: "Dezinfektues dhe produkte antiseptike",
-      },
-      "atc-natyral": {
-        title: "Produkte natyrale",
-        blurb: "Çajra mjekësore dhe produkte bimore",
-      },
+      barnat: "Produkte farmaceutike nga brende të njohura",
+      "suplements-effervescent": "Vitamina, minerale dhe suplemente ushqimore",
+      kozmetike: "Produkte për kujdesin e lëkurës dhe higjienën",
+      ortopedi: "Mbështetëse, banda dhe zgjidhje ortopedike",
+      "paisje-medicinale": "Aparate matëse dhe pajisje për përdorim profesional",
+      "alkool-dhe-antiseptik": "Dezinfektues dhe produkte antiseptike",
+      fasha: "Fasho, fllastera dhe materiale për plagë",
+      vajra: "Vajra natyrale dhe çajra mjekësore",
     },
     featuredEyebrow: "Të zgjedhura për ju",
     featuredTitle: "Produktet e veçuara",
