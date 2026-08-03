@@ -51,3 +51,5 @@ data/.auth-secret
 
 .vercel
 .env*
+
+.env*
