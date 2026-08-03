@@ -270,7 +270,11 @@ if (failures.length) {
 
 // Anything the automatic crop may have got wrong, so it can be checked by eye
 // rather than trusted. These are not errors — they are the ones worth opening.
-const suspect = all.filter((e) => e.blank || e.markPct < 8 || e.markPct > 99 || e.scale > 1.8);
+// Enlargement is NOT on this list. Most sources are 500-600px while the PDP
+// slot wants 1080px on a retina screen, so the upscale happens either way —
+// once here with lanczos3, or on every view in the browser. Only a scale past
+// 3x means the source was genuinely too small to use.
+const suspect = all.filter((e) => e.blank || e.markPct < 8 || e.markPct > 99.5 || e.scale > 3);
 console.log(`\nWorth a look by eye: ${suspect.length} of ${all.length}`);
 for (const e of suspect.slice(0, 25)) {
   const why = e.blank
