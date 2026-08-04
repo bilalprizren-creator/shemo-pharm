@@ -6,7 +6,17 @@
 export const SITE = {
   name: "SHEMO PHARM",
   legalName: "Shemo Pharm",
-  domain: "https://shemopharm.com",
+  /**
+   * Where this site actually lives — the canonical origin for metadataBase,
+   * the sitemap, robots.txt and the JSON-LD graph.
+   *
+   * NOT shemopharm.com: that domain belongs to someone else and serves an
+   * unrelated WordPress site where these paths 404. Pointing here at it made
+   * every page declare a canonical URL on a stranger's domain, which hands the
+   * site's search identity away and leaves nothing indexable. Only change this
+   * to a domain that genuinely serves this deployment.
+   */
+  domain: "https://shemo-pharm.vercel.app",
   tagline: "Distributor me shumicë i pajisjeve dhe produkteve mjekësore",
   taglineLong:
     "Depo farmaceutike dhe distributor me shumicë i produkteve dhe pajisjeve mjekësore",
