@@ -29,7 +29,7 @@ export function AddToCartIconButton({
       <button
         type="button"
         onClick={() => {
-          add(productId);
+          add(productId, 1, productName);
           setAdded(true);
           setTimeout(() => setAdded(false), 1200);
         }}
@@ -66,9 +66,12 @@ export interface AddToCartQtyLabels {
 /** Quantity stepper + add button for the product detail page. */
 export function AddToCartWithQty({
   productId,
+  productName,
   labels,
 }: {
   productId: number;
+  /** Only used for the confirmation toast. */
+  productName?: string;
   labels: AddToCartQtyLabels;
 }) {
   const { add } = useCart();
@@ -104,7 +107,7 @@ export function AddToCartWithQty({
       <button
         type="button"
         onClick={() => {
-          add(productId, qty);
+          add(productId, qty, productName);
           setAdded(true);
           setTimeout(() => setAdded(false), 1500);
         }}

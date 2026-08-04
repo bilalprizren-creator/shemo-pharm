@@ -195,6 +195,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-4 border-t border-ink-900/6 pt-4">
               <AddToCartWithQty
                 productId={product.id}
+                productName={product.name}
                 labels={{
                   add: dict.product.addToCart,
                   added: dict.product.addedToCart,

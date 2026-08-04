@@ -100,10 +100,18 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
+/** The last product added by name, for the confirmation toast. `seq` makes a
+ *  second add of the same product a new notification rather than a no-op. */
+export interface CartNotice {
+  name: string;
+  seq: number;
+}
+
 interface CartContextValue {
   lines: CartLine[];
   count: number;
-  add: (id: number, qty?: number) => void;
+  /** `name` is optional and only drives the toast — bulk adds pass none. */
+  add: (id: number, qty?: number, name?: string) => void;
   setQty: (id: number, qty: number) => void;
   remove: (id: number) => void;
   clear: () => void;
@@ -112,6 +120,8 @@ interface CartContextValue {
   open: boolean;
   openCart: () => void;
   closeCart: () => void;
+  notice: CartNotice | null;
+  dismissNotice: () => void;
 }
 
 const CartContext = createContext<CartContextValue>({
@@ -125,6 +135,8 @@ const CartContext = createContext<CartContextValue>({
   open: false,
   openCart: () => {},
   closeCart: () => {},
+  notice: null,
+  dismissNotice: () => {},
 });
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -138,6 +150,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const openCart = useCallback(() => setOpen(true), []);
   const closeCart = useCallback(() => setOpen(false), []);
 
+  const [notice, setNotice] = useState<CartNotice | null>(null);
+  const dismissNotice = useCallback(() => setNotice(null), []);
+  const add = useCallback((id: number, qty = 1, name?: string) => {
+    addLine(id, qty);
+    if (name) setNotice((prev) => ({ name, seq: (prev?.seq ?? 0) + 1 }));
+  }, []);
+
   const count = lines.reduce((sum, l) => sum + l.qty, 0);
 
   return (
@@ -145,7 +164,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       value={{
         lines,
         count,
-        add: addLine,
+        add,
         setQty,
         remove: removeLine,
         clear: clearCart,
@@ -153,6 +172,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         open,
         openCart,
         closeCart,
+        notice,
+        dismissNotice,
       }}
     >
       {children}

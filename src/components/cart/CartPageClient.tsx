@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  CheckCircle2,
   Loader2,
   Mail,
   MessageCircle,
@@ -23,6 +25,9 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
   const { items: resolved, error, ready } = useCartItems();
   const order = useCartOrder(resolved ?? [], dict);
   const lang = dict.lang;
+  // The order leaves through WhatsApp or a mail client, so the site never
+  // hears back — this is the only confirmation the customer gets.
+  const [sent, setSent] = useState(false);
 
   if (error) {
     return (
@@ -172,33 +177,70 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
           </p>
         )}
 
-        <div className="mt-5 space-y-2.5">
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => logOrder("whatsapp")}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
-          >
-            <MessageCircle className="size-4.5" aria-hidden />
-            {dict.cartPage.sendWhatsapp}
-          </a>
-          <a
-            href={mailHref}
-            onClick={() => logOrder("email")}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
-          >
-            <Mail className="size-4.5 text-brand-600" aria-hidden />
-            {dict.cartPage.sendEmail}
-          </a>
-          <button
-            type="button"
-            onClick={clear}
-            className="w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
-          >
-            {dict.cartPage.clearCart}
-          </button>
-        </div>
+        {sent ? (
+          <div className="mt-5 rounded-xl bg-accent-50 px-4 py-4" role="status">
+            <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
+              <CheckCircle2 className="size-5 text-accent-600" aria-hidden />
+              {dict.cartPage.orderSentTitle}
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-ink-600">
+              {dict.cartPage.orderSentText}
+            </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  clear();
+                  setSent(false);
+                }}
+                className="min-h-11 flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+              >
+                {dict.cartPage.clearCart}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSent(false)}
+                className="min-h-11 flex-1 rounded-full border border-ink-900/12 bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+              >
+                {dict.cartPage.keepCart}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-5 space-y-2.5">
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                logOrder("whatsapp");
+                setSent(true);
+              }}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+            >
+              <MessageCircle className="size-4.5" aria-hidden />
+              {dict.cartPage.sendWhatsapp}
+            </a>
+            <a
+              href={mailHref}
+              onClick={() => {
+                logOrder("email");
+                setSent(true);
+              }}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+            >
+              <Mail className="size-4.5 text-brand-600" aria-hidden />
+              {dict.cartPage.sendEmail}
+            </a>
+            <button
+              type="button"
+              onClick={clear}
+              className="w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
+            >
+              {dict.cartPage.clearCart}
+            </button>
+          </div>
+        )}
 
         <p className="mt-4 text-[12px] leading-relaxed text-ink-400">
           {dict.cartPage.note}

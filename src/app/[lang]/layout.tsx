@@ -10,6 +10,7 @@ import { StickyMobileBar } from "@/components/layout/StickyMobileBar";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartToast } from "@/components/cart/CartToast";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import "../globals.css";
 
@@ -104,6 +105,7 @@ export default async function RootLayout({
             <Footer dict={dict} />
             <StickyMobileBar dict={dict} />
             <CartDrawer dict={dict} />
+            <CartToast dict={dict} />
           </CartProvider>
         </WishlistProvider>
       </body>

@@ -6,13 +6,27 @@ import {
   Clock,
   Heart,
   LogOut,
+  MailWarning,
   ShoppingBag,
   UserRound,
 } from "lucide-react";
-import { findUser, getSession } from "@/lib/auth";
+import { canSeePrices, findUser, getSession } from "@/lib/auth";
 import { logoutAction } from "@/lib/auth-actions";
-import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { sql } from "@/lib/db";
+import { formatPrice } from "@/lib/format";
+import { fmt, isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
+import { ResendVerification } from "@/components/account/ResendVerification";
+import { ReorderButton } from "@/components/account/ReorderButton";
+
+interface OrderRow {
+  id: number;
+  channel: string;
+  items: { id: number; name: string; qty: number }[];
+  items_count: number;
+  total_cents: number;
+  created_at: Date;
+}
 
 interface Props {
   params: Promise<{ lang: string }>;
@@ -35,6 +49,28 @@ export default async function AccountPage({ params }: Props) {
 
   const user = await findUser(session.email);
   const approved = user?.status === "approved";
+  const emailVerified = user ? user.emailVerifiedAt !== null : true;
+  const showPrices = canSeePrices(session);
+
+  // Orders the customer sent while logged in (guest orders carry no address).
+  const orders = (await sql`
+    SELECT id, channel, items, items_count, total_cents, created_at
+    FROM orders WHERE customer_email = ${session.email}
+    ORDER BY created_at DESC LIMIT 10
+  `) as OrderRow[];
+
+  // A product can have been hidden or deleted since the order was logged —
+  // drop those ids before they reach the reorder button.
+  const orderedIds = [...new Set(orders.flatMap((o) => o.items.map((i) => i.id)))];
+  const live = new Set(
+    orderedIds.length === 0
+      ? []
+      : (
+          (await sql`
+            SELECT id FROM products WHERE id = ANY(${orderedIds}) AND hidden = false
+          `) as { id: number }[]
+        ).map((r) => r.id)
+  );
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 lg:py-16">
@@ -50,8 +86,24 @@ export default async function AccountPage({ params }: Props) {
         </div>
       </div>
 
+      {/* Two separate gates, two separate lines: a confirmed mailbox is not
+          the same thing as an approved account, and conflating them is how a
+          customer ends up thinking one is the other. */}
+      {!emailVerified && (
+        <div className="mt-6 flex items-start gap-3 rounded-2xl bg-amber-50 px-5 py-4 text-amber-900">
+          <MailWarning className="mt-0.5 size-5 shrink-0 text-amber-700" aria-hidden />
+          <div>
+            <p className="font-semibold">{dict.accountPage.emailUnverifiedTitle}</p>
+            <p className="mt-0.5 text-sm">
+              {fmt(dict.accountPage.emailUnverifiedText, { email: session.email })}
+            </p>
+            <ResendVerification dict={dict} />
+          </div>
+        </div>
+      )}
+
       <div
-        className={`mt-6 flex items-start gap-3 rounded-2xl px-5 py-4 ${
+        className={`mt-4 flex items-start gap-3 rounded-2xl px-5 py-4 ${
           approved ? "bg-brand-50 text-brand-900" : "bg-amber-50 text-amber-900"
         }`}
       >
@@ -99,6 +151,59 @@ export default async function AccountPage({ params }: Props) {
             </dd>
           </div>
         </dl>
+      )}
+
+      {orders.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-bold text-ink-900">
+            {dict.accountPage.ordersTitle}
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-500">{dict.accountPage.ordersSub}</p>
+
+          <ul className="mt-4 space-y-3">
+            {orders.map((o) => {
+              const lines = o.items
+                .filter((i) => live.has(i.id))
+                .map((i) => ({ id: i.id, qty: i.qty }));
+              return (
+                <li
+                  key={o.id}
+                  className="rounded-2xl border border-ink-900/8 bg-white p-4 sm:flex sm:items-center sm:justify-between sm:gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-ink-900">
+                      {new Date(o.created_at).toLocaleDateString(
+                        dict.accountPage.dateLocale,
+                        { year: "numeric", month: "long", day: "numeric" }
+                      )}
+                      <span className="ml-2 font-normal text-ink-400">
+                        {o.channel === "whatsapp"
+                          ? dict.accountPage.orderChannelWhatsapp
+                          : dict.accountPage.orderChannelEmail}
+                      </span>
+                    </p>
+                    <p className="mt-0.5 line-clamp-1 text-sm text-ink-500">
+                      {o.items.map((i) => i.name).join(", ")}
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink-400">
+                      {fmt(dict.accountPage.ordersItems, { n: o.items_count })}
+                      {showPrices && o.total_cents > 0 && (
+                        <span className="ml-2 font-semibold text-brand-800">
+                          {formatPrice(o.total_cents)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  {lines.length > 0 && (
+                    <div className="mt-3 sm:mt-0">
+                      <ReorderButton lines={lines} label={dict.accountPage.reorder} />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       <div className="mt-8 flex flex-wrap gap-3">

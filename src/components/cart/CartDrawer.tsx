@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  CheckCircle2,
   Loader2,
   Mail,
   MessageCircle,
@@ -46,6 +47,10 @@ function CartPanel({ dict }: { dict: Dictionary }) {
   const { open, closeCart, setQty, remove, clear } = useCart();
   const { items, error, ready } = useCartItems();
   const order = useCartOrder(items ?? [], dict);
+  // The order leaves through WhatsApp or a mail client, so the site never
+  // hears back. Saying so — and offering to empty the basket — is what stops
+  // a customer wondering whether it worked and sending it a second time.
+  const [sent, setSent] = useState(false);
   const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -239,6 +244,37 @@ function CartPanel({ dict }: { dict: Dictionary }) {
             </ul>
 
             <div className="border-t border-ink-900/8 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+              {sent ? (
+                <div role="status">
+                  <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
+                    <CheckCircle2 className="size-5 text-accent-600" aria-hidden />
+                    {dict.cartPage.orderSentTitle}
+                  </p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-ink-500">
+                    {dict.cartPage.orderSentText}
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clear();
+                        setSent(false);
+                      }}
+                      className="min-h-11 flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                    >
+                      {dict.cartPage.clearCart}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSent(false)}
+                      className="min-h-11 flex-1 rounded-full border border-ink-900/12 bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
+                    >
+                      {dict.cartPage.keepCart}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
               {order.pricesVisible ? (
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm font-semibold text-ink-900">
@@ -266,7 +302,10 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                   href={order.whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => order.logOrder("whatsapp")}
+                  onClick={() => {
+                    order.logOrder("whatsapp");
+                    setSent(true);
+                  }}
                   className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
                 >
                   <MessageCircle className="size-4.5" aria-hidden />
@@ -274,7 +313,10 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                 </a>
                 <a
                   href={order.mailHref}
-                  onClick={() => order.logOrder("email")}
+                  onClick={() => {
+                    order.logOrder("email");
+                    setSent(true);
+                  }}
                   className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
                 >
                   <Mail className="size-4.5 text-brand-600" aria-hidden />
@@ -298,6 +340,8 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                   {dict.cartPage.clearCart}
                 </button>
               </div>
+                </>
+              )}
             </div>
           </>
         )}
