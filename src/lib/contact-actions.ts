@@ -10,12 +10,25 @@ export interface ContactFormState {
   success?: boolean;
   error?: string;
   fieldErrors?: Record<string, string>;
+  /** Echoed back so a rejected form keeps what the visitor already typed —
+   *  losing a 4000-character message to a short subject is the worst of it. */
+  values?: Record<string, string>;
 }
 
 /** Locale comes from a hidden form field so messages match the page. */
 function formLang(formData: FormData): Lang {
   const lang = String(formData.get("lang") ?? "sq");
   return isLang(lang) ? lang : "sq";
+}
+
+const KEPT_FIELDS = ["name", "company", "phone", "email", "subject", "message"] as const;
+
+/** Raw values, straight off the FormData — zod trims and lowercases, and on
+ *  most failure paths there is no parsed data to read from at all. */
+function keptValues(formData: FormData): Record<string, string> {
+  return Object.fromEntries(
+    KEPT_FIELDS.map((k) => [k, String(formData.get(k) ?? "")])
+  );
 }
 
 function schema(dict: Dictionary) {
@@ -31,8 +44,9 @@ function schema(dict: Dictionary) {
 
 /**
  * Submissions land in the contact_messages table and are read in the admin
- * panel (/admin/mesazhet). TODO(SMTP): additionally forward to the business
- * inbox once SMTP credentials are provided — form and validation stay as is.
+ * panel (/admin/mesazhet). Outbound mail now exists (src/lib/mail.ts), so
+ * forwarding a copy to the business inbox is a few lines away — left off on
+ * purpose until someone decides they want the duplicate in their inbox.
  */
 async function storeMessage(entry: {
   name: string;
@@ -54,21 +68,23 @@ export async function contactAction(
   formData: FormData
 ): Promise<ContactFormState> {
   const dict = getDictionary(formLang(formData));
+  const values = keptValues(formData);
 
   // Honeypot and time trap stop naive bots; the limit stops a patient one from
   // filling contact_messages.
   if (await rateLimited("contact", { limit: 5, windowMs: TEN_MINUTES_MS })) {
-    return { error: dict.actions.tooManyAttempts };
+    return { error: dict.actions.tooManyAttempts, values };
   }
 
-  // Honeypot: real users never fill this hidden field.
+  // Honeypot: real users never fill this hidden field. Returns success without
+  // values — a bot gets nothing back, and no human ever sees this path.
   if (formData.get("website")) {
     return { success: true }; // silently drop bot submissions
   }
   // Time trap: submitting a long form in under 3 seconds is not human.
   const startedAt = Number(formData.get("startedAt"));
   if (!Number.isFinite(startedAt) || Date.now() - startedAt < 3000) {
-    return { error: dict.actions.sendFailed };
+    return { error: dict.actions.sendFailed, values };
   }
 
   const parsed = schema(dict).safeParse({
@@ -86,7 +102,7 @@ export async function contactAction(
       const key = String(issue.path[0] ?? "form");
       if (!fieldErrors[key]) fieldErrors[key] = issue.message;
     }
-    return { fieldErrors };
+    return { fieldErrors, values };
   }
 
   try {
@@ -99,7 +115,7 @@ export async function contactAction(
       message: parsed.data.message,
     });
   } catch {
-    return { error: dict.actions.contactTechProblem };
+    return { error: dict.actions.contactTechProblem, values };
   }
 
   return { success: true };

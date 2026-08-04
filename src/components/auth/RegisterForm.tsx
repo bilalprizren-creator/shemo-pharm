@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
-import { CircleAlert, Loader2, UserPlus } from "lucide-react";
+import { Check, CircleAlert, Loader2, UserPlus } from "lucide-react";
 import { registerAction, type AuthFormState } from "@/lib/auth-actions";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PasswordField } from "./PasswordField";
 
 const initialState: AuthFormState = {};
 
@@ -52,7 +53,19 @@ function Field({
 
 export function RegisterForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const fe = state.fieldErrors ?? {};
+  // What was typed before the rejection. React resets the form after a submit
+  // and a reset restores each field to its defaultValue — so re-rendering the
+  // values here is what puts them back, with the inputs staying uncontrolled.
+  const v = state.values ?? {};
+
+  // Shown while typing rather than as a red error afterwards.
+  const rules = [
+    { ok: password.length >= 8, text: dict.auth.ruleMinChars },
+    { ok: password.length > 0 && password === confirm, text: dict.auth.ruleMatch },
+  ];
 
   return (
     <form action={formAction} noValidate className="space-y-4">
@@ -74,6 +87,7 @@ export function RegisterForm({ dict }: { dict: Dictionary }) {
         type="text"
         autoComplete="name"
         required
+        defaultValue={v.name}
         error={fe.name}
       />
       <Field
@@ -83,6 +97,7 @@ export function RegisterForm({ dict }: { dict: Dictionary }) {
         autoComplete="organization"
         optional
         optionalLabel={dict.common.optional}
+        defaultValue={v.company}
         error={fe.company}
       />
       <Field
@@ -92,6 +107,7 @@ export function RegisterForm({ dict }: { dict: Dictionary }) {
         autoComplete="tel"
         required
         placeholder="+383 4x xxx xxx"
+        defaultValue={v.phone}
         error={fe.phone}
       />
       <Field
@@ -101,24 +117,49 @@ export function RegisterForm({ dict }: { dict: Dictionary }) {
         autoComplete="email"
         required
         placeholder="emri@kompania.com"
+        defaultValue={v.email}
         error={fe.email}
       />
-      <Field
+      <PasswordField
         id="password"
         label={dict.auth.password}
-        type="password"
+        value={password}
+        onChange={setPassword}
         autoComplete="new-password"
-        required
         error={fe.password}
+        labels={{ show: dict.auth.showPassword, hide: dict.auth.hidePassword }}
       />
-      <Field
+      <PasswordField
         id="confirm"
         label={dict.auth.confirmPassword}
-        type="password"
+        value={confirm}
+        onChange={setConfirm}
         autoComplete="new-password"
-        required
         error={fe.confirm}
+        labels={{ show: dict.auth.showPassword, hide: dict.auth.hidePassword }}
       />
+
+      {(password || confirm) && (
+        <ul className="space-y-1" aria-live="polite">
+          {rules.map((r) => (
+            <li
+              key={r.text}
+              className={`flex items-center gap-1.5 text-[13px] ${
+                r.ok ? "font-medium text-accent-700" : "text-ink-400"
+              }`}
+            >
+              <span
+                className={`flex size-4 items-center justify-center rounded-full ${
+                  r.ok ? "bg-accent-100 text-accent-700" : "bg-ink-900/6"
+                }`}
+              >
+                {r.ok && <Check className="size-3" aria-hidden />}
+              </span>
+              {r.text}
+            </li>
+          ))}
+        </ul>
+      )}
 
       <button
         type="submit"

@@ -1,16 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { CircleAlert, Loader2, LogIn } from "lucide-react";
 import { loginAction, type AuthFormState } from "@/lib/auth-actions";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PasswordField } from "./PasswordField";
 
 const initialState: AuthFormState = {};
 
 export function LoginForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+  const [password, setPassword] = useState("");
 
   return (
     <form action={formAction} noValidate className="space-y-4">
@@ -36,24 +38,21 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
           type="email"
           autoComplete="email"
           required
+          // Kept across a failed attempt — only the password has to be retyped.
+          defaultValue={state.values?.email}
           className="h-12 w-full rounded-xl border border-ink-900/10 bg-white px-4 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
           placeholder="emri@kompania.com"
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-ink-900">
-          {dict.auth.password}
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="h-12 w-full rounded-xl border border-ink-900/10 bg-white px-4 text-sm text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
-        />
-      </div>
+      <PasswordField
+        id="password"
+        label={dict.auth.password}
+        value={password}
+        onChange={setPassword}
+        autoComplete="current-password"
+        labels={{ show: dict.auth.showPassword, hide: dict.auth.hidePassword }}
+      />
 
       <button
         type="submit"

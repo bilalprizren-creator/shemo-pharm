@@ -68,6 +68,10 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(contactAction, initialState);
   const startedAtRef = useRef<HTMLInputElement>(null);
   const fe = state.fieldErrors ?? {};
+  // What was typed before the rejection. React resets the form after a submit,
+  // and a reset restores each field to its defaultValue — so re-rendering the
+  // values here is what puts them back, with the inputs staying uncontrolled.
+  const v = state.values ?? {};
 
   // Timestamp for the spam time-trap, written straight to the DOM on mount
   useEffect(() => {
@@ -118,6 +122,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
           type="text"
           autoComplete="name"
           required
+          defaultValue={v.name}
           error={fe.name}
         />
         <Field
@@ -127,6 +132,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
           autoComplete="organization"
           optional
           optionalLabel={dict.common.optional}
+          defaultValue={v.company}
           error={fe.company}
         />
         <Field
@@ -136,6 +142,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
           autoComplete="tel"
           required
           placeholder="+383 4x xxx xxx"
+          defaultValue={v.phone}
           error={fe.phone}
         />
         <Field
@@ -145,6 +152,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
           autoComplete="email"
           required
           placeholder="emri@kompania.com"
+          defaultValue={v.email}
           error={fe.email}
         />
       </div>
@@ -154,6 +162,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         type="text"
         required
         placeholder={dict.contactForm.subjectPlaceholder}
+        defaultValue={v.subject}
         error={fe.subject}
       />
       <Field
@@ -162,6 +171,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         textarea
         required
         placeholder={dict.contactForm.messagePlaceholder}
+        defaultValue={v.message}
         error={fe.message}
       />
 
