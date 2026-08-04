@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth";
 import {
   categoryDisplayName,
-  getShowcaseProducts,
+  getCategoryImage,
   getTopCategories,
 } from "@/lib/catalog";
 import type { Dictionary } from "@/lib/dictionaries";
@@ -15,7 +15,7 @@ export async function Header({ dict }: { dict: Dictionary }) {
       slug: c.slug,
       name: categoryDisplayName(c),
       count: c.count,
-      image: (await getShowcaseProducts(c.slug, 1))[0]?.images[0] ?? null,
+      image: await getCategoryImage(c.slug),
     }))
   );
 

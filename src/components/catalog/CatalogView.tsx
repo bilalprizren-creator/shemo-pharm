@@ -97,7 +97,9 @@ export async function CatalogView({
       </div>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[260px_1fr]">
-        <aside className="hidden lg:block" aria-label={dict.catalog.filters}>
+        {/* min-w-0: without it the grid item grows to its widest category
+            name and the panel scrolls sideways */}
+        <aside className="hidden min-w-0 lg:block" aria-label={dict.catalog.filters}>
           <div className="sticky top-40 max-h-[calc(100vh-11rem)] overflow-y-auto rounded-2xl border border-ink-900/8 bg-white p-3">
             <h2 className="px-3 pb-2 pt-1 text-sm font-bold uppercase tracking-wide text-ink-900">
               {dict.catalog.categoriesHeading}

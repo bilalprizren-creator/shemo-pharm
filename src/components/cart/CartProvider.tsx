@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useState, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "shemo-cart";
 
@@ -108,6 +108,10 @@ interface CartContextValue {
   remove: (id: number) => void;
   clear: () => void;
   ready: boolean;
+  /** Side panel state — the basket opens next to the page, not as a new one. */
+  open: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue>({
@@ -118,6 +122,9 @@ const CartContext = createContext<CartContextValue>({
   remove: () => {},
   clear: () => {},
   ready: false,
+  open: false,
+  openCart: () => {},
+  closeCart: () => {},
 });
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -127,6 +134,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => true,
     () => false
   );
+  const [open, setOpen] = useState(false);
+  const openCart = useCallback(() => setOpen(true), []);
+  const closeCart = useCallback(() => setOpen(false), []);
 
   const count = lines.reduce((sum, l) => sum + l.qty, 0);
 
@@ -140,6 +150,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         remove: removeLine,
         clear: clearCart,
         ready,
+        open,
+        openCart,
+        closeCart,
       }}
     >
       {children}

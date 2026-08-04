@@ -115,6 +115,36 @@ h4 {
   animation: rise 0.5s ease-out both;
 }
 
+/* Cart side panel. CSS rather than a JS animation on purpose: the panel is a
+   modal that also locks page scroll, so it must be in its final, on-screen
+   position even if the animation never gets a frame. The reduced-motion block
+   above collapses the duration. */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.drawer-in {
+  animation: slide-in-right 0.25s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fade-in 0.2s ease-out both;
+}
+
 /* Utility: hide scrollbar on horizontal product rows while keeping scroll */
 .scrollbar-none {
   scrollbar-width: none;
@@ -123,21 +153,3 @@ h4 {
   display: none;
 }
 
-/* Partner-brand logos (homepage strip only).
-   On hover-capable pointers the logos are shown lightly desaturated and regain
-   their full official colour when the card is hovered. Touch devices have no
-   reliable hover, so there the logos always stay in full colour. The full
-   /markat page never uses this class — its logos are always full colour.
-   The reduced-motion block above already neutralizes the transition. */
-@media (hover: hover) and (pointer: fine) {
-  .brand-logo {
-    filter: grayscale(1);
-    opacity: 0.85;
-    transition: filter 0.2s ease, opacity 0.2s ease;
-  }
-  .brand-logo-cell:hover .brand-logo,
-  .brand-logo-cell:focus-visible .brand-logo {
-    filter: grayscale(0);
-    opacity: 1;
-  }
-}

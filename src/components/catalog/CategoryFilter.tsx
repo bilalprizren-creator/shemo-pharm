@@ -36,7 +36,9 @@ export function CategoryFilter({
             : "text-ink-700 hover:bg-brand-50 hover:text-brand-800"
         }`}
       >
-        <span className="truncate">{name}</span>
+        {/* One line for the usual names, two for the long ones — cutting them
+            off pushed the count out of a 260px sidebar */}
+        <span className="line-clamp-2 min-w-0 leading-snug">{name}</span>
         <span className={`shrink-0 text-xs ${isActive ? "text-white/80" : "text-ink-400"}`}>
           {node.count}
         </span>

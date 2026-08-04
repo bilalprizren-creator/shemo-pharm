@@ -52,17 +52,20 @@ function IconAction({
   label,
   icon: Icon,
   badge,
+  onClick,
 }: {
   href: string;
   label: string;
   icon: typeof Heart;
   badge?: number;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
   return (
     <Link
       href={href}
       aria-label={label}
       title={label}
+      onClick={onClick}
       className="group relative flex size-11 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700"
     >
       <Icon className="size-5.5" strokeWidth={1.75} aria-hidden />
@@ -388,27 +391,29 @@ export function HeaderClient({
                         <li key={c.slug}>
                           <Link
                             href={langHref(lang, `/kategorite/${c.slug}`)}
-                            className="group flex items-center gap-3 rounded-2xl border border-ink-900/6 bg-surface p-3 transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-white hover:shadow-card"
+                            className="group flex h-full items-center gap-3 rounded-2xl border border-ink-900/6 bg-surface p-3 transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-white hover:shadow-card"
                           >
-                            <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-ink-900/6">
+                            <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-ink-900/6">
                               {c.image ? (
                                 <Image
                                   src={c.image}
                                   alt=""
                                   fill
-                                  sizes="48px"
+                                  sizes="56px"
                                   className="object-contain p-1.5 transition-transform duration-300 group-hover:scale-110"
                                 />
                               ) : (
                                 <Package
-                                  className="size-5 text-brand-600"
+                                  className="size-6 text-brand-600"
                                   strokeWidth={1.5}
                                   aria-hidden
                                 />
                               )}
                             </span>
                             <span className="min-w-0">
-                              <span className="block truncate text-sm font-semibold text-ink-900">
+                              {/* Two lines for the long names — "Kozmetikë dhe
+                                  kujdes personal" used to be cut mid-word */}
+                              <span className="line-clamp-2 text-sm font-semibold leading-snug text-ink-900">
                                 {c.name}
                               </span>
                               <span className="block text-xs font-medium text-accent-600">
@@ -483,13 +488,21 @@ export function HeaderClient({
 
 /** Wishlist + cart badges need the providers — split so hooks stay simple. */
 function CartAction({ lang, label }: { lang: Lang; label: string }) {
-  const { count, ready } = useCart();
+  const { count, ready, openCart } = useCart();
   return (
     <IconAction
       href={langHref(lang, "/shporta")}
       label={label}
       icon={ShoppingBag}
       badge={ready ? count : 0}
+      // A plain click slides the basket in beside the page; it stays a real
+      // link so ctrl/middle-click still opens /shporta, and so it works
+      // before hydration.
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        openCart();
+      }}
     />
   );
 }

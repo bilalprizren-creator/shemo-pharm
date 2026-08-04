@@ -185,7 +185,7 @@ export function MobileNav({
                         onClick={onClose}
                         className="flex min-h-11 items-center justify-between gap-2 rounded-full px-3 py-2.5 text-sm text-ink-700 hover:bg-brand-50"
                       >
-                        <span className="truncate">{c.name}</span>
+                        <span className="line-clamp-2 min-w-0 leading-snug">{c.name}</span>
                         <span className="shrink-0 text-xs text-ink-400">{c.count}</span>
                       </Link>
                     </li>

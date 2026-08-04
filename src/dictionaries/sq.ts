@@ -412,6 +412,8 @@ export const sq = {
     orderGreeting: "Përshëndetje! Dëshiroj të porosis:",
     orderClosing: "Ju lutem konfirmoni disponueshmërinë dhe çmimet. Faleminderit!",
     orderMailSubject: "Porosi e re nga uebfaqja",
+    closeDrawer: "Mbyll shportën",
+    viewFullCart: "Shiko shportën e plotë",
   },
 
   wishlistPage: {

@@ -394,6 +394,38 @@ export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
 }
 
 /**
+ * The product whose photo fronts each category in the nav. Hand-picked from
+ * the clean white-background packshots: the nav used to show whichever
+ * product happened to sort first, which is how Ortopedi ended up fronted by
+ * an incontinence brief and Kozmetikë by an unlabelled carton. Categories
+ * missing here keep that first-product behaviour.
+ */
+const CATEGORY_FACE: Record<string, string> = {
+  barnat: "rivoksar-15mg-x-28-tab-9892",
+  "suplements-effervescent": "magnesium-citrate-60-tablets-9911",
+  kozmetike: "vaseline-body-lotion-cocoa-radiant-400-ml-6053",
+  ortopedi: "splint-per-mobilizim-dore-ref0-602-djathte-majte-s-m-l-xl-xxl",
+  "paisje-medicinale": "tensiometer-digjital-krahu-shemo-shm-500-0018",
+  "alkool-dhe-antiseptik": "baticonol-jod-10",
+  fasha: "fllaster-me-aloe-vera-no-231",
+  vajra: "coconut-oil-106ml-91003",
+};
+
+/**
+ * The photo that represents a category. Falls back to the category's first
+ * showcase product, so a face product that is hidden, renamed or left
+ * without a photo degrades to the old behaviour instead of an empty circle.
+ */
+export async function getCategoryImage(categorySlug: string): Promise<string | null> {
+  const { products } = await loadCatalog();
+  const face = products.find((p) => p.slug === CATEGORY_FACE[categorySlug]);
+  const image = face && productImage(face);
+  if (image) return image;
+  const [first] = await getShowcaseProducts(categorySlug, 1);
+  return first ? productImage(first) : null;
+}
+
+/**
  * Curated homepage category cards mapped to real catalog slugs. Titles and
  * blurbs live in the dictionaries (home.categoryCards[slug]) so both locales
  * are covered; the icon key maps to a lucide icon in the CategoryGrid.

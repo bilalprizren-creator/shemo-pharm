@@ -408,6 +408,8 @@ export const en: Dictionary = {
     orderGreeting: "Hello! I would like to order:",
     orderClosing: "Please confirm availability and prices. Thank you!",
     orderMailSubject: "New order from the website",
+    closeDrawer: "Close the cart",
+    viewFullCart: "View the full cart",
   },
 
   wishlistPage: {

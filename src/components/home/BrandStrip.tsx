@@ -6,7 +6,7 @@ import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
 /**
- * Curated partner-brand logos as a calm, even grid — grayscale until hover,
+ * Curated partner-brand logos as a calm, even grid — full official colour,
  * with a consistent visual area per cell so no single logo dominates and the
  * section never becomes a dense logo wall. The full brand list stays on /markat.
  */
@@ -30,7 +30,7 @@ export function BrandStrip({ dict }: { dict: Dictionary }) {
           {HOME_BRANDS.map((b) => (
             <li
               key={b.name}
-              className="brand-logo-cell flex h-16 items-center justify-center rounded-xl border border-line bg-white px-5 sm:h-[4.5rem]"
+              className="flex h-16 items-center justify-center rounded-xl border border-line bg-white px-5 sm:h-[4.5rem]"
               title={b.name}
             >
               <Image
@@ -38,7 +38,7 @@ export function BrandStrip({ dict }: { dict: Dictionary }) {
                 alt={b.name}
                 width={150}
                 height={60}
-                className="brand-logo max-h-12 w-auto max-w-[120px] object-contain sm:max-h-14 sm:max-w-[140px]"
+                className="max-h-12 w-auto max-w-[120px] object-contain sm:max-h-14 sm:max-w-[140px]"
               />
             </li>
           ))}

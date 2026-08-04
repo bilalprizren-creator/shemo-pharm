@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -13,51 +12,17 @@ import {
   ShoppingBag,
   Trash2,
 } from "lucide-react";
-import { SITE } from "@/lib/site";
-import type { CardProduct } from "@/lib/types";
 import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
-import { logOrderAction } from "@/lib/order-actions";
-
-/** Parses "12,34 €" (server-formatted) back to cents for the local total. */
-function priceToCents(price: string): number {
-  const m = price.match(/(\d+),(\d{2})/);
-  return m ? Number(m[1]) * 100 + Number(m[2]) : 0;
-}
-
-function formatCents(cents: number): string {
-  return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
-}
+import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
 
 export function CartPageClient({ dict }: { dict: Dictionary }) {
-  const { lines, setQty, remove, clear, ready } = useCart();
-  const [items, setItems] = useState<CardProduct[] | null>(null);
-  const [error, setError] = useState(false);
+  const { setQty, remove, clear } = useCart();
+  const { items: resolved, error, ready } = useCartItems();
+  const order = useCartOrder(resolved ?? [], dict);
   const lang = dict.lang;
-
-  const ids = useMemo(() => lines.map((l) => l.id), [lines]);
-
-  useEffect(() => {
-    if (!ready || ids.length === 0) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/lista?ids=${ids.join(",")}`);
-        if (!res.ok) throw new Error();
-        const data = (await res.json()) as { items: CardProduct[] };
-        if (!cancelled) setItems(data.items);
-      } catch {
-        if (!cancelled) setError(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [ids, ready]);
-
-  const resolved = ready && ids.length === 0 ? [] : items;
 
   if (error) {
     return (
@@ -98,35 +63,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
     );
   }
 
-  const qtyOf = (id: number) => lines.find((l) => l.id === id)?.qty ?? 1;
-  const pricesVisible = resolved.every((p) => p.price !== null);
-  const totalCents = pricesVisible
-    ? resolved.reduce((sum, p) => sum + priceToCents(p.price as string) * qtyOf(p.id), 0)
-    : 0;
-
-  const orderLines = resolved
-    .map(
-      (p, i) =>
-        `${i + 1}. ${p.name}${p.sku ? ` (${dict.common.code}: ${p.sku})` : ""} — ${qtyOf(p.id)} ${dict.common.piece}`
-    )
-    .join("\n");
-  const orderText = `${dict.cartPage.orderGreeting}\n\n${orderLines}\n\n${dict.cartPage.orderClosing}`;
-  const whatsappHref = `${SITE.whatsapp}?text=${encodeURIComponent(orderText)}`;
-  const mailHref = `mailto:${SITE.emails[0]}?subject=${encodeURIComponent(
-    dict.cartPage.orderMailSubject
-  )}&body=${encodeURIComponent(orderText)}`;
-
-  /**
-   * Mirror the order into the DB (visible in /admin/porosite) as the external
-   * app opens. Fire-and-forget: a logging failure must never stop the
-   * customer from sending the WhatsApp/email itself.
-   */
-  const logOrder = (channel: "whatsapp" | "email") => {
-    logOrderAction({
-      channel,
-      lines: lines.map((l) => ({ id: l.id, qty: l.qty })),
-    }).catch(() => {});
-  };
+  const { qtyOf, pricesVisible, totalCents, whatsappHref, mailHref, logOrder } = order;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
@@ -210,7 +147,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
           <div className="flex justify-between">
             <dt>{dict.cartPage.totalQty}</dt>
             <dd className="font-semibold text-ink-900">
-              {lines.reduce((s, l) => s + l.qty, 0)} {dict.common.piece}
+              {order.totalQty} {dict.common.piece}
             </dd>
           </div>
           {pricesVisible && (
