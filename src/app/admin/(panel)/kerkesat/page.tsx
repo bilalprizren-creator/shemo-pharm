@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BadgeCheck, Clock } from "lucide-react";
+import { BadgeCheck, Clock, MailCheck, MailWarning } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import {
@@ -18,6 +18,7 @@ interface CustomerRow {
   phone: string;
   status: string;
   created_at: Date;
+  email_verified_at: Date | null;
 }
 
 function fmtDate(d: Date): string {
@@ -27,11 +28,27 @@ function fmtDate(d: Date): string {
   }).format(d);
 }
 
+/** Whether the customer proved the mailbox. Separate from the approval below:
+ *  this says the address is real, approval says the business is a partner. */
+function EmailBadge({ verified }: { verified: boolean }) {
+  return verified ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800">
+      <MailCheck className="size-3" aria-hidden />
+      Email i verifikuar
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+      <MailWarning className="size-3" aria-hidden />
+      Email i paverifikuar
+    </span>
+  );
+}
+
 export default async function AdminRequestsPage() {
   await requireAdmin();
 
   const customers = (await sql`
-    SELECT id, email, name, company, phone, status, created_at
+    SELECT id, email, name, company, phone, status, created_at, email_verified_at
     FROM users WHERE role = 'customer'
     ORDER BY (status = 'pending') DESC, created_at DESC
   `) as CustomerRow[];
@@ -75,7 +92,8 @@ export default async function AdminRequestsPage() {
                     {c.email}
                     {c.phone && ` · ${c.phone}`}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-400">
+                  <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-ink-400">
+                    <EmailBadge verified={c.email_verified_at !== null} />
                     Regjistruar: {fmtDate(c.created_at)}
                   </p>
                 </div>
@@ -136,6 +154,9 @@ export default async function AdminRequestsPage() {
                       {c.phone && (
                         <span className="block text-xs text-ink-400">{c.phone}</span>
                       )}
+                      <span className="mt-1 block">
+                        <EmailBadge verified={c.email_verified_at !== null} />
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-ink-400">
                       {fmtDate(c.created_at)}

@@ -5,6 +5,7 @@ import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { sql } from "@/lib/db";
+import { isLang, type Lang } from "@/lib/i18n";
 
 /**
  * B2B auth: users live in the Postgres `users` table, sessions are signed
@@ -28,6 +29,10 @@ export interface StoredUser {
   status: UserStatus;
   role: UserRole;
   createdAt: string;
+  /** When the mailbox was proven. null = not verified yet. */
+  emailVerifiedAt: string | null;
+  /** Locale chosen at registration, for mail sent outside a request. */
+  lang: Lang;
 }
 
 export interface Session {
@@ -35,6 +40,7 @@ export interface Session {
   name: string;
   status: UserStatus;
   role: UserRole;
+  emailVerified: boolean;
 }
 
 interface UserRow {
@@ -47,6 +53,8 @@ interface UserRow {
   status: string;
   role: string;
   created_at: string | Date;
+  email_verified_at: string | Date | null;
+  lang: string | null;
 }
 
 function getSecret(): Uint8Array {
@@ -84,6 +92,12 @@ function mapUser(r: UserRow): StoredUser {
     role: r.role === "admin" ? "admin" : "customer",
     createdAt:
       r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    emailVerifiedAt: r.email_verified_at
+      ? r.email_verified_at instanceof Date
+        ? r.email_verified_at.toISOString()
+        : String(r.email_verified_at)
+      : null,
+    lang: r.lang && isLang(r.lang) ? r.lang : "sq",
   };
 }
 
@@ -100,17 +114,98 @@ export interface NewUser {
   name: string;
   company: string;
   phone: string;
+  lang: Lang;
 }
 
-/** Creates a customer account with status "pending" (awaits admin approval). */
+/**
+ * Creates a customer account with status "pending" (awaits admin approval).
+ * verification_sent_at starts at now(): the mail goes out with this insert,
+ * so the resend cooldown has to start counting from here.
+ */
 export async function createUser(data: NewUser): Promise<StoredUser> {
   const rows = (await sql`
-    INSERT INTO users (email, password_hash, name, company, phone, status, role)
+    INSERT INTO users (email, password_hash, name, company, phone, status, role,
+                       lang, verification_sent_at)
     VALUES (${data.email.trim().toLowerCase()}, ${data.passwordHash}, ${data.name},
-            ${data.company}, ${data.phone}, 'pending', 'customer')
+            ${data.company}, ${data.phone}, 'pending', 'customer',
+            ${data.lang}, now())
     RETURNING *
   `) as UserRow[];
   return mapUser(rows[0]);
+}
+
+/**
+ * Email verification.
+ *
+ * The link carries a signed token rather than a row in a token table: the
+ * signature already proves the address, and a link that dies with a rotated
+ * AUTH_SECRET is the safe direction. `sub` is the address being proven, so a
+ * stale token can never verify a different one.
+ *
+ * Session cookies and verification links are signed with the same key, so both
+ * carry a `purpose` claim and each side rejects the other's tokens.
+ */
+const VERIFY_PURPOSE = "verify-email";
+
+export async function signVerificationToken(email: string): Promise<string> {
+  return new SignJWT({ purpose: VERIFY_PURPOSE })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(email.trim().toLowerCase())
+    .setIssuedAt()
+    .setExpirationTime("24h")
+    .sign(getSecret());
+}
+
+export type VerificationToken =
+  | { ok: true; email: string }
+  | { ok: false; reason: "expired" | "invalid" };
+
+export async function readVerificationToken(
+  token: string
+): Promise<VerificationToken> {
+  if (!token) return { ok: false, reason: "invalid" };
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (payload.purpose !== VERIFY_PURPOSE || typeof payload.sub !== "string") {
+      return { ok: false, reason: "invalid" };
+    }
+    return { ok: true, email: payload.sub };
+  } catch (err) {
+    const expired = (err as { code?: string })?.code === "ERR_JWT_EXPIRED";
+    return { ok: false, reason: expired ? "expired" : "invalid" };
+  }
+}
+
+/** Flips the address to verified. Re-clicking a link reports "already". */
+export async function markEmailVerified(
+  email: string
+): Promise<"verified" | "already" | "unknown"> {
+  const address = email.trim().toLowerCase();
+  const rows = (await sql`
+    UPDATE users SET email_verified_at = now()
+    WHERE email = ${address} AND email_verified_at IS NULL
+    RETURNING id
+  `) as { id: number }[];
+  if (rows.length > 0) return "verified";
+  return (await findUser(address)) ? "already" : "unknown";
+}
+
+/**
+ * Reserves the right to send a verification mail to this address, at most
+ * once every two minutes. Guard and write are one statement on purpose: the
+ * IP limiter in rate-limit.ts lives in one instance's memory, so on Vercel it
+ * cannot stop two instances from both mailing the same mailbox.
+ */
+export async function claimVerificationSend(email: string): Promise<boolean> {
+  const rows = (await sql`
+    UPDATE users SET verification_sent_at = now()
+    WHERE email = ${email.trim().toLowerCase()}
+      AND email_verified_at IS NULL
+      AND (verification_sent_at IS NULL
+           OR verification_sent_at < now() - interval '2 minutes')
+    RETURNING id
+  `) as { id: number }[];
+  return rows.length > 0;
 }
 
 /**
@@ -119,7 +214,7 @@ export async function createUser(data: NewUser): Promise<StoredUser> {
  * Putting authorization state in the token would let it go stale.
  */
 export async function createSessionCookie(user: { email: string }): Promise<void> {
-  const token = await new SignJWT({ email: user.email })
+  const token = await new SignJWT({ email: user.email, purpose: "session" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DAYS}d`)
@@ -155,6 +250,11 @@ export const getSession = cache(async (): Promise<Session | null> => {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, getSecret());
+    // Verification links are signed with the same secret. Without this check a
+    // verification token pasted into the cookie would authenticate. Cookies
+    // issued before the claim existed have no `purpose` and still pass, so the
+    // rollover logs nobody out.
+    if (payload.purpose !== undefined && payload.purpose !== "session") return null;
     if (typeof payload.email !== "string") return null;
     const user = await findUser(payload.email);
     if (!user) return null; // account deleted since the token was issued
@@ -163,6 +263,7 @@ export const getSession = cache(async (): Promise<Session | null> => {
       name: user.name,
       status: user.status,
       role: user.role,
+      emailVerified: user.emailVerifiedAt !== null,
     };
   } catch {
     return null;

@@ -370,6 +370,10 @@ export const sq = {
     haveAccount: "Keni llogari?",
     pendingNote:
       "Pas regjistrimit, llogaria juaj kërkon verifikim nga ekipi i SHEMO PHARM përpara se çmimet të bëhen të dukshme.",
+    showPassword: "Shfaq fjalëkalimin",
+    hidePassword: "Fshih fjalëkalimin",
+    ruleMinChars: "Së paku 8 karaktere",
+    ruleMatch: "Fjalëkalimet përputhen",
   },
 
   accountPage: {
@@ -385,6 +389,35 @@ export const sq = {
     wishlist: "Lista e dëshirave",
     logout: "Dilni",
     dateLocale: "sq-AL",
+    emailVerifiedTitle: "Email-i është verifikuar",
+    emailUnverifiedTitle: "Verifikoni email-in tuaj",
+    emailUnverifiedText:
+      "Ju dërguam një lidhje verifikimi te {email}. Klikojeni për të konfirmuar adresën — kështu jemi të sigurt se ju gjejmë me përgjigjen e porosisë.",
+    resendButton: "Dërgo përsëri lidhjen",
+    ordersTitle: "Porositë e dërguara",
+    ordersSub: "Ngarkojini përsëri në shportë me një klikim.",
+    ordersEmpty: "Ende nuk keni dërguar asnjë porosi nga kjo llogari.",
+    ordersItems: "{n} produkte",
+    reorder: "Porosit përsëri",
+    orderChannelWhatsapp: "Dërguar në WhatsApp",
+    orderChannelEmail: "Dërguar me email",
+  },
+
+  verifyPage: {
+    title: "Verifikimi i email-it",
+    okTitle: "Email-i u verifikua",
+    okText:
+      "Faleminderit! Adresa juaj u konfirmua. Çmimet me shumicë shfaqen sapo ekipi i SHEMO PHARM ta aprovojë llogarinë.",
+    alreadyTitle: "Kjo adresë është verifikuar tashmë",
+    alreadyText: "Nuk nevojitet asnjë veprim tjetër.",
+    expiredTitle: "Lidhja ka skaduar",
+    expiredText:
+      "Lidhjet e verifikimit vlejnë 24 orë. Kyçuni dhe kërkoni një lidhje të re nga llogaria juaj.",
+    errorTitle: "Lidhja nuk është e vlefshme",
+    errorText:
+      "Sigurohuni që keni hapur lidhjen e plotë nga email-i, ose kërkoni një të re nga llogaria juaj.",
+    toAccount: "Shko te llogaria",
+    toLogin: "Kyçu",
   },
 
   cartPage: {
@@ -415,6 +448,12 @@ export const sq = {
     orderMailSubject: "Porosi e re nga uebfaqja",
     closeDrawer: "Mbyll shportën",
     viewFullCart: "Shiko shportën e plotë",
+    addedToast: "{name} u shtua në shportë",
+    viewCartShort: "Shiko shportën",
+    orderSentTitle: "Porosia u nis",
+    orderSentText:
+      "Ekipi i SHEMO PHARM ju kontakton për të konfirmuar disponueshmërinë dhe çmimet.",
+    keepCart: "Mbaje shportën",
   },
 
   wishlistPage: {
@@ -461,6 +500,29 @@ export const sq = {
     sendFailed: "Dërgimi dështoi. Ju lutemi provoni përsëri.",
     contactTechProblem:
       "Mesazhi nuk u dërgua për shkak të një problemi teknik. Ju lutemi na telefononi ose na shkruani në WhatsApp.",
+    verifySent: "Lidhja e verifikimit u dërgua. Kontrolloni email-in tuaj.",
+    verifyWait:
+      "Një lidhje u dërgua para pak kohësh. Kontrolloni email-in (edhe dosjen e spam-it) ose prisni disa minuta.",
+  },
+
+  /** Copy for the transactional emails — see src/lib/mail-templates.ts. */
+  mail: {
+    verifySubject: "Verifikoni email-in tuaj — SHEMO PHARM",
+    verifyHeading: "Verifikoni adresën tuaj",
+    verifyIntro: "Përshëndetje {name}, faleminderit që u regjistruat te SHEMO PHARM.",
+    verifyBody: "Klikoni butonin më poshtë për të konfirmuar se kjo adresë ju përket.",
+    verifyButton: "Verifiko email-in",
+    verifyFallback: "Nëse butoni nuk funksionon, kopjoni këtë lidhje në shfletues:",
+    verifyExpiry: "Kjo lidhje vlen 24 orë.",
+    verifyIgnore: "Nëse nuk e keni bërë ju këtë regjistrim, injorojeni këtë mesazh.",
+    approvedSubject: "Llogaria juaj u aprovua — SHEMO PHARM",
+    approvedHeading: "Llogaria juaj është aktive",
+    approvedIntro: "Përshëndetje {name},",
+    approvedBody:
+      "Ekipi i SHEMO PHARM e aprovoi llogarinë tuaj. Çmimet me shumicë tani janë të dukshme në të gjithë katalogun.",
+    approvedButton: "Shiko produktet",
+    footerNote:
+      "SHEMO PHARM — depo farmaceutike dhe distributor me shumicë, Prizren, Kosovë.",
   },
 };
 

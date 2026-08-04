@@ -32,12 +32,31 @@ e faqes ekzistuese (`shemopharm.com/wp-json/wc/store/v1/…`) në
 në server (`src/lib/auth.ts` → `canSeePrices`). Vizitorët e paidentifikuar dhe
 llogaritë në pritje nuk marrin asnjë të dhënë çmimi në HTML apo API.
 
-- Përdoruesit ruhen në `data/users.json` (jashtë git-it).
-- Regjistrimet e reja marrin status `pending`; për t'i aprovuar, ndryshoni
-  statusin në `approved` në atë skedar (ose ndërtoni një panel administrimi).
-- Llogaria demo për testim: `demo@shemopharm.com` / `Demo2026!` (e aprovuar).
-- Në produksion vendosni `AUTH_SECRET` si variabël mjedisi (opsionale në dev —
-  gjenerohet automatikisht në `data/.auth-secret`).
+- Përdoruesit ruhen në tabelën `users` në Postgres; sesioni është një JWT në
+  cookie (`AUTH_SECRET` duhet të jetë e vendosur në `.env.local` dhe në Vercel).
+- Tri porta të ndara, që nuk duhen ngatërruar:
+  1. `email_verified_at` — klienti klikoi lidhjen në email. Nuk bllokon asgjë,
+     por shfaqet si shenjë te `/admin/kerkesat` përpara aprovimit.
+  2. `status` (`pending` → `approved`) — aprovimi juaj i biznesit. Vetëm kjo
+     hap çmimet me shumicë (`canSeePrices`).
+  3. `role` (`customer` / `admin`) — qasja në panelin e administrimit.
+- Regjistrimet e reja aprovohen nga `/admin/kerkesat`.
+
+### Email-et (Resend)
+
+Verifikimi i email-it, njoftimi për regjistrim të ri dhe email-i i aprovimit
+dërgohen përmes Resend (`src/lib/mail.ts`). Pa `RESEND_API_KEY` asgjë nuk
+dërgohet — mesazhi shkruhet vetëm në log, dhe asnjë veprim nuk dështon.
+
+| Variabël | Për çka |
+| --- | --- |
+| `RESEND_API_KEY` | Çelësi nga resend.com → API Keys |
+| `MAIL_FROM` | p.sh. `SHEMO PHARM <noreply@shemopharm.com>` — kërkon domain të verifikuar te Resend |
+| `MAIL_ADMIN_TO` | Ku shkojnë njoftimet për regjistrime (opsionale; përndryshe `ADMIN_EMAIL`) |
+| `APP_ORIGIN` | `https://shemopharm.com` — nga kjo ndërtohen lidhjet në email |
+
+Migrimi i kolonave: `node scripts/add-email-verification.mjs` (i sigurt të
+përsëritet).
 
 Llogaritë e klientëve nga faqja e vjetër WordPress **nuk mund të migrohen** pa
 qasje në bazën e të dhënave të saj; klientët duhet të regjistrohen sërish.

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
@@ -15,6 +16,10 @@ import {
 import { sql } from "@/lib/db";
 import { isAllowedImageSrc } from "@/lib/images";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
+import { sendMail, siteOrigin } from "@/lib/mail";
+import { accountApprovedMessage } from "@/lib/mail-templates";
+import { getDictionary } from "@/lib/dictionaries";
+import { isLang, langHref, type Lang } from "@/lib/i18n";
 
 /**
  * All admin mutations live here. Every action re-checks authorization with
@@ -69,9 +74,30 @@ export async function approveUserAction(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
-  await sql`
-    UPDATE users SET status = 'approved' WHERE id = ${id} AND role = 'customer'
-  `;
+
+  // Conditional on the status actually changing, so pressing Approve twice
+  // does not mail the customer twice. RETURNING gives us who to write to.
+  const rows = (await sql`
+    UPDATE users SET status = 'approved'
+    WHERE id = ${id} AND role = 'customer' AND status <> 'approved'
+    RETURNING email, name, lang
+  `) as { email: string; name: string; lang: string | null }[];
+
+  const user = rows[0];
+  if (user) {
+    const dict = getDictionary(isLang(user.lang ?? "") ? (user.lang as Lang) : "sq");
+    after(async () => {
+      await sendMail(
+        accountApprovedMessage({
+          dict,
+          name: user.name,
+          to: user.email,
+          url: `${siteOrigin()}${langHref(dict.lang, "/produktet")}`,
+        })
+      );
+    });
+  }
+
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
 }

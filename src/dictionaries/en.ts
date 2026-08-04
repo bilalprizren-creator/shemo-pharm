@@ -366,6 +366,10 @@ export const en: Dictionary = {
     haveAccount: "Already have an account?",
     pendingNote:
       "After registration, your account needs verification by the SHEMO PHARM team before prices become visible.",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    ruleMinChars: "At least 8 characters",
+    ruleMatch: "Passwords match",
   },
 
   accountPage: {
@@ -381,6 +385,35 @@ export const en: Dictionary = {
     wishlist: "Wishlist",
     logout: "Log out",
     dateLocale: "en-GB",
+    emailVerifiedTitle: "Email verified",
+    emailUnverifiedTitle: "Verify your email",
+    emailUnverifiedText:
+      "We sent a verification link to {email}. Click it to confirm the address — that way we can reach you with the answer to your order.",
+    resendButton: "Resend the link",
+    ordersTitle: "Orders you sent",
+    ordersSub: "Load any of them back into the cart with one click.",
+    ordersEmpty: "You have not sent an order from this account yet.",
+    ordersItems: "{n} products",
+    reorder: "Order again",
+    orderChannelWhatsapp: "Sent on WhatsApp",
+    orderChannelEmail: "Sent by email",
+  },
+
+  verifyPage: {
+    title: "Email verification",
+    okTitle: "Email verified",
+    okText:
+      "Thank you! Your address is confirmed. Wholesale prices appear as soon as the SHEMO PHARM team approves your account.",
+    alreadyTitle: "This address is already verified",
+    alreadyText: "No further action is needed.",
+    expiredTitle: "The link has expired",
+    expiredText:
+      "Verification links are valid for 24 hours. Log in and request a new one from your account.",
+    errorTitle: "The link is not valid",
+    errorText:
+      "Make sure you opened the full link from the email, or request a new one from your account.",
+    toAccount: "Go to my account",
+    toLogin: "Log in",
   },
 
   cartPage: {
@@ -411,6 +444,12 @@ export const en: Dictionary = {
     orderMailSubject: "New order from the website",
     closeDrawer: "Close the cart",
     viewFullCart: "View the full cart",
+    addedToast: "{name} was added to the cart",
+    viewCartShort: "View the cart",
+    orderSentTitle: "Order on its way",
+    orderSentText:
+      "The SHEMO PHARM team will contact you to confirm availability and prices.",
+    keepCart: "Keep the cart",
   },
 
   wishlistPage: {
@@ -457,5 +496,28 @@ export const en: Dictionary = {
     sendFailed: "Sending failed. Please try again.",
     contactTechProblem:
       "The message was not sent due to a technical problem. Please call us or message us on WhatsApp.",
+    verifySent: "Verification link sent. Check your inbox.",
+    verifyWait:
+      "A link was sent a moment ago. Check your inbox (including spam) or wait a few minutes.",
+  },
+
+  /** Copy for the transactional emails — see src/lib/mail-templates.ts. */
+  mail: {
+    verifySubject: "Verify your email — SHEMO PHARM",
+    verifyHeading: "Verify your address",
+    verifyIntro: "Hello {name}, thank you for registering with SHEMO PHARM.",
+    verifyBody: "Click the button below to confirm this address belongs to you.",
+    verifyButton: "Verify email",
+    verifyFallback: "If the button does not work, copy this link into your browser:",
+    verifyExpiry: "This link is valid for 24 hours.",
+    verifyIgnore: "If you did not create this account, please ignore this message.",
+    approvedSubject: "Your account is approved — SHEMO PHARM",
+    approvedHeading: "Your account is active",
+    approvedIntro: "Hello {name},",
+    approvedBody:
+      "The SHEMO PHARM team has approved your account. Wholesale prices are now visible across the whole catalog.",
+    approvedButton: "Browse products",
+    footerNote:
+      "SHEMO PHARM — pharmaceutical depot and wholesale distributor, Prizren, Kosovo.",
   },
 };

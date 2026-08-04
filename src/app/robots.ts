@@ -8,6 +8,7 @@ const PRIVATE_PATHS = [
   "/regjistrohu",
   "/lista-e-deshirave",
   "/shporta",
+  "/verifikimi",
 ];
 
 export default function robots(): MetadataRoute.Robots {
