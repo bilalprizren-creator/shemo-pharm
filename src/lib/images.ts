@@ -6,18 +6,19 @@
  * three places: next.config.ts (what the optimizer accepts), the admin form
  * (what an editor may paste) and the catalog layer (what reaches a component).
  *
- * Product photography is moving from the old WordPress to Vercel Blob. Both
- * hosts are listed during the move: the Blob one has to be accepted BEFORE the
- * new URLs reach the database, or every product would fall back to the
- * placeholder icon, and the WordPress one stays until the migration is verified
- * so the old URLs remain a way back.
+ * All 2049 product photos now live in the repo under public/products/, which
+ * needs no entry here — local paths are allowed outright below. The old
+ * WordPress host stays listed only so an editor can still paste a URL from the
+ * old site into the admin form while it is up.
+ *
+ * The Vercel Blob host was removed again: the store was blocked within hours of
+ * the migration ("Your store is blocked") and every product image on production
+ * turned into a 502, so the photos moved into the repo instead. If an upload
+ * field is ever added to the admin panel, an object store becomes the right
+ * answer again and its host belongs back on this list — see
+ * scripts/localize-images.mjs.
  */
 export const REMOTE_IMAGE_PATTERNS = [
-  {
-    protocol: "https",
-    hostname: "*.public.blob.vercel-storage.com",
-    pathname: "/products/**",
-  },
   {
     protocol: "https",
     hostname: "shemopharm.com",
