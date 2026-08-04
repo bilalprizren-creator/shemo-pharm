@@ -11,14 +11,23 @@
  * WordPress host stays listed only so an editor can still paste a URL from the
  * old site into the admin form while it is up.
  *
- * The Vercel Blob host was removed again: the store was blocked within hours of
- * the migration ("Your store is blocked") and every product image on production
- * turned into a 502, so the photos moved into the repo instead. If an upload
- * field is ever added to the admin panel, an object store becomes the right
- * answer again and its host belongs back on this list — see
- * scripts/localize-images.mjs.
+ * Vercel Blob is listed too, but for single photos rather than the bulk of the
+ * catalog. The bulk migration blocked the store by spending all 2000 free write
+ * operations in one run, which is why the catalog lives in the repo. Adding one
+ * product at a time is a different scale entirely — a pharmacy adds tens of
+ * products a month, not thousands — so an editor can upload a photo in the
+ * Vercel dashboard and paste its URL into the admin form, and it has to pass
+ * this list to be accepted.
+ *
+ * The store id in the hostname is generated and has already changed once, hence
+ * the wildcard rather than a literal name.
  */
 export const REMOTE_IMAGE_PATTERNS = [
+  {
+    protocol: "https",
+    hostname: "*.public.blob.vercel-storage.com",
+    pathname: "/**",
+  },
   {
     protocol: "https",
     hostname: "shemopharm.com",
