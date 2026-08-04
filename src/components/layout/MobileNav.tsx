@@ -17,6 +17,7 @@ import {
 import { SITE } from "@/lib/site";
 import { langHref, switchLangPath, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { useCart } from "@/components/cart/CartProvider";
 import type { NavCategory } from "./HeaderClient";
 
 const LINK_PATHS = [
@@ -44,6 +45,7 @@ export function MobileNav({
   dict: Dictionary;
 }) {
   const [catsOpen, setCatsOpen] = useState(false);
+  const { openCart } = useCart();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
@@ -153,7 +155,17 @@ export function MobileNav({
               <li key={l.href}>
                 <Link
                   href={langHref(lang, l.href)}
-                  onClick={onClose}
+                  // The basket slides in beside the page here too, so the menu
+                  // never hands the customer off to a separate cart page.
+                  onClick={
+                    l.key === "cart"
+                      ? (e) => {
+                          e.preventDefault();
+                          onClose();
+                          openCart();
+                        }
+                      : onClose
+                  }
                   className="flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-medium text-ink-900 hover:bg-brand-50"
                 >
                   {"icon" in l && l.icon && (
