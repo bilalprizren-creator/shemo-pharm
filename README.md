@@ -64,8 +64,10 @@ Mesazhet ruhen në `data/messages.json`, abonimet në `data/newsletter.json`.
 ## Fotografitë
 
 - `public/photos/depo.jpg` — foto reale e njësisë së SHEMO (nga faqja e vjetër).
-- `public/photos/keshillim.jpg` — foto stock (Unsplash, licencë falas) si
-  vendmbajtëse derisa të ketë fotografi reale të ekipit.
+- `public/photos/hero-barnatore.jpg` dhe `public/photos/keshillim.jpg` — pamje
+  të gjeneruara me AI posaçërisht për markën (uniforma dhe logo SHEMO), të cilat
+  zëvendësuan fotot stock. Mbeten vendmbajtëse derisa të ketë fotografi reale
+  të ekipit.
 - `public/logo-symbol.svg` — simboli i logos i nxjerrë nga `logo.svg` origjinal
   (pa rivizatim), i përdorur në footer-in e errët.
 

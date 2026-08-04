@@ -169,7 +169,8 @@ export const sq = {
       "Informacion mbi disponueshmërinë dhe stokun",
       "Porosi me shumicë për barnatore dhe institucione",
     ],
-    adviceImageAlt: "Ekipi duke pranuar porosi në telefon dhe duke punuar në kompjuter",
+    adviceImageAlt:
+      "Dy farmacistë të SHEMO Pharm duke shqyrtuar një porosi në laptop pas banakut",
     hoursTitle: "Orari i punës",
     hoursDays: "E hënë – E premte",
     hoursTime: "09:00 – 18:00",

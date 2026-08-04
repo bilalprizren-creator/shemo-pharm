@@ -165,7 +165,8 @@ export const en: Dictionary = {
       "Availability and stock information",
       "Wholesale orders for pharmacies and institutions",
     ],
-    adviceImageAlt: "The team taking a phone order and working on a computer",
+    adviceImageAlt:
+      "Two SHEMO Pharm pharmacists reviewing an order on a laptop behind the counter",
     hoursTitle: "Working hours",
     hoursDays: "Monday – Friday",
     hoursTime: "09:00 – 18:00",

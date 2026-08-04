@@ -364,7 +364,7 @@ export function HeaderClient({
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 className="border-t border-ink-900/6 bg-white shadow-drawer"
               >
-                <div className="mx-auto max-w-3xl px-4 py-4 lg:px-6">
+                <div className="mx-auto max-w-3xl px-4 py-5 lg:px-6">
                   <SearchBar
                     autoFocus
                     withButton

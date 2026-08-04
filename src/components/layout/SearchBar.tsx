@@ -136,10 +136,20 @@ export function SearchBar({
 
   return (
     <div ref={rootRef} className={`relative ${className ?? ""}`}>
-      <div className="relative">
+      {/* One borderless pill carries the fill, shadow and focus ring; the submit
+          button is a second pill inset inside it, so both of its ends stay
+          round. Laying the row out with flex also keeps the spinner and the
+          clear button clear of the button without hand-tuned offsets.
+          With no hairline, the shadow alone has to separate the white field
+          from the white panel behind it — hence card-hover rather than card. */}
+      <div
+        className={`group flex h-13 items-center gap-1 rounded-full bg-white pl-4 shadow-card-hover transition focus-within:shadow-float focus-within:ring-4 focus-within:ring-brand-500/15 ${
+          withButton ? "pr-1.5" : "pr-2"
+        }`}
+      >
         <Search
           aria-hidden
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4.5 text-ink-400"
+          className="size-5 shrink-0 text-ink-400 transition-colors group-focus-within:text-brand-600"
         />
         <input
           ref={inputRef}
@@ -155,41 +165,37 @@ export function SearchBar({
           onChange={(e) => updateQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={onKeyDown}
-          className={`h-11 w-full border border-ink-900/10 bg-white pl-10 text-sm text-ink-900 placeholder:text-ink-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden ${
-            withButton ? "rounded-l-full rounded-r-none border-r-0 pr-10" : "rounded-full pr-16"
-          }`}
+          // outline-none! — the site-wide :focus-visible outline in globals.css
+          // is unlayered, so it beats any Tailwind utility no matter the
+          // specificity, and would draw a rectangle inside the pill. The
+          // wrapper's focus-within ring is this field's focus indicator.
+          className="h-full min-w-0 flex-1 bg-transparent px-2 text-sm text-ink-900 outline-none! placeholder:text-ink-400 [&::-webkit-search-cancel-button]:hidden"
         />
+        {loading && (
+          <Loader2 aria-hidden className="size-4 shrink-0 animate-spin text-brand-600" />
+        )}
+        {query && (
+          <button
+            type="button"
+            onClick={() => {
+              updateQuery("");
+              inputRef.current?.focus();
+            }}
+            aria-label={dict.search.clear}
+            className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-ink-900/5 hover:text-ink-700"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        )}
         {withButton && (
           <button
             type="button"
             onClick={goToFullSearch}
-            className="absolute right-0 top-0 h-11 rounded-r-full bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className="h-10 shrink-0 rounded-full bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:px-5"
           >
             {dict.search.button}
           </button>
         )}
-        <div
-          className={`absolute top-1/2 flex -translate-y-1/2 items-center gap-1 ${
-            withButton ? "right-[4.6rem]" : "right-2"
-          }`}
-        >
-          {loading && (
-            <Loader2 aria-hidden className="size-4 animate-spin text-brand-600" />
-          )}
-          {query && (
-            <button
-              type="button"
-              onClick={() => {
-                updateQuery("");
-                inputRef.current?.focus();
-              }}
-              aria-label={dict.search.clear}
-              className="flex size-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-900/5 hover:text-ink-700"
-            >
-              <X className="size-4" aria-hidden />
-            </button>
-          )}
-        </div>
       </div>
 
       {open && query.trim().length >= 2 && (
@@ -197,7 +203,7 @@ export function SearchBar({
           id="kerko-sugjerimet"
           role="listbox"
           aria-label={dict.search.suggestionsLabel}
-          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-ink-900/8 bg-white shadow-drawer"
+          className="absolute left-0 right-0 top-full z-50 mt-2.5 overflow-hidden rounded-3xl border border-ink-900/8 bg-white shadow-drawer"
         >
           {results.length === 0 && !loading ? (
             <div className="flex items-center gap-3 px-4 py-5 text-sm text-ink-500">

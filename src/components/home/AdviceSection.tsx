@@ -9,11 +9,11 @@ import type { Dictionary } from "@/lib/dictionaries";
  * "Këshillim profesional" split section. The working-hours card shows only the
  * verified hours.
  *
- * TODO(image): /photos/keshillim.jpg is a PLACEHOLDER (two people in white coats
- * in a lab-like setting) and does not show real SHEMO Pharm consultation.
- * Replace with a real SHEMO photo — an employee advising a customer, a pharmacist
- * on the phone, or an employee processing an order — once one is available.
- * Do not substitute lab, hospital or generic medical stock imagery.
+ * TODO(image): /photos/keshillim.jpg is now an AI render commissioned for the
+ * brand (SHEMO coats and wall logo), which replaced the generic Unsplash stock
+ * shot — but it is still not a photograph of the real team. Swap in a real
+ * SHEMO photo — an employee advising a customer or processing an order — once
+ * one is available. Do not fall back to lab, hospital or generic medical stock.
  */
 export function AdviceSection({ dict }: { dict: Dictionary }) {
   return (
@@ -66,7 +66,7 @@ export function AdviceSection({ dict }: { dict: Dictionary }) {
 
         <div className="relative">
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-card">
-            {/* TODO(image): placeholder — replace with a real SHEMO consultation photo. */}
+            {/* TODO(image): branded AI render — replace with a real SHEMO photo. */}
             <Image
               src="/photos/keshillim.jpg"
               alt={dict.home.adviceImageAlt}
