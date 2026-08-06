@@ -162,6 +162,57 @@ export function newRegistrationMessage({
   return { to, subject, html, text, replyTo: user.email };
 }
 
+/**
+ * "Choose a new password" — the only way back into an account whose password
+ * is lost. Names no account details beyond the greeting: the mail may land in
+ * a shared pharmacy mailbox, and it is also what someone typing a stranger's
+ * address into the form would receive.
+ */
+export function resetPasswordMessage({
+  dict,
+  name,
+  to,
+  url,
+}: {
+  dict: Dictionary;
+  name: string;
+  to: string;
+  url: string;
+}): MailMessage {
+  const m = dict.mail;
+  const intro = fmt(m.resetIntro, { name });
+
+  const html = shell(
+    m.resetSubject,
+    [
+      `<h1 style="margin:0 0 14px;font-size:20px;color:${INK};">${escapeHtml(m.resetHeading)}</h1>`,
+      paragraph(intro),
+      paragraph(m.resetBody),
+      button(url, m.resetButton),
+      `<p style="margin:0 0 6px;color:${MUTED};font-size:13px;">${escapeHtml(m.verifyFallback)}</p>`,
+      `<p style="margin:0 0 16px;font-size:13px;word-break:break-all;"><a href="${escapeHtml(url)}" style="color:${BRAND};">${escapeHtml(url)}</a></p>`,
+      `<p style="margin:0;color:${MUTED};font-size:13px;">${escapeHtml(m.resetExpiry)} ${escapeHtml(m.resetIgnore)}</p>`,
+    ].join("\n"),
+    m.footerNote
+  );
+
+  const text = [
+    m.resetHeading,
+    "",
+    intro,
+    m.resetBody,
+    "",
+    url,
+    "",
+    m.resetExpiry,
+    m.resetIgnore,
+    "",
+    m.footerNote,
+  ].join("\n");
+
+  return { to, subject: m.resetSubject, html, text };
+}
+
 /** "Your account is approved" — sent when the admin flips status to approved. */
 export function accountApprovedMessage({
   dict,

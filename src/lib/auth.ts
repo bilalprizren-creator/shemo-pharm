@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { sql } from "@/lib/db";
 import { isLang, type Lang } from "@/lib/i18n";
 
@@ -188,6 +188,107 @@ export async function markEmailVerified(
   `) as { id: number }[];
   if (rows.length > 0) return "verified";
   return (await findUser(address)) ? "already" : "unknown";
+}
+
+/**
+ * Password reset.
+ *
+ * Same shape as the verification link and for the same reason — no token table,
+ * the signature is the proof. Two differences, both because this token hands
+ * over the account rather than confirming a mailbox:
+ *
+ *   - one hour instead of twenty-four;
+ *   - a fingerprint of the password hash rides along in `pw`, so the link stops
+ *     working the moment the password changes. That makes it single-use in
+ *     practice: a link already spent, or one from before a password change,
+ *     verifies its signature and is still refused. It also invalidates every
+ *     outstanding link at once if a customer requests several.
+ */
+const RESET_PURPOSE = "reset-password";
+
+/** Short, non-reversible tag for a password hash. Not a secret — it only has to
+ *  change when the hash does, and it never leaves our own signed token. */
+function passwordFingerprint(passwordHash: string): string {
+  return createHash("sha256").update(passwordHash).digest("hex").slice(0, 16);
+}
+
+export async function signResetToken(user: {
+  email: string;
+  passwordHash: string;
+}): Promise<string> {
+  return new SignJWT({
+    purpose: RESET_PURPOSE,
+    pw: passwordFingerprint(user.passwordHash),
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(user.email.trim().toLowerCase())
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(getSecret());
+}
+
+export type ResetToken =
+  | { ok: true; email: string }
+  | { ok: false; reason: "expired" | "invalid" | "used" };
+
+/**
+ * Verifies a reset link and confirms it still matches the account's current
+ * password. "used" is reported separately from "invalid" so the page can say
+ * the link has already been spent instead of implying it was forged.
+ */
+export async function readResetToken(token: string): Promise<ResetToken> {
+  if (!token) return { ok: false, reason: "invalid" };
+  let email: string;
+  let fingerprint: string;
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (
+      payload.purpose !== RESET_PURPOSE ||
+      typeof payload.sub !== "string" ||
+      typeof payload.pw !== "string"
+    ) {
+      return { ok: false, reason: "invalid" };
+    }
+    email = payload.sub;
+    fingerprint = payload.pw;
+  } catch (err) {
+    const expired = (err as { code?: string })?.code === "ERR_JWT_EXPIRED";
+    return { ok: false, reason: expired ? "expired" : "invalid" };
+  }
+
+  const user = await findUser(email);
+  if (!user) return { ok: false, reason: "invalid" };
+  if (passwordFingerprint(user.passwordHash) !== fingerprint) {
+    return { ok: false, reason: "used" };
+  }
+  return { ok: true, email };
+}
+
+/** Writes the new password. Returns false if the address vanished meanwhile. */
+export async function setPassword(email: string, password: string): Promise<boolean> {
+  const rows = (await sql`
+    UPDATE users SET password_hash = ${hashPassword(password)}
+    WHERE email = ${email.trim().toLowerCase()}
+    RETURNING id
+  `) as { id: number }[];
+  return rows.length > 0;
+}
+
+/**
+ * Reserves the right to send a reset mail to this address, at most once every
+ * two minutes — the same per-address guard the verification mail uses, and for
+ * the same reason. Returns false for an address that does not exist, which the
+ * caller must not reveal.
+ */
+export async function claimPasswordResetSend(email: string): Promise<boolean> {
+  const rows = (await sql`
+    UPDATE users SET reset_sent_at = now()
+    WHERE email = ${email.trim().toLowerCase()}
+      AND (reset_sent_at IS NULL
+           OR reset_sent_at < now() - interval '2 minutes')
+    RETURNING id
+  `) as { id: number }[];
+  return rows.length > 0;
 }
 
 /**

@@ -374,6 +374,24 @@ export const en: Dictionary = {
     hidePassword: "Hide password",
     ruleMinChars: "At least 8 characters",
     ruleMatch: "Passwords match",
+    forgotPassword: "Forgot your password?",
+    forgotTitle: "Reset password",
+    forgotMetaDescription:
+      "Request a link to reset the password of your SHEMO PHARM account.",
+    forgotHeading: "Forgot your password?",
+    forgotSub: "Enter your email and we will send you a link to reset it.",
+    forgotButton: "Send the link",
+    backToLogin: "Back to login",
+    newPasswordHeading: "Choose a new password",
+    newPasswordSub: "Link confirmed. Set the new password for {email}.",
+    newPassword: "New password",
+    newPasswordButton: "Save password",
+    linkDeadHeading: "This link is no longer valid",
+    linkExpiredText: "Reset links expire after an hour. Request a new one below.",
+    linkUsedText:
+      "This link has already been used, or the password has changed since. Request a new one below.",
+    linkInvalidText:
+      "This link cannot be read. Make sure you copied it in full, or request a new one below.",
   },
 
   accountPage: {
@@ -503,6 +521,10 @@ export const en: Dictionary = {
     verifySent: "Verification link sent. Check your inbox.",
     verifyWait:
       "A link was sent a moment ago. Check your inbox (including spam) or wait a few minutes.",
+    resetSent:
+      "If this address has an account, a password reset link has just been sent. Check your inbox, including spam.",
+    resetLinkDead:
+      "This link is no longer valid. It expires after an hour and works only once — request a new one.",
   },
 
   /** Copy for the transactional emails — see src/lib/mail-templates.ts. */
@@ -515,6 +537,15 @@ export const en: Dictionary = {
     verifyFallback: "If the button does not work, copy this link into your browser:",
     verifyExpiry: "This link is valid for 24 hours.",
     verifyIgnore: "If you did not create this account, please ignore this message.",
+    resetSubject: "Reset your password — SHEMO PHARM",
+    resetHeading: "Reset your password",
+    resetIntro: "Hello {name},",
+    resetBody:
+      "We received a request to reset the password of your account. Click the button below to choose a new one.",
+    resetButton: "Choose a new password",
+    resetExpiry: "This link is valid for one hour and can be used only once.",
+    resetIgnore:
+      "If you did not request this, ignore this message — your password stays unchanged.",
     approvedSubject: "Your account is approved — SHEMO PHARM",
     approvedHeading: "Your account is active",
     approvedIntro: "Hello {name},",

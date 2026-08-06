@@ -379,6 +379,25 @@ export const sq = {
     hidePassword: "Fshih fjalëkalimin",
     ruleMinChars: "Së paku 8 karaktere",
     ruleMatch: "Fjalëkalimet përputhen",
+    forgotPassword: "Keni harruar fjalëkalimin?",
+    forgotTitle: "Rivendos fjalëkalimin",
+    forgotMetaDescription:
+      "Kërkoni një lidhje për të rivendosur fjalëkalimin e llogarisë suaj te SHEMO PHARM.",
+    forgotHeading: "Keni harruar fjalëkalimin?",
+    forgotSub: "Shkruani email-in tuaj dhe ju dërgojmë një lidhje për ta rivendosur.",
+    forgotButton: "Dërgo lidhjen",
+    backToLogin: "Kthehu te kyçja",
+    newPasswordHeading: "Zgjidhni një fjalëkalim të ri",
+    newPasswordSub: "Lidhja u konfirmua. Vendosni fjalëkalimin e ri për {email}.",
+    newPassword: "Fjalëkalimi i ri",
+    newPasswordButton: "Ruaj fjalëkalimin",
+    linkDeadHeading: "Lidhja nuk vlen më",
+    linkExpiredText:
+      "Lidhjet për rivendosje skadojnë pas një ore. Kërkoni një të re më poshtë.",
+    linkUsedText:
+      "Kjo lidhje është përdorur tashmë ose fjalëkalimi është ndryshuar që atëherë. Kërkoni një të re më poshtë.",
+    linkInvalidText:
+      "Kjo lidhje nuk mund të lexohet. Sigurohuni që e kopjuat të plotë, ose kërkoni një të re më poshtë.",
   },
 
   accountPage: {
@@ -508,6 +527,11 @@ export const sq = {
     verifySent: "Lidhja e verifikimit u dërgua. Kontrolloni email-in tuaj.",
     verifyWait:
       "Një lidhje u dërgua para pak kohësh. Kontrolloni email-in (edhe dosjen e spam-it) ose prisni disa minuta.",
+    /** Deliberately says nothing about whether the address exists. */
+    resetSent:
+      "Nëse kjo adresë ka një llogari, lidhja për rivendosjen e fjalëkalimit sapo u dërgua. Kontrolloni email-in, edhe dosjen e spam-it.",
+    resetLinkDead:
+      "Kjo lidhje nuk vlen më. Ajo skadon pas një ore dhe funksionon vetëm një herë — kërkoni një të re.",
   },
 
   /** Copy for the transactional emails — see src/lib/mail-templates.ts. */
@@ -520,6 +544,15 @@ export const sq = {
     verifyFallback: "Nëse butoni nuk funksionon, kopjoni këtë lidhje në shfletues:",
     verifyExpiry: "Kjo lidhje vlen 24 orë.",
     verifyIgnore: "Nëse nuk e keni bërë ju këtë regjistrim, injorojeni këtë mesazh.",
+    resetSubject: "Rivendosni fjalëkalimin — SHEMO PHARM",
+    resetHeading: "Rivendosni fjalëkalimin",
+    resetIntro: "Përshëndetje {name},",
+    resetBody:
+      "Morëm një kërkesë për të rivendosur fjalëkalimin e llogarisë suaj. Klikoni butonin më poshtë për të zgjedhur një të ri.",
+    resetButton: "Zgjidh fjalëkalim të ri",
+    resetExpiry: "Kjo lidhje vlen një orë dhe mund të përdoret vetëm një herë.",
+    resetIgnore:
+      "Nëse nuk e keni kërkuar ju këtë, injorojeni këtë mesazh — fjalëkalimi juaj mbetet i pandryshuar.",
     approvedSubject: "Llogaria juaj u aprovua — SHEMO PHARM",
     approvedHeading: "Llogaria juaj është aktive",
     approvedIntro: "Përshëndetje {name},",

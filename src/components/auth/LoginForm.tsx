@@ -54,6 +54,17 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
         labels={{ show: dict.auth.showPassword, hide: dict.auth.hidePassword }}
       />
 
+      {/* Under the password field, where somebody who just failed to remember
+          it is already looking — not buried at the foot of the page. */}
+      <p className="-mt-1 text-right text-sm">
+        <Link
+          href={langHref(dict.lang, "/rikthe-fjalekalimin")}
+          className="font-semibold text-brand-700 hover:text-brand-800"
+        >
+          {dict.auth.forgotPassword}
+        </Link>
+      </p>
+
       <button
         type="submit"
         disabled={pending}

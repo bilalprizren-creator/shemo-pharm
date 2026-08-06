@@ -57,6 +57,18 @@ export function verificationUrl(token: string, lang: Lang): string {
   return `${siteOrigin()}/api/verifiko-email?${params}`;
 }
 
+/**
+ * The absolute link that opens the "choose a new password" form.
+ *
+ * Unlike the verification link this points at a page rather than an API route:
+ * the token cannot do anything on its own, it only unlocks a form the customer
+ * still has to fill in.
+ */
+export function passwordResetUrl(token: string, lang: Lang): string {
+  const path = lang === "sq" ? "" : `/${lang}`;
+  return `${siteOrigin()}${path}/rikthe-fjalekalimin?token=${encodeURIComponent(token)}`;
+}
+
 /** Where "a new partner registered" goes. ADMIN_EMAIL already exists in env. */
 export function adminNotificationAddress(): string {
   return (
