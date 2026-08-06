@@ -37,16 +37,35 @@ export function CategoryFilter({
         }`}
       >
         {/* One line for the usual names, two for the long ones — cutting them
-            off pushed the count out of a 260px sidebar */}
-        <span className="line-clamp-2 min-w-0 leading-snug">{name}</span>
-        <span className={`shrink-0 text-xs ${isActive ? "text-white/80" : "text-ink-400"}`}>
+            off pushed the count out of a 260px sidebar. break-words matters at
+            the third level, where a single long word like "kompresioni" has no
+            space to break in and otherwise widens the row past its siblings. */}
+        <span className="line-clamp-2 min-w-0 break-words leading-snug">{name}</span>
+        {/* Right-aligned in a fixed column with tabular figures, so 20 and 461
+            end on the same pixel instead of each starting wherever its label
+            happens to leave off. */}
+        <span
+          className={`w-8 shrink-0 text-right text-xs tabular-nums ${
+            isActive ? "text-white/80" : "text-ink-400"
+          }`}
+        >
           {node.count}
         </span>
       </Link>
     );
 
+    // A branch carries a chevron button beside its link, a leaf does not — so
+    // without this spacer every leaf's count sits a chevron-width further right
+    // than its siblings', which is exactly the ragged column being fixed.
+    const chevronWidth = <span aria-hidden className="size-9 shrink-0" />;
+
     if (node.children.length === 0) {
-      return <li key={node.id}>{link}</li>;
+      return (
+        <li key={node.id} className="flex items-center gap-0.5">
+          {link}
+          {chevronWidth}
+        </li>
+      );
     }
 
     return (
