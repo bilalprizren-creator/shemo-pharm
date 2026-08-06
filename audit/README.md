@@ -15,9 +15,10 @@ named "Labella" or "Palloma" turns out to be some other brand entirely.
 
 | | |
 |---|---|
-| Classified | **1800 of 2049** — batches 001–036 |
-| Remaining | batches **037–041** (249 products) |
+| Classified | **2049 of 2049** — batches 001–041, complete |
+| Remaining | none |
 | Validator | 0 problems |
+| To re-check by hand | 147 low confidence, 58 parked on a bare root |
 | Applied to JSON or the database | **nothing yet** |
 
 ## Layout
@@ -39,9 +40,11 @@ node scripts/audit-thumbnails.mjs
 ```
 
 That rebuilds `audit/thumbs/` from `public/products/`, which is exactly where
-`audit/batches/*.json` point. Nothing else needs restoring.
+`audit/batches/*.json` point. Nothing else needs restoring. Needed again only
+to re-open a photo during review — no batch is waiting to be classified.
 
-Then, for each remaining batch, run one subagent with this brief:
+<details>
+<summary>The brief each batch was classified under (kept for re-runs)</summary>
 
 > Read `audit/RULES.md` in full, then `audit/PRECEDENTS.md` in full, then
 > `audit/batches/batch-0NN.json`. For EVERY product, open the `image` path with the
@@ -53,16 +56,15 @@ Then, for each remaining batch, run one subagent with this brief:
 > are applied afterwards by a deterministic rule. Write the file incrementally every
 > ~10 products so an interruption does not lose the batch.
 
-Then gate on:
+</details>
+
+The gate, which currently reports `classified: 2049 of 2049` and `problems: 0`:
 
 ```bash
 node scripts/merge-audit.mjs audit/out
 ```
 
-It must report `problems: 0` and no `INCOMPLETE` list. Repeat until
-`classified: 2049 of 2049`.
-
-## Then
+## Next
 
 ```bash
 node scripts/merge-audit.mjs audit/out --write   # -> src/data/catalog-assignments.json
@@ -97,9 +99,13 @@ because an LLM applying the same rule 2049 times will not apply it the same way 
   on the `per-femije` root). Also unhoused: topical/scalp-route medicines such as
   medicated shampoos and minoxidil, silicone breast prostheses, oral "medical device"
   products, cushions, hospital beds, and printed pharmacy carrier bags — which are
-  retail supplies and probably want `hidden` rather than a category.
-- **Labella.** Across 1750 audited products, not one package carries the Labella mark.
-  The brand and the two categories merging into it are heading for `count = 0`.
+  retail supplies and probably want `hidden` rather than a category. The last five
+  batches added a few more: table sweeteners (5 products, on the `suplemente` root),
+  drinking and distilled water (4), apple-cider vinegar (3), and honey-paste potency
+  sachets (3). None is big enough to deserve a leaf on its own; together they might
+  want one shared "other" home.
+- **Labella.** Now measured across all 2049 products: not one package carries the
+  Labella mark. The brand and the two categories merging into it end at `count = 0`.
 - **Ersa Med** lands at ~160 products via article codes, against 238 in the old bucket.
   The difference is genuine foreign stock — the old bucket held a stool-sample cup, a
   Medura kinesiology tape and an ESCAPE LX wheelchair.

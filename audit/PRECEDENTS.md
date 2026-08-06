@@ -32,7 +32,8 @@ Judge the package, never the name. Real examples already caught:
 - **Hydrocolloid blister plaster** → `fllastera` (it dresses broken skin).
 - **Corn / callus plasters** → `kujdesi-i-duarve-dhe-kembeve` (foot care). The same leaf
   takes the ointment, jar and collodion-solution versions of the same treatment — these
-  are foot care in every format, not `krema-dhe-pomada`.
+  are foot care in every format, not `krema-dhe-pomada`. **Wart-remover liquid** goes
+  here too: same treatment, same format.
 - **Eyeglass and lens cleaning wipes AND cloths** → `kujdesi-i-syve`, including plain
   microfibre cloths. They clean the lens, not the eye, but nothing else comes closer.
 - **Eye pads / Göz Pedi** → `kujdesi-i-syve`, not `fllastera`.
@@ -56,7 +57,13 @@ and say in `note` what leaf is missing.
 | Medicinal powder sachet for oral solution (Lupocet-type cold remedy) | `shurupa` | |
 | Shoulder immobilizer / Velpeau arm sling | `krah` | |
 | "Sexual massage oil" sold beside lubricants | `prezervativ` | |
-| Artificial sweetener tablets (Huxol) | `suplemente` (root) | |
+| Artificial sweetener tablets, sticks or dispensers (Huxol, stevia, Süßstoff) | `suplemente` (root) | |
+| Honey-paste sticks sold for potency (Premium king honey, The Stallion, Wonderful Honey) | `suplemente` (root) | |
+| Apple-cider vinegar sold as a health product | `suplemente` (root) | |
+| Bottled drinking water (Zamzam) | `suplemente` (root) | |
+| Distilled water / aqua purificata | `alkool-dhe-antiseptik` (root) | as the mattress protector |
+| Stethoscope | `te-ndryshme` | with the batteries and hospital beds |
+| Hand exercise or stress ball | `te-tjera-ersa-med-ortoped` | |
 | **Baby nappies** (Pampers Active Baby / Premium Care / Maxi Pack) | `per-femije` (root) | 22 products, no leaf exists |
 | Eyeglass and lens cleaning wipes | `kujdesi-i-syve` | |
 | Anti-snore nose clip | `kujdesi-i-hundes` | |
@@ -102,6 +109,16 @@ repellents, `confidence: "high"` — same product family, and there is no separa
   ingredients: a named antihistamine → `pika` under barnat; sodium hyaluronate,
   echinacea, or a lens-compatible comfort formula → `kujdesi-i-syve`.
 - **Vaginal capsules / ovules** with no named drug substance → `supositore`.
+- **A gargle and a spray of the same medicine part company.** Kloroben and Tanflex both
+  sell benzydamine as an oral spray and as a rinse: the spray is `sprej-dhe-inhalim`
+  under barnat, the gargle is `dentare`.
+- **Sterile lubricating jelly** (K-Y, Zetasin) → `prezervativ`, where the lubricants are.
+- **Vapour rub** whose only claim is easier breathing → `kujdesi-i-hundes`, following the
+  vapor patch. A menthol or arnica balm that claims muscles or skin stays
+  `kujdesi-i-trupit`.
+- **Antiseptic healing cream for nappy rash *and* wounds** (Sudocrem) →
+  `krema-dhe-pomada` + `alsoTypes: ["kujdesi-i-bebeve"]`. A cream that only says baby
+  (Bepanthen, Neogranormon) goes straight to `kujdesi-i-bebeve`.
 
 ## Brand discipline
 
