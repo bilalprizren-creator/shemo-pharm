@@ -103,3 +103,10 @@ because an LLM applying the same rule 2049 times will not apply it the same way 
 - **Ersa Med** lands at ~160 products via article codes, against 238 in the old bucket.
   The difference is genuine foreign stock — the old bucket held a stool-sample cup, a
   Medura kinesiology tape and an ESCAPE LX wheelchair.
+- **Known limit of the code rule: 4 products where the code and the photo disagree.**
+  Ids 5089, 19066 (photographed as *med TEXTILE*) and 10799, 5135 (a *SUPPORT LINK*
+  tag, which is not Ersa's *supportline*) carry an Ersa-shaped code in the name while
+  the package shows someone else. The rule fills them as Ersa because the auditor
+  correctly left `brand: null` — an unlisted brand and an unreadable one are both
+  `null`, so the rule cannot tell them apart. Decide these four by hand at review;
+  detecting the case by grepping the free-text `note` would be worse than the disease.
