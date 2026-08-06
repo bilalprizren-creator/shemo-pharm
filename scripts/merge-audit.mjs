@@ -26,6 +26,9 @@ if (!dir) {
 
 const taxonomy = readJson(dataPath("taxonomy.json"));
 const products = readJson(dataPath("products.json"));
+const brandPins = existsSync(dataPath("brand-pins.json"))
+  ? readJson(dataPath("brand-pins.json"))
+  : { pins: [] };
 assertTree(taxonomy.categories);
 
 const bySlug = new Map(taxonomy.categories.map((c) => [c.slug, c]));
@@ -126,6 +129,7 @@ for (const file of files) {
       alsoTypes: also,
       brand: row.brand ?? null,
       brandSource: row.brand ? "photo" : null,
+      pinnedBrands: [],
       confidence: row.confidence === "low" ? "low" : "high",
       note: (row.note ?? "").slice(0, 120),
       _file: file,
@@ -148,6 +152,35 @@ for (const row of rows.values()) {
   row.brand = match.brand;
   row.brandSource = "code";
   coded++;
+}
+
+/**
+ * Brand shelves whose membership is kept exactly as the live site has it, from
+ * src/data/brand-pins.json — see the header of scripts/pin-brands.mjs for why
+ * Ersa Med and Labella are not left to the camera. A pin only ever adds a link:
+ * where the auditor read a different mark off the package, that mark stays the
+ * product's brand and the pin becomes a second one.
+ */
+let pinnedPrimary = 0;
+let pinnedSecondary = 0;
+for (const pin of brandPins.pins) {
+  if (!brandSlugs.has(pin.brand)) {
+    problems.push(`brand-pins.json: "${pin.brand}" is not a brand`);
+    continue;
+  }
+  for (const id of pin.ids) {
+    const row = rows.get(id);
+    if (!row) continue; // an unclassified product surfaces in "not yet done" already
+    if (row.brand === pin.brand || row.pinnedBrands.includes(pin.brand)) continue;
+    if (row.brand) {
+      row.pinnedBrands.push(pin.brand);
+      pinnedSecondary++;
+    } else {
+      row.brand = pin.brand;
+      row.brandSource = "pinned";
+      pinnedPrimary++;
+    }
+  }
 }
 
 /**
@@ -204,6 +237,7 @@ console.log(`not yet done:  ${missing.length}`);
 console.log(`low confidence:${low.length}`);
 console.log(`on a bare root that has leaves: ${onRoot.length}`);
 console.log(`per-femije added for a kids brand:  ${kidsTagged}`);
+console.log(`brand kept by a pin: ${pinnedPrimary} as the brand, ${pinnedSecondary} beside a read one`);
 console.log(`problems:      ${problems.length}`);
 if (problems.length) console.log("  " + problems.slice(0, 40).join("\n  "));
 
@@ -217,13 +251,23 @@ for (const [slug, n] of [...perType].sort((a, b) => b[1] - a[1])) {
 const unusedLeaves = [...typeSlugs].filter((s) => !perType.has(s));
 if (unusedLeaves.length) console.log(`\nleaves nothing landed in: ${unusedLeaves.join(", ")}`);
 
+// Counted over brand *and* pinnedBrands, so the number here is the number the
+// brand's category page will show rather than one that quietly omits the 7
+// products whose photo mark differs from the shelf they are pinned to.
 const perBrand = new Map();
-for (const r of rows.values()) if (r.brand) perBrand.set(r.brand, (perBrand.get(r.brand) ?? 0) + 1);
-const branded = [...perBrand.values()].reduce((a, b) => a + b, 0);
+for (const r of rows.values()) {
+  for (const slug of [r.brand, ...r.pinnedBrands]) {
+    if (slug) perBrand.set(slug, (perBrand.get(slug) ?? 0) + 1);
+  }
+}
+const branded = [...rows.values()].filter((r) => r.brand).length;
 console.log(`\nbranded: ${branded} (${coded} from an article code), brandless: ${rows.size - branded}`);
 for (const [slug, n] of [...perBrand].sort((a, b) => b[1] - a[1])) {
-  const fromCode = [...rows.values()].filter((r) => r.brand === slug && r.brandSource === "code").length;
-  console.log(`  ${String(n).padStart(4)}  ${slug}${fromCode ? `  (${fromCode} by code)` : ""}`);
+  const list = [...rows.values()].filter((r) => r.brand === slug || r.pinnedBrands.includes(slug));
+  const fromCode = list.filter((r) => r.brandSource === "code" && r.brand === slug).length;
+  const fromPin = list.filter((r) => r.brandSource === "pinned" || r.pinnedBrands.includes(slug)).length;
+  const how = [fromCode && `${fromCode} by code`, fromPin && `${fromPin} pinned`].filter(Boolean);
+  console.log(`  ${String(n).padStart(4)}  ${slug}${how.length ? `  (${how.join(", ")})` : ""}`);
 }
 
 if (!WRITE) {

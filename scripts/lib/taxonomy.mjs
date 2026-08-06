@@ -103,9 +103,12 @@ export function countProducts(categories, products) {
  * with the first id it can resolve, so the primary leaf has to come first for a
  * card to say "Kujdesi i buzëve" instead of "Kozmetikë". Ancestors follow so
  * that browsing a parent finds the product, then the secondary types, then the
- * brand last — a brand is never what a product *is*.
+ * brand last — a brand is never what a product *is*. `pinnedBrands` are the
+ * shelves a product keeps regardless of what its photo shows (see
+ * scripts/pin-brands.mjs) and come last of all, behind the mark actually read
+ * off the package.
  */
-export function orderedCategoryIds({ type, alsoTypes = [], brand }, bySlug, byId) {
+export function orderedCategoryIds({ type, alsoTypes = [], brand, pinnedBrands = [] }, bySlug, byId) {
   const out = [];
   const push = (id) => {
     if (id != null && !out.includes(id)) out.push(id);
@@ -120,5 +123,6 @@ export function orderedCategoryIds({ type, alsoTypes = [], brand }, bySlug, byId
   addWithAncestors(type);
   for (const t of alsoTypes) addWithAncestors(t);
   if (brand) push(bySlug.get(brand)?.id);
+  for (const b of pinnedBrands) push(bySlug.get(b)?.id);
   return out;
 }
