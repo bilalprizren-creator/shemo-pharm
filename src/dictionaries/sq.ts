@@ -104,7 +104,7 @@ export const sq = {
     /** Blurbs only — the card title is the category's own display name. */
     categoryCards: {
       barnat: "Produkte farmaceutike nga brende të njohura",
-      "suplements-effervescent": "Vitamina, minerale dhe suplemente ushqimore",
+      suplemente: "Vitamina, minerale dhe suplemente ushqimore",
       kozmetike: "Produkte për kujdesin e lëkurës dhe higjienën",
       ortopedi: "Mbështetëse, banda dhe zgjidhje ortopedike",
       "paisje-medicinale": "Aparate matëse dhe pajisje për përdorim profesional",
@@ -279,6 +279,11 @@ export const sq = {
     sub: "Bashkëpunojmë me brende të njohura ndërkombëtare për t'u ofruar barnatoreve dhe partnerëve produkte me cilësi të verifikuar.",
     metaDescription:
       "Brendet ndërkombëtare që distribuon SHEMO PHARM: Swiss Energy, Dr. Frei, Kräuterhof, Cansin, Sudocrem dhe shumë të tjera.",
+    productCount: "{count} produkte",
+    noProducts: "Së shpejti në katalog",
+    moreTitle: "Brende të tjera në katalog",
+    moreSub:
+      "Marka me produkte në katalogun tonë që ende nuk kanë logo në listën më lart.",
   },
 
   offersPage: {

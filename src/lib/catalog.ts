@@ -155,6 +155,115 @@ export async function getBrandCategories(): Promise<Category[]> {
     .sort((a, b) => b.count - a.count);
 }
 
+/** "Kräuterhof" -> "krauterhof", "TIO Medikal" -> "tio-medikal". */
+function brandKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ë/g, "e")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Partner logos whose name is not the name of a brand category, and where they
+ * should point instead. Every entry was measured against the catalog rather
+ * than guessed:
+ *
+ *   Support Line  the packshot audit found one retail box printing "supportline"
+ *                 and "ersamed®" side by side, and every Support-Line product in
+ *                 the catalog sits in the Ersa Med range. It is Ersa's own line,
+ *                 not a separate supplier.
+ *   Comfort Plus  the brand category reads "Comfort" — the DR.COMFORT incontinence
+ *                 pants and the DM-series devices. A name search finds tampons and
+ *                 a lubricant instead, because "comfort" is a marketing word.
+ *   Foot Guard    only the pumice stone spells the brand out in its name, but the
+ *                 audit read "Kokona Foot Guard" off the cream, the powder and the
+ *                 spray too, so the whole foot range answers to "Foot".
+ */
+const BRAND_LINK_OVERRIDES: Record<string, { category?: string; query?: string }> = {
+  "Support Line": { category: "ersa-med-ortopedi" },
+  "Comfort Plus": { category: "comfort" },
+  "Foot Guard": { query: "Foot" },
+};
+
+/**
+ * A brand name matched as whole words against the catalog.
+ *
+ * `searchProducts` matches substrings, which is right for a search box and wrong
+ * for deciding whether a logo has anywhere to go: "Alg" is inside "Deksalgin",
+ * "algodon" and "valgus", so the substring test claims five products for a brand
+ * that has none. The link is only offered when the name stands as its own word.
+ */
+function brandMatches(products: Product[], name: string): Product[] {
+  const tests = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(
+      (token) =>
+        new RegExp(
+          `(^|[^\\p{L}\\p{N}])${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^\\p{L}\\p{N}]|$)`,
+          "iu"
+        )
+    );
+  return products.filter((p) => tests.every((re) => re.test(`${p.name} ${p.sku}`)));
+}
+
+export interface BrandLink {
+  name: string;
+  /** null when nothing in the catalog answers to this brand — render it unlinked. */
+  href: string | null;
+  /** Products the destination lists, so the card can say so. */
+  count: number;
+}
+
+/**
+ * Where each partner logo on /markat leads. A logo either reaches a brand
+ * category, or a product search that actually returns something, or nothing at
+ * all — and "nothing at all" is returned honestly rather than dressed up as a
+ * link to an empty result page.
+ */
+export async function getBrandLinks(names: readonly string[]): Promise<BrandLink[]> {
+  const { products, categories } = await loadCatalog();
+  const byKey = new Map<string, Category>();
+  for (const c of categories) {
+    if (c.kind !== "brand" || c.count === 0) continue;
+    byKey.set(c.slug, c);
+    byKey.set(brandKey(categoryDisplayName(c)), c);
+  }
+
+  return names.map((name) => {
+    const override = BRAND_LINK_OVERRIDES[name];
+    const cat = byKey.get(override?.category ?? brandKey(name));
+    if (cat) return { name, href: `/kategorite/${cat.slug}`, count: cat.count };
+
+    const query = override?.query ?? name;
+    const hits = brandMatches(products, query);
+    if (!hits.length) return { name, href: null, count: 0 };
+    return {
+      name,
+      href: `/produktet?kerko=${encodeURIComponent(query)}`,
+      count: searchProducts(products, query).length,
+    };
+  });
+}
+
+/**
+ * Brand categories no partner logo already covers. Without these, twenty
+ * brands — Ersa Med's 241 products among them — are reachable only by typing
+ * the URL, because /kategorite lists product types only.
+ */
+export async function getUnbrandedCategories(names: readonly string[]): Promise<Category[]> {
+  const links = await getBrandLinks(names);
+  const covered = new Set(
+    links
+      .map((l) => l.href?.match(/^\/kategorite\/(.+)$/)?.[1])
+      .filter((slug): slug is string => Boolean(slug))
+  );
+  return (await getBrandCategories()).filter((c) => !covered.has(c.slug));
+}
+
 /** The type tree, for the sidebar filter and /kategorite. Brands are omitted. */
 export async function getCategoryTree(): Promise<CategoryNode[]> {
   const { categories } = await loadCatalog();
@@ -402,7 +511,7 @@ export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
  */
 const CATEGORY_FACE: Record<string, string> = {
   barnat: "rivoksar-15mg-x-28-tab-9892",
-  "suplements-effervescent": "magnesium-citrate-60-tablets-9911",
+  suplemente: "magnesium-citrate-60-tablets-9911",
   kozmetike: "vaseline-body-lotion-cocoa-radiant-400-ml-6053",
   ortopedi: "splint-per-mobilizim-dore-ref0-602-djathte-majte-s-m-l-xl-xxl",
   "paisje-medicinale": "tensiometer-digjital-krahu-shemo-shm-500-0018",
@@ -432,7 +541,7 @@ export async function getCategoryImage(categorySlug: string): Promise<string | n
  */
 export const HOME_CATEGORIES: { slug: string; icon: string }[] = [
   { slug: "barnat", icon: "cross" },
-  { slug: "suplements-effervescent", icon: "pill" },
+  { slug: "suplemente", icon: "pill" },
   { slug: "kozmetike", icon: "sparkles" },
   { slug: "ortopedi", icon: "footprints" },
   { slug: "paisje-medicinale", icon: "stethoscope" },

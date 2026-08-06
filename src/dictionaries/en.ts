@@ -100,7 +100,7 @@ export const en: Dictionary = {
     /** Blurbs only — the card title is the category's own display name. */
     categoryCards: {
       barnat: "Pharmaceutical products from well-known brands",
-      "suplements-effervescent": "Vitamins, minerals and dietary supplements",
+      suplemente: "Vitamins, minerals and dietary supplements",
       kozmetike: "Skincare and hygiene products",
       ortopedi: "Supports, braces and orthopedic solutions",
       "paisje-medicinale": "Measuring instruments and devices for professional use",
@@ -275,6 +275,10 @@ export const en: Dictionary = {
     sub: "We work with well-known international brands to offer pharmacies and partners products of verified quality.",
     metaDescription:
       "International brands distributed by SHEMO PHARM: Swiss Energy, Dr. Frei, Kräuterhof, Cansin, Sudocrem and many more.",
+    productCount: "{count} products",
+    noProducts: "Coming to the catalog",
+    moreTitle: "More brands in the catalog",
+    moreSub: "Brands with products in our catalog that do not yet have a logo above.",
   },
 
   offersPage: {
