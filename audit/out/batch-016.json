@@ -9,19 +9,19 @@
  },
  {
   "id": 9938,
-  "type": "suplemente",
+  "type": "te-ndryshme-suplements-effervescent",
   "alsoTypes": [],
   "brand": null,
-  "confidence": "low",
-  "note": "Huxol Classic sweetener tablets for tea/coffee; no sweetener leaf"
+  "confidence": "high",
+  "note": "Huxol Classic sweetener tablets for tea/coffee"
  },
  {
   "id": 12534,
-  "type": "suplemente",
+  "type": "te-ndryshme-suplements-effervescent",
   "alsoTypes": [],
   "brand": null,
-  "confidence": "low",
-  "note": "Huxol Original sweetener tablets, 1200ct; no matching leaf"
+  "confidence": "high",
+  "note": "Huxol Original sweetener tablets, 1200ct"
  },
  {
   "id": 4505,

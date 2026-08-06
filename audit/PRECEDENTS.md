@@ -46,6 +46,28 @@ Judge the package, never the name. Real examples already caught:
 These have no leaf. Do not invent one; use the fallback below, `confidence: "low"`,
 and say in `note` what leaf is missing.
 
+**Closed after the 41st batch** — these no longer park on a root, and the 50
+products already filed under them were moved:
+
+| Product kind | Now goes to | |
+|---|---|---|
+| Baby nappies (Pampers Active Baby / Premium Care / Maxi Pack) | `pelena-per-bebe` | new leaf under Për fëmijë, 22 products. **"Pampers për të rritur"** is adult incontinence and stays in `pelena-per-te-rritur`, despite the identical brand name |
+| Sweeteners, honey and potency sachets, bottled water, cider vinegar | `te-ndryshme-suplements-effervescent` | the catch-all under Suplemente was there all along |
+| Mosquito-repellent wristbands | `mbrojtje-nga-insektet` | with the sprays and after-bite lotions |
+| Microfibre lens cloth | `kujdesi-i-syve` | as the lens wipes |
+| Waterproof mattress protector, distilled water / aqua purificata | `te-ndryshme` | beside the stethoscope and the hospital beds |
+| Macrogol sachets for oral solution | `shurupa` | already the Lupocet rule |
+| Dexpanthenol / topical medicinal solution | `ampula-dhe-tretesira` | |
+
+Still genuinely unhoused, and deliberately left on a root:
+
+- **Medicated shampoo or scalp-route drug** (permethrin, ketoconazole, minoxidil)
+  — `barnat` root plus `alsoTypes: ["kujdesi-i-flokeve"]`, so it is reachable
+  from hair care. Barnat has no topical leaf and six products do not earn one.
+- **Printed pharmacy carrier bags** (2) — `paisje-medicinale` root. These are
+  retail supplies rather than catalog items; the real fix is `hidden = true` on
+  the product, which is a database flag, not a category.
+
 | Product kind | Use | |
 |---|---|---|
 | Oral **liquid** "medical device" in sticks/vials (Esoxx One) | `shurupa-suplemente` | |
@@ -57,28 +79,17 @@ and say in `note` what leaf is missing.
 | Medicinal powder sachet for oral solution (Lupocet-type cold remedy) | `shurupa` | |
 | Shoulder immobilizer / Velpeau arm sling | `krah` | |
 | "Sexual massage oil" sold beside lubricants | `prezervativ` | |
-| Artificial sweetener tablets, sticks or dispensers (Huxol, stevia, Süßstoff) | `suplemente` (root) | |
-| Honey-paste sticks sold for potency (Premium king honey, The Stallion, Wonderful Honey) | `suplemente` (root) | |
-| Apple-cider vinegar sold as a health product | `suplemente` (root) | |
-| Bottled drinking water (Zamzam) | `suplemente` (root) | |
-| Distilled water / aqua purificata | `alkool-dhe-antiseptik` (root) | as the mattress protector |
 | Stethoscope | `te-ndryshme` | with the batteries and hospital beds |
 | Hand exercise or stress ball | `te-tjera-ersa-med-ortoped` | |
-| **Baby nappies** (Pampers Active Baby / Premium Care / Maxi Pack) | `per-femije` (root) | 22 products, no leaf exists |
 | Eyeglass and lens cleaning wipes | `kujdesi-i-syve` | |
 | Anti-snore nose clip | `kujdesi-i-hundes` | |
 | **Silicone breast prosthesis / mastectomy form** | `te-tjera-ersa-med-ortoped` | 4 products, no leaf |
 | Burn-relief cream or lotion with no named drug | `ndihma-e-pare` | |
 | Supplement in a spray bottle | `shurupa-suplemente` | |
 | Foot-odour powder — odour control, not care | `deodorante` | |
-| Waterproof mattress protector sheet | `alkool-dhe-antiseptik` (root) | |
 | Printed pharmacy carrier bags — retail supplies, not a product | `paisje-medicinale` (root) | candidate for `hidden` |
-
-Note the adult/baby split: **"Pampers për të rritur"** is adult incontinence and belongs in
-`pelena-per-te-rritur`; a Pampers *baby* nappy does not, despite the identical brand name.
 | Medicated shampoo or scalp-route drug — permethrin, ketoconazole, minoxidil spray | `barnat` (root) + `alsoTypes: ["kujdesi-i-flokeve"]` | |
 | Lice product that states it contains NO insecticide ("böcek ilacı içermez") | `kujdesi-i-flokeve` — not a drug, so not barnat | |
-| Honey and folk-remedy jars (incl. honey with goose fat) | `suplemente` (root) | |
 | Infant hip-abduction / dysplasia harness | `te-tjera-ersa-med-ortoped` | |
 | Multipurpose isotonic saline claiming nose+eye+ear use | `kujdesi-i-hundes` + `alsoTypes: ["kujdesi-i-syve","kujdesi-i-vesheve"]` | |
 | Cold-sore / herpes lip patch | `fllastera` | |

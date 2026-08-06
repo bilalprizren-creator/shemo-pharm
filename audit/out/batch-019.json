@@ -33,7 +33,7 @@
  {"id": 19174, "type": "pluhur-dhe-qese", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Lacto Defence Plus lactoferrin supplement sticks, vit D3/C/zinc"},
  {"id": 19305, "type": "prezervativ", "alsoTypes": [], "brand": null, "confidence": "low", "note": "B'Cool Men Largo wipes, hearts branding, exact use unclear"},
  {"id": 17629, "type": "cajra-me-filter", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Naturagen Late Night sleep tea sachets, passiflora + collagen"},
- {"id": 9107, "type": "barnat", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Macrogol 4000 laxative powder sachets; no barnat powder leaf"},
+ {"id": 9107, "type": "shurupa", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Macrogol 4000 laxative powder sachets"},
  {"id": 15132, "type": "vajera", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Lea/Fitofarm almond oil, prunus dulcis oleum"},
  {"id": 14921, "type": "krema-dhe-pomada", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Lea Anti Acne Gel contains Clindamycin antibiotic"},
  {"id": 14923, "type": "krema-dhe-pomada", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Lea Anti Acne Lotion contains Clindamycin antibiotic"},

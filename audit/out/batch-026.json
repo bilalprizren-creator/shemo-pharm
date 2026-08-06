@@ -41,12 +41,12 @@
 {"id": 6388, "type": "kujdesi-i-bebeve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Sensitive baby wipes, 52 count"},
 {"id": 11377, "type": "kujdesi-i-bebeve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Sensitive fragrance-free baby wipes, opened pack"},
 {"id": 9817, "type": "aksesore-kozmetike", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Cleanic Pure Effect cleansing cotton pads, tube of 120"},
-{"id": 11504, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 3, 54ct; no diaper leaf exists"},
-{"id": 6445, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 3, 82ct jumbo; no diaper leaf"},
-{"id": 11507, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 4, 46ct; no diaper leaf exists"},
-{"id": 6447, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 4, 70ct; no diaper leaf exists"},
-{"id": 11510, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 5, 38ct; no diaper leaf exists"},
-{"id": 6455, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 5, 60ct jumbo; no diaper leaf"},
-{"id": 19577, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 5, 64ct; no diaper leaf exists"},
-{"id": 11512, "type": "per-femije", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Pampers Active Baby diapers size 6, 32ct; no diaper leaf exists"}
+{"id": 11504, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 3, 54ct"},
+{"id": 6445, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 3, 82ct jumbo"},
+{"id": 11507, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 4, 46ct"},
+{"id": 6447, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 4, 70ct"},
+{"id": 11510, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 5, 38ct"},
+{"id": 6455, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 5, 60ct jumbo"},
+{"id": 19577, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 5, 64ct"},
+{"id": 11512, "type": "pelena-per-bebe", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Pampers Active Baby diapers size 6, 32ct"}
 ]

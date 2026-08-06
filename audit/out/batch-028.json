@@ -14,7 +14,7 @@
 {"id": 3634, "type": "pelhure", "alsoTypes": [], "brand": "cansin", "confidence": "high", "note": "CANSIN Fix elastic self-adhesive bandage, 10m x 10cm"},
 {"id": 3637, "type": "pelhure", "alsoTypes": [], "brand": "cansin", "confidence": "high", "note": "CANSIN Fix elastic self-adhesive bandage, 5m x 10cm"},
 {"id": 3639, "type": "pelhure", "alsoTypes": [], "brand": "cansin", "confidence": "high", "note": "CANSIN Fix esnek elastic self-adhesive bandage, 5m x 5cm"},
-{"id": 8761, "type": "paisje-medicinale", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Elina microfiber lens-cleaning cloth for glasses; no leaf fits"},
+{"id": 8761, "type": "kujdesi-i-syve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Elina microfiber lens-cleaning cloth for glasses"},
 {"id": 17253, "type": "kujdesi-i-bebeve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Penaten Baby Puder bottle, 100g"},
 {"id": 10521, "type": "kujdesi-i-bebeve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Penaten Creme tin, 150ml"},
 {"id": 6344, "type": "kujdesi-i-bebeve", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Penaten Creme tin, 50ml, opened showing white cream"},

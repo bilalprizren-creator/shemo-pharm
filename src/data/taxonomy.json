@@ -93,6 +93,7 @@
   { "id": 209, "slug": "per-femije", "parent": 0, "kind": "type", "name": "Për fëmijë", "sort": 100 },
   { "id": 428, "slug": "ushqyerja-e-bebeve", "parent": 209, "kind": "type", "name": "Ushqyerja e bebeve", "sort": 10 },
   { "id": 429, "slug": "kujdesi-i-bebeve", "parent": 209, "kind": "type", "name": "Kujdesi i bebeve", "sort": 20 },
+  { "id": 432, "slug": "pelena-per-bebe", "parent": 209, "kind": "type", "name": "Pelena për bebe", "sort": 30 },
 
   { "id": 356, "slug": "embelsira", "oldSlug": "orbit", "parent": 0, "kind": "type", "name": "Ëmbëlsira dhe çamçakëz", "sort": 110 },
 

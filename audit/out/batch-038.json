@@ -37,7 +37,7 @@
  {"id": 18952, "type": "teste-diagnostike", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Photo is a SureLab Ovulation Test, not a pregnancy test"},
  {"id": 12682, "type": "diabetike", "alsoTypes": [], "brand": null, "confidence": "high", "note": "RinaCheck AP10 blood glucose test strips"},
  {"id": 16674, "type": "ampula-dhe-tretesira", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Galenika Testosteron Depo 250mg/mL, 5 ampoules for injection"},
- {"id": 19299, "type": "suplemente", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Hemani The Stallion honey paste sticks; no honey leaf, as Premium king honey"},
+ {"id": 19299, "type": "te-ndryshme-suplements-effervescent", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Hemani The Stallion honey paste sticks, as Premium king honey"},
  {"id": 11796, "type": "te-tjera-ersa-med-ortoped", "alsoTypes": [], "brand": null, "confidence": "low", "note": "Ankle sand-bag therapy weight 500g (REF-410); no weights leaf"},
  {"id": 9665, "type": "kapsula", "alsoTypes": [], "brand": null, "confidence": "high", "note": "ThyroBalance 30 capsules, dietary supplement, Biofaktor"},
  {"id": 19152, "type": "tableta-dhe-kapsula", "alsoTypes": [], "brand": null, "confidence": "high", "note": "Tirebrant Fort 200mg trimebutine maleate tablets, Pharmactive"},
