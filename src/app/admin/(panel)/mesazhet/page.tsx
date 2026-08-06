@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail, MailOpen, Phone } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { formatDateTime } from "@/lib/format";
 import { deleteMessageAction, markMessageReadAction } from "@/lib/admin-actions";
 
 export const metadata: Metadata = { title: "Mesazhet" };
@@ -16,13 +17,6 @@ interface MessageRow {
   message: string;
   is_read: boolean;
   created_at: Date;
-}
-
-function fmtDate(d: Date): string {
-  return new Intl.DateTimeFormat("sq-AL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(d);
 }
 
 export default async function AdminMessagesPage() {
@@ -76,7 +70,7 @@ export default async function AdminMessagesPage() {
                   </p>
                 </div>
                 <span className="shrink-0 text-xs text-ink-400">
-                  {fmtDate(m.created_at)}
+                  {formatDateTime(m.created_at)}
                 </span>
               </div>
 

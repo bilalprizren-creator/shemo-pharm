@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle2, Mail, MessageCircle, RotateCcw, User } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { formatPrice } from "@/lib/format";
+import { formatDateTime, formatPrice } from "@/lib/format";
 import { deleteOrderAction, markOrderHandledAction } from "@/lib/admin-actions";
 
 export const metadata: Metadata = { title: "Porositë" };
@@ -25,13 +25,6 @@ interface OrderRow {
   total_cents: number;
   is_handled: boolean;
   created_at: Date;
-}
-
-function fmtDate(d: Date): string {
-  return new Intl.DateTimeFormat("sq-AL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(d);
 }
 
 export default async function AdminOrdersPage() {
@@ -104,7 +97,7 @@ export default async function AdminOrdersPage() {
                   </p>
                 </div>
                 <span className="shrink-0 text-xs text-ink-400">
-                  {fmtDate(o.created_at)}
+                  {formatDateTime(o.created_at)}
                 </span>
               </div>
 

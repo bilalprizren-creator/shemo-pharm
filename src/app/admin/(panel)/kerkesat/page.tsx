@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BadgeCheck, Clock, MailCheck, MailWarning } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { formatDateTime } from "@/lib/format";
 import {
   approveUserAction,
   rejectUserAction,
@@ -19,13 +20,6 @@ interface CustomerRow {
   status: string;
   created_at: Date;
   email_verified_at: Date | null;
-}
-
-function fmtDate(d: Date): string {
-  return new Intl.DateTimeFormat("sq-AL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(d);
 }
 
 /** Whether the customer proved the mailbox. Separate from the approval below:
@@ -94,7 +88,7 @@ export default async function AdminRequestsPage() {
                   </p>
                   <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-ink-400">
                     <EmailBadge verified={c.email_verified_at !== null} />
-                    Regjistruar: {fmtDate(c.created_at)}
+                    Regjistruar: {formatDateTime(c.created_at)}
                   </p>
                 </div>
                 <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
@@ -159,7 +153,7 @@ export default async function AdminRequestsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-ink-400">
-                      {fmtDate(c.created_at)}
+                      {formatDateTime(c.created_at)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <form action={revokeUserAction} className="inline">

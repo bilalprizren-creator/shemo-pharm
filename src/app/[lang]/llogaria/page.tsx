@@ -13,7 +13,7 @@ import {
 import { canSeePrices, findUser, getSession } from "@/lib/auth";
 import { logoutAction } from "@/lib/auth-actions";
 import { sql } from "@/lib/db";
-import { formatPrice } from "@/lib/format";
+import { formatDate, formatPrice } from "@/lib/format";
 import { fmt, isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { ResendVerification } from "@/components/account/ResendVerification";
@@ -143,11 +143,7 @@ export default async function AccountPage({ params }: Props) {
           <div>
             <dt className="text-ink-400">{dict.accountPage.memberSince}</dt>
             <dd className="mt-0.5 font-semibold text-ink-900">
-              {new Date(user.createdAt).toLocaleDateString(dict.accountPage.dateLocale, {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {formatDate(user.createdAt, dict.accountPage.dateLocale)}
             </dd>
           </div>
         </dl>
@@ -172,10 +168,7 @@ export default async function AccountPage({ params }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-ink-900">
-                      {new Date(o.created_at).toLocaleDateString(
-                        dict.accountPage.dateLocale,
-                        { year: "numeric", month: "long", day: "numeric" }
-                      )}
+                      {formatDate(o.created_at, dict.accountPage.dateLocale)}
                       <span className="ml-2 font-normal text-ink-400">
                         {o.channel === "whatsapp"
                           ? dict.accountPage.orderChannelWhatsapp
