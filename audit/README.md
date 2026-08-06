@@ -15,8 +15,8 @@ named "Labella" or "Palloma" turns out to be some other brand entirely.
 
 | | |
 |---|---|
-| Classified | **1750 of 2049** — batches 001–035 |
-| Remaining | batches **036–041** (299 products) |
+| Classified | **1800 of 2049** — batches 001–036 |
+| Remaining | batches **037–041** (249 products) |
 | Validator | 0 problems |
 | Applied to JSON or the database | **nothing yet** |
 
