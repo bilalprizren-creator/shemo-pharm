@@ -1,0 +1,402 @@
+[
+ {
+  "id": 16396,
+  "type": "gisht-kembe",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Toe splint strapped to big toe for hallux valgus correction"
+ },
+ {
+  "id": 4319,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": "krauterhof",
+  "confidence": "high",
+  "note": "Kraeuterhof Hand- & Nagelcreme jar, 100ml, Made in Germany"
+ },
+ {
+  "id": 17761,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Dove Body Love hand cream, avocado oil, dry skin"
+ },
+ {
+  "id": 17602,
+  "type": "dezinfektues",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "NT41 Solutions Hand Sanitizer, antibacterial, 100mL, alcohol-based"
+ },
+ {
+  "id": 4312,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": "krauterhof",
+  "confidence": "high",
+  "note": "Kraeuterhof Hand- und Nagelcreme mit Panthenol, 100ml tube"
+ },
+ {
+  "id": 17908,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Goldbears Altin Ayicik fruit gummy bears, 80g"
+ },
+ {
+  "id": 18053,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Miami Frizzi sour gummy candy bag, 70g"
+ },
+ {
+  "id": 18063,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Minis tub, 4 different mini packet varieties"
+ },
+ {
+  "id": 17910,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Mix Fizz sour share-size gummy candy bag"
+ },
+ {
+  "id": 18055,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Phantasia share-size gummy candy bag, 80g"
+ },
+ {
+  "id": 17950,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Roulette candy roll with fruit-flavour discs"
+ },
+ {
+  "id": 17914,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Worms Fizz sour gummy candy bag"
+ },
+ {
+  "id": 18061,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Solucan Worms gummy candy bag, 80g"
+ },
+ {
+  "id": 18057,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Sound Cubes Eksi sour gummy candy"
+ },
+ {
+  "id": 18059,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": "haribo",
+  "confidence": "high",
+  "note": "Haribo Tropifrutti tropical-fruit gummy candy bag"
+ },
+ {
+  "id": 16819,
+  "type": "ushqyerja-e-bebeve",
+  "alsoTypes": [],
+  "brand": "bio-tree-baby",
+  "confidence": "high",
+  "note": "Bio Tree Baby Harmony Soother pacifier, 0-6 month"
+ },
+ {
+  "id": 16821,
+  "type": "ushqyerja-e-bebeve",
+  "alsoTypes": [],
+  "brand": "bio-tree-baby",
+  "confidence": "high",
+  "note": "Bio Tree Baby Harmony Soother pacifier, 18+ month"
+ },
+ {
+  "id": 16823,
+  "type": "ushqyerja-e-bebeve",
+  "alsoTypes": [],
+  "brand": "bio-tree-baby",
+  "confidence": "high",
+  "note": "Bio Tree Baby Harmony Soother pacifier, 6-18 month"
+ },
+ {
+  "id": 3986,
+  "type": "bonbona",
+  "alsoTypes": ["per-femije"],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Healthy Growth kids vitamin gummies, seahorse mascot"
+ },
+ {
+  "id": 5668,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Helix Original joint capsules: snail powder, turmeric, Boswellia"
+ },
+ {
+  "id": 18455,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Firefly Hello Kitty kids toothbrushes, 2-pack, soft bristles"
+ },
+ {
+  "id": 14873,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hemomycin azitromicin 100mg/5ml oral suspension powder, Hemofarm box"
+ },
+ {
+  "id": 14866,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hemomycin azitromicin 200mg/5ml oral suspension powder, Hemofarm box"
+ },
+ {
+  "id": 14871,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hemomycin azitromicin 500mg film tablets x3, Hemofarm box"
+ },
+ {
+  "id": 19638,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hepathrombin gel, 300 i.j./g heparin-natrijum, 40g, teal box"
+ },
+ {
+  "id": 19640,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hepathrombin gel, 500 i.j./g heparin-natrijum, 40g, teal box"
+ },
+ {
+  "id": 19642,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Pack reads 300 i.j./g pink KREM, not gel-500 as named"
+ },
+ {
+  "id": 18071,
+  "type": "supositore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hepathrombin H suppositories, prednizolon+heparin+polidokanol, 10pcs, Hemofarm"
+ },
+ {
+  "id": 14883,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hepathrombin H rectal ointment with applicator, 20g, Hemofarm"
+ },
+ {
+  "id": 19371,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Heplapan krem, 300 i.j./g heparin-natrijum, 40g, Galenika"
+ },
+ {
+  "id": 19342,
+  "type": "bonbona",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Alpenlor for Kids herbal lollipops, Vitamin C, A10 box"
+ },
+ {
+  "id": 19344,
+  "type": "bonbona",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Alpenlor for Kids herbal lollipops display box, 50 count"
+ },
+ {
+  "id": 4059,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Herbal Lozenges, eucalyptus & menthol, 20 alpine herbs"
+ },
+ {
+  "id": 4004,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Eucalyptus & Menthol lozenges box, A12"
+ },
+ {
+  "id": 4061,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Herbal Lozenges, finest bee honey, 20 alpine herbs"
+ },
+ {
+  "id": 3287,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Honey lozenges box, A12"
+ },
+ {
+  "id": 4063,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Herbal Lozenges, natural sage, 20 alpine herbs"
+ },
+ {
+  "id": 4002,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Sage lozenges box, A12"
+ },
+ {
+  "id": 14887,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": ["kujdesi-i-buzeve"],
+  "brand": null,
+  "confidence": "high",
+  "note": "Herpesan gel, Achillea millefolium oil, cold-sore treatment, Fitofarm"
+ },
+ {
+  "id": 16613,
+  "type": "dezinfektues",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Aqua Oksijenli Su, hydrogen peroxide antibacterial solution, 100ml"
+ },
+ {
+  "id": 6033,
+  "type": "dezinfektues",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Dermosept Oksijenli Su, hydrogen peroxide 3%, 1L bottle"
+ },
+ {
+  "id": 5310,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige maternity compression tights, product photo, no brand visible"
+ },
+ {
+  "id": 5286,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige open-toe compression tights photo, no brand visible"
+ },
+ {
+  "id": 5291,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige closed-toe compression tights photo, no brand visible"
+ },
+ {
+  "id": 5299,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige closed-toe compression tights photo, no brand visible"
+ },
+ {
+  "id": 5297,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige open-toe compression tights photo, no brand visible"
+ },
+ {
+  "id": 7672,
+  "type": "corape-kompresioni",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige closed-toe compression tights, 140 DEN, no brand visible"
+ },
+ {
+  "id": 7131,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Honey Power, Epimedium extract & herbal mixture, 40ml"
+ },
+ {
+  "id": 18766,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": "mr-white",
+  "confidence": "high",
+  "note": "Hot Wheels battery toothbrush, mr.White logo on pack, soft"
+ },
+ {
+  "id": 19477,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hot Wheels oral-care gift set: toothbrush, cup, keychain car"
+ }
+]

@@ -1,0 +1,402 @@
+[
+ {
+  "id": 3628,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast kağıt (paper) non-woven tape 5m x 5cm"
+ },
+ {
+  "id": 3606,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast cotton zincoxide perforated tape 5m x 5cm"
+ },
+ {
+  "id": 3632,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast silk zincoxide tape 5m x 2.5cm"
+ },
+ {
+  "id": 3626,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast ipek (silk) zincoxide tape 5m x 5cm"
+ },
+ {
+  "id": 3624,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast pamuk (cotton) zincoxide tape 5m x 2.5cm"
+ },
+ {
+  "id": 3622,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast pamuk cotton zincoxide tape 5m x 5cm"
+ },
+ {
+  "id": 3618,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast transparent tape 5m x 2.5cm"
+ },
+ {
+  "id": 3616,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast şeffaf/transparent tape 5m x 5cm"
+ },
+ {
+  "id": 15461,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "LEVOtuss 30mg/5ml sciroppo, Levodropropizina cough syrup, Dompé"
+ },
+ {
+  "id": 19133,
+  "type": "pika",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Levoximed 0.5% Levofloxacin sterile eye and ear drops"
+ },
+ {
+  "id": 19440,
+  "type": "ampula-dhe-tretesira",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Levoximed 500mg/100ml Levofloxacin solution for IV infusion"
+ },
+ {
+  "id": 4895,
+  "type": "shiringa-dhe-gjilpera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Red webbing tourniquet strap with buckle, arm tie"
+ },
+ {
+  "id": 18589,
+  "type": "ampula-dhe-tretesira",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Lidokain-hlorid Galenika 1%, 10 ampoules for injection"
+ },
+ {
+  "id": 19119,
+  "type": "supositore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Limenda Metronidazole/Miconazole 750mg/200mg, 7 vaginal suppositories"
+ },
+ {
+  "id": 16559,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Small round lip balm tins: chocolate, classic, flower, aloe vera"
+ },
+ {
+  "id": 18152,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "NT41 Solutions Lip Balm stick, Classic, vaseline with olive oil"
+ },
+ {
+  "id": 16788,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Curalene Original Lip Care tin, moisturising lip balm"
+ },
+ {
+  "id": 16790,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Curalene Rosy Lip Care tin, moisturising lip balm"
+ },
+ {
+  "id": 16778,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Curalene Cocoa Butter Lip Care tin, moisturising lip balm"
+ },
+ {
+  "id": 18391,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Lipozin Garcinia Cambogia food supplement, 60 capsules"
+ },
+ {
+  "id": 11679,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Naturagen Liquid Collagen Peptides liquid supplement 60ml, pineapple"
+ },
+ {
+  "id": 6351,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Advanced White mouthwash; bottle reads 500ml, not 250ml"
+ },
+ {
+  "id": 6355,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Cool Mint daily mouthwash 250ml"
+ },
+ {
+  "id": 18551,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Cool Mint Mild anti-bacterial mouthwash 95ml"
+ },
+ {
+  "id": 6353,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Freshburst antibacterial mouthwash 250mL"
+ },
+ {
+  "id": 14542,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Kids Smart Rinse mouthwash 250ml, strawberry"
+ },
+ {
+  "id": 18239,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Mentol mouthwash 80ml"
+ },
+ {
+  "id": 6349,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Total Care 6-in-1 mouthwash 250ml"
+ },
+ {
+  "id": 6358,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Listerine Total Care mouthwash, clean mint 95ml"
+ },
+ {
+  "id": 17535,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Livorex Forte Pharmalife food supplement, 30 tablets"
+ },
+ {
+  "id": 11823,
+  "type": "bonbona",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Dr Frei Lolli Travel lollipop with ginger extract, kids"
+ },
+ {
+  "id": 4950,
+  "type": "kateter-dhe-qese-urinare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White slipper-shaped bedpan with flat lid"
+ },
+ {
+  "id": 16392,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Lorazepam HF 1mg x 30 tablets, Hemofarm"
+ },
+ {
+  "id": 14935,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Lorazepam HF 2.5mg x 20 tablets, Hemofarm"
+ },
+ {
+  "id": 17693,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": "autan",
+  "confidence": "high",
+  "note": "Autan Family Care mosquito repellent lotion, Icaridin"
+ },
+ {
+  "id": 17703,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": "autan",
+  "confidence": "high",
+  "note": "Autan mosquito repellent bottle, foreign-script regional label"
+ },
+ {
+  "id": 16303,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SOS Kids Repellent Lotion, mosquito protection 100ml"
+ },
+ {
+  "id": 16299,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SOS Repellent Lotion for adults, mosquito protection 100ml"
+ },
+ {
+  "id": 16305,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SOS Emollient Lotion, soothes after mosquito bites/sunburn"
+ },
+ {
+  "id": 3288,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "love-plus",
+  "confidence": "high",
+  "note": "Love Plus Classic, box of 24 packs of 3 condoms"
+ },
+ {
+  "id": 3978,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "love-plus",
+  "confidence": "high",
+  "note": "Love Plus Orange, quality condoms box"
+ },
+ {
+  "id": 3915,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "love-plus",
+  "confidence": "high",
+  "note": "Love Plus Sensations, quality dotted condoms box"
+ },
+ {
+  "id": 18164,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Chocolate flavor lubricant gel, water based"
+ },
+ {
+  "id": 10504,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Lubricant Gel, chocolate flavor 125ml"
+ },
+ {
+  "id": 7014,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Trigger Delay lubricant gel 50ml"
+ },
+ {
+  "id": 16401,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Arrow Erection lubricant gel 50ml"
+ },
+ {
+  "id": 18660,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "dolphi",
+  "confidence": "high",
+  "note": "Dolphi Lubricant Sensual Touch stimulating gel 100ml"
+ },
+ {
+  "id": 18166,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Strawberry flavor lubricant gel, water based"
+ },
+ {
+  "id": 9404,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Lubricant Gel, strawberry flavor 125ml"
+ },
+ {
+  "id": 10723,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "dolphi",
+  "confidence": "high",
+  "note": "Dolphi Lubricant Sweet Pleasure, red-ripe strawberry flavor"
+ }
+]

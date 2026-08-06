@@ -1,0 +1,406 @@
+[
+ {
+  "id": 11698,
+  "type": "kateter-dhe-qese-urinare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "JOYCARE All Silicone Foley Catheter, nr.18"
+ },
+ {
+  "id": 11699,
+  "type": "kateter-dhe-qese-urinare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "JOYCARE All Silicone Foley Catheter, nr.20"
+ },
+ {
+  "id": 10192,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Katopil 25mg kapsulë, Galenika captopril box"
+ },
+ {
+  "id": 16849,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Katopil 50mg, 40 tableta, Galenika box"
+ },
+ {
+  "id": 18215,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Keltican Forte caps, dietary management supplement, no mg drug"
+ },
+ {
+  "id": 11779,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hallux Valgus post-op anatomical shoe/sandal, black mesh"
+ },
+ {
+  "id": 18225,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "KETOMAG 25mg/g gel, Ketoprofen, 40g"
+ },
+ {
+  "id": 18323,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "K-Y Lubricant Jelly tube, 42g, intimacy lubricant"
+ },
+ {
+  "id": 19250,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [
+   "per-femije"
+  ],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kidilact drops, erbozeta food-supplement bottle, kids elephant art"
+ },
+ {
+  "id": 9095,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kidofen duo, Ibuprofenum+Paracetamolum oral suspension w/ syringe"
+ },
+ {
+  "id": 3937,
+  "type": "eferveta",
+  "alsoTypes": [
+   "per-femije"
+  ],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Kids Multivitamins+Calcium, 20 effervescent tube"
+ },
+ {
+  "id": 14552,
+  "type": "kujdesi-i-flokeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's strength drops kids shampoo bottle"
+ },
+ {
+  "id": 7183,
+  "type": "leukoplasta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Kinesiology Sports Tape box; no kinesiology-tape leaf exists"
+ },
+ {
+  "id": 7835,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black leather orthopedic clog, article code NT-008"
+ },
+ {
+  "id": 7857,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Navy leather orthopedic clog, article code NT-012"
+ },
+ {
+  "id": 7808,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White leather orthopedic clog w/ red stud, NT019"
+ },
+ {
+  "id": 7813,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Pink leather orthopedic clog, article code NT021"
+ },
+ {
+  "id": 7822,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Floral orthopedic clog w/ red trim, NT-023"
+ },
+ {
+  "id": 7878,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Navy/white orthopedic clog, article code NT-029"
+ },
+ {
+  "id": 7995,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White/navy chunky-sole orthopedic clog, code NT-044"
+ },
+ {
+  "id": 7982,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Floral cork-sole orthopedic clog, article code NT-034"
+ },
+ {
+  "id": 19092,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Kloroben Oral Rinse, Benzydamine+Chlorhexidine; no medicated-rinse leaf"
+ },
+ {
+  "id": 19094,
+  "type": "sprej-dhe-inhalim",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kloroben Oral Spray, Benzydamine HCl + Chlorhexidine actives"
+ },
+ {
+  "id": 4948,
+  "type": "kateter-dhe-qese-urinare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Prezervatifli Sonda, external condom catheter, 1 piece"
+ },
+ {
+  "id": 12115,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White rigid posture/spinal brace with mechanism, worn on torso"
+ },
+ {
+  "id": 5241,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige colostomy support belt with stoma-bag opening"
+ },
+ {
+  "id": 7224,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black rigid lumbar-sacral orthosis, shoulder straps"
+ },
+ {
+  "id": 7226,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White rigid TLSO body-alignment brace, multi-angle photo"
+ },
+ {
+  "id": 10263,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Beige waist-shaping corset, box and product shown"
+ },
+ {
+  "id": 12113,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Grey chest/rib-cage brace with lime green straps"
+ },
+ {
+  "id": 12502,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Alter Heideschäfer Arnika-Salbe, arnica ointment tub"
+ },
+ {
+  "id": 12507,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Alter Heideschäfer Melkfett-Salbe, milk-fat ointment tub"
+ },
+ {
+  "id": 12511,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": "krauterhof",
+  "confidence": "high",
+  "note": "KRÄUTERHOF Arnika-Salbe tub, arnica extract, 250ml"
+ },
+ {
+  "id": 6065,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Elina med Pflegende Handcreme, Urea 3%, hand cream"
+ },
+ {
+  "id": 4310,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": "krauterhof",
+  "confidence": "high",
+  "note": "KRÄUTERHOF Creme mit Alpenkräutern, leg/foot herbal cream"
+ },
+ {
+  "id": 4289,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": "krauterhof",
+  "confidence": "high",
+  "note": "KRÄUTERHOF Creme mit Rotem Weinlaub, vein/circulation cream"
+ },
+ {
+  "id": 19121,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "KRUKLAR 500mg Claritromicina compresse box, SF Group"
+ },
+ {
+  "id": 15440,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ksalol 0.25mg tableta, Galenika alprazolam box"
+ },
+ {
+  "id": 15442,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ksalol 0.5mg tableta, Galenika box"
+ },
+ {
+  "id": 15444,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ksalol 1mg tableta, Galenika box"
+ },
+ {
+  "id": 19709,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kukident Professionell HaftSchutz Haftcreme, denture adhesive"
+ },
+ {
+  "id": 5715,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kukident Extra Strong Haftcreme Med+Kamille, denture adhesive"
+ },
+ {
+  "id": 16271,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Kukident Reiniger Aktiv Plus, denture-cleaning effervescent tablets"
+ },
+ {
+  "id": 4890,
+  "type": "aksesore-per-barna",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Rabir Günlük İlaç Kutusu, daily pill box, EuroDoz"
+ },
+ {
+  "id": 4888,
+  "type": "aksesore-per-barna",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Rabir Haftalık İlaç Kutusu, weekly pill box, EuroDoz"
+ },
+ {
+  "id": 4886,
+  "type": "aksesore-per-barna",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Protez Kutusu, denture storage boxes plus retail box"
+ },
+ {
+  "id": 19526,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SEPENATURAL L-GinTau, taurine/ginseng dietary supplement capsules"
+ },
+ {
+  "id": 16785,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Photo shows Lip Smacker Disney Frozen II display, not Labella"
+ },
+ {
+  "id": 14463,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Photo shows ANGEALA Nursing Lip Balm x3, not Labella"
+ },
+ {
+  "id": 11532,
+  "type": "kujdesi-i-buzeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Photo shows DC Batman lip balm card, not Labella"
+ }
+]

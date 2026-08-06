@@ -1,0 +1,402 @@
+[
+ {
+  "id": 18717,
+  "type": "embelsira",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake mints Spearmint box, sugar-free candy, no vitamin claim"
+ },
+ {
+  "id": 18719,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy apple & cinnamon, candy enriched with vitamins"
+ },
+ {
+  "id": 18721,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy coconut & black currant, vitamins B,C,E, sugar-free"
+ },
+ {
+  "id": 18723,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy grape, candy enriched with Vitamin C, sugar-free"
+ },
+ {
+  "id": 18726,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy green tea & lime, Vitamin C breath mints"
+ },
+ {
+  "id": 18728,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy mango, vitamins B,C,E, sugar-free breath freshener"
+ },
+ {
+  "id": 18730,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy peach, candy enriched with vitamin C"
+ },
+ {
+  "id": 18732,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy pineapple, Vitamin C, sugar-free gluten-free vegan"
+ },
+ {
+  "id": 18735,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy raspberry, Vitamin C, sugar-free breath freshener"
+ },
+ {
+  "id": 18740,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy strawberry, Vitamin C, sugar-free gluten-free vegan"
+ },
+ {
+  "id": 18737,
+  "type": "bonbona",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jake VitaminCandy tangerine, Vitamin C, sugar-free candy box"
+ },
+ {
+  "id": 5272,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black horseshoe-shaped open seating cushion, no visible brand"
+ },
+ {
+  "id": 5270,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White foam bolster roll, anti-snoring neck support pillow"
+ },
+ {
+  "id": 5277,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White contoured memory-foam cervical pillow, no visible brand"
+ },
+ {
+  "id": 11786,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White textured gel orthopedic contour pillow, no visible brand"
+ },
+ {
+  "id": 5265,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "\"Support Line\" boxed ring seat cushion for hemorrhoids, Turkey"
+ },
+ {
+  "id": 5268,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "\"Support Line\" boxed orthopedic lumbar/back cushion for chairs"
+ },
+ {
+  "id": 11792,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black contoured coccyx seat cushion, no visible brand"
+ },
+ {
+  "id": 10252,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Blue foam patient-turning/positioning wedge cushion shown in therapy use"
+ },
+ {
+  "id": 11794,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black flat square seating cushion, no visible brand"
+ },
+ {
+  "id": 5275,
+  "type": "te-tjera-ersa-med-ortoped",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White U-shaped travel neck pillow, no visible brand"
+ },
+ {
+  "id": 11798,
+  "type": "gisht-kembe",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Silicone forefoot/toe loop cushion pad worn on ball of foot"
+ },
+ {
+  "id": 9913,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": ["kujdesi-i-bebeve"],
+  "brand": null,
+  "confidence": "low",
+  "note": "Jekoderm mast, Galenika; icons sun/hand/baby/family, exact indication unreadable"
+ },
+ {
+  "id": 14298,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's Baby Powder bottle; label reads 100g, not 200g"
+ },
+ {
+  "id": 7662,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's Baby Powder bottle, 200g, paraben/dye/phthalate free"
+ },
+ {
+  "id": 16261,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's Baby Shampoo 500ml, \"no more tears\", choose gentle"
+ },
+ {
+  "id": 19661,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's Baby Shampoo Bedtime 500ml with NaturalCalm essences"
+ },
+ {
+  "id": 19663,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Johnson's Baby Chamomile Shampoo 500ml, for sensitive skin"
+ },
+ {
+  "id": 3957,
+  "type": "eferveta",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Joint Care Glucosamine & Chondroitin, 20 effervescent tabs"
+ },
+ {
+  "id": 12837,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Jointin-D Glucosamine/Chondroitin/MSM/Vit D3, food supplement, 30 tablets"
+ },
+ {
+  "id": 19693,
+  "type": "vajera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Cellcense Organic Jojoba Oil 30ml, 100% pure moisturizing oil"
+ },
+ {
+  "id": 16975,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jomelop-E natural balm for scars, keloids, burns, 145ml"
+ },
+ {
+  "id": 16977,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Jomelop-G natural balm for burns, 50g jar"
+ },
+ {
+  "id": 4901,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Blue disposable plastic shoe covers, box of 100"
+ },
+ {
+  "id": 4774,
+  "type": "shiringa-dhe-gjilpera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "IV cannula for infusion, 22G blue, no visible brand"
+ },
+ {
+  "id": 4777,
+  "type": "shiringa-dhe-gjilpera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "IV cannula for infusion, 24G yellow, no visible brand"
+ },
+ {
+  "id": 19008,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Blue disposable bouffant caps, box of 100"
+ },
+ {
+  "id": 4912,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "White disposable bouffant caps, box of 100"
+ },
+ {
+  "id": 10314,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Green disposable bouffant caps, box of 100"
+ },
+ {
+  "id": 3893,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": "comfort",
+  "confidence": "high",
+  "note": "\"COMFORT\" branded electric power wheelchair, joystick control"
+ },
+ {
+  "id": 18932,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Teal/white commode chair with wheeled shower legs, no brand"
+ },
+ {
+  "id": 5058,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Steel-frame white commode chair, no visible brand"
+ },
+ {
+  "id": 5055,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Black padded commode chair with armrests, no visible brand"
+ },
+ {
+  "id": 3888,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Steel commode chair on castors, cream seat, no brand"
+ },
+ {
+  "id": 13620,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Wheelchair with commode seat opening and footrests, no brand"
+ },
+ {
+  "id": 3895,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Standard manual wheelchair, blue seat, chrome frame, no brand"
+ },
+ {
+  "id": 14561,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Katena 100mg Tyrozin (tyrosine) capsules x20, Bilupi supplement box"
+ },
+ {
+  "id": 16576,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Katena 300mg gabapentin capsules x50, Belupo, Cyrillic pharma label"
+ },
+ {
+  "id": 5065,
+  "type": "karrige-dhe-ndihmese-per-ecje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Adjustable quad cane, four-footed walking stick, no visible brand"
+ },
+ {
+  "id": 11695,
+  "type": "kateter-dhe-qese-urinare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Joycare All Silicone Foley Catheter, sterile packaging"
+ }
+]

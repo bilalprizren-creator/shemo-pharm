@@ -1,0 +1,402 @@
+[
+ {
+  "id": 19062,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "MED Textile Posture Brace with steel stays, Art.2011"
+ },
+ {
+  "id": 19064,
+  "type": "shoka-dhe-korseta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "MED Textile Posture Brace Elastic, light fixation, Art.2013"
+ },
+ {
+  "id": 12128,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-01 Lux arm sling, worn across chest and shoulder"
+ },
+ {
+  "id": 11932,
+  "type": "krah",
+  "alsoTypes": ["per-femije"],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-01 Lux child arm sling, orange, worn by boy"
+ },
+ {
+  "id": 5118,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-03D arm sling with large abduction pillow 45-60°"
+ },
+ {
+  "id": 5116,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-03 arm sling with small abduction pillow 30°"
+ },
+ {
+  "id": 5122,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-01F mesh arm sling, black, multiple angle views"
+ },
+ {
+  "id": 18648,
+  "type": "krah",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Dr.Frei Kids Child Arm Sling box, Art.KD901, size L"
+ },
+ {
+  "id": 18651,
+  "type": "krah",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Dr.Frei Kids Child Arm Sling box, Art.KD901, size M"
+ },
+ {
+  "id": 18653,
+  "type": "krah",
+  "alsoTypes": ["per-femije"],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "Dr.Frei Kids Child Arm Sling box, Art.KD901, size S"
+ },
+ {
+  "id": 11930,
+  "type": "krah",
+  "alsoTypes": ["per-femije"],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-02-Ç child arm/vest sling, orange, worn by boy"
+ },
+ {
+  "id": 12093,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-13 arm-and-shoulder immobilizer vest, gray-green"
+ },
+ {
+  "id": 5133,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "REF-620 shoulder support wrap, close-up on model"
+ },
+ {
+  "id": 18261,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi brown house slipper, cork-look sole"
+ },
+ {
+  "id": 18259,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi purple house slipper, DrLuigi tag visible"
+ },
+ {
+  "id": 5497,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi gray house slipper, DrLuigi tag visible"
+ },
+ {
+  "id": 5493,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi navy house slipper, DrLuigi tag visible"
+ },
+ {
+  "id": 5491,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi red house slipper, red-cross DrLuigi tag"
+ },
+ {
+  "id": 5499,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi black house slipper, DrLuigi tag visible"
+ },
+ {
+  "id": 11784,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": ["per-femije"],
+  "brand": null,
+  "confidence": "high",
+  "note": "Denis Browne boots, metal bar, infant clubfoot correction"
+ },
+ {
+  "id": 11782,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-508 black cast shoe, worn over leg cast"
+ },
+ {
+  "id": 10149,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi black slide sandal, red-cross tag, summer style"
+ },
+ {
+  "id": 5461,
+  "type": "mbathje-ortopedike",
+  "alsoTypes": [],
+  "brand": "dr-luigi",
+  "confidence": "high",
+  "note": "Dr.Luigi navy slide sandal, cross-logo tag, summer style"
+ },
+ {
+  "id": 5227,
+  "type": "gjuri",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-09 hinged ROM knee brace, adjustable, worn on leg"
+ },
+ {
+  "id": 5225,
+  "type": "nyje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-510 ROM Walker Achilles boot, black CAM walker"
+ },
+ {
+  "id": 5166,
+  "type": "nyje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "SL-903 white ankle-foot orthosis brace, right foot"
+ },
+ {
+  "id": 12103,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "REF-621 humerus stabilizer brace, black-green, worn on shoulder"
+ },
+ {
+  "id": 5191,
+  "type": "nyje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "ERS-01 white T-shaped ankle-foot orthosis with stand"
+ },
+ {
+  "id": 18342,
+  "type": "gisht-kembe",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Puffix silicone big-toe protector/separator A2, box and pair"
+ },
+ {
+  "id": 17791,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Raid liquid mosquito-device refill, 30 nights, SC Johnson"
+ },
+ {
+  "id": 16637,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "MediStav Rebuild joint supplement, 30 sachets, hyaluronic/collagen"
+ },
+ {
+  "id": 19423,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Medivid 50,000 IU vitamin D3 oral solution, monodose vials"
+ },
+ {
+  "id": 10026,
+  "type": "kujdesi-i-fytyres",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Abeis Med Mela IS dark-spot corrective face cream jar"
+ },
+ {
+  "id": 12868,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Melatonin 3mg food supplement, 30 tablets"
+ },
+ {
+  "id": 12896,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Melatonix Melatonin 5mg food supplement, 30 tablets"
+ },
+ {
+  "id": 9123,
+  "type": "shurupa-suplemente",
+  "alsoTypes": ["per-femije"],
+  "brand": null,
+  "confidence": "high",
+  "note": "Meloo Junior throat syrup box, Epsilon Health, bee mascot"
+ },
+ {
+  "id": 9121,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Meloo throat syrup box, Epsilon Health, adult version"
+ },
+ {
+  "id": 19411,
+  "type": "sprej-dhe-inhalim",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Mometix AQ 0.05% nasal spray, mometasone furoate"
+ },
+ {
+  "id": 3668,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Multiplus Menthol Balm box says moisturizer; could be a rub"
+ },
+ {
+  "id": 19052,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Mesh Nebulizer TZ-W07/W08 Plus Upgrade, box and device"
+ },
+ {
+  "id": 17180,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": "shemo",
+  "confidence": "high",
+  "note": "SHEMO Mesh Nebulizer SHM-200 box, S SHEMO logo"
+ },
+ {
+  "id": 19613,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Methotrexate 2.5mg film-coated tablets box, 100 tabs, blister"
+ },
+ {
+  "id": 14954,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Methyldopa 250mg film-coated tablets box"
+ },
+ {
+  "id": 19615,
+  "type": "pika",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Methylergometrin HF 0.25mg/mL oral drops solution, 10ml"
+ },
+ {
+  "id": 19533,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "MG.K Vis Magnesio Potassio orange sachets, 15 bustine"
+ },
+ {
+  "id": 4906,
+  "type": "teste-diagnostike",
+  "alsoTypes": [],
+  "brand": "shemo",
+  "confidence": "high",
+  "note": "SHEMO Early Pregnancy Test box, SHEMO logo"
+ },
+ {
+  "id": 16894,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": "mr-white",
+  "confidence": "high",
+  "note": "Mr.White Minions vibrating soft toothbrush, blister pack"
+ },
+ {
+  "id": 16889,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": "mr-white",
+  "confidence": "high",
+  "note": "Mr.White Minions 2-min flashing-timer toothbrush, blister"
+ },
+ {
+  "id": 16878,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": "mr-white",
+  "confidence": "high",
+  "note": "Mr.White Minions Oral Care Kit box with light"
+ },
+ {
+  "id": 16882,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": "mr-white",
+  "confidence": "high",
+  "note": "Mr.White Minions mint toothpaste tube, 75ml"
+ }
+]

@@ -1,0 +1,402 @@
+[
+ {
+  "id": 19601,
+  "type": "ndihma-e-pare",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN self-heating pad for menstrual cramps, up to 8hr"
+ },
+ {
+  "id": 18543,
+  "type": "cajra-mjekesore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "vitalHOmix Fast Slimming Tea, natural, 80gr box"
+ },
+ {
+  "id": 4682,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Mena-V Fawar Lemon eff. salt sachets; medicine vs supplement unclear"
+ },
+ {
+  "id": 16836,
+  "type": "ushqyerja-e-bebeve",
+  "alsoTypes": [],
+  "brand": "bio-tree-baby",
+  "confidence": "high",
+  "note": "Bio Tree silicone feeding spoon 2pcs, 6+ months, BPA free"
+ },
+ {
+  "id": 12272,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Femiton Forte, menopause support capsules"
+ },
+ {
+  "id": 19689,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Fero Syrup, iron with vitamin C and B12"
+ },
+ {
+  "id": 19558,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ferro 3 Forte vials, integratore alimentare iron+vitamins"
+ },
+ {
+  "id": 17522,
+  "type": "shurupa-suplemente",
+  "alsoTypes": ["per-femije"],
+  "brand": null,
+  "confidence": "high",
+  "note": "Pharmalife Ferro C iron supplement syrup, bear mascot, 1+"
+ },
+ {
+  "id": 16268,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "LifeActive FerroVit iron supplement vials, 10ml x10"
+ },
+ {
+  "id": 12274,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Fertilex Man, male fertility capsules"
+ },
+ {
+  "id": 17921,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Milkway nasal aspirator replacement tips, 10pcs"
+ },
+ {
+  "id": 10116,
+  "type": "ndihma-e-pare",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast mini first aid kit, red plastic case"
+ },
+ {
+  "id": 17525,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Pharmalife Fitobalm balsamic gel, no camphor/menthol, kids character"
+ },
+ {
+  "id": 16419,
+  "type": "kujdesi-i-vesheve",
+  "alsoTypes": [],
+  "brand": "shemo",
+  "confidence": "high",
+  "note": "SHEMO Fix Ear, adult ear care product"
+ },
+ {
+  "id": 16417,
+  "type": "kujdesi-i-vesheve",
+  "alsoTypes": [],
+  "brand": "shemo",
+  "confidence": "high",
+  "note": "SHEMO Fix Ear, for baby ear care"
+ },
+ {
+  "id": 17581,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Fixdual levocetirizine/montelukast 5mg/10mg, 30 film tablets"
+ },
+ {
+  "id": 17787,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": "froika",
+  "confidence": "high",
+  "note": "FROIKA Flamosin Cream, hyaluronic acid, damaged skin repair"
+ },
+ {
+  "id": 16493,
+  "type": "kujdesi-i-trupit",
+  "alsoTypes": [],
+  "brand": "froika",
+  "confidence": "high",
+  "note": "FROIKA Flamosin Gel, hyaluronic acid, damaged skin repair"
+ },
+ {
+  "id": 7185,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast designed first aid plasters for kids, 30pcs"
+ },
+ {
+  "id": 10111,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast round transparent first aid plaster, 20pcs"
+ },
+ {
+  "id": 3641,
+  "type": "kujdesi-i-syve",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN adhesive eye pad, children, amblyopia/strabismus, 25pcs"
+ },
+ {
+  "id": 3643,
+  "type": "kujdesi-i-syve",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN adhesive eye pad, adults, 25pcs, hypoallergenic"
+ },
+ {
+  "id": 3766,
+  "type": "kujdesi-i-syve",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN adhesive eye pad, adults, 50pcs, hypoallergenic"
+ },
+ {
+  "id": 10119,
+  "type": "kujdesi-i-syve",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN design eye pad, amblyopia/strabismus treatment, 50pcs"
+ },
+ {
+  "id": 13860,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "FIGO Pflaster-Strips, waterproof plaster strips, 50pcs"
+ },
+ {
+  "id": 4250,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSINBANT fabric first aid plaster, 10pcs box"
+ },
+ {
+  "id": 4226,
+  "type": "ndihma-e-pare",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN perforated self-heating plaster for muscle/rheumatic pain"
+ },
+ {
+  "id": 4114,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast Blood Stop first aid plaster, 10pcs"
+ },
+ {
+  "id": 4252,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN BANT Plus fabric first aid plaster display box"
+ },
+ {
+  "id": 4254,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast Klasik fabric first aid plasters"
+ },
+ {
+  "id": 4106,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast mixed shapes family pack plaster, 20pcs"
+ },
+ {
+  "id": 4110,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Klasik Yara Bandi first aid plaster, floral box, no brand seen"
+ },
+ {
+  "id": 4122,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast Aloe Vera first aid plaster, 20pcs"
+ },
+ {
+  "id": 10103,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast design first aid plaster, 20pcs"
+ },
+ {
+  "id": 4103,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast classic one-shape first aid plaster, 20pcs"
+ },
+ {
+  "id": 12649,
+  "type": "kujdesi-i-fytyres",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Akne Bandi acne patch for face, 20pcs"
+ },
+ {
+  "id": 12300,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "low",
+  "note": "CANSIN herpes/cold-sore lip patch, invisible; nearest fit is plaster"
+ },
+ {
+  "id": 6989,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "FIGO Hühneraugen-Pflaster, corn plaster with pressure protection"
+ },
+ {
+  "id": 4085,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN sterile IV catheter fixation tape, with pad, 50pcs"
+ },
+ {
+  "id": 4116,
+  "type": "kujdesi-i-hundes",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN nasal strip for easier breathing, 10pcs"
+ },
+ {
+  "id": 4099,
+  "type": "kujdesi-i-duarve-dhe-kembeve",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast Nasır Bandı corn plaster, 6pcs"
+ },
+ {
+  "id": 7181,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN mosquito repellent patches, citronella/geranium/eucalyptus oils"
+ },
+ {
+  "id": 4101,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN economic cut-to-size plaster strip, 6x25cm, 2pcs"
+ },
+ {
+  "id": 4183,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN waterproof ultra-thin first aid plaster, 10pcs"
+ },
+ {
+  "id": 4248,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN injection-site round plaster, 25mm, 100pcs"
+ },
+ {
+  "id": 4119,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN sterile wound closure suture strips, 8pcs"
+ },
+ {
+  "id": 10105,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN Plast transparent first aid plaster, 20pcs"
+ },
+ {
+  "id": 4108,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "CANSIN hydrocolloid gel blister plaster for feet, 5pcs"
+ },
+ {
+  "id": 4129,
+  "type": "kujdesi-i-hundes",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "low",
+  "note": "CANSIN vapor patch on clothes, eucalyptus-mint-pine breathing aid"
+ },
+ {
+  "id": 19178,
+  "type": "supositore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Florelle vaginal capsules 10x465mg, Pharma+, made in Italy"
+ }
+]

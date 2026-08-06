@@ -1,0 +1,402 @@
+[
+ {
+  "id": 17148,
+  "type": "kujdesi-i-bebeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Elina Baby Zinkoxid 10% wound protection cream, baby imagery on lid"
+ },
+ {
+  "id": 9109,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ginger extract + vitamin B6, A20 carton, anti-nausea supplement"
+ },
+ {
+  "id": 18531,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "oxygen humidifier bottle with black cap, no brand mark visible"
+ },
+ {
+  "id": 19215,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Energym polyvitamin supplement, 10 drinkable flaconi 10ml each"
+ },
+ {
+  "id": 17573,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Epixx Levetiracetam 500mg film tablets, box and blister shown"
+ },
+ {
+  "id": 13897,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Eritromicin 250mg, 16 capsules box"
+ },
+ {
+  "id": 14829,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Erythromycin 500 film tablets box"
+ },
+ {
+  "id": 14827,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Erythromycin 250, powder for 100ml oral suspension"
+ },
+ {
+  "id": 19038,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "ESOXX ONE 20 monodose 10ml oral sticks, medical device for reflux"
+ },
+ {
+  "id": 16532,
+  "type": "te-tjera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "essence volume mascara tube, no cosmetics leaf fits makeup"
+ },
+ {
+  "id": 15663,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Etodin Fort Etodolac 400mg, 14 film-coated tablets"
+ },
+ {
+  "id": 19131,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Etotac SR Etodolac 600mg sustained-release tablets, Humanis"
+ },
+ {
+  "id": 18019,
+  "type": "ampula-dhe-tretesira",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Evaton-B injectable solution, 10 ampoules x 2ml, DEMO"
+ },
+ {
+  "id": 19335,
+  "type": "krema-dhe-pomada",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Exenate Methylprednisolone Aceponate 0.1% corticosteroid cream, 30g"
+ },
+ {
+  "id": 18086,
+  "type": "kujdesi-i-fytyres",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Cellcense Extra-C Vitamin C brightening face serum, pump bottle"
+ },
+ {
+  "id": 12871,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Extra-C Vitamin C 500mg with Rose Hips, tablet bottle"
+ },
+ {
+  "id": 14126,
+  "type": "te-tjera",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "eyebrow/eyelash care oil wand vials, Turkish label, no listed brand"
+ },
+ {
+  "id": 4243,
+  "type": "gaza",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "low",
+  "note": "Cansin gauze bandage wrapper reads 10cm x 4m, name says 5cm"
+ },
+ {
+  "id": 4246,
+  "type": "gaza",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Hidrofil Sargi cotton gauze bandage roll"
+ },
+ {
+  "id": 4239,
+  "type": "gaza",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Elastik Sargi gauze bandage, 10cm x 4m"
+ },
+ {
+  "id": 4235,
+  "type": "gaza",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast cotton gauze bandage, 15cm x 2m"
+ },
+ {
+  "id": 4237,
+  "type": "gaza",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Elastik Sargi gauze bandage, 15cm x 4m"
+ },
+ {
+  "id": 4233,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast woven Elastic Bandage box, size 10"
+ },
+ {
+  "id": 4230,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast woven Elastic Bandage box, size 15"
+ },
+ {
+  "id": 4228,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Elastik Bandaj box, size 8"
+ },
+ {
+  "id": 16071,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "generic medical elastic textile bandage roll, 5m x 12cm"
+ },
+ {
+  "id": 12244,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "dr.Frei PRO elastic bandage roll 8cm, shown applied to knee"
+ },
+ {
+  "id": 4189,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "plain Ideal Bandage roll with metal clips, no brand mark"
+ },
+ {
+  "id": 4191,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "plain Ideal Bandage roll with metal clips, no brand mark"
+ },
+ {
+  "id": 4193,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "plain Ideal Bandage roll with metal clips, no brand mark"
+ },
+ {
+  "id": 4195,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "plain Ideal Bandage roll with metal clips, no brand mark"
+ },
+ {
+  "id": 4186,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ideal Bandage 6cm x 4.5m printed on wrapper"
+ },
+ {
+  "id": 4187,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Ideal Bandage 8cm x 4.5m printed on wrapper"
+ },
+ {
+  "id": 3608,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Cohesive Elastic self-adhesive bandage, size 10"
+ },
+ {
+  "id": 3610,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Cohesive Elastic bandage, size 2.5"
+ },
+ {
+  "id": 3612,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Cohesive Elastic bandage, size 5"
+ },
+ {
+  "id": 3614,
+  "type": "pelhure",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Plast Cohesive Elastic bandage, size 7.5"
+ },
+ {
+  "id": 4166,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi transparent waterproof wound dressing, 5x7.5cm A50"
+ },
+ {
+  "id": 4168,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi transparent wound dressing, 5x7.5cm A10"
+ },
+ {
+  "id": 10101,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x10cm A25"
+ },
+ {
+  "id": 4170,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x10cm A5"
+ },
+ {
+  "id": 10098,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin surgical wound dressing, 9x15cm A25"
+ },
+ {
+  "id": 4159,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin surgical wound dressing, 9x25cm A25"
+ },
+ {
+  "id": 4155,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x25cm A5"
+ },
+ {
+  "id": 4157,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin surgical wound dressing, 9x30cm A25"
+ },
+ {
+  "id": 4153,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x30cm A5"
+ },
+ {
+  "id": 4161,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin surgical wound dressing, 9x35cm A25"
+ },
+ {
+  "id": 4151,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x35cm A5"
+ },
+ {
+  "id": 4163,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin surgical wound dressing, 9x5cm A50"
+ },
+ {
+  "id": 4172,
+  "type": "fllastera",
+  "alsoTypes": [],
+  "brand": "cansin",
+  "confidence": "high",
+  "note": "Cansin Yara Pedi wound dressing, 9x5cm A10"
+ }
+]

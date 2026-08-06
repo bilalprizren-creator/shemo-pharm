@@ -43,6 +43,11 @@ next-env.d.ts
 # Design reference screenshots (not part of the app)
 reference/
 
+# Category-audit thumbnails: 30 MB of derived files, rebuilt in a minute with
+# `node scripts/audit-thumbnails.mjs`. The audit's inputs and verdicts under
+# audit/batches and audit/out ARE committed — those cannot be regenerated.
+audit/thumbs/
+
 # Server-only data stores and secrets
 data/users.json
 data/messages.json

@@ -1,0 +1,402 @@
+[
+ {
+  "id": 16405,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Spear Warming Lubricant Gel, red bottle"
+ },
+ {
+  "id": 10721,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "dolphi",
+  "confidence": "high",
+  "note": "Dolphi Lubricant Light Mint 100ml, cooling effect"
+ },
+ {
+  "id": 10718,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": "dolphi",
+  "confidence": "high",
+  "note": "Dolphi Lubricant Ultra Comfort Classical 100ml"
+ },
+ {
+  "id": 19319,
+  "type": "shurupa",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "Belupo paracetamol/guaifenesin/phenylephrine oral-solution powder sachets; no leaf"
+ },
+ {
+  "id": 19191,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Fidia Macular B forte, 20 compresse, food supplement"
+ },
+ {
+  "id": 18840,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "dr.Frei Magne Direct 250mg, 20 orodispersible sachets"
+ },
+ {
+  "id": 18843,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "dr.Frei Magne Forte 1778mg, 14 liquid sticks"
+ },
+ {
+  "id": 18845,
+  "type": "shurupa-suplemente",
+  "alsoTypes": [],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "dr.Frei Magne Liquid 815mg, 20 liquid sticks"
+ },
+ {
+  "id": 19520,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "MAGNEADD Magnezyum bottle, 60 tablets, Zn/D/B6"
+ },
+ {
+  "id": 7341,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "PharmaVital Magnesium+B-Complex, 30 sachet sticks"
+ },
+ {
+  "id": 18899,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": "solgar",
+  "confidence": "high",
+  "note": "Solgar Magnesium with Vitamin B6, 100 tablets"
+ },
+ {
+  "id": 19162,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Synergy Magnesium + B6, 60 capsules"
+ },
+ {
+  "id": 16315,
+  "type": "eferveta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "effervescent tube, Magnesium 200mg, 24 tablets"
+ },
+ {
+  "id": 19362,
+  "type": "eferveta",
+  "alsoTypes": [],
+  "brand": "eferveta-kruger-heliusan",
+  "confidence": "high",
+  "note": "heilusan Magnesium 200mg, 20 Brausetabletten"
+ },
+ {
+  "id": 14495,
+  "type": "eferveta",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Sanae Premium Magnesium+vitamin B6 effervescent, lemon"
+ },
+ {
+  "id": 16496,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Aqua Vital Magnesium 400 Direct sachets, no liquid needed"
+ },
+ {
+  "id": 12941,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Magnesium 500mg bottle, 60 tablets"
+ },
+ {
+  "id": 18892,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": "solgar",
+  "confidence": "high",
+  "note": "Solgar Magnesium Citrate, high potency, 60 tablets"
+ },
+ {
+  "id": 3991,
+  "type": "eferveta",
+  "alsoTypes": [],
+  "brand": "swiss-energy",
+  "confidence": "high",
+  "note": "Swiss Energy Magnesium+B-complex, 20 effervescent tablets"
+ },
+ {
+  "id": 5706,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "PharmaVital Magnestick Premium 400mg, 30 sachets"
+ },
+ {
+  "id": 14937,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "STADA Magnetrans direct-granulat 375mg; box shows 50 sticks, not 20"
+ },
+ {
+  "id": 6083,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Magnezi + Vit.B6, 30 tablets, dietary supplement"
+ },
+ {
+  "id": 18043,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Magnilax Magnesium Citrate 400mg, 30 tablets"
+ },
+ {
+  "id": 18041,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Magnizen Magnesium Glycinate 850mg, 30 tablets"
+ },
+ {
+  "id": 16803,
+  "type": "ushqyerja-e-bebeve",
+  "alsoTypes": [],
+  "brand": "bio-tree-baby",
+  "confidence": "high",
+  "note": "Bio Tree Baby manual breast pump box"
+ },
+ {
+  "id": 17538,
+  "type": "mbrojtje-nga-insektet",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Pharmalife Mapez natural anti-mosquito spray, kids bear"
+ },
+ {
+  "id": 14939,
+  "type": "kujdesi-i-hundes",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Marissimo baby seawater nasal spray, whale design"
+ },
+ {
+  "id": 19473,
+  "type": "dentare",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Spider-Man electric toothbrush, rinse cup, zip pouch set"
+ },
+ {
+  "id": 4968,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Famex Medikal N95 FFP2 white mask box"
+ },
+ {
+  "id": 3710,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "clear nebuliser mask with tubing, adult & child"
+ },
+ {
+  "id": 4960,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Orlex 3-ply surgical mask box, 50 pcs"
+ },
+ {
+  "id": 7679,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "black 3-ply surgical masks, pair shown"
+ },
+ {
+  "id": 9214,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "black reusable fabric protective mask"
+ },
+ {
+  "id": 4973,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "white KN95-style mask with red exhalation valve"
+ },
+ {
+  "id": 3714,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "adult oxygen mask with reservoir bag; no oxygen-mask leaf"
+ },
+ {
+  "id": 3716,
+  "type": "inhalatore-dhe-aspiratore",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "low",
+  "note": "green oxygen mask w/ strap, adult & child; no exact leaf"
+ },
+ {
+  "id": 4966,
+  "type": "doreza-dhe-maska",
+  "alsoTypes": [],
+  "brand": "freely",
+  "confidence": "high",
+  "note": "Freely Çocuk Maskesi box, children's mask, 10pcs"
+ },
+ {
+  "id": 16403,
+  "type": "prezervativ",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Hitman Sexual Massage Oil, strawberry, 250ml"
+ },
+ {
+  "id": 18032,
+  "type": "pluhur-dhe-qese",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Matcha B Premium Latte powder-drink sticks, 140g"
+ },
+ {
+  "id": 18039,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Matcha Premium Form Tablet, L-carnitine/chitosan, 30 tabs"
+ },
+ {
+  "id": 12288,
+  "type": "oksimetra",
+  "alsoTypes": [],
+  "brand": "dr-frei",
+  "confidence": "high",
+  "note": "dr.Frei fingertip pulse oximeter AS-304-L box"
+ },
+ {
+  "id": 7332,
+  "type": "oksimetra",
+  "alsoTypes": [],
+  "brand": "comfort",
+  "confidence": "high",
+  "note": "Comfort Plus pulse oximeter box reads OM-110, not DM-110"
+ },
+ {
+  "id": 17460,
+  "type": "kujdesi-i-flokeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Cellcense Max Hair anti-dandruff shampoo bottle"
+ },
+ {
+  "id": 17462,
+  "type": "kujdesi-i-flokeve",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Cellcense Max Hair shampoo, dry & damaged hair"
+ },
+ {
+  "id": 19409,
+  "type": "tableta-dhe-kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Drogsan Maximus Flurbiprofen 100mg film tablets, NSAID"
+ },
+ {
+  "id": 12876,
+  "type": "kapsula",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "Nutrifactor Maxzoom Skin Hair Nails bottle, 60 tabs"
+ },
+ {
+  "id": 5120,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "black shoulder/arm immobilizer sling, chest strap, Lux"
+ },
+ {
+  "id": 5107,
+  "type": "gisht",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "three-piece buttonniere finger splint on hand"
+ },
+ {
+  "id": 5126,
+  "type": "krah",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "black Velpeau bandage arm/shoulder sling, cross strap views"
+ },
+ {
+  "id": 5184,
+  "type": "nyje",
+  "alsoTypes": [],
+  "brand": null,
+  "confidence": "high",
+  "note": "black/red elastic ankle support sleeve worn on foot"
+ }
+]
