@@ -1,21 +1,491 @@
 [
  {
-  "id": 250,
-  "name": "Alkool dhe Antiseptik",
-  "slug": "alkool-dhe-antiseptik",
+  "id": 248,
+  "name": "Barnat",
+  "slug": "barnat",
   "parent": 0,
-  "count": 37,
-  "displayName": "Higjienë dhe antiseptikë",
+  "count": 292,
+  "displayName": "Barnat",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 400,
+  "name": "Tableta dhe kapsula",
+  "slug": "tableta-dhe-kapsula",
+  "parent": 248,
+  "count": 136,
+  "displayName": "Tableta dhe kapsula",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 347,
+  "name": "Shurupa",
+  "slug": "shurupa",
+  "parent": 248,
+  "count": 28,
+  "displayName": "Shurupa",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 349,
+  "name": "Pika",
+  "slug": "pika",
+  "parent": 248,
+  "count": 19,
+  "displayName": "Pika",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 401,
+  "name": "Sprej dhe inhalim",
+  "slug": "sprej-dhe-inhalim",
+  "parent": 248,
+  "count": 14,
+  "displayName": "Sprej dhe inhalim",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 402,
+  "name": "Krema dhe pomada",
+  "slug": "krema-dhe-pomada",
+  "parent": 248,
+  "count": 49,
+  "displayName": "Krema dhe pomada",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 403,
+  "name": "Ampula dhe tretësira",
+  "slug": "ampula-dhe-tretesira",
+  "parent": 248,
+  "count": 31,
+  "displayName": "Ampula dhe tretësira",
   "kind": "type",
   "sort": 60
  },
  {
-  "id": 227,
-  "name": "Antibakterial",
-  "slug": "antibakterial",
+  "id": 348,
+  "name": "Supozitorë",
+  "slug": "supositore",
+  "parent": 248,
+  "count": 9,
+  "displayName": "Supozitorë",
+  "kind": "type",
+  "sort": 70
+ },
+ {
+  "id": 204,
+  "name": "Suplemente",
+  "slug": "suplemente",
+  "parent": 0,
+  "count": 398,
+  "displayName": "Suplemente",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 210,
+  "name": "Kapsula dhe tableta",
+  "slug": "kapsula",
+  "parent": 204,
+  "count": 161,
+  "displayName": "Kapsula dhe tableta",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 206,
+  "name": "Eferveta",
+  "slug": "eferveta",
+  "parent": 204,
+  "count": 33,
+  "displayName": "Eferveta",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 207,
+  "name": "Bonbona dhe karamele vitaminash",
+  "slug": "bonbona",
+  "parent": 204,
+  "count": 44,
+  "displayName": "Bonbona dhe karamele vitaminash",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 208,
+  "name": "Omega 3",
+  "slug": "omega-3",
+  "parent": 204,
+  "count": 21,
+  "displayName": "Omega 3",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 404,
+  "name": "Pluhur dhe qese",
+  "slug": "pluhur-dhe-qese",
+  "parent": 204,
+  "count": 46,
+  "displayName": "Pluhur dhe qese",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 405,
+  "name": "Shurupa dhe pika suplementesh",
+  "slug": "shurupa-suplemente",
+  "parent": 204,
+  "count": 73,
+  "displayName": "Shurupa dhe pika suplementesh",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 213,
+  "name": "Soda bikarboni",
+  "slug": "soda-bikarboni",
+  "parent": 204,
+  "count": 6,
+  "displayName": "Soda bikarboni",
+  "kind": "type",
+  "sort": 70
+ },
+ {
+  "id": 265,
+  "name": "Të tjera — Suplemente",
+  "slug": "te-ndryshme-suplements-effervescent",
+  "parent": 204,
+  "count": 19,
+  "displayName": "Të tjera — Suplemente",
+  "kind": "type",
+  "sort": 900
+ },
+ {
+  "id": 221,
+  "name": "Kozmetikë dhe kujdes personal",
+  "slug": "kozmetike",
+  "parent": 0,
+  "count": 461,
+  "displayName": "Kozmetikë dhe kujdes personal",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 228,
+  "name": "Higjienë personale",
+  "slug": "higjienike",
   "parent": 221,
-  "count": 14,
-  "displayName": "Antibakterial",
+  "count": 12,
+  "displayName": "Higjienë personale",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 406,
+  "name": "Kujdesi i fytyrës",
+  "slug": "kujdesi-i-fytyres",
+  "parent": 221,
+  "count": 57,
+  "displayName": "Kujdesi i fytyrës",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 229,
+  "name": "Kujdesi i trupit",
+  "slug": "kujdesi-i-trupit",
+  "parent": 221,
+  "count": 73,
+  "displayName": "Kujdesi i trupit",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 222,
+  "name": "Kujdesi i flokëve",
+  "slug": "kujdesi-i-flokeve",
+  "parent": 221,
+  "count": 85,
+  "displayName": "Kujdesi i flokëve",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 225,
+  "name": "Kujdesi i dhëmbëve",
+  "slug": "dentare",
+  "parent": 221,
+  "count": 119,
+  "displayName": "Kujdesi i dhëmbëve",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 407,
+  "name": "Kujdesi i buzëve",
+  "slug": "kujdesi-i-buzeve",
+  "parent": 221,
+  "count": 45,
+  "displayName": "Kujdesi i buzëve",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 408,
+  "name": "Mbrojtje nga dielli",
+  "slug": "mbrojtje-nga-dielli",
+  "parent": 221,
+  "count": 18,
+  "displayName": "Mbrojtje nga dielli",
+  "kind": "type",
+  "sort": 70
+ },
+ {
+  "id": 409,
+  "name": "Deodorantë",
+  "slug": "deodorante",
+  "parent": 221,
+  "count": 12,
+  "displayName": "Deodorantë",
+  "kind": "type",
+  "sort": 80
+ },
+ {
+  "id": 410,
+  "name": "Kujdesi i duarve dhe këmbëve",
+  "slug": "kujdesi-i-duarve-dhe-kembeve",
+  "parent": 221,
+  "count": 26,
+  "displayName": "Kujdesi i duarve dhe këmbëve",
+  "kind": "type",
+  "sort": 90
+ },
+ {
+  "id": 411,
+  "name": "Kujdesi i thonjve",
+  "slug": "kujdesi-i-thonjve",
+  "parent": 221,
+  "count": 6,
+  "displayName": "Kujdesi i thonjve",
+  "kind": "type",
+  "sort": 100
+ },
+ {
+  "id": 412,
+  "name": "Parfume",
+  "slug": "parfume",
+  "parent": 221,
+  "count": 6,
+  "displayName": "Parfume",
+  "kind": "type",
+  "sort": 110
+ },
+ {
+  "id": 413,
+  "name": "Rroje dhe depilim",
+  "slug": "rroje-dhe-depilim",
+  "parent": 221,
+  "count": 7,
+  "displayName": "Rroje dhe depilim",
+  "kind": "type",
+  "sort": 120
+ },
+ {
+  "id": 414,
+  "name": "Aksesorë kozmetikë",
+  "slug": "aksesore-kozmetike",
+  "parent": 221,
+  "count": 6,
+  "displayName": "Aksesorë kozmetikë",
+  "kind": "type",
+  "sort": 130
+ },
+ {
+  "id": 230,
+  "name": "Të tjera — Kozmetikë",
+  "slug": "te-tjera",
+  "parent": 221,
+  "count": 3,
+  "displayName": "Të tjera — Kozmetikë",
+  "kind": "type",
+  "sort": 900
+ },
+ {
+  "id": 328,
+  "name": "Ortopedi",
+  "slug": "ortopedi",
+  "parent": 0,
+  "count": 281,
+  "displayName": "Ortopedi",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 238,
+  "name": "Këmbë",
+  "slug": "kembe",
+  "parent": 328,
+  "count": 101,
+  "displayName": "Këmbë",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 242,
+  "name": "Gjuri",
+  "slug": "gjuri",
+  "parent": 238,
+  "count": 34,
+  "displayName": "Gjuri",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 243,
+  "name": "Çorape",
+  "slug": "corape",
+  "parent": 238,
+  "count": 0,
+  "displayName": "Çorape",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 241,
+  "name": "Nyje",
+  "slug": "nyje",
+  "parent": 238,
+  "count": 27,
+  "displayName": "Nyje",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 240,
+  "name": "Gishtat e këmbës",
+  "slug": "gisht-kembe",
+  "parent": 238,
+  "count": 8,
+  "displayName": "Gishtat e këmbës",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 244,
+  "name": "Çorape kompresioni",
+  "slug": "corape-kompresioni",
+  "parent": 238,
+  "count": 21,
+  "displayName": "Çorape kompresioni",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 239,
+  "name": "Shtroje",
+  "slug": "shtroje",
+  "parent": 238,
+  "count": 6,
+  "displayName": "Shtroje",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 234,
+  "name": "Dorë",
+  "slug": "dore",
+  "parent": 328,
+  "count": 62,
+  "displayName": "Dorë",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 237,
+  "name": "Krah",
+  "slug": "krah",
+  "parent": 234,
+  "count": 30,
+  "displayName": "Krah",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 235,
+  "name": "Gishtat e dorës",
+  "slug": "gisht",
+  "parent": 234,
+  "count": 9,
+  "displayName": "Gishtat e dorës",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 233,
+  "name": "Shoka dhe korseta",
+  "slug": "shoka-dhe-korseta",
+  "parent": 328,
+  "count": 45,
+  "displayName": "Shoka dhe korseta",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 232,
+  "name": "Qafore",
+  "slug": "qafore",
+  "parent": 328,
+  "count": 13,
+  "displayName": "Qafore",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 245,
+  "name": "Karrige dhe ndihmëse për ecje",
+  "slug": "karrige-dhe-ndihmese-per-ecje",
+  "parent": 328,
+  "count": 20,
+  "displayName": "Karrige dhe ndihmëse për ecje",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 247,
+  "name": "Mbathje ortopedike",
+  "slug": "mbathje-ortopedike",
+  "parent": 328,
+  "count": 21,
+  "displayName": "Mbathje ortopedike",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 246,
+  "name": "Të tjera — Ortopedi",
+  "slug": "te-tjera-ersa-med-ortoped",
+  "parent": 328,
+  "count": 20,
+  "displayName": "Të tjera — Ortopedi",
+  "kind": "type",
+  "sort": 900
+ },
+ {
+  "id": 220,
+  "name": "Pajisje mjekësore",
+  "slug": "paisje-medicinale",
+  "parent": 0,
+  "count": 227,
+  "displayName": "Pajisje mjekësore",
   "kind": "type",
   "sort": 50
  },
@@ -24,50 +494,460 @@
   "name": "Aparatura",
   "slug": "aparatura",
   "parent": 220,
-  "count": 113,
+  "count": 79,
   "displayName": "Aparatura",
   "kind": "type",
   "sort": 10
+ },
+ {
+  "id": 415,
+  "name": "Tensiometra",
+  "slug": "tensiometra",
+  "parent": 187,
+  "count": 13,
+  "displayName": "Tensiometra",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 416,
+  "name": "Termometra",
+  "slug": "termometra",
+  "parent": 187,
+  "count": 9,
+  "displayName": "Termometra",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 417,
+  "name": "Inhalatorë dhe aspiratorë",
+  "slug": "inhalatore-dhe-aspiratore",
+  "parent": 187,
+  "count": 28,
+  "displayName": "Inhalatorë dhe aspiratorë",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 418,
+  "name": "Oksimetra dhe monitorim",
+  "slug": "oksimetra",
+  "parent": 187,
+  "count": 4,
+  "displayName": "Oksimetra dhe monitorim",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 194,
+  "name": "Diabetike",
+  "slug": "diabetike",
+  "parent": 187,
+  "count": 15,
+  "displayName": "Diabetike",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 195,
+  "name": "Të tjera — Aparatura",
+  "slug": "te-ndryshme",
+  "parent": 187,
+  "count": 10,
+  "displayName": "Të tjera — Aparatura",
+  "kind": "type",
+  "sort": 900
+ },
+ {
+  "id": 419,
+  "name": "Doreza dhe maska",
+  "slug": "doreza-dhe-maska",
+  "parent": 220,
+  "count": 21,
+  "displayName": "Doreza dhe maska",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 420,
+  "name": "Shiringa, gjilpëra dhe kanila",
+  "slug": "shiringa-dhe-gjilpera",
+  "parent": 220,
+  "count": 15,
+  "displayName": "Shiringa, gjilpëra dhe kanila",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 421,
+  "name": "Kateter dhe qese urinare",
+  "slug": "kateter-dhe-qese-urinare",
+  "parent": 220,
+  "count": 16,
+  "displayName": "Kateter dhe qese urinare",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 422,
+  "name": "Teste diagnostike",
+  "slug": "teste-diagnostike",
+  "parent": 220,
+  "count": 6,
+  "displayName": "Teste diagnostike",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 423,
+  "name": "Kujdesi i syve dhe thjerrëzave",
+  "slug": "kujdesi-i-syve",
+  "parent": 220,
+  "count": 18,
+  "displayName": "Kujdesi i syve dhe thjerrëzave",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 424,
+  "name": "Kujdesi i veshëve",
+  "slug": "kujdesi-i-vesheve",
+  "parent": 220,
+  "count": 19,
+  "displayName": "Kujdesi i veshëve",
+  "kind": "type",
+  "sort": 70
+ },
+ {
+  "id": 431,
+  "name": "Kujdesi i hundës",
+  "slug": "kujdesi-i-hundes",
+  "parent": 220,
+  "count": 28,
+  "displayName": "Kujdesi i hundës",
+  "kind": "type",
+  "sort": 75
+ },
+ {
+  "id": 425,
+  "name": "Ndihma e parë dhe komprese",
+  "slug": "ndihma-e-pare",
+  "parent": 220,
+  "count": 20,
+  "displayName": "Ndihma e parë dhe komprese",
+  "kind": "type",
+  "sort": 80
+ },
+ {
+  "id": 426,
+  "name": "Aksesorë për barna",
+  "slug": "aksesore-per-barna",
+  "parent": 220,
+  "count": 5,
+  "displayName": "Aksesorë për barna",
+  "kind": "type",
+  "sort": 90
+ },
+ {
+  "id": 250,
+  "name": "Higjienë dhe antiseptikë",
+  "slug": "alkool-dhe-antiseptik",
+  "parent": 0,
+  "count": 87,
+  "displayName": "Higjienë dhe antiseptikë",
+  "kind": "type",
+  "sort": 60
+ },
+ {
+  "id": 427,
+  "name": "Alkool dhe dezinfektues",
+  "slug": "dezinfektues",
+  "parent": 250,
+  "count": 22,
+  "displayName": "Alkool dhe dezinfektues",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 351,
+  "name": "Tampona dhe higjienë intime",
+  "slug": "tampon",
+  "parent": 250,
+  "count": 31,
+  "displayName": "Tampona dhe higjienë intime",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 357,
+  "name": "Pelena për të rritur",
+  "slug": "pelena-per-te-rritur",
+  "parent": 250,
+  "count": 9,
+  "displayName": "Pelena për të rritur",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 227,
+  "name": "Antibakterial",
+  "slug": "antibakterial",
+  "parent": 250,
+  "count": 0,
+  "displayName": "Antibakterial",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 430,
+  "name": "Mbrojtje nga insektet",
+  "slug": "mbrojtje-nga-insektet",
+  "parent": 250,
+  "count": 25,
+  "displayName": "Mbrojtje nga insektet",
+  "kind": "type",
+  "sort": 50
+ },
+ {
+  "id": 200,
+  "name": "Fasho dhe fllastera",
+  "slug": "fasha",
+  "parent": 0,
+  "count": 92,
+  "displayName": "Fasho dhe fllastera",
+  "kind": "type",
+  "sort": 70
+ },
+ {
+  "id": 197,
+  "name": "Fllastera",
+  "slug": "fllastera",
+  "parent": 200,
+  "count": 52,
+  "displayName": "Fllastera",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 199,
+  "name": "Gaza",
+  "slug": "gaza",
+  "parent": 200,
+  "count": 8,
+  "displayName": "Gaza",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 198,
+  "name": "Leukoplasta",
+  "slug": "leukoplasta",
+  "parent": 200,
+  "count": 13,
+  "displayName": "Leukoplasta",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 256,
+  "name": "Pëlhurë",
+  "slug": "pelhure",
+  "parent": 200,
+  "count": 19,
+  "displayName": "Pëlhurë",
+  "kind": "type",
+  "sort": 40
+ },
+ {
+  "id": 219,
+  "name": "Vajra dhe çajra",
+  "slug": "vajra",
+  "parent": 0,
+  "count": 67,
+  "displayName": "Vajra dhe çajra",
+  "kind": "type",
+  "sort": 80
+ },
+ {
+  "id": 218,
+  "name": "Vajra natyrale",
+  "slug": "vajera",
+  "parent": 219,
+  "count": 33,
+  "displayName": "Vajra natyrale",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 215,
+  "name": "Çajra mjekësore",
+  "slug": "cajra-mjekesore",
+  "parent": 219,
+  "count": 19,
+  "displayName": "Çajra mjekësore",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 216,
+  "name": "Çajra me filtër",
+  "slug": "cajra-me-filter",
+  "parent": 219,
+  "count": 15,
+  "displayName": "Çajra me filtër",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 15,
+  "name": "Prezervativë",
+  "slug": "prezervativ",
+  "parent": 0,
+  "count": 25,
+  "displayName": "Prezervativë",
+  "kind": "type",
+  "sort": 90
+ },
+ {
+  "id": 209,
+  "name": "Për fëmijë",
+  "slug": "per-femije",
+  "parent": 0,
+  "count": 235,
+  "displayName": "Për fëmijë",
+  "kind": "type",
+  "sort": 100
+ },
+ {
+  "id": 428,
+  "name": "Ushqyerja e bebeve",
+  "slug": "ushqyerja-e-bebeve",
+  "parent": 209,
+  "count": 52,
+  "displayName": "Ushqyerja e bebeve",
+  "kind": "type",
+  "sort": 10
+ },
+ {
+  "id": 429,
+  "name": "Kujdesi i bebeve",
+  "slug": "kujdesi-i-bebeve",
+  "parent": 209,
+  "count": 50,
+  "displayName": "Kujdesi i bebeve",
+  "kind": "type",
+  "sort": 20
+ },
+ {
+  "id": 432,
+  "name": "Pelena për bebe",
+  "slug": "pelena-per-bebe",
+  "parent": 209,
+  "count": 22,
+  "displayName": "Pelena për bebe",
+  "kind": "type",
+  "sort": 30
+ },
+ {
+  "id": 356,
+  "name": "Ëmbëlsira dhe çamçakëz",
+  "slug": "embelsira",
+  "parent": 0,
+  "count": 20,
+  "displayName": "Ëmbëlsira dhe çamçakëz",
+  "kind": "type",
+  "sort": 110
+ },
+ {
+  "id": 231,
+  "name": "Ersa Med",
+  "slug": "ersa-med-ortopedi",
+  "parent": 0,
+  "count": 241,
+  "displayName": "Ersa Med",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 196,
+  "name": "Cansin",
+  "slug": "cansin",
+  "parent": 0,
+  "count": 83,
+  "displayName": "Cansin",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 205,
+  "name": "Swiss Energy",
+  "slug": "swiss-energy",
+  "parent": 0,
+  "count": 51,
+  "displayName": "Swiss Energy",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 224,
+  "name": "Froika",
+  "slug": "froika",
+  "parent": 0,
+  "count": 64,
+  "displayName": "Froika",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 226,
+  "name": "Labella",
+  "slug": "labella",
+  "parent": 0,
+  "count": 61,
+  "displayName": "Labella",
+  "kind": "brand",
+  "sort": 0
  },
  {
   "id": 214,
   "name": "ATC Natyral",
   "slug": "atc-natyral",
   "parent": 0,
-  "count": 59,
+  "count": 14,
   "displayName": "ATC Natyral",
   "kind": "brand",
   "sort": 0
  },
  {
-  "id": 352,
-  "name": "Autan",
-  "slug": "autan",
+  "id": 251,
+  "name": "Kräuterhof",
+  "slug": "krauterhof",
   "parent": 0,
-  "count": 3,
-  "displayName": "Autan",
+  "count": 39,
+  "displayName": "Kräuterhof",
   "kind": "brand",
   "sort": 0
  },
  {
-  "id": 259,
-  "name": "Balsam",
-  "slug": "balsam-krauterhof",
-  "parent": 251,
-  "count": 10,
-  "displayName": "Kräuterhof — Balsam",
+  "id": 344,
+  "name": "Mr. White",
+  "slug": "mr-white",
+  "parent": 0,
+  "count": 43,
+  "displayName": "Mr. White",
   "kind": "brand",
   "sort": 0
  },
  {
-  "id": 248,
-  "name": "Barnat",
-  "slug": "barnat",
+  "id": 346,
+  "name": "Senti 2",
+  "slug": "senti2",
   "parent": 0,
-  "count": 316,
-  "displayName": "Barnat",
-  "kind": "type",
-  "sort": 10
+  "count": 30,
+  "displayName": "Senti 2",
+  "kind": "brand",
+  "sort": 0
  },
  {
   "id": 343,
@@ -90,56 +970,6 @@
   "sort": 0
  },
  {
-  "id": 207,
-  "name": "Bonbona",
-  "slug": "bonbona",
-  "parent": 204,
-  "count": 8,
-  "displayName": "Bonbona vitaminash",
-  "kind": "type",
-  "sort": 50
- },
- {
-  "id": 216,
-  "name": "Çajra me filter",
-  "slug": "cajra-me-filter",
-  "parent": 219,
-  "count": 5,
-  "displayName": "Çajra me filtër",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 215,
-  "name": "Çajra Mjekësore",
-  "slug": "cajra-mjekesore",
-  "parent": 219,
-  "count": 16,
-  "displayName": "Çajra mjekësore",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 196,
-  "name": "Cansin",
-  "slug": "cansin",
-  "parent": 0,
-  "count": 100,
-  "displayName": "Cansin",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 210,
-  "name": "Capsula",
-  "slug": "capsula",
-  "parent": 204,
-  "count": 18,
-  "displayName": "Kapsula",
-  "kind": "type",
-  "sort": 30
- },
- {
   "id": 353,
   "name": "Chicco",
   "slug": "chicco",
@@ -150,72 +980,72 @@
   "sort": 0
  },
  {
+  "id": 189,
+  "name": "Dr. Frei",
+  "slug": "dr-frei",
+  "parent": 0,
+  "count": 39,
+  "displayName": "Dr. Frei",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 188,
+  "name": "Shemo",
+  "slug": "shemo",
+  "parent": 0,
+  "count": 16,
+  "displayName": "Shemo",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
   "id": 191,
   "name": "Comfort",
   "slug": "comfort",
   "parent": 0,
-  "count": 10,
+  "count": 16,
   "displayName": "Comfort",
   "kind": "brand",
   "sort": 0
  },
  {
-  "id": 225,
-  "name": "Dentare",
-  "slug": "dentare",
-  "parent": 221,
-  "count": 102,
-  "displayName": "Dentare",
-  "kind": "type",
-  "sort": 20
+  "id": 211,
+  "name": "Kruger / Heliusan",
+  "slug": "eferveta-kruger-heliusan",
+  "parent": 0,
+  "count": 5,
+  "displayName": "Kruger / Heliusan",
+  "kind": "brand",
+  "sort": 0
  },
  {
-  "id": 194,
-  "name": "Diabetike",
-  "slug": "diabetike",
-  "parent": 187,
-  "count": 16,
-  "displayName": "Diabetike",
-  "kind": "type",
-  "sort": 10
+  "id": 354,
+  "name": "Haribo",
+  "slug": "haribo",
+  "parent": 0,
+  "count": 10,
+  "displayName": "Haribo",
+  "kind": "brand",
+  "sort": 0
+ },
+ {
+  "id": 254,
+  "name": "TIO Medikal",
+  "slug": "tio-medical",
+  "parent": 0,
+  "count": 8,
+  "displayName": "TIO Medikal",
+  "kind": "brand",
+  "sort": 0
  },
  {
   "id": 202,
   "name": "Dolphi",
   "slug": "dolphi",
   "parent": 0,
-  "count": 8,
+  "count": 9,
   "displayName": "Dolphi",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 236,
-  "name": "Dorë",
-  "slug": "dore-dore",
-  "parent": 234,
-  "count": 4,
-  "displayName": "Dorë — të tjera",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 234,
-  "name": "Dorë",
-  "slug": "dore",
-  "parent": 328,
-  "count": 55,
-  "displayName": "Dorë",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 189,
-  "name": "Dr. Frei",
-  "slug": "dr-frei",
-  "parent": 0,
-  "count": 15,
-  "displayName": "Dr. Frei",
   "kind": "brand",
   "sort": 0
  },
@@ -230,426 +1060,6 @@
   "sort": 0
  },
  {
-  "id": 206,
-  "name": "Eferveta",
-  "slug": "eferveta",
-  "parent": 204,
-  "count": 22,
-  "displayName": "Eferveta",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 211,
-  "name": "Eferveta (Kruger, Heliusan)",
-  "slug": "eferveta-kruger-heliusan",
-  "parent": 0,
-  "count": 10,
-  "displayName": "Kruger / Heliusan",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 231,
-  "name": "Ersa Med (Ortopedi)",
-  "slug": "ersa-med-ortopedi",
-  "parent": 0,
-  "count": 238,
-  "displayName": "Ersa Med",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 200,
-  "name": "Fasha",
-  "slug": "fasha",
-  "parent": 0,
-  "count": 100,
-  "displayName": "Fasho dhe fllastera",
-  "kind": "type",
-  "sort": 70
- },
- {
-  "id": 197,
-  "name": "Fllastera",
-  "slug": "fllastera",
-  "parent": 200,
-  "count": 35,
-  "displayName": "Fllastera",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 193,
-  "name": "Freely",
-  "slug": "freely",
-  "parent": 0,
-  "count": 2,
-  "displayName": "Freely",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 224,
-  "name": "Froika",
-  "slug": "froika",
-  "parent": 0,
-  "count": 68,
-  "displayName": "Froika",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 199,
-  "name": "Gaza",
-  "slug": "gaza",
-  "parent": 200,
-  "count": 13,
-  "displayName": "Gaza",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 240,
-  "name": "Gisht",
-  "slug": "gisht-kembe",
-  "parent": 238,
-  "count": 8,
-  "displayName": "Gishtat e këmbës",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 235,
-  "name": "Gisht",
-  "slug": "gisht",
-  "parent": 234,
-  "count": 13,
-  "displayName": "Gishtat e dorës",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 242,
-  "name": "Gjuri",
-  "slug": "gjuri",
-  "parent": 238,
-  "count": 25,
-  "displayName": "Gjuri",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 354,
-  "name": "Haribo",
-  "slug": "haribo",
-  "parent": 0,
-  "count": 10,
-  "displayName": "Haribo",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 228,
-  "name": "Higjienike",
-  "slug": "higjienike",
-  "parent": 221,
-  "count": 96,
-  "displayName": "Higjienike",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 244,
-  "name": "Hollaopke",
-  "slug": "hollaopke",
-  "parent": 238,
-  "count": 6,
-  "displayName": "Çorape kompresioni",
-  "kind": "type",
-  "sort": 50
- },
- {
-  "id": 245,
-  "name": "Karrige dhe ndihmëse për ecje",
-  "slug": "karrige-dhe-ndihmese-per-ecje",
-  "parent": 328,
-  "count": 18,
-  "displayName": "Karrige dhe ndihmëse për ecje",
-  "kind": "type",
-  "sort": 50
- },
- {
-  "id": 238,
-  "name": "Këmbë",
-  "slug": "kembe",
-  "parent": 328,
-  "count": 92,
-  "displayName": "Këmbë",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 221,
-  "name": "Kozmetikë",
-  "slug": "kozmetike",
-  "parent": 0,
-  "count": 568,
-  "displayName": "Kozmetikë dhe kujdes personal",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 264,
-  "name": "Kozmetikë",
-  "slug": "kozmetike-swiss-energy",
-  "parent": 205,
-  "count": 6,
-  "displayName": "Swiss Energy — Kozmetikë",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 268,
-  "name": "Kozmetikë",
-  "slug": "kozmetike-labella",
-  "parent": 226,
-  "count": 24,
-  "displayName": "Labella — Kozmetikë",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 237,
-  "name": "Krah",
-  "slug": "krah",
-  "parent": 234,
-  "count": 30,
-  "displayName": "Krah",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 251,
-  "name": "Krauterhof",
-  "slug": "krauterhof",
-  "parent": 0,
-  "count": 51,
-  "displayName": "Kräuterhof",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 260,
-  "name": "Krem",
-  "slug": "krem",
-  "parent": 251,
-  "count": 23,
-  "displayName": "Kräuterhof — Krem",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 262,
-  "name": "Krem",
-  "slug": "krem-swiss-energy",
-  "parent": 205,
-  "count": 3,
-  "displayName": "Swiss Energy — Krem",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 229,
-  "name": "Krema",
-  "slug": "krema",
-  "parent": 221,
-  "count": 92,
-  "displayName": "Krema",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 226,
-  "name": "Labella",
-  "slug": "labella",
-  "parent": 0,
-  "count": 61,
-  "displayName": "Labella",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 261,
-  "name": "Labellë",
-  "slug": "labelle",
-  "parent": 226,
-  "count": 1,
-  "displayName": "Labella — Vaseline",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 198,
-  "name": "Leukoplasta",
-  "slug": "leukoplasta",
-  "parent": 200,
-  "count": 11,
-  "displayName": "Leukoplasta",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 201,
-  "name": "Love Plus",
-  "slug": "love-plus",
-  "parent": 0,
-  "count": 3,
-  "displayName": "Love Plus",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 247,
-  "name": "Mbathje Ortopedike",
-  "slug": "mbathje-ortopedike",
-  "parent": 328,
-  "count": 18,
-  "displayName": "Mbathje ortopedike",
-  "kind": "type",
-  "sort": 60
- },
- {
-  "id": 344,
-  "name": "Mr. White",
-  "slug": "mr-white",
-  "parent": 0,
-  "count": 35,
-  "displayName": "Mr. White",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 241,
-  "name": "Nyje",
-  "slug": "nyje",
-  "parent": 238,
-  "count": 11,
-  "displayName": "Nyje",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 208,
-  "name": "Omega 3",
-  "slug": "omega-3",
-  "parent": 204,
-  "count": 7,
-  "displayName": "Omega 3",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 356,
-  "name": "Orbit",
-  "slug": "orbit",
-  "parent": 0,
-  "count": 23,
-  "displayName": "Bonbona",
-  "kind": "type",
-  "sort": 110
- },
- {
-  "id": 328,
-  "name": "Ortopedi",
-  "slug": "ortopedi",
-  "parent": 0,
-  "count": 283,
-  "displayName": "Ortopedi",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 220,
-  "name": "Paisje Medicinale",
-  "slug": "paisje-medicinale",
-  "parent": 0,
-  "count": 238,
-  "displayName": "Pajisje mjekësore",
-  "kind": "type",
-  "sort": 50
- },
- {
-  "id": 357,
-  "name": "Pampers",
-  "slug": "pampers",
-  "parent": 250,
-  "count": 6,
-  "displayName": "Pelena për të rritur",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 256,
-  "name": "Pëlhurë",
-  "slug": "pelhure",
-  "parent": 200,
-  "count": 3,
-  "displayName": "Pëlhurë",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 209,
-  "name": "Për Fëmijë",
-  "slug": "per-femije",
-  "parent": 0,
-  "count": 50,
-  "displayName": "Për fëmijë",
-  "kind": "type",
-  "sort": 100
- },
- {
-  "id": 349,
-  "name": "Pika",
-  "slug": "pika",
-  "parent": 248,
-  "count": 19,
-  "displayName": "Pika",
-  "kind": "type",
-  "sort": 20
- },
- {
-  "id": 15,
-  "name": "Prezervativ",
-  "slug": "prezervativ",
-  "parent": 0,
-  "count": 42,
-  "displayName": "Prezervativë",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 232,
-  "name": "Qafore",
-  "slug": "qafore",
-  "parent": 328,
-  "count": 11,
-  "displayName": "Qafore",
-  "kind": "type",
-  "sort": 40
- },
- {
-  "id": 243,
-  "name": "Qorape",
-  "slug": "qorape",
-  "parent": 238,
-  "count": 15,
-  "displayName": "Çorape",
-  "kind": "type",
-  "sort": 20
- },
- {
   "id": 253,
   "name": "Restorex",
   "slug": "restorex",
@@ -658,96 +1068,6 @@
   "displayName": "Restorex",
   "kind": "brand",
   "sort": 0
- },
- {
-  "id": 346,
-  "name": "Senti2",
-  "slug": "senti2",
-  "parent": 0,
-  "count": 30,
-  "displayName": "Senti 2",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 257,
-  "name": "Serum",
-  "slug": "serum",
-  "parent": 251,
-  "count": 7,
-  "displayName": "Kräuterhof — Serum",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 258,
-  "name": "Shampo",
-  "slug": "shampo-krauterhof",
-  "parent": 251,
-  "count": 7,
-  "displayName": "Kräuterhof — Shampo",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 222,
-  "name": "Shampo",
-  "slug": "shampo",
-  "parent": 221,
-  "count": 67,
-  "displayName": "Shampo",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 188,
-  "name": "Shemo",
-  "slug": "shemo",
-  "parent": 0,
-  "count": 15,
-  "displayName": "Shemo",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 233,
-  "name": "Shoka dhe Korseta",
-  "slug": "shoka-dhe-korseta",
-  "parent": 328,
-  "count": 32,
-  "displayName": "Shoka dhe korseta",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 239,
-  "name": "Shtroje",
-  "slug": "shtroje",
-  "parent": 238,
-  "count": 6,
-  "displayName": "Shtroje",
-  "kind": "type",
-  "sort": 60
- },
- {
-  "id": 347,
-  "name": "Shurupa",
-  "slug": "shurupa",
-  "parent": 248,
-  "count": 25,
-  "displayName": "Shurupa",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 213,
-  "name": "Soda Bikarboni",
-  "slug": "soda-bikarboni",
-  "parent": 204,
-  "count": 6,
-  "displayName": "Soda bikarboni",
-  "kind": "type",
-  "sort": 60
  },
  {
   "id": 355,
@@ -760,143 +1080,33 @@
   "sort": 0
  },
  {
-  "id": 212,
-  "name": "Suplemente",
-  "slug": "suplemente",
-  "parent": 204,
-  "count": 203,
-  "displayName": "Suplemente",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 204,
-  "name": "Suplements & Effervescent",
-  "slug": "suplements-effervescent",
+  "id": 352,
+  "name": "Autan",
+  "slug": "autan",
   "parent": 0,
-  "count": 359,
-  "displayName": "Suplemente",
-  "kind": "type",
-  "sort": 20
+  "count": 6,
+  "displayName": "Autan",
+  "kind": "brand",
+  "sort": 0
  },
  {
-  "id": 348,
-  "name": "Supositore",
-  "slug": "supositore",
-  "parent": 248,
+  "id": 201,
+  "name": "Love Plus",
+  "slug": "love-plus",
+  "parent": 0,
   "count": 3,
-  "displayName": "Supositore",
-  "kind": "type",
-  "sort": 30
- },
- {
-  "id": 205,
-  "name": "Swiss Energy",
-  "slug": "swiss-energy",
-  "parent": 0,
-  "count": 94,
-  "displayName": "Swiss Energy",
+  "displayName": "Love Plus",
   "kind": "brand",
   "sort": 0
  },
  {
-  "id": 351,
-  "name": "Tampon",
-  "slug": "tampon",
-  "parent": 250,
+  "id": 193,
+  "name": "Freely",
+  "slug": "freely",
+  "parent": 0,
   "count": 3,
-  "displayName": "Tampona dhe higjienë intime",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 300,
-  "name": "të ndryshme",
-  "slug": "te-ndryshme-atc-natyral",
-  "parent": 214,
-  "count": 18,
-  "displayName": "ATC Natyral — të tjera",
+  "displayName": "Freely",
   "kind": "brand",
   "sort": 0
- },
- {
-  "id": 266,
-  "name": "Te ndryshme",
-  "slug": "te-ndryshme-prezervativ",
-  "parent": 15,
-  "count": 25,
-  "displayName": "Të tjera — Prezervativë",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 265,
-  "name": "Te ndryshme",
-  "slug": "te-ndryshme-suplements-effervescent",
-  "parent": 204,
-  "count": 10,
-  "displayName": "Të tjera — Suplemente",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 195,
-  "name": "Të ndryshme",
-  "slug": "te-ndryshme",
-  "parent": 187,
-  "count": 34,
-  "displayName": "Të tjera — Aparatura",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 230,
-  "name": "Të tjera",
-  "slug": "te-tjera",
-  "parent": 221,
-  "count": 12,
-  "displayName": "Të tjera — Kozmetikë",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 246,
-  "name": "Të tjera",
-  "slug": "te-tjera-ersa-med-ortoped",
-  "parent": 328,
-  "count": 21,
-  "displayName": "Të tjera — Ortopedi",
-  "kind": "type",
-  "sort": 90
- },
- {
-  "id": 254,
-  "name": "Tio Medical",
-  "slug": "tio-medical",
-  "parent": 0,
-  "count": 10,
-  "displayName": "TIO Medikal",
-  "kind": "brand",
-  "sort": 0
- },
- {
-  "id": 218,
-  "name": "Vajëra",
-  "slug": "vajera",
-  "parent": 219,
-  "count": 17,
-  "displayName": "Vajra natyrale",
-  "kind": "type",
-  "sort": 10
- },
- {
-  "id": 219,
-  "name": "Vajra",
-  "slug": "vajra",
-  "parent": 0,
-  "count": 77,
-  "displayName": "Vajra dhe çajra",
-  "kind": "type",
-  "sort": 80
  }
 ]

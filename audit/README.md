@@ -18,8 +18,9 @@ named "Labella" or "Palloma" turns out to be some other brand entirely.
 | Classified | **2049 of 2049** — batches 001–041, complete |
 | Remaining | none |
 | Validator | 0 problems |
-| To re-check by hand | 147 low confidence, 58 parked on a bare root |
-| Applied to JSON or the database | **nothing yet** |
+| To re-check by hand | 97 low confidence, 8 parked on a bare root by choice |
+| Applied to `src/data/*.json` | **yes** — assignments, categories and products |
+| Applied to the database | **not yet** |
 
 ## Layout
 
@@ -64,21 +65,38 @@ The gate, which currently reports `classified: 2049 of 2049` and `problems: 0`:
 node scripts/merge-audit.mjs audit/out
 ```
 
-## Next
+## What has run
 
 ```bash
+node scripts/pin-brands.mjs                      # -> src/data/brand-pins.json
 node scripts/merge-audit.mjs audit/out --write   # -> src/data/catalog-assignments.json
-node scripts/apply-taxonomy.mjs                  # dry run, writes nothing
+node scripts/apply-taxonomy.mjs --json-only      # -> src/data/{categories,products}.json
 ```
 
-Review the dry run before anything else. **`.env.local` points at the same Neon
-database as production**, so `--commit` is a live edit — take a fresh snapshot with
-`node scripts/snapshot-categories.mjs` first, and deploy the reading code before
-migrating the data, not after.
+`categories.json` went 90 → 111 and the product links 3727 → 5264. Only `corape`
+and `antibakterial` end at `count = 0`.
+
+## Next — the database
+
+```bash
+node scripts/snapshot-categories.mjs             # rollback file, take it first
+node scripts/apply-taxonomy.mjs                  # dry run against the current DB
+node scripts/apply-taxonomy.mjs --commit         # live edit
+```
+
+**`.env.local` points at the same Neon database as production**, so `--commit` is a
+live edit. Deploy the reading code before migrating the data, not after — and keep
+the gap short: `src/lib/catalog.ts` now names the post-migration slug `suplemente`
+for its homepage card, which until the migration resolves to the old child category
+(203 products instead of 398). Nothing breaks, but the card undercounts.
+
+Two products still want `hidden = true` rather than a category: the printed pharmacy
+carrier bags, ids 9575 and 14337. That is a database flag, so it is a toggle in
+`/admin/produktet` after the migration, not something the JSON pass could do.
 
 ## What `merge-audit.mjs` decides on its own
 
-Three things are derived deterministically rather than left to per-batch judgement,
+Four things are derived deterministically rather than left to per-batch judgement,
 because an LLM applying the same rule 2049 times will not apply it the same way twice:
 
 1. **Brand from article code**, filling only what the photo audit left `null`. Each
@@ -89,30 +107,31 @@ because an LLM applying the same rule 2049 times will not apply it the same way 
 2. **`per-femije` for children's brands** whose type sits outside the children's
    branch. A Disney toothbrush is `dentare`, which hangs under Kozmetikë, so without
    this it appears under "Për fëmijë" or not depending on which batch it landed in.
-3. **Refusing to write** when any result file has fewer rows than its input — agents
+3. **Brand shelves that keep their live membership**, from `src/data/brand-pins.json`
+   — see below, and the header of `scripts/pin-brands.mjs`.
+4. **Refusing to write** when any result file has fewer rows than its input — agents
    write incrementally, so a half-written file is otherwise indistinguishable from a
    finished one.
 
-## Open questions for the dry run
+## What the review decided
 
-- **Vocabulary gaps.** Baby nappies have no leaf at all (22 products, currently parked
-  on the `per-femije` root). Also unhoused: topical/scalp-route medicines such as
-  medicated shampoos and minoxidil, silicone breast prostheses, oral "medical device"
-  products, cushions, hospital beds, and printed pharmacy carrier bags — which are
-  retail supplies and probably want `hidden` rather than a category. The last five
-  batches added a few more: table sweeteners (5 products, on the `suplemente` root),
-  drinking and distilled water (4), apple-cider vinegar (3), and honey-paste potency
-  sachets (3). None is big enough to deserve a leaf on its own; together they might
-  want one shared "other" home.
-- **Labella.** Now measured across all 2049 products: not one package carries the
-  Labella mark. The brand and the two categories merging into it end at `count = 0`.
-- **Ersa Med** lands at ~160 products via article codes, against 238 in the old bucket.
-  The difference is genuine foreign stock — the old bucket held a stool-sample cup, a
-  Medura kinesiology tape and an ESCAPE LX wheelchair.
-- **Known limit of the code rule: 4 products where the code and the photo disagree.**
-  Ids 5089, 19066 (photographed as *med TEXTILE*) and 10799, 5135 (a *SUPPORT LINK*
-  tag, which is not Ersa's *supportline*) carry an Ersa-shaped code in the name while
-  the package shows someone else. The rule fills them as Ersa because the auditor
-  correctly left `brand: null` — an unlisted brand and an unreadable one are both
-  `null`, so the rule cannot tell them apart. Decide these four by hand at review;
-  detecting the case by grepping the free-text `note` would be worse than the disease.
+- **Ersa Med and Labella keep the membership the live site has.** The audit read
+  brands off the package, which is right for a shampoo bottle and blind for an
+  orthopedic range photographed on an anonymous limb: Ersa would have fallen from
+  238 products to 158, and Labella — whose wordmark appears on none of the 2049
+  packshots — to zero. Both are pinned instead, so Ersa lands at 241 (the 238 plus
+  three the article code found elsewhere) and Labella stays at 61. A pin only adds a
+  link; where the camera read a different mark, that mark still wins, which is how
+  the ESCAPE LX wheelchair stays Comfort *and* sits on the Ersa shelf.
+- **The vocabulary gaps are closed** — 50 of the 58 products parked on a bare root
+  moved. `pelena-per-bebe` is the one new leaf (22 nappies); everything else went
+  into catch-alls that already existed. See the table in PRECEDENTS.md.
+- **Still parked, deliberately:** six scalp-route medicines on `barnat` (reachable
+  through `alsoTypes: ["kujdesi-i-flokeve"]`) and the two pharmacy carrier bags.
+- **The 4 products where the code and the photo disagree** — ids 5089, 19066
+  (photographed as *med TEXTILE*) and 10799, 5135 (a *SUPPORT LINK* tag, which is
+  not Ersa's *supportline*) — are moot now. All four sit in the old Ersa bucket, so
+  the pin puts them where the live site already has them.
+- **97 products remain `confidence: "low"`**, and these are genuine photo doubts, not
+  vocabulary complaints: the package contradicts the name, or the count or dosage
+  form is not legible. They need an eye on the packshot, not another rule.
