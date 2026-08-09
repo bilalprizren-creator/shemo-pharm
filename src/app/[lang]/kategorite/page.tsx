@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { categoryDisplayName, getCategoryTree } from "@/lib/catalog";
-import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { Info } from "lucide-react";
+import {
+  categoryDisplayName,
+  getCategoryTree,
+  getProductCount,
+} from "@/lib/catalog";
+import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 
@@ -27,6 +32,7 @@ export default async function CategoriesPage({ params }: Props) {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
   const tree = (await getCategoryTree()).filter((c) => c.count > 0);
+  const total = await getProductCount();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
@@ -35,6 +41,24 @@ export default async function CategoriesPage({ params }: Props) {
         {dict.categoriesPage.title}
       </h1>
       <p className="mt-2 max-w-2xl text-ink-500">{dict.categoriesPage.sub}</p>
+
+      {/* The counts on the cards are per category and correct, but adding them
+          up gives 2 185 against a catalog of 2 049 — 136 products sit in two
+          categories at once, which is deliberate: a children's cough syrup
+          belongs on both shelves. Saying so here is cheaper than letting
+          someone do the arithmetic and conclude the numbers are broken. */}
+      <div className="mt-6 flex max-w-3xl items-start gap-2.5 rounded-2xl bg-tint px-4 py-3 text-sm leading-relaxed text-ink-600">
+        <Info className="mt-0.5 size-4 shrink-0 text-brand-600" aria-hidden />
+        <p>
+          {fmt(dict.categoriesPage.overlapNote, { total })}{" "}
+          <Link
+            href={langHref(dict.lang, "/produktet")}
+            className="font-semibold text-brand-700 underline-offset-2 hover:underline"
+          >
+            {fmt(dict.categoriesPage.overlapLink, { total })}
+          </Link>
+        </p>
+      </div>
 
       <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tree.map((cat) => (
