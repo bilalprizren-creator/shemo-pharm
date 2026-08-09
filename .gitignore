@@ -48,13 +48,7 @@ reference/
 # audit/batches and audit/out ARE committed — those cannot be regenerated.
 audit/thumbs/
 
-# Server-only data stores and secrets
-data/users.json
-data/messages.json
-data/newsletter.json
-data/.auth-secret
-
-.vercel
-.env*
-
-.env*
+# The pre-Postgres file store. Users, messages and the signing secret all live
+# in the database now and data/ no longer exists, but the entry stays so an old
+# checkout or a script writing there can never commit customer data.
+data/

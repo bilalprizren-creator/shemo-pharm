@@ -67,16 +67,12 @@ const PRODUCT_DISPLAY_NAMES = {
   "0012": "Nebulizator me kompresor – SHEMO SHM-100",
   "7159": "A-Z Vitamina + Lutein & Q10 – 60 tableta",
 };
-const LOCAL_IMAGES = {
-  "0018": "/products/0018-tensiometer-shm-500.png",
-  "0002": "/products/0002-pulseoximeter-shm-300.png",
-  "0012": "/products/0012-compressor-nebulizer-shm-100.png",
-  "0013": "/products/0013-mesh-nebulizer-shm-200.png",
-  "7159": "/products/7159-az-vitamine.png",
-  "3204": "/products/3204-calcium-vitamin-c.png",
-  "7601": "/products/7601-gummy-monsters-multivitamin.png",
-  "1007": "/products/1007-alpherol-vitamin-e.png",
-};
+// There used to be a LOCAL_IMAGES overlay here, pinning eight SKUs to
+// hand-made PNG renders because the WooCommerce photos were hotlinked from
+// the old site. The 2026-08-04 image migration made that obsolete: every
+// product now carries a standardized 1000x1000 WebP in src/data/products.json
+// and in public/products/, so the overlay only risked pointing image_override
+// at files that no longer exist. image_override is left to the admin panel.
 // The four curated homepage picks become featured=true.
 const FEATURED_SLUGS = new Set([
   "tensiometer-digjital-krahu-shemo-shm-500-0018",
@@ -139,7 +135,7 @@ async function main() {
     description: p.description ?? "",
     short_description: p.shortDescription ?? "",
     display_name: PRODUCT_DISPLAY_NAMES[p.sku] ?? null,
-    image_override: LOCAL_IMAGES[p.sku] ?? null,
+    image_override: null,
     featured: FEATURED_SLUGS.has(p.slug),
   }));
   for (const batch of chunk(productRows, 500)) {
@@ -165,8 +161,11 @@ async function main() {
         images = EXCLUDED.images, in_stock = EXCLUDED.in_stock,
         description = EXCLUDED.description,
         short_description = EXCLUDED.short_description,
-        display_name = EXCLUDED.display_name,
-        image_override = EXCLUDED.image_override,
+        -- The two columns the admin panel owns are kept, not overwritten:
+        -- re-running the import must not silently undo an editor's work. A
+        -- row that has never been given one still picks up the seed value.
+        display_name = COALESCE(products.display_name, EXCLUDED.display_name),
+        image_override = COALESCE(products.image_override, EXCLUDED.image_override),
         featured = EXCLUDED.featured, updated_at = now()
     `;
   }
