@@ -1,15 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
   categoryDisplayName,
   getAllCategories,
   getCategoryTree,
   getProducts,
+  hasOutOfStockProducts,
   toCardProducts,
   type ProductSort,
 } from "@/lib/catalog";
-import { langHref, fmt } from "@/lib/i18n";
+import { langHref, fmt, type Lang } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
@@ -23,9 +25,55 @@ export interface CatalogSearchParams {
   kerko?: string;
   faqja?: string;
   renditja?: string;
+  /** "1" = only products in stock. Any other value means no filter. */
+  stok?: string;
 }
 
 const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
+
+/**
+ * Canonical URL and robots directive for a paginated listing.
+ *
+ * Two things were wrong before. Every page of /produktet declared itself
+ * canonical to /produktet, so 85 of the 86 pages claimed to be a page they
+ * are not — which is how the products on them stop being discovered. And
+ * internal search results were indexable, which fills an index with URLs
+ * nobody linked to.
+ *
+ * So: a plain listing, with or without a page number, is canonical to itself.
+ * Anything carrying a search term, a non-default sort or the stock filter is
+ * a view of that listing rather than a page of its own — it points at the
+ * plain equivalent and is marked noindex, follow, so the crawler still walks
+ * through to the products.
+ */
+export function listingMetadata({
+  lang,
+  path,
+  searchParams,
+}: {
+  lang: Lang;
+  /** Unprefixed, e.g. "/produktet" or "/kategorite/barnat". */
+  path: string;
+  searchParams: CatalogSearchParams;
+}): Pick<Metadata, "alternates" | "robots"> {
+  const page = Math.max(1, Number(searchParams.faqja) || 1);
+  const isView =
+    Boolean(searchParams.kerko?.trim()) ||
+    (searchParams.renditja !== undefined && searchParams.renditja !== "emri-asc") ||
+    searchParams.stok === "1";
+
+  const suffix = !isView && page > 1 ? `?faqja=${page}` : "";
+  return {
+    alternates: {
+      canonical: `${langHref(lang, path)}${suffix}`,
+      languages: {
+        sq: `${path}${suffix}`,
+        en: `/en${path}${suffix}`,
+      },
+    },
+    ...(isView ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 /**
  * Shared product-listing view for /produktet and /kategorite/[slug]:
@@ -60,8 +108,16 @@ export async function CatalogView({
     ? (searchParams.renditja as ProductSort)
     : "emri-asc";
   const page = Math.max(1, Number(searchParams.faqja) || 1);
+  const inStockOnly = searchParams.stok === "1";
 
-  const result = await getProducts({ categorySlug, query, sort, page, perPage: 24 });
+  const result = await getProducts({
+    categorySlug,
+    query,
+    sort,
+    page,
+    perPage: 24,
+    inStockOnly,
+  });
   const cards = await toCardProducts(result.items, showPrices);
 
   const tree = await getCategoryTree();
@@ -73,6 +129,28 @@ export async function CatalogView({
   const params = new URLSearchParams();
   if (query) params.set("kerko", query);
   if (sort !== "emri-asc") params.set("renditja", sort);
+  if (inStockOnly) params.set("stok", "1");
+
+  /**
+   * This same listing with one thing changed and the page number dropped.
+   * Removing a filter has to leave the other filters standing — clearing the
+   * search should not silently also clear "in stock", which is what happens
+   * when every chip just links back to the bare path.
+   */
+  const listingHref = (change: { query?: string; stok?: boolean } = {}) => {
+    const nextQuery = "query" in change ? change.query : query;
+    const nextStock = "stok" in change ? change.stok : inStockOnly;
+    const next = new URLSearchParams();
+    if (nextQuery) next.set("kerko", nextQuery);
+    if (sort !== "emri-asc") next.set("renditja", sort);
+    if (nextStock) next.set("stok", "1");
+    const qs = next.toString();
+    return `${localBase}${qs ? `?${qs}` : ""}`;
+  };
+  const stockToggleHref = listingHref({ stok: !inStockOnly });
+  // Shown once anything is actually out of stock — plus whenever the filter is
+  // already on, so it can always be switched back off.
+  const showStockFilter = inStockOnly || (await hasOutOfStockProducts());
 
   const filterPanel = (
     <CategoryFilter
@@ -124,12 +202,40 @@ export async function CatalogView({
                 className="h-10 w-full rounded-lg border border-ink-900/10 bg-white pl-10 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
               />
               {sort !== "emri-asc" && <input type="hidden" name="renditja" value={sort} />}
+              {inStockOnly && <input type="hidden" name="stok" value="1" />}
             </form>
             <MobileFilters
               labels={{ filters: dict.catalog.filters, close: dict.catalog.closeFilters }}
             >
               {filterPanel}
             </MobileFilters>
+            {/* A link, not a checkbox: the state lives in the URL so it
+                survives sorting, paging and the back button, and the control
+                needs no JavaScript to work. */}
+            {showStockFilter && (
+              <Link
+                href={stockToggleHref}
+                role="switch"
+                aria-checked={inStockOnly}
+                className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors ${
+                  inStockOnly
+                    ? "border-brand-500 bg-brand-50 text-brand-800"
+                    : "border-ink-900/10 bg-white text-ink-900 hover:border-brand-400"
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className={`flex size-4 items-center justify-center rounded border ${
+                    inStockOnly
+                      ? "border-brand-600 bg-brand-600 text-white"
+                      : "border-ink-900/25 bg-white"
+                  }`}
+                >
+                  {inStockOnly && <Check className="size-3" strokeWidth={3} />}
+                </span>
+                {dict.catalog.inStockOnly}
+              </Link>
+            )}
             <SortSelect
               labels={{
                 label: dict.catalog.sortLabel,
@@ -140,11 +246,11 @@ export async function CatalogView({
             />
           </div>
 
-          {(query || categorySlug) && (
+          {(query || categorySlug || inStockOnly) && (
             <div className="mb-5 flex flex-wrap items-center gap-2" aria-label={dict.catalog.activeFilters}>
               {query && (
                 <Link
-                  href={localBase}
+                  href={listingHref({ query: undefined })}
                   className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 py-1.5 pl-3.5 pr-2.5 text-[13px] font-medium text-brand-800 hover:bg-brand-100"
                 >
                   {fmt(dict.catalog.searchChip, { q: query })}
@@ -160,6 +266,16 @@ export async function CatalogView({
                   {fmt(dict.catalog.categoryChip, {
                     name: displayName[categorySlug] ?? categorySlug,
                   })}
+                  <X className="size-3.5" aria-hidden />
+                  <span className="sr-only">{dict.catalog.removeFilter}</span>
+                </Link>
+              )}
+              {inStockOnly && (
+                <Link
+                  href={stockToggleHref}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 py-1.5 pl-3.5 pr-2.5 text-[13px] font-medium text-brand-800 hover:bg-brand-100"
+                >
+                  {dict.catalog.inStockChip}
                   <X className="size-3.5" aria-hidden />
                   <span className="sr-only">{dict.catalog.removeFilter}</span>
                 </Link>

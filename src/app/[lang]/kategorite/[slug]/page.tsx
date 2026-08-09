@@ -5,10 +5,11 @@ import {
   getAllCategories,
   getCategoryBySlug,
 } from "@/lib/catalog";
-import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
+import { isLang, fmt, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import {
   CatalogView,
+  listingMetadata,
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogView";
 import type { Crumb } from "@/components/catalog/Breadcrumbs";
@@ -18,25 +19,28 @@ interface Props {
   searchParams: Promise<CatalogSearchParams>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
   const cat = await getCategoryBySlug(slug);
   if (!cat) return {};
   const name = categoryDisplayName(cat);
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.faqja) || 1);
   return {
-    title: name,
+    title: page > 1 ? `${name} — ${page}` : name,
     description: fmt(dict.categoriesPage.categoryMetaDescription, {
       name,
       count: cat.count,
     }),
-    alternates: {
-      canonical: langHref(dict.lang, `/kategorite/${slug}`),
-      languages: {
-        sq: `/kategorite/${slug}`,
-        en: `/en/kategorite/${slug}`,
-      },
-    },
+    ...listingMetadata({
+      lang: dict.lang,
+      path: `/kategorite/${slug}`,
+      searchParams: sp,
+    }),
   };
 }
 

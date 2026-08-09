@@ -247,6 +247,8 @@ export const sq = {
     searchInResults: "Kërko në këto produkte…",
     searchChip: "Kërkimi: “{q}”",
     categoryChip: "Kategoria: {name}",
+    inStockOnly: "Vetëm në stok",
+    inStockChip: "Vetëm në stok",
     removeFilter: "— hiq filtrin",
     clearFilters: "Pastro filtrat",
     emptyTitle: "Asnjë produkt nuk u gjet",
@@ -272,6 +274,10 @@ export const sq = {
       "Të gjitha kategoritë e produkteve të SHEMO PHARM: pajisje mjekësore, ortopedi, suplemente, kozmetikë, higjienë dhe shumë të tjera.",
     categoryMetaDescription:
       "{name} — shfletoni {count} produkte nga katalogu i SHEMO PHARM, distributor me shumicë i produkteve dhe pajisjeve mjekësore në Kosovë.",
+    /** Why the numbers on the cards add up to more than the catalog holds. */
+    overlapNote:
+      "Një produkt mund të jetë në më shumë se një kategori — një shurup për fëmijë është njëkohësisht bar dhe produkt për fëmijë. Prandaj shumat e numrave më poshtë e kalojnë totalin: katalogu ka {total} produkte të ndryshme.",
+    overlapLink: "Shiko të gjitha {total} produktet",
   },
 
   brandsPage: {

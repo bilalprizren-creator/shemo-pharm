@@ -243,6 +243,8 @@ export const en: Dictionary = {
     searchInResults: "Search within these products…",
     searchChip: "Search: “{q}”",
     categoryChip: "Category: {name}",
+    inStockOnly: "In stock only",
+    inStockChip: "In stock only",
     removeFilter: "— remove filter",
     clearFilters: "Clear filters",
     emptyTitle: "No products found",
@@ -268,6 +270,9 @@ export const en: Dictionary = {
       "All SHEMO PHARM product categories: medical devices, orthopedics, supplements, cosmetics, hygiene and many more.",
     categoryMetaDescription:
       "{name} — browse {count} products from the SHEMO PHARM catalog, a wholesale distributor of medical products and devices in Kosovo.",
+    overlapNote:
+      "A product can sit in more than one category — a children's cough syrup is both a medicine and a children's product. That is why the numbers below add up to more than the total: the catalog holds {total} distinct products.",
+    overlapLink: "Browse all {total} products",
   },
 
   brandsPage: {

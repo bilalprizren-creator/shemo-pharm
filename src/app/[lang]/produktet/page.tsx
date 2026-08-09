@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import {
   CatalogView,
+  listingMetadata,
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogView";
 
@@ -11,16 +12,20 @@ interface Props {
   searchParams: Promise<CatalogSearchParams>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.faqja) || 1);
   return {
-    title: dict.catalog.title,
+    // The page number belongs in the title too, or every result page is
+    // indistinguishable from the first in a list of search results.
+    title: page > 1 ? `${dict.catalog.title} — ${page}` : dict.catalog.title,
     description: dict.catalog.metaDescription,
-    alternates: {
-      canonical: langHref(dict.lang, "/produktet"),
-      languages: { sq: "/produktet", en: "/en/produktet" },
-    },
+    ...listingMetadata({ lang: dict.lang, path: "/produktet", searchParams: sp }),
   };
 }
 
