@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { BadgePercent } from "lucide-react";
-import rawOffers from "@/data/offers.json";
+import { CURATED_OFFER_SLUGS, offersAvailable } from "@/lib/offers";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
   getDiscountedProducts,
@@ -28,13 +28,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: langHref(dict.lang, "/oferta"),
       languages: { sq: "/oferta", en: "/en/oferta" },
     },
+    // A page whose only content is "nothing here yet" should not be offered
+    // as a search result; it re-enters the index once it has offers on it.
+    ...((await offersAvailable()) ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
 /**
- * Offers = products with a genuine sale price from the export, plus a
- * curated list the business maintains in src/data/offers.json (slugs).
- * No invented discounts: if neither exists, we say so honestly.
+ * Offers = products with a genuine sale price, plus a curated list the
+ * business maintains in src/data/offers.json (slugs). No invented discounts.
+ *
+ * While both are empty the navigation stops linking here (see
+ * offersAvailable()), but the route stays alive: an external link or a
+ * bookmark should land on an explanation, not a 404.
  */
 export default async function OffersPage({ params }: Props) {
   const { lang } = await params;
@@ -43,7 +49,7 @@ export default async function OffersPage({ params }: Props) {
   const showPrices = canSeePrices(session);
 
   const curatedResolved = await Promise.all(
-    (rawOffers as string[]).map((slug) => getProductBySlug(slug))
+    CURATED_OFFER_SLUGS.map((slug) => getProductBySlug(slug))
   );
   const curated = curatedResolved.filter(
     (p): p is NonNullable<typeof p> => Boolean(p)

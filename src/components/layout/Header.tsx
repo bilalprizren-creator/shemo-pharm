@@ -4,6 +4,7 @@ import {
   getCategoryImage,
   getTopCategories,
 } from "@/lib/catalog";
+import { offersAvailable } from "@/lib/offers";
 import type { Dictionary } from "@/lib/dictionaries";
 import { HeaderClient, type NavCategory } from "./HeaderClient";
 
@@ -23,6 +24,9 @@ export async function Header({ dict }: { dict: Dictionary }) {
     <HeaderClient
       categories={categories}
       user={session ? { name: session.name } : null}
+      // Decided on the server and passed down, because the nav lives in a
+      // client component that has no way to ask the catalog itself.
+      hasOffers={await offersAvailable()}
       dict={dict}
     />
   );

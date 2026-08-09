@@ -36,12 +36,15 @@ export function MobileNav({
   onClose,
   categories,
   user,
+  hasOffers,
   dict,
 }: {
   open: boolean;
   onClose: () => void;
   categories: NavCategory[];
   user: { name: string } | null;
+  /** False hides the /oferta entry — see offersAvailable(). */
+  hasOffers: boolean;
   dict: Dictionary;
 }) {
   const [catsOpen, setCatsOpen] = useState(false);
@@ -151,7 +154,7 @@ export function MobileNav({
 
         <nav aria-label={dict.nav.mainLabel} className="flex-1 px-2 py-3">
           <ul>
-            {LINK_PATHS.map((l) => (
+            {LINK_PATHS.filter((l) => hasOffers || l.href !== "/oferta").map((l) => (
               <li key={l.href}>
                 <Link
                   href={langHref(lang, l.href)}

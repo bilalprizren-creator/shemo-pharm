@@ -5,6 +5,7 @@ import { SITE } from "@/lib/site";
 import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { categoryDisplayName, getTopCategories } from "@/lib/catalog";
+import { offersAvailable } from "@/lib/offers";
 import { FacebookIcon } from "@/components/icons/FacebookIcon";
 import { InstagramIcon } from "@/components/icons/InstagramIcon";
 
@@ -21,6 +22,9 @@ const NAV_PATHS = [
 export async function Footer({ dict }: { dict: Dictionary }) {
   const topCategories = (await getTopCategories()).slice(0, 6);
   const year = new Date().getFullYear();
+  // Same rule as the header nav: no offers, no link to the offers page.
+  const hasOffers = await offersAvailable();
+  const navPaths = NAV_PATHS.filter((l) => hasOffers || l.href !== "/oferta");
 
   return (
     <footer className="bg-plum-950 text-white/70">
@@ -82,7 +86,7 @@ export async function Footer({ dict }: { dict: Dictionary }) {
             {dict.nav.quickLinks}
           </h2>
           <ul className="mt-4 space-y-2.5">
-            {NAV_PATHS.map((l) => (
+            {navPaths.map((l) => (
               <li key={l.href}>
                 <Link
                   href={langHref(dict.lang, l.href)}

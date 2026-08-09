@@ -126,10 +126,13 @@ function LangSwitch({
 export function HeaderClient({
   categories,
   user,
+  hasOffers,
   dict,
 }: {
   categories: NavCategory[];
   user: { name: string } | null;
+  /** False hides every route to /oferta — see offersAvailable(). */
+  hasOffers: boolean;
   dict: Dictionary;
 }) {
   const pathname = usePathname();
@@ -293,7 +296,9 @@ export function HeaderClient({
                   aria-hidden
                 />
               </button>
-              {NAV_PATHS.map((l) => {
+              {NAV_PATHS.filter(
+                (l) => hasOffers || l.href !== "/oferta"
+              ).map((l) => {
                 const href = langHref(lang, l.href);
                 const current = pathname.startsWith(href);
                 return (
@@ -436,9 +441,13 @@ export function HeaderClient({
                     </Link>
                   </div>
 
-                  {/* Promo card — real warehouse photo, links to offers */}
+                  {/* Promo card — real warehouse photo. Its claim ("special
+                      prices for pharmacies and business partners") holds
+                      whether or not a discount list exists, so with no offers
+                      to link to it sends people to the quote form instead of
+                      to an empty page. */}
                   <Link
-                    href={langHref(lang, "/oferta")}
+                    href={langHref(lang, hasOffers ? "/oferta" : "/kontakti")}
                     className="group relative flex flex-col justify-end overflow-hidden rounded-2xl bg-plum-950 p-5 text-white"
                   >
                     <Image
@@ -462,7 +471,7 @@ export function HeaderClient({
                       {dict.header.megaPromoText}
                     </span>
                     <span className="relative mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-300">
-                      {dict.header.megaPromoCta}
+                      {hasOffers ? dict.header.megaPromoCta : dict.header.requestQuote}
                       <ArrowRight
                         className="size-4 transition-transform group-hover:translate-x-0.5"
                         aria-hidden
@@ -480,6 +489,7 @@ export function HeaderClient({
         onClose={() => setMobileOpen(false)}
         categories={categories}
         user={user}
+        hasOffers={hasOffers}
         dict={dict}
       />
     </>
