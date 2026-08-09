@@ -1,10 +1,13 @@
 "use server";
 
+import { after } from "next/server";
 import { z } from "zod";
 import { sql } from "@/lib/db";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
+import { adminNotificationAddress, sendMail, siteOrigin } from "@/lib/mail";
+import { newContactMessage } from "@/lib/mail-templates";
 
 export interface ContactFormState {
   success?: boolean;
@@ -43,10 +46,9 @@ function schema(dict: Dictionary) {
 }
 
 /**
- * Submissions land in the contact_messages table and are read in the admin
- * panel (/admin/mesazhet). Outbound mail now exists (src/lib/mail.ts), so
- * forwarding a copy to the business inbox is a few lines away — left off on
- * purpose until someone decides they want the duplicate in their inbox.
+ * Submissions land in the contact_messages table, are read in the admin panel
+ * (/admin/mesazhet) and are announced by mail (see below). The table is the
+ * record; the mail is what makes anyone look.
  */
 async function storeMessage(entry: {
   name: string;
@@ -105,18 +107,34 @@ export async function contactAction(
     return { fieldErrors, values };
   }
 
+  const entry = {
+    name: parsed.data.name,
+    company: parsed.data.company || "",
+    phone: parsed.data.phone,
+    email: parsed.data.email,
+    subject: parsed.data.subject,
+    message: parsed.data.message,
+  };
+
   try {
-    await storeMessage({
-      name: parsed.data.name,
-      company: parsed.data.company || "",
-      phone: parsed.data.phone,
-      email: parsed.data.email,
-      subject: parsed.data.subject,
-      message: parsed.data.message,
-    });
+    await storeMessage(entry);
   } catch {
     return { error: dict.actions.contactTechProblem, values };
   }
+
+  // Deferred, and only after the row is safely written: the visitor gets their
+  // confirmation without waiting on a mail provider, and a message that is in
+  // the database but whose notification failed is a missed email, not a lost
+  // inquiry. sendMail never throws.
+  after(async () => {
+    await sendMail(
+      newContactMessage({
+        entry,
+        to: adminNotificationAddress(),
+        adminUrl: `${siteOrigin()}/admin/mesazhet`,
+      })
+    );
+  });
 
   return { success: true };
 }

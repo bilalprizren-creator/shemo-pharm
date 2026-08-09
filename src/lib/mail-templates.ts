@@ -163,6 +163,77 @@ export function newRegistrationMessage({
 }
 
 /**
+ * "Someone wrote through the contact form" — to the business.
+ *
+ * Albanian only and hardcoded, like the registration notice: it goes to the
+ * same inbox and pairs with /admin/mesazhet, which is not translated either.
+ * The message is quoted in full so the notification stands on its own — an
+ * inquiry that can only be read by logging into an admin panel is an inquiry
+ * that waits.
+ */
+export function newContactMessage({
+  entry,
+  to,
+  adminUrl,
+}: {
+  entry: {
+    name: string;
+    company: string;
+    phone: string;
+    email: string;
+    subject: string;
+    message: string;
+  };
+  to: string;
+  adminUrl: string;
+}): MailMessage {
+  const subject = `Mesazh i ri nga faqja: ${entry.subject}`;
+  const rows: [string, string][] = [
+    ["Emri", entry.name],
+    ["Kompania", entry.company || "—"],
+    ["Telefoni", entry.phone],
+    ["Email", entry.email],
+  ];
+
+  const html = shell(
+    subject,
+    [
+      `<h1 style="margin:0 0 14px;font-size:20px;color:${INK};">Mesazh i ri</h1>`,
+      paragraph(entry.subject),
+      `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;">`,
+      rows
+        .map(
+          ([k, v]) =>
+            `<tr><td style="padding:4px 12px 4px 0;color:${MUTED};">${escapeHtml(k)}</td><td style="padding:4px 0;font-weight:bold;">${escapeHtml(v)}</td></tr>`
+        )
+        .join("\n"),
+      `</table>`,
+      // white-space:pre-wrap keeps the writer's own line breaks; without it a
+      // paragraphed message arrives as one block of text.
+      `<div style="margin:18px 0;padding:14px 16px;border-left:3px solid ${BRAND};background:#faf8fc;white-space:pre-wrap;font-size:14px;line-height:1.6;">${escapeHtml(
+        entry.message
+      )}</div>`,
+      button(adminUrl, "Hap mesazhet"),
+    ].join("\n"),
+    "Njoftim automatik nga uebfaqja e SHEMO PHARM."
+  );
+
+  const text = [
+    "Mesazh i ri nga formulari i kontaktit",
+    "",
+    ...rows.map(([k, v]) => `${k}: ${v}`),
+    `Subjekti: ${entry.subject}`,
+    "",
+    entry.message,
+    "",
+    adminUrl,
+  ].join("\n");
+
+  // Reply goes to the person who wrote, not into the void.
+  return { to, subject, html, text, replyTo: entry.email };
+}
+
+/**
  * "Choose a new password" — the only way back into an account whose password
  * is lost. Names no account details beyond the greeting: the mail may land in
  * a shared pharmacy mailbox, and it is also what someone typing a stranger's
