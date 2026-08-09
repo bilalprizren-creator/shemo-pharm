@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { CircleAlert, CircleCheck, Loader2, Save } from "lucide-react";
 import {
   createProductAction,
   updateProductAction,
   type AdminFormState,
 } from "@/lib/admin-actions";
+import { ImageUploadField } from "./ImageUploadField";
 
 export interface ProductFormValues {
   id?: number;
@@ -74,6 +75,13 @@ export function ProductForm({
     initialState
   );
   const err = state.fieldErrors ?? {};
+
+  // Controlled so an upload can append its URL. The list stays editable by
+  // hand — pasting a URL is still the fastest route for a photo that already
+  // lives somewhere.
+  const [images, setImages] = useState(values.images);
+  const addImage = (url: string) =>
+    setImages((current) => (current.trim() ? `${current.replace(/\s+$/, "")}\n${url}` : url));
 
   return (
     <form action={formAction} noValidate className="space-y-5">
@@ -168,10 +176,12 @@ export function ProductForm({
             <textarea
               name="images"
               rows={3}
-              defaultValue={values.images}
+              value={images}
+              onChange={(e) => setImages(e.target.value)}
               placeholder={"https://…/foto1.png\n/products/foto2.png"}
               className={`${areaCls} font-mono text-xs`}
             />
+            <ImageUploadField onUploaded={addImage} />
           </Field>
 
           <Field

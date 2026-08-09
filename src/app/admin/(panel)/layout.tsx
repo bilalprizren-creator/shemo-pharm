@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ExternalLink,
+  FolderTree,
   Inbox,
   LayoutDashboard,
   Package,
@@ -16,6 +17,7 @@ const NAV = [
   { href: "/admin/porosite", label: "Porositë", icon: ShoppingBag },
   { href: "/admin/kerkesat", label: "Kërkesat B2B", icon: UserCheck },
   { href: "/admin/produktet", label: "Produktet", icon: Package },
+  { href: "/admin/kategorite", label: "Kategoritë", icon: FolderTree },
   { href: "/admin/mesazhet", label: "Mesazhet", icon: Inbox },
 ] as const;
 

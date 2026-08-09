@@ -1,13 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { CircleAlert, Loader2, LogIn } from "lucide-react";
 import { adminLoginAction, type AdminFormState } from "@/lib/admin-actions";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 const initialState: AdminFormState = {};
 
 export function AdminLoginForm() {
   const [state, formAction, pending] = useActionState(adminLoginAction, initialState);
+  // PasswordField is controlled, so the typed password survives a rejected
+  // submit instead of being cleared by React's form reset — which matters
+  // most here, where a long admin password gets retyped otherwise.
+  const [password, setPassword] = useState("");
 
   return (
     <form action={formAction} noValidate className="space-y-4">
@@ -36,19 +41,16 @@ export function AdminLoginForm() {
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-ink-900">
-          Fjalëkalimi
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="h-12 w-full rounded-xl border border-ink-900/10 bg-white px-4 text-sm text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
-        />
-      </div>
+      {/* Albanian literals rather than dict lookups: the admin panel is
+          single-language and does not carry the dictionaries. */}
+      <PasswordField
+        id="password"
+        label="Fjalëkalimi"
+        value={password}
+        onChange={setPassword}
+        autoComplete="current-password"
+        labels={{ show: "Shfaq fjalëkalimin", hide: "Fshih fjalëkalimin" }}
+      />
 
       <button
         type="submit"
