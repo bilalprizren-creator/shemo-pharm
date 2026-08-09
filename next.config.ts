@@ -40,6 +40,37 @@ const RETIRED_CATEGORY_SLUGS: Record<string, string> = {
 };
 
 const nextConfig: NextConfig = {
+  // Nothing gains from telling the world which framework serves the page.
+  poweredByHeader: false,
+
+  /**
+   * Baseline security headers. Vercel already sends HSTS; these are the ones
+   * the platform leaves to the application.
+   *
+   * There is deliberately no Content-Security-Policy. Next ships an inline
+   * bootstrap script and framer-motion writes inline styles, so a real policy
+   * needs per-request nonces threaded through the layout — worth doing, but
+   * its own piece of work. A CSP written loosely enough to avoid that
+   * (`unsafe-inline`) would only look like protection.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // The site is never meant to be framed; the admin panel least of all.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+          },
+        ],
+      },
+    ];
+  },
+
   // Runs before src/proxy.ts (headers -> redirects -> proxy), so the sources
   // are the paths a browser actually asks for: Albanian bare, English prefixed.
   async redirects() {

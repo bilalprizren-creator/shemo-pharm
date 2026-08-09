@@ -76,8 +76,15 @@ export function hashPassword(password: string): string {
 export function verifyPassword(password: string, stored: string): boolean {
   const [salt, hash] = stored.split(":");
   if (!salt || !hash) return false;
+  // timingSafeEqual throws on a length mismatch, and Buffer.from silently
+  // truncates at the first non-hex character — so a hash that was written by
+  // something other than hashPassword (a hand-edited row, a botched import)
+  // would turn a wrong password into a 500 error page instead of "wrong
+  // password". Check the decoded length first and refuse the login quietly.
+  const expected = Buffer.from(hash, "hex");
+  if (expected.length !== 64) return false;
   const candidate = scryptSync(password, salt, 64);
-  return timingSafeEqual(candidate, Buffer.from(hash, "hex"));
+  return timingSafeEqual(candidate, expected);
 }
 
 function mapUser(r: UserRow): StoredUser {
