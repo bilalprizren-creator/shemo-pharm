@@ -12,18 +12,28 @@ function Script({ data }: { data: Record<string, unknown> }) {
   );
 }
 
-/** Organization data — only verified business facts, no ratings or claims. */
+/**
+ * Organization data — only verified business facts, no ratings or claims.
+ *
+ * Typed as both Organization and MedicalBusiness: the second is what makes a
+ * search engine treat the address, phone and hours as a real place of business
+ * rather than a page footer. Opening hours are transcribed from SITE.hours
+ * ("E hënë – E premte, 09:00 – 18:00") — if that string changes, this has to
+ * change with it, which is why the days are spelled out here instead of parsed.
+ */
 export function OrganizationJsonLd() {
   return (
     <Script
       data={{
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": ["Organization", "MedicalBusiness"],
         name: SITE.name,
+        legalName: SITE.legalName,
         url: SITE.domain,
         logo: `${SITE.domain}/logo.svg`,
+        image: `${SITE.domain}/opengraph-image`,
         description: SITE.description,
-        telephone: "+38349600934",
+        telephone: SITE.phones.map((p) => p.href.replace("tel:", "")),
         email: SITE.emails[0],
         address: {
           "@type": "PostalAddress",
@@ -32,7 +42,54 @@ export function OrganizationJsonLd() {
           postalCode: SITE.address.postalCode,
           addressCountry: "XK",
         },
-        sameAs: [SITE.social.facebook],
+        areaServed: { "@type": "Country", name: "Kosovë" },
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+            ],
+            opens: "09:00",
+            closes: "18:00",
+          },
+        ],
+        // Only profiles that were actually verified; youtube is still null.
+        sameAs: [SITE.social.facebook, SITE.social.instagram, SITE.social.youtube].filter(
+          (url): url is string => Boolean(url)
+        ),
+      }}
+    />
+  );
+}
+
+/**
+ * The site itself, plus the catalog search box.
+ *
+ * `SearchAction` is what lets a search engine offer a search field for this
+ * site directly in its results. It points at the same URL the header search
+ * form submits to, so there is one search, not a second one built for robots.
+ */
+export function WebSiteJsonLd() {
+  return (
+    <Script
+      data={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: SITE.name,
+        url: SITE.domain,
+        inLanguage: ["sq", "en"],
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${SITE.domain}/produktet?kerko={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
       }}
     />
   );
