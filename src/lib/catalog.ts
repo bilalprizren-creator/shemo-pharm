@@ -1,17 +1,30 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { isAllowedImageSrc } from "@/lib/images";
+import { CATALOG_TAG } from "@/lib/catalog-tag";
 import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
 /**
  * Catalog access layer. Products and categories live in Postgres (see
- * src/lib/db.ts); this module loads them once per request and runs the same
- * in-memory query/sort/selection logic the site has always used. Public
- * pages read the session cookie (for price gating) and are therefore
- * dynamically rendered, so each request sees fresh catalog data and admin
- * edits appear immediately — no cross-request cache to invalidate.
+ * src/lib/db.ts); this module loads them and runs the same in-memory
+ * query/sort/selection logic the site has always used.
+ *
+ * Two caches sit in front of the one query, and they do different jobs:
+ *
+ *   unstable_cache  keeps the result across requests, so a page view no
+ *                   longer costs a 690 KB round trip to Neon. Public pages
+ *                   are dynamic (they read the session cookie for price
+ *                   gating), so without this every single visit re-read the
+ *                   whole catalog.
+ *   cache()         de-duplicates within one render — the header, the
+ *                   sidebar and the grid all ask for the catalog.
+ *
+ * Admin mutations invalidate CATALOG_TAG (see revalidateCatalog in
+ * admin-actions.ts), so an edit is visible on the public site immediately
+ * rather than after the revalidate window.
  */
 
 interface CatalogData {
@@ -36,6 +49,7 @@ interface ProductRow {
   display_name: string | null;
   image_override: string | null;
   featured: boolean;
+  updated_at: string | Date | null;
 }
 
 interface CategoryRow {
@@ -54,6 +68,7 @@ async function fetchCatalog(): Promise<CatalogData> {
     SELECT p.id, p.name, p.slug, p.sku, p.price_cents, p.regular_cents,
            p.on_sale, p.currency, p.images, p.in_stock, p.description,
            p.short_description, p.display_name, p.image_override, p.featured,
+           p.updated_at,
            COALESCE(
              array_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL),
              '{}'::int[]
@@ -94,6 +109,7 @@ async function fetchCatalog(): Promise<CatalogData> {
         ? r.image_override
         : null,
     featured: r.featured,
+    updatedAt: r.updated_at ? new Date(r.updated_at) : null,
   }));
 
   const categories: Category[] = categoryRows.map((r) => ({
@@ -110,8 +126,30 @@ async function fetchCatalog(): Promise<CatalogData> {
   return { products, categories };
 }
 
-/** Per-request memoization: one DB round trip per render, shared by all callers. */
-const loadCatalog = cache(fetchCatalog);
+/**
+ * Cross-request cache. Measured: seven page views across five routes now cost
+ * one database read instead of seven.
+ *
+ * The sixty-second `revalidate` is a backstop, not the mechanism. Edits made
+ * in the admin panel invalidate CATALOG_TAG and appear at once; this covers
+ * the two cases that cannot: a migration script writing straight to Neon
+ * (which this project does regularly), and the possibility of the tag not
+ * reaching every serverless instance. One catalog read per minute is nothing
+ * next to one per request, so the ceiling is set low enough that nobody is
+ * ever left staring at stale data for long.
+ *
+ * The whole catalog serializes to roughly 690 KB, comfortably inside the
+ * 2 MB-per-entry limit of the platform data cache. The description columns
+ * are nearly all empty, which is why the figure is that small; should real
+ * product copy ever be filled in, this needs re-measuring.
+ */
+const cachedCatalog = unstable_cache(fetchCatalog, ["catalog-v1"], {
+  tags: [CATALOG_TAG],
+  revalidate: 60,
+});
+
+/** Per-render memoization on top, so one render makes at most one lookup. */
+const loadCatalog = cache(cachedCatalog);
 
 /**
  * Albanian display-name override for a category — the admin-editable
@@ -315,6 +353,17 @@ export interface ProductPage {
   totalPages: number;
 }
 
+/**
+ * One collator for the whole module.
+ *
+ * `a.name.localeCompare(b.name, "sq")` builds a fresh collator on every
+ * comparison, and the unfiltered listing sorts all 2 049 products before it
+ * slices out a page of 24 — so that is tens of thousands of throwaway
+ * collators per request. A reused Intl.Collator does the same job an order of
+ * magnitude faster. `numeric` so "Vitamin C 10" sorts before "Vitamin C 100".
+ */
+const byName = new Intl.Collator("sq", { numeric: true });
+
 export function searchProducts(list: Product[], query: string): Product[] {
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return list;
@@ -348,13 +397,13 @@ export async function getProducts({
   list = [...list];
   switch (sort) {
     case "emri-desc":
-      list.sort((a, b) => b.name.localeCompare(a.name, "sq"));
+      list.sort((a, b) => byName.compare(b.name, a.name));
       break;
     case "te-rejat":
       list.sort((a, b) => b.id - a.id);
       break;
     default:
-      list.sort((a, b) => a.name.localeCompare(b.name, "sq"));
+      list.sort((a, b) => byName.compare(a.name, b.name));
   }
 
   const total = list.length;
@@ -425,7 +474,7 @@ export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
       const rb = FEATURED_ORDER.indexOf(b.slug);
       const ka = ra === -1 ? Number.MAX_SAFE_INTEGER : ra;
       const kb = rb === -1 ? Number.MAX_SAFE_INTEGER : rb;
-      return ka - kb || a.name.localeCompare(b.name, "sq");
+      return ka - kb || byName.compare(a.name, b.name);
     });
   if (featured.length >= limit) return featured.slice(0, limit);
   const fill = (await getShowcaseProducts(undefined, limit * 2)).filter(
@@ -503,6 +552,40 @@ export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
 }
 
 /**
+ * Whether marking things out of stock is in use at all.
+ *
+ * All 2 049 products are currently flagged in stock, which makes a "in stock
+ * only" filter a control that can never change a result — worse than no
+ * control, because it invites a click and answers with nothing. The admin
+ * product list can flip the flag per product; the moment one is flipped, the
+ * filter appears.
+ */
+export async function hasOutOfStockProducts(): Promise<boolean> {
+  const { products } = await loadCatalog();
+  return products.some((p) => !p.inStock);
+}
+
+/**
+ * Whether /oferta has anything to show.
+ *
+ * The offers page has been live and empty: no product carries a struck-through
+ * price and the curated list in src/data/offers.json is empty, so the menu
+ * promised a section that turned out to be a "nothing here yet" box. Rather
+ * than write filler discounts, the link is hidden while the page would be
+ * empty — and comes back on its own the moment someone sets a higher regular
+ * price in the admin panel or adds a slug to the curated list.
+ *
+ * Both sources are checked, in the same order the page itself uses them.
+ */
+export async function hasOffers(curatedSlugs: readonly string[] = []): Promise<boolean> {
+  const { products } = await loadCatalog();
+  if (products.some((p) => p.regularCents > p.priceCents)) return true;
+  if (curatedSlugs.length === 0) return false;
+  const wanted = new Set(curatedSlugs);
+  return products.some((p) => wanted.has(p.slug));
+}
+
+/**
  * The product whose photo fronts each category in the nav. Hand-picked from
  * the clean white-background packshots: the nav used to show whichever
  * product happened to sort first, which is how Ortopedi ended up fronted by
@@ -521,17 +604,33 @@ const CATEGORY_FACE: Record<string, string> = {
 };
 
 /**
- * The photo that represents a category. Falls back to the category's first
- * showcase product, so a face product that is hidden, renamed or left
- * without a photo degrades to the old behaviour instead of an empty circle.
+ * The photo that represents a category. Falls back to the alphabetically
+ * first product in the category that has one, so a face product that is
+ * hidden, renamed or left without a photo degrades to the old behaviour
+ * instead of an empty circle.
+ *
+ * The fallback picks that product with a single linear pass rather than by
+ * sorting the category. The header calls this once per top-level category on
+ * every request, and sorting a few hundred names eleven times over to read
+ * one image off the front is work nobody asked for.
  */
 export async function getCategoryImage(categorySlug: string): Promise<string | null> {
-  const { products } = await loadCatalog();
+  const { products, categories } = await loadCatalog();
   const face = products.find((p) => p.slug === CATEGORY_FACE[categorySlug]);
   const image = face && productImage(face);
   if (image) return image;
-  const [first] = await getShowcaseProducts(categorySlug, 1);
-  return first ? productImage(first) : null;
+
+  const cat = categories.find((c) => c.slug === categorySlug);
+  if (!cat) return null;
+  const ids = categoryIdWithDescendants(cat.id, categories);
+
+  let best: Product | undefined;
+  for (const p of products) {
+    if (p.images.length === 0) continue;
+    if (!p.categoryIds.some((id) => ids.has(id))) continue;
+    if (!best || byName.compare(p.name, best.name) < 0) best = p;
+  }
+  return best ? productImage(best) : null;
 }
 
 /**

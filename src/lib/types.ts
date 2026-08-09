@@ -16,6 +16,8 @@ export interface Product {
   displayName: string | null;
   imageOverride: string | null;
   featured: boolean;
+  /** Last edit, for the sitemap. Null on rows the import never touched again. */
+  updatedAt: Date | null;
 }
 
 /** Product data that is safe to send to any visitor — never contains prices. */

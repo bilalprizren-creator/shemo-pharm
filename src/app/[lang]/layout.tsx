@@ -11,18 +11,29 @@ import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { CartToast } from "@/components/cart/CartToast";
-import { OrganizationJsonLd } from "@/components/seo/JsonLd";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
 import "../globals.css";
 
+/**
+ * `latin` only, deliberately.
+ *
+ * Each declared subset is a separate woff2 that Next preloads, so asking for
+ * latin-ext on both families put four font files in the critical path. Nothing
+ * on this site needs it: Albanian's ë and ç are Latin-1, as is the ä in
+ * Kräuterhof, and the only other non-ASCII characters anywhere in the catalog
+ * are – — and ’ (U+2013/2014/2019), which the latin subset covers through its
+ * U+2000–206F range. Adding a language that needs ğ, ş or ı means adding
+ * latin-ext back here.
+ */
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   display: "swap",
 });
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   display: "swap",
 });
 
@@ -90,6 +101,7 @@ export default async function RootLayout({
           }}
         />
         <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <WishlistProvider>
           <CartProvider>
             <a

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -14,6 +14,7 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { CATALOG_TAG } from "@/lib/catalog-tag";
 import { isAllowedImageSrc } from "@/lib/images";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 import { sendMail, siteOrigin } from "@/lib/mail";
@@ -285,10 +286,19 @@ function productFromForm(formData: FormData) {
   } as const;
 }
 
+/**
+ * Drops the cached catalog and refreshes the admin views.
+ *
+ * Public pages are dynamic (they read the session cookie), but the catalog
+ * behind them is cached across requests — without this, an edit would sit
+ * invisible until the revalidate window ran out. `expire: 0` rather than the
+ * "max" profile on purpose: "max" serves the stale copy while it refreshes in
+ * the background, and an editor who just pressed Save and opens the public
+ * page must not be shown the version they replaced. Traffic here is far too
+ * low for the blocking refetch to matter.
+ */
 function revalidateCatalog(): void {
-  // Public catalog pages are dynamic (they read the session cookie), so they
-  // already re-query on every request. Just refresh the admin views' router
-  // cache so the list/dashboard reflect the change on navigation.
+  revalidateTag(CATALOG_TAG, { expire: 0 });
   revalidatePath("/admin/produktet");
   revalidatePath("/admin");
 }
@@ -397,6 +407,124 @@ export async function deleteMessageAction(formData: FormData): Promise<void> {
   await sql`DELETE FROM contact_messages WHERE id = ${id}`;
   revalidatePath("/admin/mesazhet");
   revalidatePath("/admin");
+}
+
+/* ----------------------------- Categories -------------------------------- */
+
+/**
+ * Category editing.
+ *
+ * There is no delete action, and that is deliberate: product_categories is
+ * ON DELETE CASCADE, so removing a category row silently takes every
+ * product↔category link with it. A category that should disappear from the
+ * site gets its products moved and is left with a count of zero — which is
+ * already how visibility is decided everywhere (count > 0 gates the nav, the
+ * homepage, /kategorite and the sitemap). Actually dropping rows stays with
+ * the migration scripts, which snapshot the tree before they touch it.
+ */
+
+const categorySchema = z.object({
+  displayName: z.string().trim().max(120).optional().or(z.literal("")),
+  sort: z.coerce.number().int().min(0).max(9999),
+  parent: z.coerce.number().int().min(0),
+  kind: z.enum(["type", "brand"]),
+});
+
+/** A category may not become its own ancestor — that would spin recountCategories. */
+async function wouldCycle(id: number, parent: number): Promise<boolean> {
+  if (parent === 0) return false;
+  if (parent === id) return true;
+  const rows = (await sql`
+    WITH RECURSIVE up AS (
+      SELECT id, parent, 0 AS depth FROM categories WHERE id = ${parent}
+      UNION ALL
+      SELECT c.id, c.parent, up.depth + 1
+      FROM categories c JOIN up ON c.id = up.parent
+      WHERE up.depth < 20
+    )
+    SELECT 1 AS hit FROM up WHERE id = ${id} LIMIT 1
+  `) as { hit: number }[];
+  return rows.length > 0;
+}
+
+export async function updateCategoryAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return { error: "ID e pavlefshme." };
+
+  const parsed = categorySchema.safeParse({
+    displayName: formData.get("displayName"),
+    sort: formData.get("sort") || 0,
+    parent: formData.get("parent") || 0,
+    kind: formData.get("kind"),
+  });
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "form");
+      if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+    }
+    return { fieldErrors };
+  }
+  const d = parsed.data;
+
+  if (await wouldCycle(id, d.parent)) {
+    return { error: "Kategoria nuk mund të vendoset nën vetveten." };
+  }
+
+  await sql`
+    UPDATE categories
+    SET display_name = ${d.displayName || null}, sort = ${d.sort},
+        parent = ${d.parent}, kind = ${d.kind}
+    WHERE id = ${id}
+  `;
+  // Moving a category changes which products count for which parent.
+  await recountCategories();
+  revalidateCatalog();
+  revalidatePath("/admin/kategorite");
+  return { success: "Kategoria u ruajt." };
+}
+
+export async function createCategoryAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  await requireAdmin();
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (name.length < 2) {
+    return { fieldErrors: { name: "Emri duhet të ketë të paktën 2 shkronja." } };
+  }
+  const parsed = categorySchema.safeParse({
+    displayName: formData.get("displayName"),
+    sort: formData.get("sort") || 0,
+    parent: formData.get("parent") || 0,
+    kind: formData.get("kind") || "type",
+  });
+  if (!parsed.success) return { error: "Të dhëna të pavlefshme." };
+  const d = parsed.data;
+
+  const slugBase = slugify(name) || "kategori";
+  const existing = (await sql`
+    SELECT 1 AS hit FROM categories WHERE slug = ${slugBase} LIMIT 1
+  `) as { hit: number }[];
+  if (existing.length > 0) {
+    return { fieldErrors: { name: "Ekziston tashmë një kategori me këtë emër." } };
+  }
+
+  // Ids are assigned by hand for the same reason products are: the table was
+  // seeded from WooCommerce with its ids preserved and has no sequence.
+  await sql`
+    INSERT INTO categories (id, name, slug, parent, count, display_name, kind, sort)
+    VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM categories), ${name}, ${slugBase},
+            ${d.parent}, 0, ${d.displayName || null}, ${d.kind}, ${d.sort})
+  `;
+  revalidateCatalog();
+  revalidatePath("/admin/kategorite");
+  return { success: `Kategoria "${name}" u krijua.` };
 }
 
 /* ------------------------------- Orders ---------------------------------- */
