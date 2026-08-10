@@ -7,6 +7,14 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "//": "Needs `npm run build` first. The dev server injects CSS through inline <style> tags, which report as Content-Security-Policy violations that production never has — so the policy can only be judged here.",
+      "name": "shemo-pharm-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

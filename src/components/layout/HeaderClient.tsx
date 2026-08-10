@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -93,6 +93,9 @@ function LangSwitch({
   tone?: "light" | "dark";
 }) {
   const pathname = usePathname();
+  // Carried across the switch, so changing the language on a filtered listing
+  // keeps the search, sort, page and stock filter.
+  const search = useSearchParams().toString();
   const dark = tone === "dark";
   return (
     <div
@@ -104,7 +107,7 @@ function LangSwitch({
       {(["sq", "en"] as const).map((l) => (
         <Link
           key={l}
-          href={switchLangPath(pathname, l)}
+          href={switchLangPath(pathname, l, search)}
           aria-current={lang === l ? "true" : undefined}
           className={`rounded-full px-2 py-1 uppercase transition-colors ${
             lang === l

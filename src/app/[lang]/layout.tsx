@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { SITE } from "@/lib/site";
@@ -83,6 +84,9 @@ export default async function RootLayout({
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   const dict = getDictionary(lang as Lang);
+  // Next stamps its own scripts with the nonce automatically; the two this
+  // project writes by hand have to ask for it. Set in src/proxy.ts.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <html
@@ -95,6 +99,9 @@ export default async function RootLayout({
             so instead the scroll position is zeroed right before unload —
             the browser then stores 0 and every restore lands on the header. */}
         <script
+          nonce={nonce}
+          // The browser blanks the nonce attribute after parsing; see JsonLd.tsx.
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
               'try{window.addEventListener("beforeunload",function(){window.scrollTo(0,0);});}catch(e){}',

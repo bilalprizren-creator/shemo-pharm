@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,8 +38,19 @@ export function SearchBar({
   const [active, setActive] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  /**
+   * A combobox keeps focus in the input, so the highlighted option has to be
+   * named by `aria-activedescendant` — the background colour alone tells a
+   * screen-reader user nothing. Each option needs a stable id for that, and
+   * the id has to be unique on the page: the header overlay and the mobile
+   * sheet each mount their own SearchBar.
+   */
+  const listId = useId();
+  const optionId = (index: number) => `${listId}-opsioni-${index}`;
 
   const close = useCallback(() => {
     setOpen(false);
@@ -50,6 +61,9 @@ export function SearchBar({
   const updateQuery = useCallback(
     (value: string) => {
       setQuery(value);
+      // The old highlight belongs to the old list — keeping it would leave
+      // aria-activedescendant pointing at whatever product lands in that slot.
+      setActive(-1);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       // A slower earlier request must never overwrite newer suggestions.
       abortRef.current?.abort();
@@ -92,6 +106,13 @@ export function SearchBar({
     },
     []
   );
+
+  // The list scrolls at eight results in a short overlay, so the last two were
+  // being highlighted below the fold — arrow-down appeared to do nothing.
+  useEffect(() => {
+    if (active < 0) return;
+    listRef.current?.children[active]?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
   // Close when clicking outside
   useEffect(() => {
@@ -156,7 +177,10 @@ export function SearchBar({
           type="search"
           role="combobox"
           aria-expanded={open && results.length > 0}
-          aria-controls="kerko-sugjerimet"
+          aria-controls={listId}
+          aria-activedescendant={
+            active >= 0 && results[active] ? optionId(active) : undefined
+          }
           aria-autocomplete="list"
           aria-label={dict.search.label}
           placeholder={dict.search.placeholder}
@@ -198,13 +222,11 @@ export function SearchBar({
         )}
       </div>
 
+      {/* The listbox role sits on the <ul> inside, not on this panel: the
+          "view all results" button below is not an option, and a listbox may
+          only contain options. */}
       {open && query.trim().length >= 2 && (
-        <div
-          id="kerko-sugjerimet"
-          role="listbox"
-          aria-label={dict.search.suggestionsLabel}
-          className="absolute left-0 right-0 top-full z-50 mt-2.5 overflow-hidden rounded-3xl border border-ink-900/8 bg-white shadow-drawer"
-        >
+        <div className="absolute left-0 right-0 top-full z-50 mt-2.5 overflow-hidden rounded-3xl border border-ink-900/8 bg-white shadow-drawer">
           {results.length === 0 && !loading ? (
             <div className="flex items-center gap-3 px-4 py-5 text-sm text-ink-500">
               <PackageSearch className="size-5 shrink-0 text-ink-300" aria-hidden />
@@ -212,9 +234,20 @@ export function SearchBar({
             </div>
           ) : (
             <>
-              <ul className="max-h-88 overflow-y-auto py-1.5">
+              <ul
+                ref={listRef}
+                id={listId}
+                role="listbox"
+                aria-label={dict.search.suggestionsLabel}
+                className="max-h-88 overflow-y-auto py-1.5"
+              >
                 {results.map((p, i) => (
-                  <li key={p.id} role="option" aria-selected={i === active}>
+                  <li
+                    key={p.id}
+                    id={optionId(i)}
+                    role="option"
+                    aria-selected={i === active}
+                  >
                     <Link
                       href={langHref(lang, `/produktet/${p.slug}`)}
                       onClick={() => {

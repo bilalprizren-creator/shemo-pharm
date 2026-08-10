@@ -233,8 +233,11 @@ const BRAND_LINK_OVERRIDES: Record<string, { category?: string; query?: string }
  * for deciding whether a logo has anywhere to go: "Alg" is inside "Deksalgin",
  * "algodon" and "valgus", so the substring test claims five products for a brand
  * that has none. The link is only offered when the name stands as its own word.
+ *
+ * Exported for tests: the rule is subtle, and the function it feeds needs a
+ * database.
  */
-function brandMatches(products: Product[], name: string): Product[] {
+export function brandMatches(products: Product[], name: string): Product[] {
   const tests = name
     .split(/\s+/)
     .filter(Boolean)
@@ -435,24 +438,142 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   return (await loadCatalog()).products.find((p) => p.slug === slug);
 }
 
+/**
+ * Resolves ids to products, in the order they were asked for.
+ *
+ * The wishlist route used to reach for getProducts({ perPage: 3000 }), which
+ * sorts all 2 049 products through the collator and slices a page out of them,
+ * only to throw nearly all of it away and re-sort the survivors. Ids that no
+ * longer exist are dropped — a wishlist kept in localStorage outlives the
+ * products in it.
+ */
+export async function getProductsByIds(ids: number[]): Promise<Product[]> {
+  const { products } = await loadCatalog();
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return ids.flatMap((id) => {
+    const found = byId.get(id);
+    return found ? [found] : [];
+  });
+}
+
 export async function getProductCount(): Promise<number> {
   return (await loadCatalog()).products.length;
 }
 
+/** How far a category sits from a root. The guard is insurance against a cycle
+ *  in `parent`; the real tree is three deep. */
+function categoryDepth(cat: Category, byId: Map<number, Category>): number {
+  let depth = 0;
+  let current: Category | undefined = cat;
+  while (current && current.parent !== 0 && depth < 10) {
+    current = byId.get(current.parent);
+    depth += 1;
+  }
+  return depth;
+}
+
+function pickPrimary(
+  product: Product,
+  byId: Map<number, Category>
+): Category | undefined {
+  let best: Category | undefined;
+  let bestDepth = -1;
+  for (const id of product.categoryIds) {
+    const cat = byId.get(id);
+    if (!cat) continue;
+    const depth = categoryDepth(cat, byId);
+    const better =
+      !best ||
+      depth > bestDepth ||
+      (depth === bestDepth &&
+        (cat.count < best.count ||
+          (cat.count === best.count && byName.compare(cat.name, best.name) < 0)));
+    if (better) {
+      best = cat;
+      bestDepth = depth;
+    }
+  }
+  return best;
+}
+
+/**
+ * The one category that stands for a product.
+ *
+ * 805 products sit in several branches at once, and two places used to choose
+ * from that set differently: this scanned the category table and took the first
+ * row the product carried, while toCardProducts scanned the product's own id
+ * list. So a card could be labelled "Kozmetikë" while its own breadcrumb, its
+ * ProductJsonLd and its search suggestion said "Barnat".
+ *
+ * One rule now, and it is not "whichever came first": the most specific
+ * category wins — deepest in the tree, then the smallest shelf, then by name so
+ * the answer never depends on row order. "Shurupa për fëmijë" tells a customer
+ * more than "Barnat" does.
+ */
+export function primaryCategoryOf(
+  product: Product,
+  categories: Category[]
+): Category | undefined {
+  return pickPrimary(product, new Map(categories.map((c) => [c.id, c])));
+}
+
 export async function primaryCategory(product: Product): Promise<Category | undefined> {
   const { categories } = await loadCatalog();
-  return categories.find((c) => product.categoryIds.includes(c.id));
+  return primaryCategoryOf(product, categories);
+}
+
+/**
+ * Products worth showing next to this one.
+ *
+ * The old version filtered to "shares any category" and sliced the first eight
+ * — and the catalog loads ORDER BY id, so all 292 products in Barnat carried
+ * the same eight neighbours, chosen for nothing but having low ids. A product
+ * whose own shelf holds twelve items was buried under its broadest parent.
+ *
+ * Now candidates are scored: every shared category counts, and sharing the
+ * product's primary (most specific) category counts for more, so a paracetamol
+ * syrup pulls other children's syrups ahead of the rest of the medicine aisle.
+ * Ties break by distance in id, which is both deterministic and useful — the
+ * catalog was imported brand by brand, so ids near each other tend to be the
+ * same range — and means neighbouring products no longer return identical rows.
+ */
+export function rankRelated(
+  product: Product,
+  products: Product[],
+  categories: Category[],
+  limit = 8
+): Product[] {
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  const own = new Set(product.categoryIds);
+  const primary = pickPrimary(product, byId);
+
+  const scored: { product: Product; score: number; distance: number }[] = [];
+  for (const p of products) {
+    if (p.id === product.id || p.images.length === 0) continue;
+    let shared = 0;
+    let onPrimary = false;
+    for (const id of p.categoryIds) {
+      if (!own.has(id)) continue;
+      shared += 1;
+      if (primary && id === primary.id) onPrimary = true;
+    }
+    if (shared === 0) continue;
+    scored.push({
+      product: p,
+      score: shared + (onPrimary ? 2 : 0),
+      distance: Math.abs(p.id - product.id),
+    });
+  }
+
+  scored.sort(
+    (a, b) => b.score - a.score || a.distance - b.distance || a.product.id - b.product.id
+  );
+  return scored.slice(0, limit).map((s) => s.product);
 }
 
 export async function getRelatedProducts(product: Product, limit = 8): Promise<Product[]> {
-  const { products } = await loadCatalog();
-  const related = products.filter(
-    (p) =>
-      p.id !== product.id &&
-      p.images.length > 0 &&
-      p.categoryIds.some((id) => product.categoryIds.includes(id))
-  );
-  return related.slice(0, limit);
+  const { products, categories } = await loadCatalog();
+  return rankRelated(product, products, categories, limit);
 }
 
 /**
@@ -542,16 +663,11 @@ export async function toCardProducts(
   showPrices: boolean
 ): Promise<CardProduct[]> {
   const { categories } = await loadCatalog();
+  // One map for the whole batch, and the same choice of category the product
+  // page, the JSON-LD and the search suggestions make — see primaryCategoryOf.
   const byId = new Map(categories.map((c) => [c.id, c]));
   return list.map((product) => {
-    let cat: Category | undefined;
-    for (const id of product.categoryIds) {
-      const found = byId.get(id);
-      if (found) {
-        cat = found;
-        break;
-      }
-    }
+    const cat = pickPrimary(product, byId);
     return buildCard(product, showPrices, cat ? categoryDisplayName(cat) : null);
   });
 }

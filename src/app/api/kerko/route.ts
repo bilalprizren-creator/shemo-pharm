@@ -18,6 +18,13 @@ export async function GET(request: NextRequest) {
   if (q.length < 2) {
     return NextResponse.json({ items: [] });
   }
+  // Suggestions carry no price and no session-dependent field (PublicProduct),
+  // so the same answer serves every visitor and the CDN can hold it. A minute
+  // is short next to how often the catalog changes, and the stale window means
+  // a popular query is never waiting on a function.
+  const cacheHeaders = {
+    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  };
   const { items, total } = await getProducts({ query: q, perPage: 8 });
   const results: PublicProduct[] = await Promise.all(
     items.map(async (p) => {
@@ -33,5 +40,5 @@ export async function GET(request: NextRequest) {
       };
     })
   );
-  return NextResponse.json({ items: results, total });
+  return NextResponse.json({ items: results, total }, { headers: cacheHeaders });
 }

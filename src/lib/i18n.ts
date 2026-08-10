@@ -17,10 +17,23 @@ export function langHref(lang: Lang, path: string): string {
   return path === "/" ? "/en" : `/en${path}`;
 }
 
-/** Swap the language on a *browser* pathname, keeping the rest of the path. */
-export function switchLangPath(pathname: string, target: Lang): string {
+/**
+ * Swap the language on a *browser* pathname, keeping the rest of the path.
+ *
+ * `search` matters more than it looks: usePathname() drops the query string, so
+ * without it the switch on /produktet?kerko=vitamin&faqja=3 lands on a bare
+ * listing — the search, the sort, the page and the stock filter all thrown away
+ * by a control that only promised to change the language. Accepts the raw
+ * "?a=b" or the bare "a=b" that URLSearchParams.toString() returns.
+ */
+export function switchLangPath(
+  pathname: string,
+  target: Lang,
+  search = ""
+): string {
   const bare = pathname === "/en" ? "/" : pathname.replace(/^\/en(?=\/)/, "");
-  return langHref(target, bare);
+  const query = search.replace(/^\?/, "");
+  return `${langHref(target, bare)}${query ? `?${query}` : ""}`;
 }
 
 /** Derive the language from a browser pathname (usePathname). */

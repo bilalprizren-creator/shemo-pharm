@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronDown,
   Heart,
@@ -52,6 +52,9 @@ export function MobileNav({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  // See LangSwitch in HeaderClient — the query string rides along, so the
+  // switch changes the language and nothing else.
+  const search = useSearchParams().toString();
   const lang = dict.lang;
 
   // Scroll lock + initial focus + Escape + focus trap
@@ -118,7 +121,7 @@ export function MobileNav({
               {(["sq", "en"] as const).map((l) => (
                 <Link
                   key={l}
-                  href={switchLangPath(pathname, l)}
+                  href={switchLangPath(pathname, l, search)}
                   onClick={onClose}
                   aria-current={lang === l ? "true" : undefined}
                   className={`rounded-full px-2.5 py-1.5 uppercase ${

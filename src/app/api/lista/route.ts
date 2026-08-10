@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canSeePrices, getSession } from "@/lib/auth";
-import { getProducts, toCardProducts } from "@/lib/catalog";
+import { getProductsByIds, toCardProducts } from "@/lib/catalog";
+import { MINUTE_MS, rateLimited } from "@/lib/rate-limit";
 
 /**
  * Resolves wishlist ids (kept in localStorage) into card data.
  * Prices are included only for approved sessions — checked server-side.
  */
 export async function GET(request: NextRequest) {
+  // The cart drawer and the wishlist page both call this, and each visit to
+  // either is one request — so the ceiling is generous. It is here at all
+  // because this is the one public route that answers with prices.
+  if (await rateLimited("lista", { limit: 60, windowMs: MINUTE_MS })) {
+    return NextResponse.json({ items: [] }, { status: 429 });
+  }
+
   const idsParam = request.nextUrl.searchParams.get("ids") ?? "";
   const ids = idsParam
     .split(",")
@@ -19,11 +27,9 @@ export async function GET(request: NextRequest) {
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
-  const wanted = new Set(ids);
-  const { items } = await getProducts({ perPage: 3000 });
-  const found = items.filter((p) => wanted.has(p.id));
-  // Preserve the order items were added to the wishlist
-  found.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  // getProductsByIds answers in the order asked, which is the order things were
+  // added to the wishlist — no sorting the whole catalog to find 200 rows.
+  const found = await getProductsByIds(ids);
 
   return NextResponse.json(
     { items: await toCardProducts(found, showPrices) },

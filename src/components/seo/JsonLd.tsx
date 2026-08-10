@@ -1,10 +1,27 @@
+import { headers } from "next/headers";
 import { SITE } from "@/lib/site";
 
-/** Serializes structured data safely for embedding in a script tag. */
-function Script({ data }: { data: Record<string, unknown> }) {
+/**
+ * Serializes structured data safely for embedding in a script tag.
+ *
+ * The nonce is read here rather than passed in by each caller: a JSON-LD block
+ * added later would otherwise be one forgotten prop away from being reported as
+ * a policy violation. Next stamps its own scripts automatically, but not these.
+ * Absent header (no proxy in the request path) means no attribute, which is
+ * exactly right — a stale nonce would be worse than none.
+ */
+async function Script({ data }: { data: Record<string, unknown> }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <script
       type="application/ld+json"
+      nonce={nonce}
+      // Browsers blank the nonce attribute once the document is parsed, so that
+      // a CSS attribute selector cannot read it back out. React compares
+      // attributes during hydration, sees "" against the value the server sent,
+      // and reports a mismatch for a tag that is in fact correct. Suppressing it
+      // here is the narrow fix; the element is static and never re-renders.
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(data).replace(/</g, "\\u003c"),
       }}

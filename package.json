@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "export:catalog": "node scripts/export-catalog.mjs",
     "seed:db": "node scripts/seed-db.mjs"
   },
@@ -31,6 +33,7 @@
     "eslint-config-next": "16.2.10",
     "sharp": "^0.35.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

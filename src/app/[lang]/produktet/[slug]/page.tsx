@@ -16,6 +16,7 @@ import {
   getProductBySlug,
   getRelatedProducts,
   primaryCategory,
+  primaryCategoryOf,
   toCardProducts,
 } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
@@ -66,8 +67,8 @@ export default async function ProductPage({ params }: Props) {
   const showPrices = canSeePrices(session);
 
   const all = await getAllCategories();
-  const productCategories = all.filter((c) => product.categoryIds.includes(c.id));
-  const mainCat = productCategories[0];
+  // The same category the card, the search suggestion and the JSON-LD name.
+  const mainCat = primaryCategoryOf(product, all);
 
   const crumbs: Crumb[] = [
     { label: dict.catalog.title, href: "/produktet" },

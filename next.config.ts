@@ -47,11 +47,11 @@ const nextConfig: NextConfig = {
    * Baseline security headers. Vercel already sends HSTS; these are the ones
    * the platform leaves to the application.
    *
-   * There is deliberately no Content-Security-Policy. Next ships an inline
-   * bootstrap script and framer-motion writes inline styles, so a real policy
-   * needs per-request nonces threaded through the layout — worth doing, but
-   * its own piece of work. A CSP written loosely enough to avoid that
-   * (`unsafe-inline`) would only look like protection.
+   * The Content-Security-Policy is NOT here: it carries a nonce that has to be
+   * new on every request, which a static header table cannot produce. It is
+   * built in src/lib/csp.ts and sent from src/proxy.ts, currently in
+   * report-only mode. `frame-ancestors 'self'` there agrees with the
+   * X-Frame-Options below rather than contradicting it.
    */
   async headers() {
     return [
