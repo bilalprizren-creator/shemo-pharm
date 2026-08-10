@@ -5,6 +5,7 @@ import { canSeePrices, getSession } from "@/lib/auth";
 import {
   categoryDisplayName,
   getAllCategories,
+  getBrandTypeBreakdown,
   getCategoryTree,
   getProducts,
   hasOutOfStockProducts,
@@ -15,6 +16,7 @@ import { langHref, fmt, type Lang } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
+import { BrandTypeFilter } from "./BrandTypeFilter";
 import { CategoryFilter } from "./CategoryFilter";
 import { EmptyState } from "./EmptyState";
 import { MobileFilters } from "./MobileFilters";
@@ -27,6 +29,8 @@ export interface CatalogSearchParams {
   renditja?: string;
   /** "1" = only products in stock. Any other value means no filter. */
   stok?: string;
+  /** Product-type slug a brand shelf is narrowed to. */
+  lloji?: string;
 }
 
 const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
@@ -41,10 +45,10 @@ const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
  * nobody linked to.
  *
  * So: a plain listing, with or without a page number, is canonical to itself.
- * Anything carrying a search term, a non-default sort or the stock filter is
- * a view of that listing rather than a page of its own — it points at the
- * plain equivalent and is marked noindex, follow, so the crawler still walks
- * through to the products.
+ * Anything carrying a search term, a non-default sort, the stock filter or a
+ * product-type narrowing is a view of that listing rather than a page of its
+ * own — it points at the plain equivalent and is marked noindex, follow, so
+ * the crawler still walks through to the products.
  */
 export function listingMetadata({
   lang,
@@ -60,7 +64,8 @@ export function listingMetadata({
   const isView =
     Boolean(searchParams.kerko?.trim()) ||
     (searchParams.renditja !== undefined && searchParams.renditja !== "emri-asc") ||
-    searchParams.stok === "1";
+    searchParams.stok === "1" ||
+    Boolean(searchParams.lloji?.trim());
 
   const suffix = !isView && page > 1 ? `?faqja=${page}` : "";
   return {
@@ -85,6 +90,7 @@ export async function CatalogView({
   subtitle,
   basePath,
   categorySlug,
+  categoryKind,
   crumbs,
   searchParams,
   dict,
@@ -94,6 +100,11 @@ export async function CatalogView({
   /** Unprefixed path — the language prefix is added here. */
   basePath: string;
   categorySlug?: string;
+  /**
+   * "brand" swaps the product-type tree in the sidebar for the brand's own
+   * type breakdown. Undefined on /produktet and on product-type shelves.
+   */
+  categoryKind?: "type" | "brand";
   crumbs: Crumb[];
   searchParams: CatalogSearchParams;
   dict: Dictionary;
@@ -109,9 +120,14 @@ export async function CatalogView({
     : "emri-asc";
   const page = Math.max(1, Number(searchParams.faqja) || 1);
   const inStockOnly = searchParams.stok === "1";
+  // Only meaningful on a brand shelf; ignored everywhere else so the parameter
+  // cannot be used to narrow a page that offers no way to widen it again.
+  const isBrand = categoryKind === "brand" && Boolean(categorySlug);
+  const typeSlug = isBrand ? searchParams.lloji?.trim() || undefined : undefined;
 
   const result = await getProducts({
     categorySlug,
+    typeSlug,
     query,
     sort,
     page,
@@ -125,11 +141,20 @@ export async function CatalogView({
     (await getAllCategories()).map((c) => [c.slug, categoryDisplayName(c)])
   );
 
+  // The types this brand spreads across. Empty for one-type brands like
+  // Kräuterhof, and then nothing is offered — there is nothing to narrow.
+  const brandTypes = isBrand ? await getBrandTypeBreakdown(categorySlug!) : [];
+  const showTypeFilter = brandTypes.length > 1;
+  const activeType = showTypeFilter
+    ? brandTypes.find((t) => t.slug === typeSlug)
+    : undefined;
+
   // Preserved across pagination links
   const params = new URLSearchParams();
   if (query) params.set("kerko", query);
   if (sort !== "emri-asc") params.set("renditja", sort);
   if (inStockOnly) params.set("stok", "1");
+  if (activeType) params.set("lloji", activeType.slug);
 
   /**
    * This same listing with one thing changed and the page number dropped.
@@ -137,13 +162,17 @@ export async function CatalogView({
    * search should not silently also clear "in stock", which is what happens
    * when every chip just links back to the bare path.
    */
-  const listingHref = (change: { query?: string; stok?: boolean } = {}) => {
+  const listingHref = (
+    change: { query?: string; stok?: boolean; lloji?: string } = {}
+  ) => {
     const nextQuery = "query" in change ? change.query : query;
     const nextStock = "stok" in change ? change.stok : inStockOnly;
+    const nextType = "lloji" in change ? change.lloji : activeType?.slug;
     const next = new URLSearchParams();
     if (nextQuery) next.set("kerko", nextQuery);
     if (sort !== "emri-asc") next.set("renditja", sort);
     if (nextStock) next.set("stok", "1");
+    if (nextType) next.set("lloji", nextType);
     const qs = next.toString();
     return `${localBase}${qs ? `?${qs}` : ""}`;
   };
@@ -152,7 +181,25 @@ export async function CatalogView({
   // already on, so it can always be switched back off.
   const showStockFilter = inStockOnly || (await hasOutOfStockProducts());
 
-  const filterPanel = (
+  /**
+   * One panel, rendered twice — desktop sidebar and mobile sheet — so a brand
+   * shelf gets its type breakdown on both without a second control.
+   *
+   * On a brand page the product-type tree was not merely unhelpful, it marked
+   * nothing at all as current: a brand does not appear in that tree and
+   * "all products" is not the page either.
+   */
+  const filterPanel = showTypeFilter ? (
+    <BrandTypeFilter
+      brandName={title}
+      brandHref={listingHref({ lloji: undefined })}
+      allProductsHref={productsBase}
+      types={brandTypes}
+      activeType={activeType?.slug}
+      hrefForType={(slug) => listingHref({ lloji: slug })}
+      dict={dict}
+    />
+  ) : (
     <CategoryFilter
       tree={tree}
       activeSlug={categorySlug}
@@ -180,7 +227,9 @@ export async function CatalogView({
         <aside className="hidden min-w-0 lg:block" aria-label={dict.catalog.filters}>
           <div className="sticky top-40 max-h-[calc(100vh-11rem)] overflow-y-auto rounded-2xl border border-ink-900/8 bg-white p-3">
             <h2 className="px-3 pb-2 pt-1 text-sm font-bold uppercase tracking-wide text-ink-900">
-              {dict.catalog.categoriesHeading}
+              {showTypeFilter
+                ? dict.catalog.typesHeading
+                : dict.catalog.categoriesHeading}
             </h2>
             {filterPanel}
           </div>
@@ -203,6 +252,7 @@ export async function CatalogView({
               />
               {sort !== "emri-asc" && <input type="hidden" name="renditja" value={sort} />}
               {inStockOnly && <input type="hidden" name="stok" value="1" />}
+              {activeType && <input type="hidden" name="lloji" value={activeType.slug} />}
             </form>
             <MobileFilters
               labels={{ filters: dict.catalog.filters, close: dict.catalog.closeFilters }}
@@ -246,7 +296,7 @@ export async function CatalogView({
             />
           </div>
 
-          {(query || categorySlug || inStockOnly) && (
+          {(query || categorySlug || inStockOnly || activeType) && (
             <div className="mb-5 flex flex-wrap items-center gap-2" aria-label={dict.catalog.activeFilters}>
               {query && (
                 <Link
@@ -266,6 +316,16 @@ export async function CatalogView({
                   {fmt(dict.catalog.categoryChip, {
                     name: displayName[categorySlug] ?? categorySlug,
                   })}
+                  <X className="size-3.5" aria-hidden />
+                  <span className="sr-only">{dict.catalog.removeFilter}</span>
+                </Link>
+              )}
+              {activeType && (
+                <Link
+                  href={listingHref({ lloji: undefined })}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent-50 py-1.5 pl-3.5 pr-2.5 text-[13px] font-medium text-accent-800 hover:bg-accent-100"
+                >
+                  {fmt(dict.catalog.typeChip, { name: activeType.name })}
                   <X className="size-3.5" aria-hidden />
                   <span className="sr-only">{dict.catalog.removeFilter}</span>
                 </Link>

@@ -73,6 +73,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       title={categoryDisplayName(cat)}
       basePath={`/kategorite/${slug}`}
       categorySlug={slug}
+      // Brand shelves get the product-type breakdown in the sidebar instead
+      // of the type tree, which has no entry for a brand to mark as current.
+      categoryKind={cat.kind}
       crumbs={crumbs}
       searchParams={sp}
       dict={dict}

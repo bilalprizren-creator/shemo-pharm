@@ -339,6 +339,12 @@ export type ProductSort = "emri-asc" | "emri-desc" | "te-rejat";
 
 export interface ProductQuery {
   categorySlug?: string;
+  /**
+   * A second category the product must also be in, intersected with
+   * `categorySlug`. Used to narrow a brand shelf down to one product type —
+   * Swiss Energy's supplements as against its teas.
+   */
+  typeSlug?: string;
   query?: string;
   sort?: ProductSort;
   page?: number;
@@ -375,6 +381,7 @@ export function searchProducts(list: Product[], query: string): Product[] {
 
 export async function getProducts({
   categorySlug,
+  typeSlug,
   query,
   sort = "emri-asc",
   page = 1,
@@ -389,6 +396,17 @@ export async function getProducts({
     if (!cat) return { items: [], total: 0, page: 1, totalPages: 0 };
     const ids = categoryIdWithDescendants(cat.id, categories);
     list = list.filter((p) => p.categoryIds.some((id) => ids.has(id)));
+  }
+
+  // A narrowing filter on top of the shelf above, so an unknown slug is
+  // ignored rather than emptying the page: a stale ?lloji= link from a
+  // renamed category should still show the brand, not a blank result.
+  if (typeSlug) {
+    const type = categories.find((c) => c.slug === typeSlug);
+    if (type) {
+      const ids = categoryIdWithDescendants(type.id, categories);
+      list = list.filter((p) => p.categoryIds.some((id) => ids.has(id)));
+    }
   }
 
   if (inStockOnly) list = list.filter((p) => p.inStock);
@@ -549,6 +567,46 @@ export async function toCardProduct(
 export async function getDiscountedProducts(limit = 24): Promise<Product[]> {
   const { products } = await loadCatalog();
   return products.filter((p) => p.regularCents > p.priceCents).slice(0, limit);
+}
+
+export interface TypeFacet {
+  slug: string;
+  name: string;
+  count: number;
+}
+
+/**
+ * The product types a brand's shelf spreads across, largest first.
+ *
+ * A brand page is the one place where narrowing by product type is always
+ * honest: every product in the catalog sits in at least one type root, so no
+ * product can fall through. The reverse — filtering a type page by brand —
+ * would not be, because only 814 of 2 049 products carry a brand at all and
+ * the coverage is wildly uneven (Barnat: 3 of 292). That is why this function
+ * exists in one direction only.
+ *
+ * The counts do not add up to the brand's own total, and are never presented
+ * as if they did: a product tagged both a medicine and a children's product
+ * appears under both, exactly as it does on /kategorite.
+ */
+export async function getBrandTypeBreakdown(brandSlug: string): Promise<TypeFacet[]> {
+  const { products, categories } = await loadCatalog();
+  const brand = categories.find((c) => c.slug === brandSlug);
+  if (!brand) return [];
+
+  const brandIds = categoryIdWithDescendants(brand.id, categories);
+  const inBrand = products.filter((p) => p.categoryIds.some((id) => brandIds.has(id)));
+  if (inBrand.length === 0) return [];
+
+  const roots = categories.filter((c) => c.parent === 0 && c.kind === "type");
+  return roots
+    .map((root) => {
+      const ids = categoryIdWithDescendants(root.id, categories);
+      const count = inBrand.filter((p) => p.categoryIds.some((id) => ids.has(id))).length;
+      return { slug: root.slug, name: categoryDisplayName(root), count };
+    })
+    .filter((f) => f.count > 0)
+    .sort((a, b) => b.count - a.count || byName.compare(a.name, b.name));
 }
 
 /**

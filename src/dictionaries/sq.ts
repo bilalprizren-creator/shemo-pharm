@@ -242,6 +242,11 @@ export const sq = {
     closeFilters: "Mbyll filtrat",
     activeFilters: "Filtrat aktivë",
     filterByCategory: "Filtro sipas kategorisë",
+    /** Brand shelves narrow by product type instead of by category. */
+    filterByType: "Filtro sipas llojit të produktit",
+    typesHeading: "Llojet e produkteve",
+    allOfBrand: "Të gjitha të kësaj marke",
+    typeChip: "Lloji: {name}",
     allProducts: "Të gjitha produktet",
     categoriesHeading: "Kategoritë",
     searchInResults: "Kërko në këto produkte…",
