@@ -51,9 +51,14 @@ describe("contentSecurityPolicy", () => {
     expect(styleSrc).not.toContain("unsafe-inline");
   });
 
-  it("lets the admin uploader reach the blob store", () => {
+  /**
+   * The upload posts to vercel.com/api/blob, not to the store's own hostname —
+   * naming the store host here instead is the mistake that looks correct and
+   * only shows up the day the policy stops being report-only.
+   */
+  it("lets the admin uploader reach the blob API", () => {
     expect(contentSecurityPolicy(NONCE, false)).toContain(
-      "connect-src 'self' https://blob.vercel-storage.com"
+      "connect-src 'self' https://vercel.com"
     );
   });
 

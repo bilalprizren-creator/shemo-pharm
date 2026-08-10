@@ -29,8 +29,18 @@ const IMAGE_HOSTS = REMOTE_IMAGE_PATTERNS.map(
   (p) => `${p.protocol}://${p.hostname}`
 );
 
-/** Where the browser uploads a product photo — see api/admin/upload/route.ts. */
-const BLOB_UPLOAD_ORIGIN = "https://blob.vercel-storage.com";
+/**
+ * Where the browser uploads a product photo — see api/admin/upload/route.ts.
+ *
+ * This is vercel.com, not the store's own hostname, which is the guess that
+ * looks right and is wrong. `@vercel/blob/client` sends both the single-shot
+ * PUT and every multipart part to `getApiUrl()`, which is
+ * `https://vercel.com/api/blob` unless VERCEL_BLOB_API_URL overrides it
+ * (node_modules/@vercel/blob/dist/chunk-*.js). The `*.public.blob.vercel-storage.com`
+ * host only ever appears in the URL that comes back, and that one is an image,
+ * so it belongs in img-src — where it already is.
+ */
+const BLOB_UPLOAD_ORIGIN = "https://vercel.com";
 
 export function contentSecurityPolicy(nonce: string, isDev: boolean): string {
   return [

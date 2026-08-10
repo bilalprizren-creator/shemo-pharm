@@ -20,6 +20,43 @@ const ACCEPT = "image/png,image/jpeg,image/webp";
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /**
+ * What to tell the editor when an upload fails.
+ *
+ * This used to answer "Ngarkimi dështoi. Provoni përsëri." to everything, which
+ * is the worst possible answer to the failure that actually happened: the blob
+ * store hit its free-tier write limit and was suspended, and no amount of
+ * retrying was ever going to change that. The provider says so plainly; the
+ * panel should too.
+ *
+ * The session case cannot be read off a status code, because @vercel/blob
+ * replaces any non-OK answer from our token route with a fixed string — so 401
+ * (session expired), 429 (rate limited) and 400 (name refused) all arrive here
+ * looking identical, and the message names the likely causes instead of
+ * pretending to know. Anything unrecognised shows the provider's own words:
+ * this is an internal tool, and an editor who can quote the real error gets
+ * help faster than one who can only say it did not work.
+ *
+ * Exported for tests.
+ */
+export function uploadErrorMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : "";
+
+  if (/suspended|store has been suspended/i.test(raw)) {
+    return "Depoja e fotove (Vercel Blob) është e pezulluar, prandaj ngarkimet e reja nuk pranohen. Fotot ekzistuese nuk preken. Kontaktoni zhvilluesin — riprovimi nuk ndihmon.";
+  }
+  if (/quota|limit exceeded|too large|maximum/i.test(raw)) {
+    return "Depoja e fotove e ka arritur kufirin. Kontaktoni zhvilluesin — riprovimi nuk ndihmon.";
+  }
+  if (/retrieve the client token/i.test(raw)) {
+    return "Serveri nuk e lejoi ngarkimin. Ka gjasa që sesioni ka skaduar — rifreskoni faqen dhe kyçuni sërish.";
+  }
+  if (/failed to fetch|network/i.test(raw)) {
+    return "Lidhja u ndërpre gjatë ngarkimit. Kontrolloni internetin dhe provoni përsëri.";
+  }
+  return raw ? `Ngarkimi dështoi: ${raw}` : "Ngarkimi dështoi. Provoni përsëri.";
+}
+
+/**
  * The blob path for a chosen file. Mirrors the pattern the upload route
  * enforces, so a rejected name is caught here with a readable message rather
  * than as a 400 from the token endpoint.
@@ -75,14 +112,10 @@ export function ImageUploadField({ onUploaded }: { onUploaded: (url: string) => 
         onUploaded(blob.url);
       }
     } catch (err) {
-      // The route answers 401 for a session that has expired mid-edit, which
-      // is the likeliest failure here — say so instead of "something failed".
-      const message = err instanceof Error ? err.message : "";
-      setError(
-        /401|unauthorized/i.test(message)
-          ? "Sesioni skadoi. Rifreskoni faqen dhe kyçuni sërish."
-          : "Ngarkimi dështoi. Provoni përsëri."
-      );
+      // Logged as well as shown: the panel gets a sentence, the console keeps
+      // the whole error for whoever is asked to look at it.
+      console.error("[upload] failed:", err);
+      setError(uploadErrorMessage(err));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
