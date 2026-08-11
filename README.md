@@ -24,13 +24,27 @@ Deploy: `git push` në `main` (projekti është i lidhur me GitHub te Vercel).
 
 ## Të dhënat
 
-Gjithçka lexohet nga **Postgres (Neon)**, jo nga skedarë JSON. Tabelat:
+Gjithçka lexohet nga **Postgres (Neon)**, jo nga skedarë JSON. Shtatë tabela:
 `categories`, `products`, `product_categories`, `users`, `contact_messages`,
-`orders`.
+`orders`, `rate_limits`. Skema e plotë: [`db/schema.sql`](db/schema.sql) —
+skedar i gjeneruar, i provuar që rikthen bazën. Detajet: [`db/README.md`](db/README.md).
 
-⚠️ `DATABASE_URL` te `.env.local` tregon te **e njëjta bazë** si produksioni.
-Nuk ka bazë të veçantë zhvillimi — çdo skript lokal që shkruan në bazë ndryshon
-faqen live menjëherë.
+**Zhvillimi dhe produksioni janë baza të ndara.** Çdo gjë që ekzekutohet
+lokalisht — `next dev`, `next build`, `next start`, çdo skript — shkon te dega
+`development` e Neon-it. Produksioni arrihet vetëm duke deploy-uar, ose duke i
+thënë një skripti me qëllim:
+
+```bash
+DATABASE_TARGET=production node scripts/dump-schema.mjs
+```
+
+Skriptet e shkruajnë hapur se ku po shkruajnë, në rreshtin e parë. Më parë kjo
+ndarje nuk ekzistonte: `.env.local` mbante lidhjen e produksionit dhe çdo skript
+lokal ndryshonte faqen live menjëherë.
+
+Dega `development` u pastrua nga të dhënat e klientëve
+(`npm run db:scrub-dev`) — katalogu mbetet, klientët e vërtetë jo. Arsyeja është te
+`db/README.md`, dhe nuk është rregullsia.
 
 `src/data/*.json` **nuk lexohen në runtime** (përjashtim: `offers.json`). Janë
 hyrje dhe kopje sigurie për skriptet.
@@ -170,6 +184,15 @@ dokumentim i asaj që u bë.
 ```bash
 npm run seed:db          # import idempotent i src/data/*.json → Postgres
 npm run export:catalog   # eksport nga WooCommerce API e faqes së vjetër (historik)
+```
+
+Skema — shih [`db/README.md`](db/README.md) për rikthimin nga zeroja:
+
+```bash
+npm run db:schema:dump    # rigjeneron db/schema.sql (pas çdo migrimi!)
+npm run db:schema:apply   # e zbaton (IF NOT EXISTS — nuk prek rreshta)
+npm run db:schema:verify   # provon se vërtet rikthen bazën, në një degë të përkohshme
+npm run db:scrub-dev      # heq të dhënat e klientëve nga baza e zhvillimit
 ```
 
 Migrimet e skemës nga rishikimi i sigurisë (të dyja `IF NOT EXISTS`, të sigurta
