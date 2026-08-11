@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { contentSecurityPolicy } from "@/lib/csp";
+import {
+  CSP_HEADER,
+  CSP_REPORT_PATH,
+  REPORTING_ENDPOINTS_VALUE,
+  REPORT_ONLY,
+  contentSecurityPolicy,
+} from "@/lib/csp";
 
 /**
  * Next re-reads the policy it was handed and pulls the nonce back out of it, so
@@ -52,13 +58,53 @@ describe("contentSecurityPolicy", () => {
   });
 
   /**
-   * The upload posts to vercel.com/api/blob, not to the store's own hostname —
-   * naming the store host here instead is the mistake that looks correct and
-   * only shows up the day the policy stops being report-only.
+   * The uploader used to post the file from the browser straight to
+   * vercel.com/api/blob, so connect-src had to name a third party. It posts to
+   * our own route now, which means the browser has no reason to reach off-origin
+   * at all — a stronger assertion than the allowance it replaces, and one that
+   * fails loudly if anybody reintroduces a client-direct upload without
+   * revisiting the policy.
    */
-  it("lets the admin uploader reach the blob API", () => {
-    expect(contentSecurityPolicy(NONCE, false)).toContain(
-      "connect-src 'self' https://vercel.com"
+  it("needs no off-origin connect-src — the upload goes through our own route", () => {
+    const csp = contentSecurityPolicy(NONCE, false);
+    const connectSrc = csp
+      .split(";")
+      .map((d) => d.trim())
+      .find((d) => d.startsWith("connect-src"));
+    expect(connectSrc).toBe("connect-src 'self'");
+    expect(csp).not.toContain("https://vercel.com");
+  });
+
+  /**
+   * Without a collector the policy's violations exist only in whichever browser
+   * console happens to be open, and the decision to enforce it has no evidence
+   * behind it. Both spellings are sent: report-to is current, report-uri is
+   * deprecated and still the one several browsers act on.
+   */
+  it("names a collector, in both the current and the deprecated spelling", () => {
+    const csp = contentSecurityPolicy(NONCE, false);
+    expect(csp).toContain(`report-uri ${CSP_REPORT_PATH}`);
+    expect(csp).toContain("report-to csp-endpoint");
+    // The group name has to match what the response header declares, or the
+    // browser cannot resolve it.
+    expect(REPORTING_ENDPOINTS_VALUE).toContain("csp-endpoint=");
+    expect(REPORTING_ENDPOINTS_VALUE).toContain(CSP_REPORT_PATH);
+  });
+
+  /**
+   * Browsers ignore upgrade-insecure-requests in a report-only policy and log an
+   * error saying so, which would bury the violations report-only mode exists to
+   * surface — so it must appear exactly when the policy is enforced and not
+   * before.
+   */
+  it("holds upgrade-insecure-requests back until the policy is enforced", () => {
+    const csp = contentSecurityPolicy(NONCE, false);
+    expect(csp.includes("upgrade-insecure-requests")).toBe(!REPORT_ONLY);
+  });
+
+  it("sends the policy under the header that matches its mode", () => {
+    expect(CSP_HEADER).toBe(
+      REPORT_ONLY ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy"
     );
   });
 

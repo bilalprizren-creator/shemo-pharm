@@ -30,7 +30,7 @@
  */
 import { writeFileSync } from "node:fs";
 import path from "node:path";
-import { connect, ROOT, readJson, dataPath } from "./lib/db.mjs";
+import { connect, readJson, dataPath } from "./lib/db.mjs";
 import {
   assertTree,
   index,

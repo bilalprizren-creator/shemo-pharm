@@ -287,6 +287,8 @@ const out = dataPath("catalog-assignments.json");
 const previous = existsSync(out) ? readJson(out) : null;
 const merged = new Map(previous ? previous.assignments.map((a) => [a.id, a]) : []);
 for (const row of rows.values()) {
+  // Destructured only to drop `_file` from what gets written out.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _file, ...clean } = row;
   merged.set(row.id, clean);
 }

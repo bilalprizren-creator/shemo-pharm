@@ -1,3 +1,7 @@
+// Relative, not the `@/` alias: next.config.ts imports this file by path and
+// resolves it outside the app's module graph, where the alias does not exist.
+import { IMAGE_EXT, type ImageFormat } from "./image-sniff";
+
 /**
  * Where product photography may come from.
  *
@@ -67,4 +71,32 @@ function hostMatches(hostname: string, pattern: string): boolean {
   if (!hostname.endsWith(suffix)) return false;
   const label = hostname.slice(0, -suffix.length);
   return label.length > 0 && !label.includes(".");
+}
+
+/** Where uploaded product photos live in the blob store. */
+export const UPLOAD_PREFIX = "products/";
+
+/**
+ * The name to store an uploaded photo under.
+ *
+ * The editor's filename is not used, and that is the point. It used to be: the
+ * browser sanitised the name it had chosen and the server checked the result
+ * against a pattern, which is a lot of machinery to end up trusting the caller
+ * about where its own file goes. A name made of sixteen random bytes cannot
+ * collide, cannot traverse, cannot carry a second extension, and cannot leak
+ * whatever the photo happened to be called on somebody's desktop.
+ *
+ * The extension comes from the sniffed format rather than the claimed one, so a
+ * JPEG that arrived named "foto.png" is stored as .jpg and served as
+ * image/jpeg — the stored object and its content type always agree with its
+ * actual bytes.
+ *
+ * The random hex is a parameter instead of being generated here so that this is
+ * a pure function with a test that needs no mocking.
+ */
+export function blobObjectName(format: ImageFormat, hex: string): string {
+  if (!/^[0-9a-f]{32}$/.test(hex)) {
+    throw new Error("blobObjectName: expected 32 lowercase hex characters");
+  }
+  return `${UPLOAD_PREFIX}${hex}.${IMAGE_EXT[format]}`;
 }

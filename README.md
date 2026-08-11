@@ -65,6 +65,15 @@ Tri porta të ndara, që nuk duhen ngatërruar:
 Sesioni është një JWT në cookie që mban **vetëm email-in**; statusi dhe roli
 lexohen nga baza në çdo kërkesë, që një aprovim të veprojë menjëherë.
 
+Cookie-ja: `httpOnly`, `SameSite=Lax`, `Secure` kudo përveç `next dev`,
+7 ditë për klientët dhe **1 ditë për adminët** (`src/lib/session-cookie.ts`).
+
+**Çkyçja i ndal sesionet në të gjitha pajisjet**, jo vetëm në shfletuesin ku u
+shtyp. Kolona `users.sessions_valid_from` krahasohet me `iat` të tokenit, ndaj një
+cookie e kopjuar ndalon së punuari sapo llogaria del ose ndryshon fjalëkalimin —
+më parë ajo vazhdonte të vlente deri në shtatë ditë. Ndryshimi i fjalëkalimit e
+bën të njëjtën gjë brenda të njëjtës deklaratë SQL.
+
 Llogaritë e klientëve nga faqja e vjetër WordPress nuk mund të migroheshin (pa
 qasje në bazën e saj); klientët regjistrohen sërish.
 
@@ -91,8 +100,20 @@ produktet; kategoritë me `count = 0` nuk shfaqen askund.
 ### Fotot e produkteve
 
 2 049 foto WebP 1000×1000 ndodhen në `public/products/` (≈64 MB, në repo).
-Foto të reja ngarkohen nga `/admin/produktet/…` te **Vercel Blob** (rruga
-`src/app/api/admin/upload/route.ts`, ngarkim direkt nga shfletuesi).
+Foto të reja ngarkohen nga `/admin/produktet/…` te **Vercel Blob** përmes
+`src/app/api/admin/upload/route.ts`.
+
+Skedari kalon **nëpër serverin tonë**, nuk shkon drejt te depoja. Kështu duhet,
+sepse vetëm ashtu mund të kontrollohen bajtat: tipi i deklaruar, prapashtesa e
+emrit dhe **nënshkrimi real i skedarit** duhet të tregojnë të njëjtin format nga
+PNG / JPG / WebP (`src/lib/image-sniff.ts`), përmasat lexohen nga koka (16–4096 px),
+dhe emri në depo e zgjedh serveri: `products/<32 hex>.<ext>` me prapashtesën e
+formatit **të gjetur**, jo të emrit që erdhi. Një SVG i riemërtuar `foto.png`
+refuzohet me `422`.
+
+Kufiri është **2 MB** — Vercel e ndal trupin e kërkesës në 4.5 MB dhe ky numër nuk
+konfigurohet, ndaj kufiri i mbetet mirë poshtë tij. Fotoja më e madhe në katalog
+është 45 KB.
 
 Lista e host-eve të lejuar është një burim i vetëm te `src/lib/images.ts` dhe
 ushqen `next.config.ts`, formularin e adminit dhe shtresën e katalogut. Një URL
@@ -100,6 +121,10 @@ foto që nuk kalon aty nuk arrin kurrë te `next/image`.
 
 ⚠️ Blob-i u bllokua një herë kur një migrim masiv shpenzoi 2 000 shkrime falas
 në një xhiro. Ngarkime individuale janë në rregull; importe masive jo.
+
+⚠️ **Depoja është aktualmente e pezulluar** (billing-u joaktiv), ndaj çdo ngarkim
+i re përfundon me `503 store_suspended` dhe paneli e thotë hapur se riprovimi nuk
+ndihmon. Të 2 049 fotot ekzistuese nuk preken.
 
 ## Shporta (kërkesë porosie)
 
@@ -147,6 +172,14 @@ npm run seed:db          # import idempotent i src/data/*.json → Postgres
 npm run export:catalog   # eksport nga WooCommerce API e faqes së vjetër (historik)
 ```
 
+Migrimet e skemës nga rishikimi i sigurisë (të dyja `IF NOT EXISTS`, të sigurta
+për t'u rikthyer; të zbatuara më 2026-08-11):
+
+```bash
+npm run migrate:sessions      # users.sessions_valid_from — çkyçje që vlen vërtet
+npm run migrate:rate-limits   # tabela rate_limits — kufij që i ndajnë instancat
+```
+
 | Skript | Çfarë bëri |
 | --- | --- |
 | `migrate-images.mjs` | 2 049 foto → WebP 1000×1000, standardizim + manifest |
@@ -154,12 +187,38 @@ npm run export:catalog   # eksport nga WooCommerce API e faqes së vjetër (hist
 | `apply-taxonomy.mjs` | Zbatoi auditin e `audit/` mbi katalogun |
 | `fix-categories.mjs` | 121 produkte pa kategori + rillogaritje e `count` |
 | `pin-brands.mjs` | Fiksoi Ersa Med / Labella te `src/data/brand-pins.json` |
-| `create-orders-table.mjs`, `add-email-verification.mjs`, `add-password-reset.mjs` | Migrime skeme |
+| `create-orders-table.mjs`, `add-email-verification.mjs`, `add-password-reset.mjs`, `add-session-revocation.mjs`, `add-rate-limits-table.mjs` | Migrime skeme |
 | `snapshot-categories.mjs` | Foto e pemës para migrimit (`.rollback-*.json`) |
 
 `audit/` mban auditin foto-për-foto të katalogut (41 batch-e, 2 049 produkte) —
 shih `audit/README.md`. Rregullat dhe precedentët atje janë arsyeja pse disa
 kategori nuk përputhen me emrin e tyre.
+
+## Siguria
+
+Rishikimi i plotë, me çka u gjet, çka u rregullua dhe çka mbetet:
+`audit/security-review-2026-08-11.md`.
+
+Pikat që preken shpesh gjatë zhvillimit:
+
+- **Kufijtë e shpejtësisë** (`src/lib/rate-limit.ts`) numërojnë në Postgres për
+  bucket-at ku kufiri është masë sigurie (`admin-auth`, `auth`, reset, `verify`,
+  `contact`, `order`, `admin-upload`); `search` dhe `lista` mbeten në memorie, se
+  `/api/kerko` thirret në çdo shkronjë. Aktivizohen vetëm në Vercel — lokalisht
+  ndizeni me `RATE_LIMIT_STORE=postgres`. Në gabim të bazës **lëshojnë**, me një
+  rresht log, se ndalimi i çdo kyçjeje për një ndërprerje kalimtare të Neon-it
+  është më keq.
+- **Rrugët API që shkruajnë** kërkojnë `requireAdminApi()`
+  (`src/lib/api-guard.ts`), që kontrollon **origjinën para sesionit**. Pasojë:
+  `curl -X POST` kundër `/api/admin/upload` tani do `-H "Origin: https://<host>"`.
+- **CSP** është ende `Content-Security-Policy-Report-Only` (`src/lib/csp.ts:REPORT_ONLY`).
+  Lista e kushteve për ta kaluar në zbatim është në koka të atij skedari; njëri
+  prej tyre kërkon një ngarkim të vërtetë fotoje, ndaj pret riaktivizimin e Blob-it.
+  Raportet mblidhen te `/api/csp-report` dhe shkojnë vetëm në log.
+- **Eventet e sigurisë** shkruhen si një rresht JSON me prefiks `[security]`
+  (`src/lib/security-log.ts`) — kyçje, çkyçje, ngarkime, mutacione shkatërruese.
+  Filtroni `"event":"admin-login-failed"` për alarme.
+- Përpara commit-it: `npm run lint && npm run typecheck && npm test`.
 
 ## Dizajni
 

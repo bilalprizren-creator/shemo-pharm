@@ -68,6 +68,26 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        /**
+         * The proxy's matcher excludes /api, so API responses get no policy from
+         * there — and it should stay excluded: a path the proxy matches has its
+         * whole request body cloned and buffered so it can be read twice, which
+         * would double the upload route's peak memory for no benefit.
+         *
+         * A static policy costs nothing here and cannot interact with the body.
+         * A JSON response is not a document, so this is belt-and-braces against
+         * one being coaxed into rendering as one — nothing may load, nothing may
+         * frame it, and the sandbox denies it an origin if it ever does.
+         */
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'none'; frame-ancestors 'none'; sandbox",
+          },
+        ],
+      },
     ];
   },
 

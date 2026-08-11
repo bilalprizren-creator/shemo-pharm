@@ -5,14 +5,15 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
+  ADMIN_SESSION_DAYS,
   createSessionCookie,
-  clearSessionCookie,
+  endSession,
   findUser,
-  getSession,
-  isAdmin,
   requireAdmin,
   verifyPassword,
+  type Session,
 } from "@/lib/auth";
+import { logSecurityEvent } from "@/lib/security-log";
 import { sql } from "@/lib/db";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
 import { isAllowedImageSrc } from "@/lib/images";
@@ -43,6 +44,7 @@ export async function adminLoginAction(
   // The admin password is the most valuable credential here — same ceiling as
   // the customer login, counted in its own bucket.
   if (await rateLimited("admin-auth", { limit: 10, windowMs: TEN_MINUTES_MS })) {
+    await logSecurityEvent("admin-login-rate-limited");
     return { error: "Shumë tentativa. Provoni përsëri pas disa minutash." };
   }
 
@@ -54,25 +56,62 @@ export async function adminLoginAction(
 
   const user = await findUser(email);
   if (!user || !verifyPassword(password, user.passwordHash)) {
+    // The address is recorded, the password never is. One line per failure is
+    // what makes a credential-stuffing run visible in the logs.
+    await logSecurityEvent("admin-login-failed", { email });
+    // Deliberately the same answer whether the address exists or the password
+    // was wrong — the panel must not confirm which admin addresses are real.
     return { error: "Të dhëna të pasakta." };
   }
   if (user.role !== "admin") {
+    await logSecurityEvent("admin-login-not-admin", { email });
+    return { error: "Kjo llogari nuk ka qasje administratori." };
+  }
+  // Depth rather than a gate that was missing: role is what grants the panel, but
+  // an account parked as pending has no business holding an admin session either.
+  if (user.status !== "approved") {
+    await logSecurityEvent("admin-login-not-admin", { email, reason: "not approved" });
     return { error: "Kjo llogari nuk ka qasje administratori." };
   }
 
-  await createSessionCookie(user);
+  // A day, not the customer's week: this cookie opens the panel that can delete
+  // the catalogue, and the panel is used a few times a week.
+  await createSessionCookie(user, { days: ADMIN_SESSION_DAYS });
+  await logSecurityEvent("admin-login", { email });
   redirect("/admin");
 }
 
 export async function adminLogoutAction(): Promise<void> {
-  await clearSessionCookie();
+  // endSession, not clearSessionCookie: deleting the browser's copy leaves any
+  // other copy of the cookie working until it expires on its own.
+  await logSecurityEvent("admin-logout");
+  await endSession();
   redirect("/admin/login");
+}
+
+/* ------------------------------ Audit trail ------------------------------ */
+
+/**
+ * Records a mutation that changed who can do what, or destroyed something.
+ *
+ * Not every action here: toggling "featured" is noise, and a log nobody can read
+ * because of the volume is worse than none. What is recorded is the set where the
+ * question "who did this, and when" has an actual answer somebody would want —
+ * account approvals and deletions, product writes and deletions, and anything
+ * that removes a row.
+ */
+async function logMutation(
+  admin: Session,
+  action: string,
+  detail: Record<string, string | number | boolean | null | undefined> = {}
+): Promise<void> {
+  await logSecurityEvent("admin-mutation", { by: admin.email, action, ...detail });
 }
 
 /* --------------------------- User approvals ----------------------------- */
 
 export async function approveUserAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
 
@@ -86,6 +125,7 @@ export async function approveUserAction(formData: FormData): Promise<void> {
 
   const user = rows[0];
   if (user) {
+    await logMutation(admin, "approve-user", { userId: id, email: user.email });
     const dict = getDictionary(isLang(user.lang ?? "") ? (user.lang as Lang) : "sq");
     after(async () => {
       await sendMail(
@@ -104,22 +144,24 @@ export async function approveUserAction(formData: FormData): Promise<void> {
 }
 
 export async function revokeUserAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`
     UPDATE users SET status = 'pending' WHERE id = ${id} AND role = 'customer'
   `;
+  await logMutation(admin, "revoke-user", { userId: id });
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
 }
 
 /** Rejecting a request deletes the account — customers only, never admins. */
 export async function rejectUserAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`DELETE FROM users WHERE id = ${id} AND role = 'customer'`;
+  await logMutation(admin, "delete-user", { userId: id });
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
 }
@@ -307,7 +349,7 @@ export async function createProductAction(
   _prev: AdminFormState,
   formData: FormData
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const result = productFromForm(formData);
   if ("fieldErrors" in result) return { fieldErrors: result.fieldErrors };
   const p = result.data;
@@ -333,6 +375,7 @@ export async function createProductAction(
   `) as { id: number }[];
 
   await syncProductCategories(rows[0].id, parseCategoryIds(formData));
+  await logMutation(admin, "create-product", { productId: rows[0].id, name: p.name });
   revalidateCatalog();
   redirect(`/admin/produktet/${rows[0].id}?krijuar=1`);
 }
@@ -341,7 +384,7 @@ export async function updateProductAction(
   _prev: AdminFormState,
   formData: FormData
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return { error: "ID e pavlefshme." };
   const result = productFromForm(formData);
@@ -359,6 +402,7 @@ export async function updateProductAction(
     WHERE id = ${id}
   `;
   await syncProductCategories(id, parseCategoryIds(formData));
+  await logMutation(admin, "update-product", { productId: id, name: p.name });
   revalidateCatalog();
   return { success: "Produkti u ruajt." };
 }
@@ -379,10 +423,11 @@ export async function toggleProductFlagAction(formData: FormData): Promise<void>
 }
 
 export async function deleteProductAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`DELETE FROM products WHERE id = ${id}`;
+  await logMutation(admin, "delete-product", { productId: id });
   revalidateCatalog();
   redirect("/admin/produktet");
 }
@@ -401,10 +446,11 @@ export async function markMessageReadAction(formData: FormData): Promise<void> {
 }
 
 export async function deleteMessageAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`DELETE FROM contact_messages WHERE id = ${id}`;
+  await logMutation(admin, "delete-message", { messageId: id });
   revalidatePath("/admin/mesazhet");
   revalidatePath("/admin");
 }
@@ -541,18 +587,15 @@ export async function markOrderHandledAction(formData: FormData): Promise<void> 
 }
 
 export async function deleteOrderAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`DELETE FROM orders WHERE id = ${id}`;
+  await logMutation(admin, "delete-order", { orderId: id });
   revalidatePath("/admin/porosite");
   revalidatePath("/admin");
 }
 
-/* ---------------------------- Access helper ------------------------------ */
-
-/** Used by the login page to bounce already-authenticated admins to /admin. */
-export async function redirectIfAdmin(): Promise<void> {
-  const session = await getSession();
-  if (isAdmin(session)) redirect("/admin");
-}
+// There was a redirectIfAdmin() here, exported and called by nobody — the login
+// page inlines the same two lines. Every export of a "use server" file becomes a
+// POST-reachable endpoint, so an unused one is attack surface bought for nothing.

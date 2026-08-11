@@ -41,9 +41,14 @@ export async function logOrderAction(input: {
   const { channel, lines } = parsed.data;
 
   // Resolve names/prices server-side — client input is ids and counts only.
+  //
+  // `hidden = false` matches every other product read (catalog.ts). Without it an
+  // id guessed by hand put a withdrawn product's name and price into an order row
+  // that the panel then displays as though somebody had ordered it.
   const ids = lines.map((l) => l.id);
   const products = (await sql`
-    SELECT id, name, sku, price_cents FROM products WHERE id = ANY(${ids})
+    SELECT id, name, sku, price_cents FROM products
+    WHERE id = ANY(${ids}) AND hidden = false
   `) as { id: number; name: string; sku: string; price_cents: number }[];
   if (products.length === 0) return;
 

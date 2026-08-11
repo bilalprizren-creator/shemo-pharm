@@ -14,9 +14,26 @@ import { REMOTE_IMAGE_PATTERNS } from "@/lib/images";
  * header instead.
  *
  * Shipped as Content-Security-Policy-Report-Only first: the site is live, and a
- * directive that is one host short is a blank page for a real customer. Flip
- * REPORT_ONLY to false once the browser console stays quiet across the
- * homepage, a listing, a product page, the cart drawer and the admin panel.
+ * directive that is one host short is a blank page for a real customer.
+ *
+ * Flipping REPORT_ONLY to false needs evidence, not a hunch, which is why the
+ * policy now names a collector — violations used to exist only in whichever
+ * browser console happened to be open. What has to be true first:
+ *
+ *   1. a *production* build. The dev policy allows 'unsafe-eval' and dev emits
+ *      inline scripts production does not, so a walkthrough of `next dev`
+ *      proves nothing about the header customers get;
+ *   2. no violations reported across both locales — homepage, a filtered
+ *      listing, a product page (JSON-LD and gallery), the cart drawer with a
+ *      framer-motion animation actually running, the contact form, the search
+ *      bar, register/login/verify/reset, and every admin page including a real
+ *      photo upload;
+ *   3. Next's own script tags visibly carrying nonce= in view-source, which is
+ *      the handshake tests/csp.test.ts can only partly stand in for.
+ *
+ * Point 2 currently cannot be completed: the blob store's billing is inactive,
+ * so an upload cannot get far enough to prove the admin form's request path.
+ * Until that is resolved this stays true.
  */
 export const REPORT_ONLY = true;
 
@@ -24,23 +41,20 @@ export const CSP_HEADER = REPORT_ONLY
   ? "Content-Security-Policy-Report-Only"
   : "Content-Security-Policy";
 
+/** Where violations are collected. See src/app/api/csp-report/route.ts. */
+export const CSP_REPORT_PATH = "/api/csp-report";
+
+/** The name the report-to directive and the Reporting-Endpoints header share. */
+const CSP_REPORT_GROUP = "csp-endpoint";
+
+/** The response header that gives `report-to` a destination to resolve. */
+export const REPORTING_ENDPOINTS_HEADER = "Reporting-Endpoints";
+export const REPORTING_ENDPOINTS_VALUE = `${CSP_REPORT_GROUP}="${CSP_REPORT_PATH}"`;
+
 /** The hosts product photography may come from, reused from the image allow list. */
 const IMAGE_HOSTS = REMOTE_IMAGE_PATTERNS.map(
   (p) => `${p.protocol}://${p.hostname}`
 );
-
-/**
- * Where the browser uploads a product photo — see api/admin/upload/route.ts.
- *
- * This is vercel.com, not the store's own hostname, which is the guess that
- * looks right and is wrong. `@vercel/blob/client` sends both the single-shot
- * PUT and every multipart part to `getApiUrl()`, which is
- * `https://vercel.com/api/blob` unless VERCEL_BLOB_API_URL overrides it
- * (node_modules/@vercel/blob/dist/chunk-*.js). The `*.public.blob.vercel-storage.com`
- * host only ever appears in the URL that comes back, and that one is an image,
- * so it belongs in img-src — where it already is.
- */
-const BLOB_UPLOAD_ORIGIN = "https://vercel.com";
 
 export function contentSecurityPolicy(nonce: string, isDev: boolean): string {
   return [
@@ -64,9 +78,11 @@ export function contentSecurityPolicy(nonce: string, isDev: boolean): string {
     // next/font self-hosts Inter and Space Grotesk, so no Google origin here.
     "font-src 'self'",
 
-    // /api/kerko and /api/lista are same-origin; the admin photo uploader posts
-    // the file straight from the browser to the blob store.
-    `connect-src 'self' ${BLOB_UPLOAD_ORIGIN}`,
+    // Nothing off-origin. This used to name vercel.com, because the admin photo
+    // uploader posted the file from the browser straight to the blob API — the
+    // upload goes through /api/admin/upload now, so the browser has no reason to
+    // talk to anybody but us, and the allowance is gone.
+    "connect-src 'self'",
 
     "object-src 'none'",
     "base-uri 'self'",
@@ -76,6 +92,13 @@ export function contentSecurityPolicy(nonce: string, isDev: boolean): string {
     // Agrees with X-Frame-Options: SAMEORIGIN in next.config.ts rather than
     // contradicting it.
     "frame-ancestors 'self'",
+
+    // Both spellings on purpose: report-to is the current mechanism and needs
+    // the Reporting-Endpoints header to resolve the group name, report-uri is
+    // deprecated and is still what several browsers actually act on.
+    `report-uri ${CSP_REPORT_PATH}`,
+    `report-to ${CSP_REPORT_GROUP}`,
+
     // Browsers ignore this one in a report-only policy and log an error saying
     // so, which would bury the violations this mode exists to surface. It comes
     // back the moment the policy is enforced.
