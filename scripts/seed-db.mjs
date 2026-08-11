@@ -6,44 +6,20 @@
  * and writes them into the Neon Postgres tables. Safe to re-run: every insert
  * upserts by primary key / unique key.
  *
- *   npm run seed:db
+ *   npm run seed:db                                  # development database
+ *   DATABASE_TARGET=production npm run seed:db       # the live site, on purpose
  *
- * Requires DATABASE_URL (and, for the admin account, ADMIN_EMAIL /
- * ADMIN_PASSWORD) — read from .env.local automatically.
+ * Needs ADMIN_EMAIL / ADMIN_PASSWORD for the admin account. Which database it
+ * writes to is decided by scripts/lib/db.mjs, which defaults to development —
+ * this script used to carry its own .env parser reading DATABASE_URL straight out
+ * of .env.local, and .env.local held production.
  */
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { randomBytes, scryptSync } from "node:crypto";
-import { neon } from "@neondatabase/serverless";
+import { ROOT, connect } from "./lib/db.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-
-// --- Minimal .env loader (no dependency; matches Next.js precedence enough) ---
-function loadEnv(file) {
-  if (!existsSync(file)) return;
-  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
-    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-    if (!m) continue;
-    let [, key, val] = m;
-    val = val.trim();
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1);
-    }
-    if (!(key in process.env)) process.env[key] = val;
-  }
-}
-loadEnv(path.join(ROOT, ".env.local"));
-loadEnv(path.join(ROOT, ".env"));
-
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is not set (add it to .env.local).");
-  process.exit(1);
-}
-const sql = neon(process.env.DATABASE_URL);
+const sql = connect();
 
 // --- Overlays copied from src/lib/catalog.ts (fold into DB columns) ---
 const CATEGORY_DISPLAY_NAMES = {

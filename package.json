@@ -12,6 +12,10 @@
     "test:watch": "vitest",
     "export:catalog": "node scripts/export-catalog.mjs",
     "seed:db": "node scripts/seed-db.mjs",
+    "db:schema:dump": "node scripts/dump-schema.mjs",
+    "db:schema:apply": "node scripts/apply-schema.mjs",
+    "db:schema:verify": "node scripts/verify-schema.mjs",
+    "db:scrub-dev": "node scripts/scrub-dev-db.mjs",
     "migrate:sessions": "node scripts/add-session-revocation.mjs",
     "migrate:rate-limits": "node scripts/add-rate-limits-table.mjs"
   },

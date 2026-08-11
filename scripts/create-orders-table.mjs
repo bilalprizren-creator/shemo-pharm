@@ -4,30 +4,15 @@
  *
  *   node scripts/create-orders-table.mjs
  *
- * Reads DATABASE_URL from .env.local like the seed script does.
+ * Superseded by db/schema.sql, which now carries this table along with the other
+ * six; kept because it is the record of when and why `orders` appeared. Uses the
+ * shared connect() so it obeys DATABASE_TARGET like everything else — it had its
+ * own .env parser reading DATABASE_URL directly, which is how a "one-time
+ * migration" ends up running against the live site.
  */
-import { readFileSync, existsSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { neon } from "@neondatabase/serverless";
+import { connect } from "./lib/db.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-
-function loadEnv(file) {
-  if (!existsSync(file)) return;
-  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
-    const m = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-    if (m) process.env[m[1]] ??= (m[2] ?? "").replace(/^["']|["']$/g, "");
-  }
-}
-loadEnv(path.join(ROOT, ".env.local"));
-
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is not set (expected in .env.local).");
-  process.exit(1);
-}
-
-const sql = neon(process.env.DATABASE_URL);
+const sql = connect();
 
 await sql`
   CREATE TABLE IF NOT EXISTS orders (
