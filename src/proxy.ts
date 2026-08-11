@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { CSP_HEADER, contentSecurityPolicy } from "@/lib/csp";
+import {
+  CSP_HEADER,
+  REPORTING_ENDPOINTS_HEADER,
+  REPORTING_ENDPOINTS_VALUE,
+  contentSecurityPolicy,
+} from "@/lib/csp";
 
 /**
  * Two jobs, in this order:
@@ -29,6 +34,10 @@ export function proxy(request: NextRequest) {
 
   const withCsp = <T extends NextResponse>(response: T): T => {
     response.headers.set(CSP_HEADER, csp);
+    // Resolves the group name in the policy's `report-to` directive. Without it
+    // that directive names a destination the browser cannot look up, and only
+    // the deprecated `report-uri` still works.
+    response.headers.set(REPORTING_ENDPOINTS_HEADER, REPORTING_ENDPOINTS_VALUE);
     return response;
   };
 

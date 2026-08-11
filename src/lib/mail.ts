@@ -109,10 +109,13 @@ export async function sendMail(msg: MailMessage): Promise<boolean> {
 
   if (!apiKey) {
     console.warn(`[mail] RESEND_API_KEY not set — skipped "${msg.subject}" to ${to}`);
-    // Dev only: the plain-text body carries the verification link, which makes
-    // the whole flow testable from the terminal. Never in production — that
-    // link is a bearer token.
-    if (process.env.NODE_ENV !== "production") console.warn(`\n${msg.text}\n`);
+    // Development only: the plain-text body carries the verification and reset
+    // links, which makes the whole flow testable from the terminal. Those links
+    // are bearer tokens, so the condition is `=== "development"` and not
+    // `!== "production"` — the latter is also true when NODE_ENV is "test" or
+    // unset, which is a CI log or a staging build, neither of which is a terminal
+    // somebody is watching.
+    if (process.env.NODE_ENV === "development") console.warn(`\n${msg.text}\n`);
     return false;
   }
 

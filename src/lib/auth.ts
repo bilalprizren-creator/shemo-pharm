@@ -6,15 +6,24 @@ import { SignJWT, jwtVerify } from "jose";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { sql } from "@/lib/db";
 import { isLang, type Lang } from "@/lib/i18n";
+import {
+  ADMIN_SESSION_DAYS,
+  SESSION_COOKIE,
+  SESSION_DAYS,
+  sessionCookieOptions,
+  sessionRevoked,
+} from "@/lib/session-cookie";
 
 /**
  * B2B auth: users live in the Postgres `users` table, sessions are signed
  * JWTs in an HTTP-only cookie. Prices are only rendered for sessions whose
  * account status is "approved"; the admin panel is gated on role "admin".
+ *
+ * The cookie's own shape, its lifetimes and the revocation comparison live in
+ * lib/session-cookie.ts, which is importable by a test — this file is not.
  */
 
-const COOKIE_NAME = "shemo_session";
-const SESSION_DAYS = 7;
+export { ADMIN_SESSION_DAYS, SESSION_DAYS };
 
 export type UserStatus = "pending" | "approved";
 export type UserRole = "customer" | "admin";
@@ -33,6 +42,8 @@ export interface StoredUser {
   emailVerifiedAt: string | null;
   /** Locale chosen at registration, for mail sent outside a request. */
   lang: Lang;
+  /** Sessions issued before this instant are refused. null = none revoked. */
+  sessionsValidFrom: string | null;
 }
 
 export interface Session {
@@ -55,6 +66,14 @@ interface UserRow {
   created_at: string | Date;
   email_verified_at: string | Date | null;
   lang: string | null;
+  /** Null until something revokes this account's sessions. */
+  sessions_valid_from: string | Date | null;
+}
+
+/** Normalises a Postgres timestamp column, which arrives as either type. */
+function isoOrNull(value: string | Date | null | undefined): string | null {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : String(value);
 }
 
 function getSecret(): Uint8Array {
@@ -97,14 +116,10 @@ function mapUser(r: UserRow): StoredUser {
     phone: r.phone,
     status: r.status === "approved" ? "approved" : "pending",
     role: r.role === "admin" ? "admin" : "customer",
-    createdAt:
-      r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
-    emailVerifiedAt: r.email_verified_at
-      ? r.email_verified_at instanceof Date
-        ? r.email_verified_at.toISOString()
-        : String(r.email_verified_at)
-      : null,
+    createdAt: isoOrNull(r.created_at) ?? "",
+    emailVerifiedAt: isoOrNull(r.email_verified_at),
     lang: r.lang && isLang(r.lang) ? r.lang : "sq",
+    sessionsValidFrom: isoOrNull(r.sessions_valid_from),
   };
 }
 
@@ -271,14 +286,43 @@ export async function readResetToken(token: string): Promise<ResetToken> {
   return { ok: true, email };
 }
 
-/** Writes the new password. Returns false if the address vanished meanwhile. */
+/**
+ * Writes the new password. Returns false if the address vanished meanwhile.
+ *
+ * The revocation rides along in the same statement, so changing a password ends
+ * every session that was open under the old one — the point of changing it after
+ * a suspected compromise. It used to leave them all running. One statement, so
+ * there is no window in which the password is new and the old sessions are still
+ * good, and no extra round trip.
+ */
 export async function setPassword(email: string, password: string): Promise<boolean> {
   const rows = (await sql`
-    UPDATE users SET password_hash = ${hashPassword(password)}
+    UPDATE users
+    SET password_hash = ${hashPassword(password)}, sessions_valid_from = now()
     WHERE email = ${email.trim().toLowerCase()}
     RETURNING id
   `) as { id: number }[];
   return rows.length > 0;
+}
+
+/**
+ * Ends every session currently open for this account.
+ *
+ * What logging out did not do before: the cookie is a signed JWT, so deleting
+ * the browser's copy left any other copy — one captured off the wire, one on a
+ * shared machine — working until it expired on its own, up to a week later. The
+ * only remedy was rotating AUTH_SECRET, which logs out every user on the site
+ * and kills every outstanding verification and reset link.
+ *
+ * Consequence worth knowing: this is account-wide, so logging out on one device
+ * logs the account out everywhere. For a handful of admin and B2B accounts that
+ * is the behaviour you want from a logout button; it is still a change.
+ */
+export async function revokeSessions(email: string): Promise<void> {
+  await sql`
+    UPDATE users SET sessions_valid_from = now()
+    WHERE email = ${email.trim().toLowerCase()}
+  `;
 }
 
 /**
@@ -320,27 +364,49 @@ export async function claimVerificationSend(email: string): Promise<boolean> {
  * Signs the session cookie. Only the email is stored: it identifies the user,
  * and everything else (name, status, role) is looked up live in getSession().
  * Putting authorization state in the token would let it go stale.
+ *
+ * `days` lets the admin login ask for a shorter session than a customer's — see
+ * ADMIN_SESSION_DAYS. The token's own expiry and the cookie's maxAge are set from
+ * the same number so they cannot drift apart.
  */
-export async function createSessionCookie(user: { email: string }): Promise<void> {
+export async function createSessionCookie(
+  user: { email: string },
+  { days = SESSION_DAYS }: { days?: number } = {}
+): Promise<void> {
   const token = await new SignJWT({ email: user.email, purpose: "session" })
     .setProtectedHeader({ alg: "HS256" })
+    // Also what sessionRevoked() compares against, so it is load-bearing now.
     .setIssuedAt()
-    .setExpirationTime(`${SESSION_DAYS}d`)
+    .setExpirationTime(`${days}d`)
     .sign(getSecret());
 
   const jar = await cookies();
-  jar.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: SESSION_DAYS * 24 * 60 * 60,
-    path: "/",
-  });
+  jar.set(
+    SESSION_COOKIE,
+    token,
+    sessionCookieOptions({ isDev: process.env.NODE_ENV === "development", days })
+  );
 }
 
+/**
+ * Drops the browser's copy of the cookie.
+ *
+ * On its own this is not a logout — see revokeSessions(), which is what actually
+ * ends the session. Callers that mean "log out" must do both.
+ */
 export async function clearSessionCookie(): Promise<void> {
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  jar.delete(SESSION_COOKIE);
+}
+
+/**
+ * Ends the current session properly: revoke server-side, then clear the cookie.
+ * Safe to call without a session — it simply clears nothing.
+ */
+export async function endSession(): Promise<void> {
+  const session = await getSession();
+  if (session) await revokeSessions(session.email);
+  await clearSessionCookie();
 }
 
 /**
@@ -354,18 +420,26 @@ export async function clearSessionCookie(): Promise<void> {
  */
 export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
+  const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, getSecret());
-    // Verification links are signed with the same secret. Without this check a
-    // verification token pasted into the cookie would authenticate. Cookies
-    // issued before the claim existed have no `purpose` and still pass, so the
-    // rollover logs nobody out.
-    if (payload.purpose !== undefined && payload.purpose !== "session") return null;
+
+    // Verification and reset links are signed with the same secret, so without
+    // this a link pasted into the cookie would authenticate. The check used to
+    // let a token with no `purpose` at all through, to spare the cookies issued
+    // before the claim existed — those all expired on 2026-08-11 (the claim
+    // landed on 2026-08-04 and a session lives seven days), so the allowance is
+    // gone and the rule is simply that a session says it is one.
+    if (payload.purpose !== "session") return null;
     if (typeof payload.email !== "string") return null;
+
     const user = await findUser(payload.email);
     if (!user) return null; // account deleted since the token was issued
+
+    // A logout or a password change on any device ends this session too.
+    if (sessionRevoked(payload.iat, user.sessionsValidFrom)) return null;
+
     return {
       email: user.email,
       name: user.name,
@@ -396,6 +470,28 @@ export async function requireAdmin(): Promise<Session> {
   const session = await getSession();
   if (!isAdmin(session)) {
     redirect("/admin/login");
+  }
+  return session as Session;
+}
+
+/**
+ * The same guard for code that must not redirect — the admin data layer.
+ *
+ * requireAdmin() is the right answer at the top of a page and the wrong one
+ * inside a data-access function: a redirect thrown from there is a page bouncing
+ * to the login form for reasons its own code never mentions. This throws instead,
+ * so a query that was reached without authorization is a 500 and an entry in the
+ * log rather than a silent success.
+ *
+ * Costs nothing to call: getSession() is memoized per request, so a page that
+ * already called requireAdmin() has this answered from cache with no second
+ * query. That is what makes it worth putting on every function rather than
+ * trusting the callers — which is what the DAL did until now.
+ */
+export async function assertAdmin(): Promise<Session> {
+  const session = await getSession();
+  if (!isAdmin(session)) {
+    throw new Error("admin data was read without an admin session");
   }
   return session as Session;
 }

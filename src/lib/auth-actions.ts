@@ -6,8 +6,8 @@ import { z } from "zod";
 import {
   claimPasswordResetSend,
   claimVerificationSend,
-  clearSessionCookie,
   createSessionCookie,
+  endSession,
   createUser,
   findUser,
   getSession,
@@ -314,13 +314,21 @@ export async function resetPasswordAction(
 
   // Signed in straight away — the customer just proved both the mailbox and the
   // new password, and sending them to a login form to retype it is pure
-  // ceremony. Any other session stays valid; the cookie carries only the email.
+  // ceremony.
+  //
+  // setPassword() has just revoked every session for this account, which is the
+  // point of a reset. This new cookie survives that revocation because both
+  // sides are whole seconds and it is issued at or after the revocation instant
+  // — see sessionRevoked() in lib/session-cookie.ts, where the boundary is
+  // deliberate rather than incidental.
   const user = await findUser(token.email);
   if (user) await createSessionCookie(user);
   redirect(langHref(lang, "/llogaria"));
 }
 
 export async function logoutAction(): Promise<void> {
-  await clearSessionCookie();
+  // endSession, not clearSessionCookie: the cookie is a signed JWT, so deleting
+  // the browser's copy left any other copy valid for the rest of its week.
+  await endSession();
   redirect("/");
 }

@@ -1,9 +1,22 @@
 import "server-only";
+import { assertAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import type { CategoryOption } from "@/components/admin/ProductForm";
 
+/**
+ * Reads for the admin panel.
+ *
+ * Every function here re-checks authorization itself. It used to trust its
+ * callers — all of which do call requireAdmin() first, so nothing was reachable
+ * — but `server-only` is a bundling guarantee, not an authorization one, and
+ * getAdminProduct in particular returns products the public catalogue hides. The
+ * check is free (getSession is memoized per request), so the convention auth.ts
+ * documents is worth actually following rather than assuming.
+ */
+
 /** Category tree flattened to indented options for the product form. */
 export async function getAdminCategoryOptions(): Promise<CategoryOption[]> {
+  await assertAdmin();
   const rows = (await sql`
     SELECT id, name, slug, parent, display_name FROM categories ORDER BY name
   `) as { id: number; name: string; slug: string; parent: number; display_name: string | null }[];
@@ -46,6 +59,7 @@ export interface AdminCategory {
  * that is not there.
  */
 export async function getAdminCategories(): Promise<AdminCategory[]> {
+  await assertAdmin();
   const rows = (await sql`
     SELECT id, name, slug, parent, count, display_name, kind, sort
     FROM categories
@@ -117,6 +131,8 @@ export interface AdminProduct {
 }
 
 export async function getAdminProduct(id: number): Promise<AdminProduct | null> {
+  // The one read here that returns rows the public catalogue deliberately hides.
+  await assertAdmin();
   const rows = (await sql`
     SELECT p.*, COALESCE(
              array_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL),
