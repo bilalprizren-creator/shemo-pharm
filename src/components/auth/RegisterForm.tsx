@@ -6,6 +6,7 @@ import { Check, CircleAlert, Loader2, UserPlus } from "lucide-react";
 import { registerAction, type AuthFormState } from "@/lib/auth-actions";
 import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { PasswordField } from "./PasswordField";
 
 const initialState: AuthFormState = {};
@@ -177,6 +178,10 @@ export function RegisterForm({ dict }: { dict: Dictionary }) {
       <p className="text-center text-[13px] leading-relaxed text-ink-400">
         {dict.auth.pendingNote}
       </p>
+
+      <div className="text-center">
+        <PrivacyNotice dict={dict} />
+      </div>
 
       <p className="text-center text-sm text-ink-500">
         {dict.auth.haveAccount}{" "}

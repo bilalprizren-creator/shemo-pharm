@@ -33,6 +33,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/markat", "monthly", 0.7),
     entry("/rreth-nesh", "monthly", 0.6),
     entry("/kontakti", "monthly", 0.6),
+    // Indexable on purpose: a privacy policy nobody can find is not a policy.
+    entry("/privatesia", "monthly", 0.3),
+    entry("/kushtet", "monthly", 0.3),
   ];
 
   // Listed only while it has something on it — see offersAvailable().

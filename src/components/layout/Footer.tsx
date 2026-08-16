@@ -158,8 +158,22 @@ export async function Footer({ dict }: { dict: Dictionary }) {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-center text-xs text-white/50 sm:flex-row lg:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-center text-xs text-white/50 sm:flex-row lg:px-6">
           <p>{fmt(dict.footer.rights, { year })}</p>
+          <nav aria-label={dict.footer.legalNav} className="flex items-center gap-4">
+            <Link
+              href={langHref(dict.lang, "/privatesia")}
+              className="min-h-10 py-2 transition-colors hover:text-white"
+            >
+              {dict.legal.privacy.title}
+            </Link>
+            <Link
+              href={langHref(dict.lang, "/kushtet")}
+              className="min-h-10 py-2 transition-colors hover:text-white"
+            >
+              {dict.legal.terms.title}
+            </Link>
+          </nav>
           <p>{dict.footer.licensed}</p>
         </div>
       </div>
