@@ -112,6 +112,81 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
   return [...types, ...brands];
 }
 
+/** URL values for the two list filters. "" is the absent filter, not a state. */
+export type StockFilter = "" | "ne-stok" | "pa-stok";
+export type VisibilityFilter = "" | "e-dukshme" | "e-fshehur";
+
+/** One row of the admin product table — deliberately less than AdminProduct. */
+export interface AdminProductListItem {
+  id: number;
+  name: string;
+  sku: string;
+  priceCents: number;
+  inStock: boolean;
+  featured: boolean;
+  hidden: boolean;
+}
+
+/**
+ * The product table, searched and filtered.
+ *
+ * Both filters arrive as `boolean | null`, null meaning "not filtering", because
+ * the neon HTTP driver is a plain tagged template with no way to compose SQL
+ * fragments — every condition has to be in the statement and switched off by a
+ * parameter. The `::boolean` casts are what let a NULL parameter have a type at
+ * all, and the parentheses around the search clause are load-bearing: without
+ * them the trailing ANDs would bind tighter than the ORs and quietly filter the
+ * search away.
+ *
+ * `total` is the count *after* filtering, which is what the page reports.
+ */
+export async function listAdminProducts(opts: {
+  query: string;
+  stock: StockFilter;
+  visibility: VisibilityFilter;
+  page: number;
+  perPage: number;
+}): Promise<{ rows: AdminProductListItem[]; total: number }> {
+  await assertAdmin();
+  const like = `%${opts.query}%`;
+  const offset = (opts.page - 1) * opts.perPage;
+  const inStock = opts.stock === "" ? null : opts.stock === "ne-stok";
+  const hidden = opts.visibility === "" ? null : opts.visibility === "e-fshehur";
+
+  const rows = (await sql`
+    SELECT id, name, sku, price_cents, in_stock, featured, hidden,
+           count(*) OVER ()::int AS total
+    FROM products
+    WHERE (${opts.query} = '' OR name ILIKE ${like} OR sku ILIKE ${like})
+      AND (${inStock}::boolean IS NULL OR in_stock = ${inStock}::boolean)
+      AND (${hidden}::boolean IS NULL OR hidden = ${hidden}::boolean)
+    ORDER BY name ASC
+    LIMIT ${opts.perPage} OFFSET ${offset}
+  `) as Array<{
+    id: number;
+    name: string;
+    sku: string;
+    price_cents: number;
+    in_stock: boolean;
+    featured: boolean;
+    hidden: boolean;
+    total: number;
+  }>;
+
+  return {
+    rows: rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      sku: r.sku,
+      priceCents: r.price_cents,
+      inStock: r.in_stock,
+      featured: r.featured,
+      hidden: r.hidden,
+    })),
+    total: rows[0]?.total ?? 0,
+  };
+}
+
 export interface AdminProduct {
   id: number;
   name: string;
