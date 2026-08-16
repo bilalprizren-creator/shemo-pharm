@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Search, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
   categoryDisplayName,
@@ -17,6 +17,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
 import { BrandTypeFilter } from "./BrandTypeFilter";
+import { CatalogSearch } from "./CatalogSearch";
 import { CategoryFilter } from "./CategoryFilter";
 import { EmptyState } from "./EmptyState";
 import { MobileFilters } from "./MobileFilters";
@@ -123,7 +124,22 @@ export async function CatalogView({
   // Only meaningful on a brand shelf; ignored everywhere else so the parameter
   // cannot be used to narrow a page that offers no way to widen it again.
   const isBrand = categoryKind === "brand" && Boolean(categorySlug);
-  const typeSlug = isBrand ? searchParams.lloji?.trim() || undefined : undefined;
+
+  /**
+   * The types this brand spreads across.
+   *
+   * A brand that sells only one kind of thing gets no rows: narrowing 39
+   * Kräuterhof products to "the cosmetics among them" selects the shelf the
+   * visitor is already on, and a control that cannot change a result is worse
+   * than no control. The panel itself still shows — see filterPanel below.
+   */
+  const brandTypes = isBrand ? await getBrandTypeBreakdown(categorySlug!) : [];
+  const narrowTypes = brandTypes.length > 1 ? brandTypes : [];
+  // Resolved against what the panel actually offers, and only then passed to
+  // the query: a hand-typed ?lloji= for a type this brand does not sell must
+  // not silently filter a page whose sidebar shows no way to clear it again.
+  const activeType = narrowTypes.find((t) => t.slug === searchParams.lloji?.trim());
+  const typeSlug = activeType?.slug;
 
   const result = await getProducts({
     categorySlug,
@@ -140,14 +156,6 @@ export async function CatalogView({
   const displayName = Object.fromEntries(
     (await getAllCategories()).map((c) => [c.slug, categoryDisplayName(c)])
   );
-
-  // The types this brand spreads across. Empty for one-type brands like
-  // Kräuterhof, and then nothing is offered — there is nothing to narrow.
-  const brandTypes = isBrand ? await getBrandTypeBreakdown(categorySlug!) : [];
-  const showTypeFilter = brandTypes.length > 1;
-  const activeType = showTypeFilter
-    ? brandTypes.find((t) => t.slug === typeSlug)
-    : undefined;
 
   // Preserved across pagination links
   const params = new URLSearchParams();
@@ -188,13 +196,21 @@ export async function CatalogView({
    * On a brand page the product-type tree was not merely unhelpful, it marked
    * nothing at all as current: a brand does not appear in that tree and
    * "all products" is not the page either.
+   *
+   * Every brand gets this panel, including the fourteen of twenty-five that
+   * sell a single kind of thing. Those used to fall back to the catalog tree,
+   * which on a 39-product Kräuterhof shelf advertised "Barnat 292, Suplemente
+   * 398" — catalog-wide counts, every row a way out of the brand, and nothing
+   * marked as where you are. With no types to offer the panel is just the
+   * brand's name, its own shelf as the current page, and the way back to the
+   * full catalog, which is the honest version of the same three facts.
    */
-  const filterPanel = showTypeFilter ? (
+  const filterPanel = isBrand ? (
     <BrandTypeFilter
       brandName={title}
       brandHref={listingHref({ lloji: undefined })}
       allProductsHref={productsBase}
-      types={brandTypes}
+      types={narrowTypes}
       activeType={activeType?.slug}
       hrefForType={(slug) => listingHref({ lloji: slug })}
       dict={dict}
@@ -216,7 +232,11 @@ export async function CatalogView({
           <h1 className="text-3xl font-extrabold text-ink-900 sm:text-4xl">{title}</h1>
           {subtitle && <p className="mt-2 max-w-2xl text-ink-500">{subtitle}</p>}
         </div>
-        <p className="text-sm text-ink-400" aria-live="polite">
+        {/* From `sm` up the count travels with the search field it describes
+            (CatalogSearch); this is the narrow-screen copy. Only one of the two
+            is ever displayed, so only one is in the accessibility tree and the
+            change is announced once. */}
+        <p className="text-sm text-ink-400 sm:hidden" aria-live="polite">
           {fmt(dict.catalog.productsCount, { n: result.total })}
         </p>
       </div>
@@ -227,9 +247,11 @@ export async function CatalogView({
         <aside className="hidden min-w-0 lg:block" aria-label={dict.catalog.filters}>
           <div className="sticky top-40 max-h-[calc(100vh-11rem)] overflow-y-auto rounded-2xl border border-ink-900/8 bg-white p-3">
             <h2 className="px-3 pb-2 pt-1 text-sm font-bold uppercase tracking-wide text-ink-900">
-              {showTypeFilter
-                ? dict.catalog.typesHeading
-                : dict.catalog.categoriesHeading}
+              {!isBrand
+                ? dict.catalog.categoriesHeading
+                : narrowTypes.length > 0
+                  ? dict.catalog.typesHeading
+                  : dict.catalog.brandHeading}
             </h2>
             {filterPanel}
           </div>
@@ -237,23 +259,23 @@ export async function CatalogView({
 
         <div className="min-w-0">
           <div className="mb-5 flex flex-wrap items-center gap-3">
-            <form action={localBase} method="get" role="search" className="relative min-w-0 flex-1 basis-56">
-              <Search
-                aria-hidden
-                className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400"
-              />
-              <input
-                type="search"
-                name="kerko"
-                defaultValue={query ?? ""}
-                placeholder={dict.catalog.searchInResults}
-                aria-label={dict.search.label}
-                className="h-10 w-full rounded-lg border border-ink-900/10 bg-white pl-10 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 [&::-webkit-search-cancel-button]:hidden"
-              />
-              {sort !== "emri-asc" && <input type="hidden" name="renditja" value={sort} />}
-              {inStockOnly && <input type="hidden" name="stok" value="1" />}
-              {activeType && <input type="hidden" name="lloji" value={activeType.slug} />}
-            </form>
+            <CatalogSearch
+              action={localBase}
+              defaultValue={query ?? ""}
+              hidden={[
+                ...(sort !== "emri-asc" ? [{ name: "renditja", value: sort }] : []),
+                ...(inStockOnly ? [{ name: "stok", value: "1" }] : []),
+                ...(activeType ? [{ name: "lloji", value: activeType.slug }] : []),
+              ]}
+              labels={{
+                field: dict.search.label,
+                placeholder: dict.catalog.searchInResults,
+                submit: dict.catalog.searchSubmit,
+                clear: dict.catalog.searchClear,
+                count: fmt(dict.catalog.productsCount, { n: result.total }),
+                searching: dict.catalog.searching,
+              }}
+            />
             <MobileFilters
               labels={{ filters: dict.catalog.filters, close: dict.catalog.closeFilters }}
             >

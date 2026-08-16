@@ -190,9 +190,157 @@ export const en: Dictionary = {
     contactTitle: "Contact us",
     facebookAria: "SHEMO PHARM on Facebook",
     instagramAria: "SHEMO PHARM on Instagram",
+    legalNav: "Legal information",
     rights: "© {year} SHEMO PHARM. All rights reserved.",
     licensed:
       "Licensed by the Agency for Medical Products and Devices, Kosovo Ministry of Health",
+  },
+
+  /** See the note on `legal` in sq.ts — including when to remove draftNotice. */
+  legal: {
+    draftNotice:
+      "This text is a draft written from how the site technically works and has not yet been reviewed by a lawyer. It must be approved by legal counsel before final publication.",
+    lastUpdatedLabel: "Last updated",
+    lastUpdated: "12 August 2026",
+
+    /** See the note in sq.ts on why this is a sentence and not a checkbox. */
+    formNotice: "We use what you send only to get back to you. Read our {link}.",
+    formNoticeLink: "privacy policy",
+
+    privacy: {
+      title: "Privacy policy",
+      metaDescription:
+        "How SHEMO PHARM collects, uses and stores the personal data of visitors and partners — cookies, forms, orders and your rights.",
+      intro:
+        "This page explains which personal data we collect when you use shemo-pharm, why we collect it and what you can ask of us. It is short, because the site collects little.",
+      sections: [
+        {
+          heading: "Who is responsible",
+          body: [
+            "The controller for this processing is SHEMO PHARM, Rr. Ernest Koliqi 165/A, 20000 Prizren, Kosovo.",
+            "For any question about your data, write to info@shemopharm.com or call +383 (0) 49 600 934.",
+          ],
+        },
+        {
+          heading: "What we collect, and when",
+          body: [
+            "Contact form: the name, company, phone number, email address, subject and message you write. We keep these so we can answer you and so the enquiry is not lost.",
+            "Partner registration: name, company, phone, email and a password. The password is never stored as you typed it — only a value derived from it is kept, and the password cannot be recovered from that value.",
+            "Orders: the products and quantities you put in the basket, the channel you choose (WhatsApp or email) and, if you are signed in, your account's name and email.",
+            "We collect no health data, and we never ask for data that is not needed for the business relationship.",
+          ],
+        },
+        {
+          heading: "Legal basis",
+          body: [
+            "Contact-form and registration data are processed in order to prepare or perform a business relationship with you or your company.",
+            "The minimal technical data described below is processed on our legitimate interest in keeping the site working and protected from abuse.",
+          ],
+        },
+        {
+          heading: "Cookies and browser storage",
+          body: [
+            "We use a single cookie, shemo_session. It is created only when you sign in, keeps your session for seven days (one day for administrator accounts) and cannot be read by scripts on the page. Without it you cannot sign in — which is what makes it strictly necessary.",
+            "The basket and the wishlist are stored in your own browser, under shemo-cart and shemo-wishlist. They hold only product identifiers and quantities, contain no personal data, and are sent nowhere until you send an order yourself.",
+            "We use no analytics tool, no advertising pixel and no third-party script. That is why this site shows no cookie consent banner: there is nothing to consent to.",
+          ],
+        },
+        {
+          heading: "Who processes data for us",
+          body: [
+            "The site is hosted on Vercel, the database runs on Neon and photographs are served from Vercel Blob. Transactional email — address verification and password reset — is sent through Resend.",
+            "When you send an order over WhatsApp, the order text passes through WhatsApp and is subject to Meta's terms. If you would rather avoid that, use email or the phone.",
+          ],
+        },
+        {
+          heading: "IP addresses",
+          body: [
+            "To stop the forms and the sign-in from being abused, we count requests per visitor. Your IP address is not stored in full: only a hashed value derived from it is kept, which cannot be turned back into an address and identifies no one.",
+          ],
+        },
+        {
+          heading: "How long we keep it",
+          body: [
+            "Contact messages and orders are kept for as long as they are needed for the business relationship and for statutory record-keeping obligations.",
+            "Partner accounts are kept until you ask for the account to be deleted.",
+          ],
+        },
+        {
+          heading: "Your rights",
+          body: [
+            "You have the right to request access to your data, its correction, its deletion, a restriction of processing, and to object to processing.",
+            "To exercise these rights, write to info@shemopharm.com. We answer within the periods set by data-protection law.",
+            "If you believe your data has not been handled properly, you may complain to the Information and Privacy Agency of the Republic of Kosovo.",
+          ],
+        },
+        {
+          heading: "Changes to this policy",
+          body: [
+            "If we change how we process data, we update this page and the date above.",
+          ],
+        },
+      ],
+    },
+
+    terms: {
+      title: "Terms of use",
+      metaDescription:
+        "Terms of use for the SHEMO PHARM site — partner accounts, wholesale prices, orders and product information.",
+      intro:
+        "These terms apply to the use of this site. By browsing it or creating an account, you agree to follow them.",
+      sections: [
+        {
+          heading: "Who this site is for",
+          body: [
+            "SHEMO PHARM is a pharmaceutical warehouse and wholesale distributor. This site addresses pharmacies, health institutions and professional partners — not retail sale to end consumers.",
+          ],
+        },
+        {
+          heading: "Accounts and prices",
+          body: [
+            "Registration is open, but an account becomes active only after our team has verified it. Until then the catalog is shown in full, but without prices.",
+            "Wholesale prices are visible only to approved accounts and are intended for business use. You are responsible for keeping your password safe and for what is done with your account.",
+          ],
+        },
+        {
+          heading: "Prices and availability",
+          body: [
+            "Prices and availability are indicative and may change. They do not constitute a binding offer.",
+            "Product data comes from our suppliers and we work to keep it accurate, but errors and packaging changes cannot be ruled out.",
+          ],
+        },
+        {
+          heading: "Orders",
+          body: [
+            "The basket on this site is a request for a quote, not a purchase. When you send it over WhatsApp or email, we come back to you confirming availability and prices.",
+            "An agreement is formed only after our confirmation. Until then neither side is under any obligation.",
+          ],
+        },
+        {
+          heading: "Product information",
+          body: [
+            "The descriptions on this site are commercial information and are not medical or pharmaceutical advice.",
+            "The manufacturer's leaflet applies to every product. For use, dosage and contraindications, consult your pharmacist or doctor.",
+          ],
+        },
+        {
+          heading: "Site content",
+          body: [
+            "The name, logo, texts and photographs on this site belong to SHEMO PHARM or to the respective manufacturers and may not be used without permission.",
+          ],
+        },
+        {
+          heading: "Liability",
+          body: [
+            "We work to keep the site available and accurate, but we do not guarantee uninterrupted operation and accept no liability for damage arising from temporary unavailability or from errors in product data.",
+          ],
+        },
+        {
+          heading: "Applicable law",
+          body: ["The law of the Republic of Kosovo applies to these terms."],
+        },
+      ],
+    },
   },
 
   product: {
@@ -240,11 +388,15 @@ export const en: Dictionary = {
     filterByCategory: "Filter by category",
     filterByType: "Filter by product type",
     typesHeading: "Product types",
+    brandHeading: "Brand",
     allOfBrand: "Everything from this brand",
     typeChip: "Type: {name}",
     allProducts: "All products",
     categoriesHeading: "Categories",
     searchInResults: "Search within these products…",
+    searchSubmit: "Search",
+    searchClear: "Clear search",
+    searching: "Searching…",
     searchChip: "Search: “{q}”",
     categoryChip: "Category: {name}",
     inStockOnly: "In stock only",

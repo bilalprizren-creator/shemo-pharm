@@ -35,7 +35,9 @@ export function BrandTypeFilter({
   dict: Dictionary;
 }) {
   return (
-    <nav aria-label={dict.catalog.filterByType}>
+    // A one-type brand gets no rows, and then the panel does not filter by
+    // type — it only says which shelf this is and how to leave it.
+    <nav aria-label={types.length > 0 ? dict.catalog.filterByType : brandName}>
       <p className="px-3 pb-1 pt-1 text-sm font-bold text-ink-900">{brandName}</p>
 
       <ul className="space-y-0.5">

@@ -1,7 +1,8 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Loader2 } from "lucide-react";
 
 export interface SortLabels {
   label: string;
@@ -13,6 +14,9 @@ export interface SortLabels {
 export function SortSelect({ labels }: { labels: SortLabels }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // Without this the select navigates in silence: the old value stays shown,
+  // nothing indicates anything is happening, and then the whole grid swaps.
+  const [pending, startTransition] = useTransition();
   const current = searchParams.get("renditja") ?? "emri-asc";
 
   const options = [
@@ -27,12 +31,16 @@ export function SortSelect({ labels }: { labels: SortLabels }) {
     else params.set("renditja", value);
     params.delete("faqja");
     const qs = params.toString();
-    router.push(qs ? `?${qs}` : "?", { scroll: false });
+    startTransition(() => router.push(qs ? `?${qs}` : "?", { scroll: false }));
   };
 
   return (
     <label className="flex items-center gap-2 text-sm text-ink-500">
-      <ArrowUpDown className="size-4 text-ink-400" aria-hidden />
+      {pending ? (
+        <Loader2 className="size-4 animate-spin text-brand-600" aria-hidden />
+      ) : (
+        <ArrowUpDown className="size-4 text-ink-400" aria-hidden />
+      )}
       <span className="sr-only sm:not-sr-only">{labels.label}</span>
       <select
         value={current}

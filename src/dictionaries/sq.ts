@@ -194,9 +194,179 @@ export const sq = {
     contactTitle: "Na kontaktoni",
     facebookAria: "SHEMO PHARM në Facebook",
     instagramAria: "SHEMO PHARM në Instagram",
+    legalNav: "Informacione ligjore",
     rights: "© {year} SHEMO PHARM. Të gjitha të drejtat e rezervuara.",
     licensed:
       "Licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, Ministria e Shëndetësisë e Kosovës",
+  },
+
+  /**
+   * Privacy policy and terms of use.
+   *
+   * Written from what the code actually does, not from a template: one
+   * strictly-necessary session cookie, two localStorage keys holding product
+   * ids, form data in Neon, images on Vercel Blob, mail through Resend, IP
+   * addresses stored only as a salted hash for rate limiting, and WhatsApp as
+   * an order channel. There is no analytics dependency and no third-party
+   * script — `connect-src 'self'` in the CSP would block one — which is why
+   * there is no consent banner and the policy says so instead of implying one
+   * was forgotten.
+   *
+   * `draftNotice` stays on the page until a lawyer has signed the text off.
+   * Remove it in both dictionaries at the same time.
+   */
+  legal: {
+    draftNotice:
+      "Ky tekst është një draft i përgatitur sipas funksionimit teknik të faqes dhe nuk është ende i rishikuar juridikisht. Para publikimit përfundimtar duhet miratuar nga një jurist.",
+    lastUpdatedLabel: "Përditësuar më",
+    lastUpdated: "12 gusht 2026",
+
+    /**
+     * Shown under the contact and registration forms. A sentence with a link,
+     * not a tick box: the processing rests on preparing a business
+     * relationship, and a forced checkbox would swap that for consent — the
+     * weaker basis, revocable at any moment, for data we need in order to
+     * answer at all.
+     */
+    formNotice: "Të dhënat që dërgoni i përdorim vetëm për t'ju kontaktuar. Lexoni {link}.",
+    formNoticeLink: "politikën e privatësisë",
+
+    privacy: {
+      title: "Politika e privatësisë",
+      metaDescription:
+        "Si i mbledh, i përdor dhe i ruan SHEMO PHARM të dhënat personale të vizitorëve dhe partnerëve — cookies, formularët, porositë dhe të drejtat tuaja.",
+      intro:
+        "Kjo faqe shpjegon cilat të dhëna personale mbledhim kur përdorni shemo-pharm, pse i mbledhim dhe çfarë mund të kërkoni nga ne. E kemi mbajtur të shkurtër, sepse faqja mbledh pak.",
+      sections: [
+        {
+          heading: "Kush është përgjegjës",
+          body: [
+            "Përgjegjës për përpunimin e të dhënave është SHEMO PHARM, Rr. Ernest Koliqi 165/A, 20000 Prizren, Kosovë.",
+            "Për çdo pyetje lidhur me të dhënat tuaja mund të shkruani në info@shemopharm.com ose të telefononi në +383 (0) 49 600 934.",
+          ],
+        },
+        {
+          heading: "Çfarë mbledhim dhe kur",
+          body: [
+            "Formulari i kontaktit: emrin, firmën, numrin e telefonit, adresën e email-it, subjektin dhe mesazhin që shkruani. Këto ruhen që t'ju përgjigjemi dhe që kërkesa të mos humbasë.",
+            "Regjistrimi për partnerë: emrin, firmën, telefonin, email-in dhe një fjalëkalim. Fjalëkalimi nuk ruhet kurrë ashtu siç e shkruani — ruhet vetëm një vlerë e llogaritur prej tij, nga e cila fjalëkalimi nuk mund të rikthehet.",
+            "Porositë: produktet dhe sasitë që vendosni në shportë, kanali që zgjidhni (WhatsApp ose email) dhe, nëse jeni të kyçur, emri dhe email-i i llogarisë suaj.",
+            "Nuk mbledhim të dhëna shëndetësore dhe nuk ju kërkojmë kurrë të dhëna që nuk janë të nevojshme për bashkëpunimin tregtar.",
+          ],
+        },
+        {
+          heading: "Baza ligjore",
+          body: [
+            "Të dhënat e formularit të kontaktit dhe të regjistrimit i përpunojmë për të përgatitur ose zbatuar një marrëdhënie tregtare me ju ose me firmën tuaj.",
+            "Të dhënat teknike minimale — të përshkruara më poshtë — i përpunojmë për interesin tonë legjitim që faqja të mbetet funksionale dhe e mbrojtur nga keqpërdorimi.",
+          ],
+        },
+        {
+          heading: "Cookies dhe ruajtja në shfletues",
+          body: [
+            "Përdorim një cookie të vetme, shemo_session. Ajo krijohet vetëm kur kyçeni, mban sesionin tuaj shtatë ditë (një ditë për llogaritë e administrimit) dhe nuk lexohet dot nga skriptet në faqe. Pa të nuk mund të kyçeni — prandaj është teknikisht e domosdoshme.",
+            "Shporta dhe lista e dëshirave ruhen në shfletuesin tuaj, nën shemo-cart dhe shemo-wishlist. Ato përmbajnë vetëm numra identifikues produktesh dhe sasi, nuk përmbajnë asnjë të dhënë personale dhe nuk dërgohen askund derisa ju vetë të dërgoni porosinë.",
+            "Nuk përdorim asnjë mjet analitik, asnjë piksel reklamimi dhe asnjë skript të palëve të treta. Për këtë arsye kjo faqe nuk shfaq banderolë pëlqimi për cookies: nuk ka çfarë të pëlqeni.",
+          ],
+        },
+        {
+          heading: "Kush i përpunon të dhënat për ne",
+          body: [
+            "Faqja strehohet te Vercel, baza e të dhënave te Neon dhe fotografitë te Vercel Blob. Email-et transaksionale — verifikimi i adresës dhe rikthimi i fjalëkalimit — dërgohen përmes Resend.",
+            "Kur dërgoni porosinë përmes WhatsApp, teksti i porosisë kalon përmes WhatsApp dhe i nënshtrohet kushteve të Meta. Nëse preferoni ta shmangni këtë, përdorni email-in ose telefonin.",
+          ],
+        },
+        {
+          heading: "Adresat IP",
+          body: [
+            "Për të penguar keqpërdorimin e formularëve dhe të kyçjes, numërojmë kërkesat për çdo vizitor. Adresa juaj IP nuk ruhet e plotë: ruhet vetëm një vlerë e koduar prej saj, e cila nuk mund të kthehet mbrapsht në një adresë dhe nuk identifikon askënd.",
+          ],
+        },
+        {
+          heading: "Sa gjatë i ruajmë",
+          body: [
+            "Mesazhet e kontaktit dhe porositë ruhen për aq kohë sa janë të nevojshme për marrëdhënien tregtare dhe për detyrimet ligjore të ruajtjes së dokumentacionit.",
+            "Llogaritë e partnerëve ruhen derisa të kërkoni fshirjen e llogarisë.",
+          ],
+        },
+        {
+          heading: "Të drejtat tuaja",
+          body: [
+            "Keni të drejtë të kërkoni qasje në të dhënat tuaja, korrigjimin e tyre, fshirjen, kufizimin e përpunimit, si dhe të kundërshtoni përpunimin.",
+            "Për ta ushtruar këtë të drejtë, na shkruani në info@shemopharm.com. Ju përgjigjemi brenda afateve që parashikon legjislacioni për mbrojtjen e të dhënave personale.",
+            "Nëse mendoni se të dhënat tuaja nuk janë përpunuar si duhet, keni të drejtë të ankoheni te Agjencia për Informim dhe Privatësi e Republikës së Kosovës.",
+          ],
+        },
+        {
+          heading: "Ndryshimet e kësaj politike",
+          body: [
+            "Nëse ndryshojmë mënyrën se si i përpunojmë të dhënat, e përditësojmë këtë faqe dhe datën më sipër.",
+          ],
+        },
+      ],
+    },
+
+    terms: {
+      title: "Kushtet e përdorimit",
+      metaDescription:
+        "Kushtet e përdorimit të faqes SHEMO PHARM — llogaritë për partnerë, çmimet me shumicë, porositë dhe informacioni për produktet.",
+      intro:
+        "Këto kushte vlejnë për përdorimin e kësaj faqeje. Duke e shfletuar faqen ose duke krijuar një llogari, pranoni t'i respektoni ato.",
+      sections: [
+        {
+          heading: "Për kë është kjo faqe",
+          body: [
+            "SHEMO PHARM është depo farmaceutike dhe distributor me shumicë. Kjo faqe u drejtohet barnatoreve, institucioneve shëndetësore dhe partnerëve profesionalë — jo shitjes me pakicë ndaj konsumatorit fundor.",
+          ],
+        },
+        {
+          heading: "Llogaritë dhe çmimet",
+          body: [
+            "Regjistrimi është i hapur, por llogaria bëhet aktive vetëm pasi ekipi ynë e verifikon. Deri atëherë katalogu shfaqet i plotë, por pa çmime.",
+            "Çmimet me shumicë janë të dukshme vetëm për llogari të aprovuara dhe janë të destinuara për përdorim tregtar. Jeni përgjegjës për ruajtjen e fjalëkalimit tuaj dhe për veprimet e kryera me llogarinë tuaj.",
+          ],
+        },
+        {
+          heading: "Çmimet dhe disponueshmëria",
+          body: [
+            "Çmimet dhe disponueshmëria janë orientuese dhe mund të ndryshojnë. Ato nuk përbëjnë ofertë detyruese.",
+            "Të dhënat e produkteve i marrim nga furnitorët dhe përpiqemi t'i mbajmë të sakta, por gabimet dhe ndryshimet e paketimit nuk përjashtohen.",
+          ],
+        },
+        {
+          heading: "Porositë",
+          body: [
+            "Shporta në këtë faqe është një kërkesë për ofertë, jo një blerje. Kur e dërgoni përmes WhatsApp ose email-it, ne ju kthehemi me konfirmimin e disponueshmërisë dhe të çmimeve.",
+            "Marrëveshja lidhet vetëm pas konfirmimit tonë. Deri atëherë nuk krijohet asnjë detyrim për asnjërën palë.",
+          ],
+        },
+        {
+          heading: "Informacioni për produktet",
+          body: [
+            "Përshkrimet në këtë faqe janë informacion tregtar dhe nuk janë këshillë mjekësore ose farmaceutike.",
+            "Për çdo produkt vlen fletëudhëzuesi i prodhuesit. Për përdorimin, dozimin dhe kundërindikacionet konsultohuni me farmacistin ose mjekun.",
+          ],
+        },
+        {
+          heading: "Përmbajtja e faqes",
+          body: [
+            "Emri, logoja, tekstet dhe fotografitë e kësaj faqeje janë pronë e SHEMO PHARM ose e prodhuesve përkatës dhe nuk mund të përdoren pa leje.",
+          ],
+        },
+        {
+          heading: "Përgjegjësia",
+          body: [
+            "Përpiqemi që faqja të jetë e disponueshme dhe e saktë, por nuk garantojmë funksionim pa ndërprerje dhe nuk mbajmë përgjegjësi për dëme që rrjedhin nga mosdisponueshmëria e përkohshme ose nga gabime në të dhënat e produkteve.",
+          ],
+        },
+        {
+          heading: "Ligji i zbatueshëm",
+          body: [
+            "Për këto kushte zbatohet legjislacioni i Republikës së Kosovës.",
+          ],
+        },
+      ],
+    },
   },
 
   product: {
@@ -245,11 +415,17 @@ export const sq = {
     /** Brand shelves narrow by product type instead of by category. */
     filterByType: "Filtro sipas llojit të produktit",
     typesHeading: "Llojet e produkteve",
+    /** Heads the same panel for a brand that sells a single kind of thing,
+     *  where there are no types under it to list. */
+    brandHeading: "Marka",
     allOfBrand: "Të gjitha të kësaj marke",
     typeChip: "Lloji: {name}",
     allProducts: "Të gjitha produktet",
     categoriesHeading: "Kategoritë",
     searchInResults: "Kërko në këto produkte…",
+    searchSubmit: "Kërko",
+    searchClear: "Pastro kërkimin",
+    searching: "Duke kërkuar…",
     searchChip: "Kërkimi: “{q}”",
     categoryChip: "Kategoria: {name}",
     inStockOnly: "Vetëm në stok",
