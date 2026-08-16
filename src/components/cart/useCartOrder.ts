@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SITE } from "@/lib/site";
 import type { CardProduct } from "@/lib/types";
 import type { Dictionary } from "@/lib/dictionaries";
@@ -37,17 +37,33 @@ export function useCartItems(): {
   const [items, setItems] = useState<CardProduct[] | null>(null);
   const [error, setError] = useState(false);
 
-  const ids = useMemo(() => lines.map((l) => l.id), [lines]);
+  /**
+   * A string, because the effect below must not re-run for a quantity change.
+   *
+   * Every basket write rebuilds the array (CartProvider.persist maps over it),
+   * so `lines` has a new identity after each one and memoizing on it holds
+   * nothing. Pressing + on a line, or typing a quantity — QtyInput commits per
+   * keystroke — used to fire one GET /api/lista each, against an endpoint
+   * limited to 60 a minute: a customer adjusting a large basket could lock
+   * themselves out of it. The ids are what the request depends on, so the ids
+   * are what it watches.
+   */
+  const idKey = lines.map((l) => l.id).join(",");
 
   useEffect(() => {
-    if (!ready || ids.length === 0) return;
+    if (!ready || idKey === "") return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/lista?ids=${ids.join(",")}`);
+        const res = await fetch(`/api/lista?ids=${idKey}`);
         if (!res.ok) throw new Error();
         const data = (await res.json()) as { items: CardProduct[] };
-        if (!cancelled) setItems(data.items);
+        if (!cancelled) {
+          setItems(data.items);
+          // Cleared on success: one failed lookup used to leave the basket
+          // showing its error state until the page was reloaded.
+          setError(false);
+        }
       } catch {
         if (!cancelled) setError(true);
       }
@@ -55,9 +71,9 @@ export function useCartItems(): {
     return () => {
       cancelled = true;
     };
-  }, [ids, ready]);
+  }, [idKey, ready]);
 
-  return { items: ready && ids.length === 0 ? [] : items, error, ready };
+  return { items: ready && idKey === "" ? [] : items, error, ready };
 }
 
 export interface CartOrder {

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { CircleAlert, CircleCheck, Loader2, Send } from "lucide-react";
 import { contactAction, type ContactFormState } from "@/lib/contact-actions";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 
 const initialState: ContactFormState = {};
 
@@ -66,17 +67,25 @@ function Field({
 
 export function ContactForm({ dict }: { dict: Dictionary }) {
   const [state, formAction, pending] = useActionState(contactAction, initialState);
-  const startedAtRef = useRef<HTMLInputElement>(null);
+  const openedAt = useRef(0);
   const fe = state.fieldErrors ?? {};
   // What was typed before the rejection. React resets the form after a submit,
   // and a reset restores each field to its defaultValue — so re-rendering the
   // values here is what puts them back, with the inputs staying uncontrolled.
   const v = state.values ?? {};
 
-  // Timestamp for the spam time-trap, written straight to the DOM on mount
+  // Mount time for the spam time-trap. Kept in a ref rather than a hidden
+  // field: what the server checks is how long the form was open, and both
+  // readings then come from this browser's clock, so a clock that disagrees
+  // with the server cannot get a real visitor rejected.
   useEffect(() => {
-    if (startedAtRef.current) startedAtRef.current.value = String(Date.now());
+    openedAt.current = Date.now();
   }, []);
+
+  const submit = (formData: FormData) => {
+    formData.set("elapsed", String(Date.now() - openedAt.current));
+    return formAction(formData);
+  };
 
   if (state.success) {
     return (
@@ -96,7 +105,7 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
   }
 
   return (
-    <form action={formAction} noValidate className="space-y-4">
+    <form action={submit} noValidate className="space-y-4">
       {state.error && (
         <p
           role="alert"
@@ -107,12 +116,11 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         </p>
       )}
 
-      {/* Spam protection: honeypot + render timestamp */}
+      {/* Spam protection: honeypot; the time trap rides along in submit() */}
       <div className="hidden" aria-hidden="true">
         <label htmlFor="website">{dict.common.honeypotLabel}</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
-      <input ref={startedAtRef} type="hidden" name="startedAt" defaultValue="" />
       <input type="hidden" name="lang" value={dict.lang} />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -187,6 +195,8 @@ export function ContactForm({ dict }: { dict: Dictionary }) {
         )}
         {dict.contactForm.submit}
       </button>
+
+      <PrivacyNotice dict={dict} />
     </form>
   );
 }

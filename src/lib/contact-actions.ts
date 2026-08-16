@@ -83,9 +83,18 @@ export async function contactAction(
   if (formData.get("website")) {
     return { success: true }; // silently drop bot submissions
   }
-  // Time trap: submitting a long form in under 3 seconds is not human.
-  const startedAt = Number(formData.get("startedAt"));
-  if (!Number.isFinite(startedAt) || Date.now() - startedAt < 3000) {
+  // Time trap: filling a form this long in under 3 seconds is not human.
+  //
+  // The field carries how long the form was open, not when it opened. As an
+  // absolute timestamp this check did the opposite of its job in both
+  // directions: a bot that simply omitted the field passed, because
+  // Number(null) is 0 and "now minus zero" is forty years, while a real
+  // visitor whose clock ran ahead of the server got a negative difference and
+  // was turned away. A duration is measured against one clock — the
+  // visitor's own — so skew cancels out, and a missing field reads as 0 ms
+  // and is refused.
+  const openMs = Number(formData.get("elapsed"));
+  if (!Number.isFinite(openMs) || openMs < 3000) {
     return { error: dict.actions.sendFailed, values };
   }
 

@@ -14,15 +14,22 @@ export function WishlistPageClient({ dict }: { dict: Dictionary }) {
   const [items, setItems] = useState<CardProduct[] | null>(null);
   const [error, setError] = useState(false);
 
+  // Watched as a string for the same reason the basket does it (useCartOrder):
+  // the ids are what the request depends on, not the array holding them.
+  const idKey = ids.join(",");
+
   useEffect(() => {
-    if (!ready || ids.length === 0) return;
+    if (!ready || idKey === "") return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/lista?ids=${ids.join(",")}`);
+        const res = await fetch(`/api/lista?ids=${idKey}`);
         if (!res.ok) throw new Error();
         const data = (await res.json()) as { items: CardProduct[] };
-        if (!cancelled) setItems(data.items);
+        if (!cancelled) {
+          setItems(data.items);
+          setError(false);
+        }
       } catch {
         if (!cancelled) setError(true);
       }
@@ -30,9 +37,9 @@ export function WishlistPageClient({ dict }: { dict: Dictionary }) {
     return () => {
       cancelled = true;
     };
-  }, [ids, ready]);
+  }, [idKey, ready]);
 
-  const resolved = ready && ids.length === 0 ? [] : items;
+  const resolved = ready && idKey === "" ? [] : items;
 
   if (error) {
     return (

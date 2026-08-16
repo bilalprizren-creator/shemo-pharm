@@ -17,6 +17,7 @@ import { logSecurityEvent } from "@/lib/security-log";
 import { sql } from "@/lib/db";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
 import { isAllowedImageSrc } from "@/lib/images";
+import { parsePriceEuros } from "@/lib/price-input";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 import { sendMail, siteOrigin } from "@/lib/mail";
 import { accountApprovedMessage } from "@/lib/mail-templates";
@@ -33,6 +34,24 @@ export interface AdminFormState {
   error?: string;
   success?: string;
   fieldErrors?: Record<string, string>;
+}
+
+/**
+ * A zod failure reduced to one message per field.
+ *
+ * First issue wins: a field with three complaints has room for one line under
+ * it, and the first is the one that describes what was actually typed. Not
+ * exported — every export of this file becomes a POST endpoint.
+ */
+function fieldErrorsFrom(error: {
+  issues: readonly { readonly path: readonly PropertyKey[]; readonly message: string }[];
+}): Record<string, string> {
+  const fieldErrors: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = String(issue.path[0] ?? "form");
+    if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+  }
+  return fieldErrors;
 }
 
 /* ------------------------------- Auth ---------------------------------- */
@@ -231,18 +250,31 @@ function parseCategoryIds(formData: FormData): number[] {
     .filter((n) => Number.isInteger(n) && n > 0);
 }
 
+/**
+ * Replaces a product's category links.
+ *
+ * The two statements go in one transaction because the first destroys what the
+ * second restores: a DELETE that lands while the INSERT does not leaves the
+ * product in no category at all, and the recount that follows would write that
+ * loss into every ancestor's count. The neon HTTP driver takes an array of
+ * un-awaited queries and sends them as a single non-interactive transaction.
+ */
 async function syncProductCategories(
   productId: number,
   categoryIds: number[]
 ): Promise<void> {
-  await sql`DELETE FROM product_categories WHERE product_id = ${productId}`;
-  if (categoryIds.length) {
-    await sql`
-      INSERT INTO product_categories (product_id, category_id)
-      SELECT ${productId}, id FROM categories WHERE id = ANY(${categoryIds})
-      ON CONFLICT DO NOTHING
-    `;
-  }
+  await sql.transaction([
+    sql`DELETE FROM product_categories WHERE product_id = ${productId}`,
+    ...(categoryIds.length
+      ? [
+          sql`
+            INSERT INTO product_categories (product_id, category_id)
+            SELECT ${productId}, id FROM categories WHERE id = ANY(${categoryIds})
+            ON CONFLICT DO NOTHING
+          `,
+        ]
+      : []),
+  ]);
   await recountCategories();
 }
 
@@ -300,12 +332,7 @@ function productFromForm(formData: FormData) {
     description: formData.get("description"),
   });
   if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = String(issue.path[0] ?? "form");
-      if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-    }
-    return { fieldErrors } as const;
+    return { fieldErrors: fieldErrorsFrom(parsed.error) } as const;
   }
   const d = parsed.data;
   const priceCents = Math.round(d.price * 100);
@@ -391,7 +418,7 @@ export async function updateProductAction(
   if ("fieldErrors" in result) return { fieldErrors: result.fieldErrors };
   const p = result.data;
 
-  await sql`
+  const updated = (await sql`
     UPDATE products SET
       name = ${p.name}, sku = ${p.sku}, price_cents = ${p.priceCents},
       regular_cents = ${p.regularCents}, on_sale = ${p.regularCents > p.priceCents},
@@ -400,7 +427,13 @@ export async function updateProductAction(
       display_name = ${p.displayName}, image_override = ${p.imageOverride},
       featured = ${p.featured}, hidden = ${p.hidden}, updated_at = now()
     WHERE id = ${id}
-  `;
+    RETURNING id
+  `) as { id: number }[];
+  // Without this the form answers "saved" for a product that is not there —
+  // an id edited in the URL, or a row deleted in another tab — and then goes
+  // on to write category links for it.
+  if (updated.length === 0) return { error: "Produkti nuk u gjet." };
+
   await syncProductCategories(id, parseCategoryIds(formData));
   await logMutation(admin, "update-product", { productId: id, name: p.name });
   revalidateCatalog();
@@ -416,10 +449,66 @@ export async function toggleProductFlagAction(formData: FormData): Promise<void>
     await sql`UPDATE products SET featured = NOT featured, updated_at = now() WHERE id = ${id}`;
   } else if (flag === "hidden") {
     await sql`UPDATE products SET hidden = NOT hidden, updated_at = now() WHERE id = ${id}`;
+    // recountCategories counts `hidden = false` only, so this button moves
+    // every ancestor's total. Without the recount, hiding the last product of
+    // a category leaves it advertised — count > 0 is what puts a category in
+    // the nav, on /kategorite, on the homepage and in the sitemap.
+    await recountCategories();
   } else if (flag === "inStock") {
     await sql`UPDATE products SET in_stock = NOT in_stock, updated_at = now() WHERE id = ${id}`;
   }
   revalidateCatalog();
+}
+
+/**
+ * Changes one product's price straight from the list, without opening the form.
+ *
+ * The wholesale price is the only field this writes, but it cannot be written on
+ * its own: `regular_cents` is the struck-through price and `on_sale` is derived
+ * from the pair, so a bare price_cents update would leave a product advertised
+ * as an offer at a price no longer below its regular one — or the reverse, a
+ * price cut that never shows as a cut.
+ *
+ * The three assignments below reproduce exactly what productFromForm() computes
+ * for the full form. Postgres evaluates every SET expression against the row as
+ * it was, so `on_sale` reads the old regular_cents while regular_cents is itself
+ * being raised — which is the same test as "new regular > new price".
+ */
+export async function updateProductPriceAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return { error: "ID e pavlefshme." };
+
+  const cents = parsePriceEuros(formData.get("price"));
+  // One message for every way the field can be wrong: the row has space for a
+  // line, not for a taxonomy of what a price is.
+  if (cents === null) {
+    return { fieldErrors: { price: "Shkruani një çmim si 12,50." } };
+  }
+
+  const updated = (await sql`
+    UPDATE products SET
+      price_cents = ${cents},
+      regular_cents = GREATEST(regular_cents, ${cents}),
+      on_sale = regular_cents > ${cents},
+      updated_at = now()
+    WHERE id = ${id}
+    RETURNING id
+  `) as { id: number }[];
+  // Same guard as updateProductAction: without it the row answers "saved" for a
+  // product that is not there.
+  if (updated.length === 0) return { error: "Produkti nuk u gjet." };
+
+  // Unlike the flag toggles, this one is logged — a price is money, and it is
+  // exactly the kind of change where "who did this, and when" has an answer
+  // somebody will want.
+  await logMutation(admin, "update-price", { productId: id, priceCents: cents });
+  // No recountCategories(): only `hidden` and category links move those totals.
+  revalidateCatalog();
+  return { success: "U ruajt." };
 }
 
 export async function deleteProductAction(formData: FormData): Promise<void> {
@@ -427,6 +516,10 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await sql`DELETE FROM products WHERE id = ${id}`;
+  // The FK cascade drops the product_categories rows, but nothing recomputes
+  // the counts those rows fed — every other product mutation reaches
+  // recountCategories through syncProductCategories, and this one does not.
+  await recountCategories();
   await logMutation(admin, "delete-product", { productId: id });
   revalidateCatalog();
   redirect("/admin/produktet");
@@ -508,12 +601,7 @@ export async function updateCategoryAction(
     kind: formData.get("kind"),
   });
   if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = String(issue.path[0] ?? "form");
-      if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-    }
-    return { fieldErrors };
+    return { fieldErrors: fieldErrorsFrom(parsed.error) };
   }
   const d = parsed.data;
 
