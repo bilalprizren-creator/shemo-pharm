@@ -74,7 +74,14 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
       <ul className="divide-y divide-ink-900/6 rounded-xl border border-ink-900/8 bg-white">
         {resolved.map((p) => (
-          <li key={p.id} className="flex items-center gap-3 p-3.5 sm:gap-4 sm:p-4">
+          <li
+            key={p.id}
+            // Wraps rather than squeezes: with 44px steppers the quantity block
+            // needs 138px, which on a 320px screen left the product name about
+            // thirty. Below roughly 350px the controls drop to their own line;
+            // above it the row is unchanged.
+            className="flex flex-wrap items-center gap-3 p-3.5 sm:gap-4 sm:p-4"
+          >
             <Link
               href={langHref(lang, `/produktet/${p.slug}`)}
               className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 bg-white sm:size-20"
@@ -86,7 +93,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               )}
             </Link>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-20 flex-1">
               <Link
                 href={langHref(lang, `/produktet/${p.slug}`)}
                 className="line-clamp-2 text-sm font-semibold text-ink-900 hover:text-brand-700"
@@ -103,13 +110,16 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               )}
             </div>
 
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex h-10 items-center rounded-lg border border-ink-900/12">
+            <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
+              {/* 44px steppers on touch: at size-9 these were 36px, below the
+                  target size this project keeps everywhere else, and they sit
+                  directly beside a destructive control. */}
+              <div className="flex h-11 items-center rounded-lg border border-ink-900/12">
                 <button
                   type="button"
                   onClick={() => setQty(p.id, qtyOf(p.id) - 1)}
                   aria-label={fmt(dict.cartPage.decreaseFor, { name: p.name })}
-                  className="flex size-9 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
+                  className="flex size-11 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
                 >
                   <Minus className="size-3.5" aria-hidden />
                 </button>
@@ -123,7 +133,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
                   type="button"
                   onClick={() => setQty(p.id, qtyOf(p.id) + 1)}
                   aria-label={fmt(dict.cartPage.increaseFor, { name: p.name })}
-                  className="flex size-9 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50"
+                  className="flex size-11 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50"
                 >
                   <Plus className="size-3.5" aria-hidden />
                 </button>
@@ -132,7 +142,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
                 type="button"
                 onClick={() => remove(p.id)}
                 aria-label={fmt(dict.cartPage.removeFor, { name: p.name })}
-                className="flex items-center gap-1 text-xs font-medium text-ink-400 hover:text-red-600"
+                className="flex min-h-11 items-center gap-1 px-2 text-xs font-medium text-ink-400 hover:text-red-600"
               >
                 <Trash2 className="size-3.5" aria-hidden />
                 {dict.cartPage.removeWord}
@@ -235,7 +245,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
             <button
               type="button"
               onClick={clear}
-              className="w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
+              className="min-h-11 w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
             >
               {dict.cartPage.clearCart}
             </button>

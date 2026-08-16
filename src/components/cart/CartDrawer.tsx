@@ -204,12 +204,15 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                     )}
 
                     <div className="mt-2 flex items-center justify-between gap-2">
-                      <div className="flex h-9 items-center rounded-lg border border-ink-900/12">
+                      {/* The drawer is the cart most customers actually use on
+                          a phone, and its steppers were the smallest controls
+                          on the site at 32px. Same 44px as the /shporta page. */}
+                      <div className="flex h-11 items-center rounded-lg border border-ink-900/12">
                         <button
                           type="button"
                           onClick={() => setQty(p.id, order.qtyOf(p.id) - 1)}
                           aria-label={fmt(dict.cartPage.decreaseFor, { name: p.name })}
-                          className="flex size-8 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
+                          className="flex size-11 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
                         >
                           <Minus className="size-3.5" aria-hidden />
                         </button>
@@ -223,7 +226,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                           type="button"
                           onClick={() => setQty(p.id, order.qtyOf(p.id) + 1)}
                           aria-label={fmt(dict.cartPage.increaseFor, { name: p.name })}
-                          className="flex size-8 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50"
+                          className="flex size-11 items-center justify-center rounded-r-lg text-ink-700 hover:bg-brand-50"
                         >
                           <Plus className="size-3.5" aria-hidden />
                         </button>
@@ -232,7 +235,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                         type="button"
                         onClick={() => remove(p.id)}
                         aria-label={fmt(dict.cartPage.removeFor, { name: p.name })}
-                        className="flex items-center gap-1 text-xs font-medium text-ink-400 hover:text-red-600"
+                        className="flex min-h-11 items-center gap-1 px-2 text-xs font-medium text-ink-400 hover:text-red-600"
                       >
                         <Trash2 className="size-3.5" aria-hidden />
                         {dict.cartPage.removeWord}

@@ -66,7 +66,7 @@ function IconAction({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="group relative flex size-11 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700"
+      className="group relative flex size-10 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 sm:size-11"
     >
       <Icon className="size-5.5" strokeWidth={1.75} aria-hidden />
       {badge !== undefined && badge > 0 && (
@@ -253,7 +253,10 @@ export function HeaderClient({
           }`}
         >
           <div
-            className={`mx-auto flex max-w-7xl items-center gap-2 px-4 transition-[height] duration-300 lg:gap-4 lg:px-6 ${
+            // px-3 and the tighter gap below `sm`: at 320 px the logo plus the
+            // five icon buttons overran the viewport and the whole page
+            // scrolled sideways. Everything from `sm` up is unchanged.
+            className={`mx-auto flex max-w-7xl items-center gap-1 px-3 transition-[height] duration-300 sm:gap-2 sm:px-4 lg:gap-4 lg:px-6 ${
               scrolled ? "h-16" : "h-16 lg:h-20"
             }`}
           >
@@ -269,7 +272,7 @@ export function HeaderClient({
                 height={56}
                 priority
                 className={`w-auto transition-[height] duration-300 ${
-                  scrolled ? "h-9" : "h-9 lg:h-11"
+                  scrolled ? "h-8 sm:h-9" : "h-8 sm:h-9 lg:h-11"
                 }`}
               />
             </Link>
@@ -321,7 +324,7 @@ export function HeaderClient({
               })}
             </nav>
 
-            <div className="ml-auto flex items-center gap-1 lg:gap-2">
+            <div className="ml-auto flex items-center gap-0.5 sm:gap-1 lg:gap-2">
               {/* Search — icon toggle opens the full-width overlay */}
               <button
                 type="button"
@@ -331,7 +334,7 @@ export function HeaderClient({
                 }}
                 aria-label={dict.header.searchOpen}
                 aria-expanded={searchOpen}
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700"
+                className="flex size-10 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 sm:size-11"
               >
                 <Search className="size-5.5" aria-hidden />
               </button>
@@ -356,7 +359,7 @@ export function HeaderClient({
                 type="button"
                 onClick={() => setMobileOpen(true)}
                 aria-label={dict.nav.openMenu}
-                className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 lg:hidden"
+                className="flex size-10 items-center justify-center rounded-full text-ink-700 hover:bg-brand-50 hover:text-brand-700 sm:size-11 lg:hidden"
               >
                 <Menu className="size-6" aria-hidden />
               </button>
