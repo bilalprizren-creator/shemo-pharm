@@ -39,6 +39,12 @@ export interface NavCategory {
 
 const NAV_PATHS = [
   { href: "/produktet", key: "products" },
+  // Its own rubric rather than a footer link: the printed catalogue is how
+  // partners holding the paper edition navigate, and it answers a different
+  // question from /produktet — "what is on section 6.7" rather than "show me
+  // everything filterable". It also lives on its own domain, which nobody
+  // discovers from a shop that never mentions it.
+  { href: "/katalog", key: "catalog" },
   { href: "/markat", key: "brands" },
   { href: "/oferta", key: "offers" },
   { href: "/rreth-nesh", key: "about" },

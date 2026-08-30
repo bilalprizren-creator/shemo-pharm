@@ -5,6 +5,7 @@ import type { CardProduct } from "@/lib/types";
 import { langHref } from "@/lib/i18n";
 import type { SiteMode } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PhotoWell, PHOTO_SHADOW } from "./PhotoWell";
 import { WishlistButton } from "./WishlistButton";
 import { AddToCartIconButton } from "@/components/cart/AddToCartButton";
 import { fmt } from "@/lib/i18n";
@@ -34,15 +35,10 @@ export function ProductCard({
   const isKatalog = mode === "katalog";
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
-      {/* The photos carry a real alpha channel (scripts/cutout-images.mjs), so
-          the catalogue seats them on a soft tint and lets them float, the way
-          the printed pages do. The shop keeps the white well — same images,
-          and against white the transparency simply does not read. */}
-      <div
-        className={`relative aspect-square w-full ${
-          isKatalog ? "bg-gradient-to-b from-white to-tint" : "bg-white"
-        }`}
-      >
+      {/* One well on both sites. It used to be a plain white box here and the
+          tinted one only on the catalogue; see PhotoWell for why that was the
+          wrong way round. */}
+      <PhotoWell className="aspect-square w-full">
         {product.image ? (
           <Image
             src={product.image}
@@ -50,9 +46,7 @@ export function ProductCard({
             fill
             sizes="(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 280px"
             priority={priority}
-            className={`object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04] ${
-              isKatalog ? "drop-shadow-[0_8px_18px_rgba(45,40,30,0.14)]" : ""
-            }`}
+            className={`relative object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04] ${PHOTO_SHADOW}`}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>
@@ -80,12 +74,20 @@ export function ProductCard({
             {dict.product.outOfStock}
           </span>
         )}
-      </div>
+      </PhotoWell>
 
       <div className="flex flex-1 flex-col gap-1 border-t border-line p-4">
         {/* The catalogue site has no product pages — the printed catalogue it
             replaces had none either, and its job is looking a code up, not
             opening a detail view. So its cards are plain text, not links. */}
+        {/* The shelf above the name, not beside the code below it. Down a grid
+            of 48 near-identical syringes the category is what the eye sorts by
+            first, and it can only do that if it comes first. */}
+        {product.categoryName && (
+          <p className="truncate text-[11px] font-bold uppercase tracking-[0.06em] text-accent-700">
+            {product.categoryName}
+          </p>
+        )}
         <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-ink-900">
           {isKatalog ? (
             product.name
@@ -98,15 +100,9 @@ export function ProductCard({
             </Link>
           )}
         </h3>
-        {(product.categoryName || product.sku) && (
-          <p className="truncate text-xs font-medium text-brand-600">
-            {product.categoryName}
-            {product.categoryName && product.sku ? " · " : ""}
-            {product.sku && (
-              <span className="font-normal text-ink-400">
-                {dict.common.code} {product.sku}
-              </span>
-            )}
+        {product.sku && (
+          <p className="truncate text-xs text-ink-400">
+            {dict.common.code} {product.sku}
           </p>
         )}
 
