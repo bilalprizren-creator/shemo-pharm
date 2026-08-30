@@ -137,6 +137,14 @@ const nextConfig: NextConfig = {
     // Deliberately WebP only. Adding AVIF would double the transformation count
     // for a modest extra saving on files that are already ~30 KB.
     formats: ["image/webp"],
+
+    // Required since Next 16, where the default narrowed to [75]. 85 is for the
+    // two large product surfaces only — the card and the detail gallery. The
+    // source files are already WebP q82 (scripts/cutout-images.mjs), so 75 is a
+    // second lossy pass, and it lands on the small print of a carton. The
+    // 44-80px thumbnails stay on 75: invisible there, and every extra quality
+    // is another set of transformations against the plan's quota.
+    qualities: [75, 85],
   },
 };
 

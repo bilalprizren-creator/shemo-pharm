@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { fmt, langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
 import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
@@ -176,19 +177,26 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                   <Link
                     href={langHref(lang, `/produktet/${p.slug}`)}
                     onClick={closeCart}
-                    className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 bg-white"
+                    className="shrink-0"
                   >
-                    {p.image ? (
-                      <Image
-                        src={p.image}
-                        alt=""
-                        fill
-                        sizes="64px"
-                        className="object-contain p-1.5"
-                      />
-                    ) : (
-                      <Package className="size-6 text-ink-300" aria-hidden />
-                    )}
+                    <PhotoWell
+                      className="flex size-16 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6"
+                      cutOut={isCutOut(p.image)}
+                    >
+                      {p.image ? (
+                        <Image
+                          src={p.image}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className={`relative object-contain p-1.5 ${
+                            isCutOut(p.image) ? PHOTO_SHADOW_SM : ""
+                          }`}
+                        />
+                      ) : (
+                        <Package className="size-6 text-ink-300" aria-hidden />
+                      )}
+                    </PhotoWell>
                   </Link>
 
                   <div className="min-w-0 flex-1">

@@ -17,10 +17,17 @@ export function ProductSkeleton() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
-          <div className="aspect-square w-full rounded-2xl bg-ink-900/5" />
+          {/* The well's own ground rather than a grey block: the photo boxes
+              are the largest thing on the page, and settling from cool grey to
+              warm paper is a visible flash. `animate-pulse` is the loading
+              signal; the colour does not need to be one too. */}
+          <div className="aspect-square w-full rounded-2xl bg-gradient-to-b from-white to-[#f7f5f0]" />
           <div className="mt-3 flex gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="size-18 rounded-xl bg-ink-900/5" />
+              <div
+                key={i}
+                className="size-18 rounded-xl bg-gradient-to-b from-white to-[#f7f5f0]"
+              />
             ))}
           </div>
         </div>

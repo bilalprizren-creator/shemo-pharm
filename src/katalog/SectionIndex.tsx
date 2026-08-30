@@ -13,6 +13,7 @@ import { langHref, fmt } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
+import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
 
 /**
  * The printed catalogue's table of contents: the numbered sections in the order
@@ -109,7 +110,15 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                 href={href(`/katalog/${catalogSectionSlug(section)}`)}
                 className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover"
               >
-                <div className="relative flex size-16 shrink-0 items-center justify-center rounded-xl bg-surface">
+                {/* Was an unconditional `bg-surface`, which is the one thing a
+                    product well must never be: ivory behind an uncut photo
+                    shows its white rectangle as a hard box, and the first
+                    product of a section is as likely as any to be one of the
+                    sixteen. */}
+                <PhotoWell
+                  className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+                  cutOut={isCutOut(cover)}
+                >
                   {cover ? (
                     <Image
                       src={cover}
@@ -117,12 +126,14 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                       fill
                       sizes="64px"
                       priority={i < 6}
-                      className="object-contain p-2"
+                      className={`relative object-contain p-2 ${
+                        isCutOut(cover) ? PHOTO_SHADOW_SM : ""
+                      }`}
                     />
                   ) : (
                     <Package className="size-6 text-ink-300" strokeWidth={1.25} aria-hidden />
                   )}
-                </div>
+                </PhotoWell>
                 <div className="min-w-0 flex-1">
                   <span className="font-mono text-xs font-bold text-accent-700">
                     {section.catalogNo}

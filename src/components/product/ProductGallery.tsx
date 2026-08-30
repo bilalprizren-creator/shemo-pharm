@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Package } from "lucide-react";
-import { PhotoWell, PHOTO_SHADOW, isCutOut } from "./PhotoWell";
+import { PhotoWell, PHOTO_SHADOW, PHOTO_SHADOW_SM, isCutOut } from "./PhotoWell";
 
 export function ProductGallery({
   images,
@@ -33,6 +33,7 @@ export function ProductGallery({
             fill
             priority
             sizes="(max-width: 1024px) 92vw, 540px"
+            quality={85}
             className={`relative object-contain p-8 ${isCutOut(current) ? PHOTO_SHADOW : ""}`}
           />
         ) : (
@@ -53,23 +54,28 @@ export function ProductGallery({
                   .replace("{i}", String(i + 1))
                   .replace("{total}", String(images.length))}
                 aria-current={i === index}
-                // Same ground as the big view, without the glow — at 72px it
-                // would only read as a smudge.
-                className={`relative size-18 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
-                  isCutOut(src) ? "bg-gradient-to-b from-white to-[#f4f7f5]" : "bg-white"
-                } ${
-                  i === index
-                    ? "border-brand-500"
-                    : "border-ink-900/8 hover:border-brand-300"
-                }`}
+                className="relative block"
               >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  sizes="72px"
-                  className="object-contain p-1.5"
-                />
+                {/* The same well as the big view above rather than a hand-copied
+                    gradient, which is how the two drifted apart before. */}
+                <PhotoWell
+                  className={`size-18 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
+                    i === index
+                      ? "border-brand-500"
+                      : "border-ink-900/8 hover:border-brand-300"
+                  }`}
+                  cutOut={isCutOut(src)}
+                >
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    className={`relative object-contain p-1.5 ${
+                      isCutOut(src) ? PHOTO_SHADOW_SM : ""
+                    }`}
+                  />
+                </PhotoWell>
               </button>
             </li>
           ))}

@@ -46,6 +46,12 @@ export function ProductCard({
             alt={product.name}
             fill
             sizes="(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 280px"
+            // The source files are already WebP q82 (scripts/cutout-images.mjs),
+            // so the default 75 is a second lossy pass over the fine print on a
+            // carton. Only the two large surfaces ask for 85; the 44-80px
+            // thumbnails stay on 75, where the difference is invisible and the
+            // extra transformations would not be.
+            quality={85}
             priority={priority}
             className={`relative object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04] ${
               cutOut ? PHOTO_SHADOW : ""
