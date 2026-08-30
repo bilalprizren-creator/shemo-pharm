@@ -61,6 +61,35 @@ const FORCE = argv.includes("--force");
  * unreachable. Implies --force, since the output file already exists.
  */
 const RECUT = argv.includes("--recut");
+/**
+ * Recut only these codes, comma-separated.
+ *
+ * --recut on its own is all or nothing, and all is the wrong answer once the
+ * range is in a state worth keeping: the note under MIN_LAYER_KEEP records
+ * three photos a blanket recut makes worse, and there is no reason to put 2 000
+ * good files through a resample to reach 90 bad ones. Implies --recut.
+ */
+const onlyAt = argv.indexOf("--only");
+/**
+ * Separated by semicolons when any of the codes contains a comma, which in this
+ * catalogue they do: "4517 , 4533" is one product with two article numbers, and
+ * splitting the list on commas silently turns it into two codes that match
+ * nothing. Comma still works for the ordinary case, so
+ * `--only 1681,9658` reads the way anyone would expect.
+ */
+const ONLY =
+  onlyAt !== -1
+    ? new Set(
+        String(argv[onlyAt + 1] ?? "")
+          .split(String(argv[onlyAt + 1] ?? "").includes(";") ? ";" : ",")
+          .map((s) => skuKeyRaw(s))
+          .filter(Boolean)
+      )
+    : null;
+/** skuKey, but usable up here before the constants it sits among. */
+function skuKeyRaw(s) {
+  return String(s ?? "").toLowerCase().replace(/\s+/g, "");
+}
 
 const JARA = "C:/calude code/Jara pharmcay/public/products";
 const OUT = path.join(ROOT, "public/products");
@@ -151,13 +180,93 @@ const KEEP_FLAT = new Set([
   // walks in through those and leaves the rest in pieces. There is nothing to
   // cut out here in the first place: the whole frame is the picture.
   "1591", "2316", "2317", "3063", "8523", "8620",
+  // 8702 belongs here too, and it took a seeded fill to prove it: given its
+  // backdrop colour the fill clears the grey and leaves a soft grey cloud
+  // behind the model's hand, because a photographed arm on a lit ground has a
+  // shadow that no flat colour describes.
+  "8702",
 
   // Pale product on a pale ground, where removing the ground takes the product
   // with it: a white toilet-seat riser, a sterile gauze pouch, a clear infusion
   // bottle, glass ampoules, a white-on-white carton.
   "1164", "5287", "6241", "8832", "9065",
+
+  /**
+   * White cartons the fill went through rather than around.
+   *
+   * The same failure as the group above, but it took the coherence measure to
+   * find them: each one passes both safety tests, because the printing on the
+   * face survives and reaches the edges of the box, so the bounding box stays
+   * full width and the ink left over clears 6%. What is actually left is the
+   * ink alone — Diclofenac 1075 comes back as 38 fragments holding 17% between
+   * the largest of them, which is the green swoosh and the lettering floating
+   * in nothing where a white box used to be.
+   *
+   * On white that is invisible and always was, which is why it survived this
+   * long. On the ground the site now uses, the box does not read as white — it
+   * reads as a hole with text on it. Their original photo is the better answer
+   * and PhotoWell puts an uncut photo on plain white.
+   *
+   * Found by measurement, kept by hand: this is the list the "came apart"
+   * section of the report produced, checked against the contact sheet.
+   */
+  "1075", "1597", "1722", "1746", "1753", "1764", "2112", "2113",
+  "7621", "7625", "7800", "8417", "8710", "9031", "9658", "9744",
+  "9804", "9808", "9823", "9970", "91003",
 ]);
 
+
+/**
+ * Photos whose backdrop the passes never reach, and the colour it is.
+ *
+ * The counterpart to KEEP_FLAT above, and it exists for the same reason: the
+ * comment there records that two automatic tests were tried and neither
+ * separates a backdrop slab from a pale carton, so this is eyes rather than
+ * arithmetic. The difference is what is done about it — KEEP_FLAT gives up and
+ * keeps the original, this hands the fill the one colour it could not work out
+ * for itself and lets it finish the job.
+ *
+ * It is safe in a way another heuristic would not be, because it can only fire
+ * on a code that is written here. The existing MIN_SPAN / MIN_INK net still
+ * judges the result, so a colour entered wrongly costs the photo nothing — it
+ * falls back to its original exactly as any other failure does.
+ *
+ * Measured off the checked-in files rather than copied from the report:
+ * audit/cutout-images.md lists 30 flagged photos, and 13 of those no longer
+ * carry anything (Winx 3039 and 3040, Turmeric 0140, Calcium 7182 and Trodon
+ * 1734 all measure under 3% of their opaque pixels). The 17 below are the ones
+ * that still do, plus the seven where a thinner ring survives.
+ *
+ * 3039 is deliberately absent. The note under MIN_LAYER_KEEP warns that a
+ * --recut regresses it, and the checked-in file measures 1.0% — it is already
+ * the good one, and the only thing this could do to it is harm.
+ *
+ * Twenty-five codes were tried and eleven kept. The other fourteen are listed
+ * at the bottom so nobody spends the afternoon proving it again: on those the
+ * backdrop and the product are the same colour to within the tolerance, so the
+ * seeded fill takes the product with it and MIN_SPAN / MIN_INK throw the result
+ * away. They keep the cut-out they already had, slab and all. Clearing those
+ * needs a hand or a re-shoot, not a better number.
+ */
+const BACKDROP_REVIEWED = [
+  // Cleared, and the slab measured afterwards at under 2% of the ink: Bio
+  // Hanfol 2111 went from 80% grey to 0.2%, the cod liver oil 0139 from 66% to
+  // 1.6%, Artilane 7417 from 40% to nothing.
+  ["2111", [232, 232, 232]], ["0139", [213, 212, 208]], ["7417", [199, 220, 240]],
+  ["5277", [233, 235, 237]], ["5061", [241, 241, 236]], ["5062", [237, 240, 237]],
+
+  // Cleared a layer and revealed a darker one underneath — these were shot on a
+  // backdrop that bands rather than one flat colour, so they are better than
+  // they were and still flagged. Worth another colour here when someone reads
+  // the report; harmless until then.
+  ["NT021", [236, 233, 234]], ["5014", [236, 234, 234]],
+  ["5015", [236, 234, 234]], ["5017", [236, 234, 234]],
+
+  // Tried, and the fill takes the product with it. Do not re-add without a
+  // different approach:
+  //   1095 7472 7473 5060 5274 9063 1200 4960 8525A 8600 NT019 6711 8449
+  //   "4517 , 4533"
+];
 
 /**
  * How far one step of the backdrop may drift from the pixel it came from.
@@ -358,7 +467,7 @@ function frontierColour(buf, width, height) {
  * there. Later passes target whatever flat colour still rings the product, and
  * stop as soon as the frontier stops being flat.
  */
-function floodFillBackground(buf, width, height) {
+function floodFillBackground(buf, width, height, backdrop = null) {
   const n = width * height;
 
   // The conservative pass, run first on a copy. It is wanted for two decisions
@@ -421,6 +530,17 @@ function floodFillBackground(buf, width, height) {
   }
   cleared += gainedByLayers;
 
+  // The reviewed colour, last. It goes after the undo rather than before the
+  // layer passes so that it is working on the same buffer a human looked at:
+  // for every code in BACKDROP_REVIEWED the slab is what survived everything
+  // above, and seeding the fill with it is the only instruction the automatic
+  // passes were missing.
+  if (backdrop) cleared += fillFrom(buf, width, height, backdrop, 26);
+
+  // Crumbs last of all, so that the span and ink reported below describe the
+  // product rather than the product plus whatever the fill stranded around it.
+  const { specks, components, largestShare } = pruneSpecks(buf, width, height);
+
   // Whatever still rings the product after three passes. A flat colour here is
   // a backdrop the fill could not reach — worth a human look, but not a reason
   // to throw the photo away.
@@ -433,6 +553,9 @@ function floodFillBackground(buf, width, height) {
     layersUndone,
     slabRemoved,
     backdropLeft,
+    specks,
+    components,
+    largestShare,
     ...measure(buf, width, height),
   };
 }
@@ -442,6 +565,106 @@ function countInk(buf, n) {
   let ink = 0;
   for (let i = 0; i < n; i++) if (buf[i * 4 + 3] > 8) ink++;
   return ink;
+}
+
+/**
+ * The share of the ink under 0.5% that a component has to clear to be product.
+ *
+ * A fill that stops short leaves crumbs: a rim of the backdrop that never
+ * connected to the border, the ghost of an edge, a few dozen stranded pixels.
+ * On white they are invisible and nobody ever noticed; on the tinted ground
+ * they are specks, and they also pin the bounding box to the full frame, which
+ * is what made Erythromycin 1597 measure as correctly framed while the product
+ * in it is half size.
+ *
+ * 0.5% of the ink rather than of the canvas, so the bar scales with how much
+ * product there is. On the range that is a blob of roughly 55x55 at the median
+ * — smaller than any separately-photographed part of a product in this
+ * catalogue, and far larger than any crumb.
+ */
+const SPECK = 0.005;
+
+/**
+ * How much of the ink the largest piece must hold for the photo to be one
+ * coherent thing.
+ *
+ * Below this the fill did not clear a background, it went through the product:
+ * 1597 comes back as 97 fragments with the biggest holding 46%, because the
+ * white face of the carton was connected to the border and went with it. Such a
+ * photo must not be reframed — reframing scales the wreckage up to 86% and
+ * makes it the most prominent thing in the grid. It is reported instead.
+ *
+ * Multi-part packshots stay above it comfortably: a boxed product photographed
+ * beside its device is one touching blob (the oximeter 0002 is a single
+ * component), and the ampoule strips that genuinely do come apart hold 41/27/25
+ * between three pieces, so their largest still clears the bar once the crumbs
+ * are gone.
+ */
+const MIN_COHERENCE = 0.5;
+
+/**
+ * Erase the crumbs and describe what is left.
+ *
+ * Returns the bounding box of the components worth keeping, so a stranded pixel
+ * in the corner cannot claim the photo is full-frame.
+ */
+function pruneSpecks(buf, width, height) {
+  const n = width * height;
+  const lab = new Int32Array(n).fill(-1);
+  const comps = [];
+  const stack = [];
+
+  for (let seed = 0; seed < n; seed++) {
+    if (lab[seed] !== -1 || buf[seed * 4 + 3] <= 8) continue;
+    const id = comps.length;
+    let count = 0;
+    let minX = width, minY = height, maxX = -1, maxY = -1;
+    stack.push(seed);
+    lab[seed] = id;
+    while (stack.length) {
+      const i = stack.pop();
+      count++;
+      const x = i % width;
+      const y = (i / width) | 0;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      const push = (j) => {
+        if (j >= 0 && j < n && lab[j] === -1 && buf[j * 4 + 3] > 8) {
+          lab[j] = id;
+          stack.push(j);
+        }
+      };
+      if (x > 0) push(i - 1);
+      if (x < width - 1) push(i + 1);
+      push(i - width);
+      push(i + width);
+    }
+    comps.push({ id, count, minX, minY, maxX, maxY });
+  }
+
+  const totalInk = comps.reduce((a, b) => a + b.count, 0);
+  if (!totalInk) return { specks: 0, largestShare: 0, components: 0 };
+
+  const keep = new Set(
+    comps.filter((cp) => cp.count / totalInk >= SPECK).map((cp) => cp.id)
+  );
+  let specks = 0;
+  for (let i = 0; i < n; i++) {
+    const id = lab[i];
+    if (id !== -1 && !keep.has(id)) {
+      buf[i * 4 + 3] = 0;
+      specks++;
+    }
+  }
+
+  const largest = comps.reduce((a, b) => (b.count > a.count ? b : a));
+  return {
+    specks,
+    components: keep.size,
+    largestShare: largest.count / totalInk,
+  };
 }
 
 /** Opaque bounding box and opaque area, both as a share of the canvas. */
@@ -462,7 +685,12 @@ function measure(buf, width, height) {
     }
   }
   const span = maxX < 0 ? 0 : Math.max(maxX - minX + 1, maxY - minY + 1) / width;
-  return { span, ink: ink / (width * height) };
+  // How far the product sits from the middle, as a share of the canvas. Zero
+  // when migrate-images.mjs centred it and nothing has moved since; a slab
+  // coming off one side moves it, and so does a photo that was never centred.
+  const offX = maxX < 0 ? 0 : (maxX + minX + 1) / 2 / width - 0.5;
+  const offY = maxX < 0 ? 0 : (maxY + minY + 1) / 2 / height - 0.5;
+  return { span, ink: ink / (width * height), offX, offY };
 }
 
 /** Crop to what is actually opaque, then centre it on a transparent square. */
@@ -529,6 +757,14 @@ async function reframeTransparent(input) {
  */
 const skuKey = (s) => String(s ?? "").toLowerCase().replace(/\s+/g, "");
 
+/**
+ * BACKDROP_REVIEWED, keyed the way everything else here is keyed. KEEP_FLAT
+ * matches on a bare `.trim()`, which is why the codes carrying a comma or a
+ * trailing period have never been able to hit it; this side does not repeat
+ * that.
+ */
+const BACKDROP = new Map(BACKDROP_REVIEWED.map(([sku, rgb]) => [skuKey(sku), rgb]));
+
 function jaraIndex() {
   if (!existsSync(JARA)) return new Map();
   const byCode = new Map();
@@ -562,13 +798,21 @@ if (PRUNE) {
     if (r.image_override) referenced.add(path.basename(r.image_override));
   }
 
+  // Every referenced file, indexed by the photo it was made from: the basename
+  // with any `-cutout` or `-cutout-v2` taken off. That is what makes "is there
+  // a replacement for this file?" answerable once a photo can be cut twice —
+  // asking for `<stem>-cutout.webp` by name kept every superseded file on disk
+  // the moment a `-v2` existed, because the name it looked for was no longer
+  // the one in the database.
+  const base = (f) => path.basename(f, path.extname(f)).replace(/-cutout(-v\d+)?$/, "");
+  const replacements = new Set([...referenced].map(base));
+
   let removed = 0;
   let freed = 0;
   for (const file of readdirSync(OUT)) {
     if (referenced.has(file)) continue;
     // Never delete something with no replacement in place.
-    const replacement = `${path.basename(file, path.extname(file))}-cutout.webp`;
-    if (!referenced.has(replacement)) {
+    if (!replacements.has(base(file))) {
       console.log(`  kept (no cut-out references it): ${file}`);
       continue;
     }
@@ -593,20 +837,27 @@ const done = [];
 const skipped = [];
 const flagged = [];
 const rejected = [];
+const cameApart = [];
+const reverted = [];
 
 let i = 0;
 for (const p of products) {
   if (i >= LIMIT) break;
+  if (ONLY && !ONLY.has(skuKey(p.sku))) continue;
   let current = p.images[0];
   let stem = path.basename(current, path.extname(current));
-  if (stem.endsWith("-cutout")) {
-    if (!RECUT) {
+  // `-cutout-v2` and any later revision, not just the first cut.
+  const cutSuffix = stem.match(/-cutout(-v\d+)?$/);
+  if (cutSuffix) {
+    if (!RECUT && !ONLY) {
       skipped.push({ ...p, why: "already a cut-out" });
       continue;
     }
     // Back to the photo this cut came from, so the fill starts from the pixels
-    // migrate-images.mjs wrote rather than from its own last answer.
-    stem = stem.slice(0, -"-cutout".length);
+    // migrate-images.mjs wrote rather than from its own last answer. The whole
+    // matched suffix, so a second recut starts from the original and not from
+    // `…-cutout-v2`.
+    stem = stem.slice(0, -cutSuffix[0].length);
     current = `/products/${stem}.webp`;
     if (!existsSync(path.join(OUT, `${stem}.webp`))) {
       skipped.push({ sku: p.sku, name: p.name, why: `no original beside ${p.images[0]}` });
@@ -623,7 +874,7 @@ for (const p of products) {
   // pay that again for work already on disk. A file that is already there is
   // reused; --force recuts everything.
   const outPathEarly = path.join(OUT, `${stem}-cutout.webp`);
-  if (!FORCE && !RECUT && existsSync(outPathEarly)) {
+  if (!FORCE && !RECUT && !ONLY && existsSync(outPathEarly)) {
     done.push({
       id: p.id,
       sku: p.sku,
@@ -646,6 +897,12 @@ for (const p of products) {
   let layersUndone = false;
   let slabRemoved = false;
   let backdropLeft = null;
+  let reframed = false;
+  let specks = 0;
+  let components = 0;
+  let largestShare = 1;
+  let offX = 0;
+  let offY = 0;
   let mark;
 
   // Having an alpha channel is not the same as having a transparent
@@ -664,10 +921,14 @@ for (const p of products) {
     const buf = await sharp(source).ensureAlpha().raw().toBuffer();
     let span;
     let ink;
-    ({ clearedPct, layers, layersUndone, slabRemoved, backdropLeft, span, ink } = floodFillBackground(
+    ({
+      clearedPct, layers, layersUndone, slabRemoved, backdropLeft,
+      specks, components, largestShare, span, ink, offX, offY,
+    } = floodFillBackground(
       buf,
       meta.width,
-      meta.height
+      meta.height,
+      BACKDROP.get(skuKey(p.sku)) ?? null
     ));
 
     // The safety net. A photo that failed it keeps the white background it has.
@@ -687,19 +948,86 @@ for (const p of products) {
         kept: current,
         spanPct: span * 100,
         inkPct: ink * 100,
-        why: flat ? "reviewed: backdrop slab survives the undo" : "too little left",
+        // KEEP_FLAT now holds three different failures — a slab surviving the
+        // undo, a scene rather than a packshot, and a carton the fill goes
+        // through — so the reason can only point at the list.
+        why: flat ? "reviewed: in KEEP_FLAT" : "too little left",
       });
+      /**
+       * Put a product that is already on a cut-out back on its original photo,
+       * but only on a reviewed decision.
+       *
+       * Without this KEEP_FLAT can only ever prevent a cut, never undo one: a
+       * photo cut badly in an earlier run keeps pointing at that file no matter
+       * what this run decides, because only `done` reaches the database. That
+       * made the entry useless for exactly the photos that need it most — the
+       * ones already shipping a bad cut on a tinted ground.
+       *
+       * `flat` and not the automatic tests, and the difference is not academic.
+       * A photo can fail MIN_SPAN or MIN_INK *in this run* while the cut-out it
+       * is already on is perfectly usable — that is precisely what a new pass
+       * does when it overreaches, and the seeded backdrop fill above overreaches
+       * on every pale-grey slab it was given. Reverting on that would answer a
+       * cut this run made badly by throwing away a cut an earlier run made well.
+       */
+      if (cutSuffix && flat) {
+        reverted.push({ id: p.id, sku: p.sku, name: p.name, to: current });
+      }
       continue;
     }
-    // Already framed by migrate-images.mjs — re-cropping would only shift it.
-    mark = await sharp(buf, {
+    const framed = await sharp(buf, {
       raw: { width: meta.width, height: meta.height, channels: 4 },
     })
       .png()
       .toBuffer();
+
+    /**
+     * Re-frame only what is no longer framed, and only where there is one
+     * coherent thing to frame.
+     *
+     * migrate-images.mjs put every product at 86% of the canvas, and while the
+     * fill is only lifting a white background off that is still true, so the
+     * old note here — "re-cropping would only shift it" — was right. It stops
+     * being true the moment a slab comes off: the product was 86% of a picture
+     * that included the backdrop, and what is left is smaller and usually no
+     * longer centred.
+     *
+     * The coherence guard is the half of this that matters. A small span has
+     * two causes that look identical to a measurement — a product that is
+     * legitimately smaller now its backdrop has gone, and a product the fill
+     * went through — and scaling the second one up to 86% turns a photo nobody
+     * looked at twice into the biggest thing in the grid. Where it does not
+     * hold, the photo is left exactly as it was and listed under "came apart"
+     * in the report, which is a job for eyes.
+     */
+    const misframed =
+      Math.abs(span - FILL) > 0.02 ||
+      // Off-centre counts as misframed on its own. Three knee braces come back
+      // at exactly 86% and sitting a tenth of the canvas to one side, which the
+      // span test alone waves through and the eye does not.
+      Math.abs(offX) > 0.03 ||
+      Math.abs(offY) > 0.03;
+    if (largestShare >= MIN_COHERENCE && misframed) {
+      ({ mark } = await reframeTransparent(framed));
+      reframed = true;
+    } else {
+      mark = framed;
+    }
   }
 
-  const outName = `${stem}-cutout.webp`;
+  /**
+   * A recut writes a new name, and it has to.
+   *
+   * The note at the top of this file explains why the first cut did not
+   * overwrite: next/image caches its variants for a month keyed by the source
+   * URL, so a photo replaced in place keeps serving the old one. That applies
+   * just as much to the second cut as it did to the first — recutting
+   * `…-cutout.webp` in place would fix nothing anybody can see until the cache
+   * expires. `-v2` is what makes it visible, and the DB write below is what
+   * points the product at it.
+   */
+  const revised = Boolean(cutSuffix);
+  const outName = revised ? `${stem}-cutout-v2.webp` : `${stem}-cutout.webp`;
   await sharp({
     create: {
       width: CANVAS,
@@ -723,8 +1051,17 @@ for (const p of products) {
     layers,
     layersUndone,
     backdropLeft,
+    reframed,
+    specks,
+    components,
+    largestShare,
+    backdropSeeded: BACKDROP.has(skuKey(p.sku)),
   };
   done.push(record);
+  // Kept, because its original is no better, but the fill went through it
+  // rather than around it. Only eyes can decide between a re-shoot, a hand cut
+  // and an entry in KEEP_FLAT.
+  if (largestShare < MIN_COHERENCE) cameApart.push(record);
   // Kept, but a flat colour still rings the product: a studio backdrop the fill
   // could not reach, which shows as a coloured box on a tinted card.
   if (backdropLeft) flagged.push(record);
@@ -758,7 +1095,35 @@ const report = [
   `| — white background flood-filled | ${done.length - fromJara} |`,
   `| Kept their white background (cut-out rejected) | ${rejected.length} |`,
   `| A backdrop still shows | ${flagged.length} |`,
+  `| Reframed after a slab came off | ${done.filter((d) => d.reframed).length} |`,
+  `| Came apart under the fill | ${cameApart.length} |`,
   `| Skipped | ${skipped.length} |`,
+  ``,
+  `## Came apart under the fill (${cameApart.length})`,
+  ``,
+  `The fill went through the product rather than around it: the largest`,
+  `surviving piece holds less than ${(MIN_COHERENCE * 100).toFixed(0)}% of the ink, so what is left is`,
+  `fragments. Usually a white carton face that was connected to the border and`,
+  `went with it. These keep whatever they had — nothing here has been made`,
+  `worse — but they are also not reframed, because scaling wreckage up to 86%`,
+  `only makes it the most prominent thing in the grid.`,
+  ``,
+  `Fix by hand-cutting, re-shooting, or adding the code to KEEP_FLAT so the`,
+  `product shows its original photo on plain white instead.`,
+  ``,
+  ...(cameApart.length
+    ? [
+        `| Code | Product | Largest piece | Pieces | Opaque area |`,
+        `|---|---|---|---|---|`,
+        ...cameApart
+          .slice()
+          .sort((a, b) => a.largestShare - b.largestShare)
+          .map(
+            (r) =>
+              `| ${r.sku} | ${r.name} | ${(r.largestShare * 100).toFixed(0)}% | ${r.components} | ${r.to} |`
+          ),
+      ]
+    : [`None.`]),
   ``,
   `## Kept their white background (${rejected.length})`,
   ``,
@@ -843,12 +1208,17 @@ if (!WRITE) {
 
 /* ------------------------------------------------------------------- write */
 
+// Everything whose image path this run changed: the cuts it made, and the
+// products it sent back to their original photo because the cut they were on
+// is worse than no cut at all.
+const writes = [...done, ...reverted];
+
 await sql`
   UPDATE products AS p
   SET images = v.img::jsonb, updated_at = now()
   FROM (
-    SELECT unnest(${done.map((d) => d.id)}::int[]) AS id,
-           unnest(${done.map((d) => JSON.stringify([d.to]))}::text[]) AS img
+    SELECT unnest(${writes.map((d) => d.id)}::int[]) AS id,
+           unnest(${writes.map((d) => JSON.stringify([d.to]))}::text[]) AS img
   ) AS v
   WHERE p.id = v.id
 `;
@@ -857,7 +1227,7 @@ await sql`
 // mean the next re-seed quietly restores every white background.
 const file = dataPath("products.json");
 const seed = JSON.parse(readFileSync(file, "utf8"));
-const byId = new Map(done.map((d) => [d.id, d.to]));
+const byId = new Map(writes.map((d) => [d.id, d.to]));
 let touched = 0;
 for (const p of seed) {
   const next = byId.get(p.id);
@@ -868,11 +1238,14 @@ for (const p of seed) {
 writeFileSync(file, JSON.stringify(seed, null, 1));
 
 const [check] = await sql`
-  SELECT count(*) FILTER (WHERE images::text LIKE '%-cutout.webp%')::int AS cut,
+  SELECT count(*) FILTER (WHERE images::text LIKE '%-cutout%.webp%')::int AS cut,
          count(*)::int AS total
   FROM products
 `;
 console.log(`\ndatabase: ${check.cut}/${check.total} products point at a cut-out`);
 console.log(`products.json: ${touched} entries updated`);
+if (reverted.length) {
+  console.log(`reverted:  ${reverted.length} put back on their original photo`);
+}
 console.log(`\nThe superseded files are still in public/products/. Delete them with:`);
 console.log(`  node scripts/cutout-images.mjs --prune`);
