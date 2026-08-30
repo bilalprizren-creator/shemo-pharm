@@ -52,6 +52,15 @@ const PRUNE = argv.includes("--prune");
 const limitAt = argv.indexOf("--limit");
 const LIMIT = limitAt !== -1 ? Number(argv[limitAt + 1]) : Infinity;
 const FORCE = argv.includes("--force");
+/**
+ * Redo a cut that was already made, from the original photo beside it.
+ *
+ * Without this the script is a one-way door: once a product points at its
+ * `-cutout`, it is skipped for ever, so an improvement to the fill can never
+ * reach the photos that needed it. Trodon 1734 was cut, ruined, and then
+ * unreachable. Implies --force, since the output file already exists.
+ */
+const RECUT = argv.includes("--recut");
 
 const JARA = "C:/calude code/Jara pharmcay/public/products";
 const OUT = path.join(ROOT, "public/products");
@@ -81,6 +90,35 @@ const QUALITY = 82;
  */
 const MIN_SPAN = 0.8; // opaque bounding box, as a share of the canvas
 const MIN_INK = 0.06; // opaque pixels, as a share of the canvas
+
+/**
+ * How much of the product the layer passes are allowed to take.
+ *
+ * They exist to peel a *backdrop*, and a backdrop is gone once it is gone. When
+ * the product's own face is a single flat pale colour — a plain pharmaceutical
+ * carton — that face rings the product exactly as convincingly as a backdrop
+ * does, the 0.75 flatness guard below cannot tell them apart, and the fill walks
+ * straight through the box. Trodon 1734 lost four fifths of itself that way and
+ * still passed both tests above: its print reached the edges, so the bounding
+ * box stayed full width, and what survived cleared the 6% ink bar.
+ *
+ * Nothing that is merely finishing off a backdrop also removes most of what the
+ * white pass left standing. So a run of layer passes that does is given back.
+ *
+ * Reviewed over the whole range: 69 photos repaired, three made worse. Those
+ * three had a backdrop large enough to trip the ratio while the product itself
+ * was never in danger, so the undo handed them a slab they were better without:
+ *
+ *   3039 Winx paste      a magenta backdrop
+ *   9032 Pantenol        an off-white one
+ *   2111 Bio Hanfol      an off-white one behind a black bottle
+ *
+ * They are checked in as their pre-recut files. A future --recut will regress
+ * them again; compare against HEAD and keep the old three rather than assuming
+ * every changed photo improved.
+ */
+const MIN_LAYER_KEEP = 0.7;
+
 
 /**
  * One flood fill from the current transparent edge, clearing pixels within
@@ -189,7 +227,14 @@ function floodFillBackground(buf, width, height) {
   const n = width * height;
   let cleared = fillFrom(buf, width, height, [255, 255, 255], 255 - WHITE_MIN);
 
+  // What the product looks like with only the white backdrop gone. The layer
+  // passes are measured against this and can be handed it back.
+  const afterWhite = new Uint8Array(n);
+  for (let i = 0; i < n; i++) afterWhite[i] = buf[i * 4 + 3];
+  const inkAfterWhite = countInk(buf, n);
+
   const layers = [];
+  let gainedByLayers = 0;
   for (let pass = 0; pass < 3; pass++) {
     const frontier = frontierColour(buf, width, height);
     // A product's own outline is not one flat colour all the way round; a
@@ -197,9 +242,33 @@ function floodFillBackground(buf, width, height) {
     if (!frontier || frontier.share < 0.75) break;
     const gained = fillFrom(buf, width, height, frontier.colour, 26);
     if (gained < n * 0.005) break;
-    cleared += gained;
+    gainedByLayers += gained;
     layers.push(`rgb(${frontier.colour.join(",")})`);
   }
+
+  // See MIN_LAYER_KEEP: a pale carton reads as a backdrop to the guard above, so
+  // the only way to catch it is by what it cost.
+  //
+  // The undo is only for the photos the layer passes damage *quietly* — the ones
+  // that still look plausible afterwards and so sail past the safety net at the
+  // call site. Where the layered result already fails that net, the photo is one
+  // of the white-on-white cases the rejected set deliberately holds: a surgical
+  // cap, a syringe, an orthopaedic pillow. Rescuing those does not give them
+  // their product back, it hands them the backdrop the passes were removing,
+  // which on nine of the twenty-seven is a visible grey slab behind the product.
+  // A white square on a tinted card is the better of the two, and is the call
+  // that set already encodes.
+  const layered = measure(buf, width, height);
+  const passesNet = layered.span >= MIN_SPAN && layered.ink >= MIN_INK;
+
+  let layersUndone = false;
+  if (layers.length && passesNet && countInk(buf, n) < inkAfterWhite * MIN_LAYER_KEEP) {
+    for (let i = 0; i < n; i++) buf[i * 4 + 3] = afterWhite[i];
+    layers.length = 0;
+    gainedByLayers = 0;
+    layersUndone = true;
+  }
+  cleared += gainedByLayers;
 
   // Whatever still rings the product after three passes. A flat colour here is
   // a backdrop the fill could not reach — worth a human look, but not a reason
@@ -207,7 +276,20 @@ function floodFillBackground(buf, width, height) {
   const left = frontierColour(buf, width, height);
   const backdropLeft = left && left.share >= 0.75 ? `rgb(${left.colour.join(",")})` : null;
 
-  return { clearedPct: (cleared / n) * 100, layers, backdropLeft, ...measure(buf, width, height) };
+  return {
+    clearedPct: (cleared / n) * 100,
+    layers,
+    layersUndone,
+    backdropLeft,
+    ...measure(buf, width, height),
+  };
+}
+
+/** Opaque pixels. Shares the >8 threshold with measure(). */
+function countInk(buf, n) {
+  let ink = 0;
+  for (let i = 0; i < n; i++) if (buf[i * 4 + 3] > 8) ink++;
+  return ink;
 }
 
 /** Opaque bounding box and opaque area, both as a share of the canvas. */
@@ -348,11 +430,21 @@ const rejected = [];
 let i = 0;
 for (const p of products) {
   if (i >= LIMIT) break;
-  const current = p.images[0];
-  const stem = path.basename(current, path.extname(current));
+  let current = p.images[0];
+  let stem = path.basename(current, path.extname(current));
   if (stem.endsWith("-cutout")) {
-    skipped.push({ ...p, why: "already a cut-out" });
-    continue;
+    if (!RECUT) {
+      skipped.push({ ...p, why: "already a cut-out" });
+      continue;
+    }
+    // Back to the photo this cut came from, so the fill starts from the pixels
+    // migrate-images.mjs wrote rather than from its own last answer.
+    stem = stem.slice(0, -"-cutout".length);
+    current = `/products/${stem}.webp`;
+    if (!existsSync(path.join(OUT, `${stem}.webp`))) {
+      skipped.push({ sku: p.sku, name: p.name, why: `no original beside ${p.images[0]}` });
+      continue;
+    }
   }
   const source = path.join(OUT, path.basename(current));
   if (!existsSync(source)) {
@@ -364,7 +456,7 @@ for (const p of products) {
   // pay that again for work already on disk. A file that is already there is
   // reused; --force recuts everything.
   const outPathEarly = path.join(OUT, `${stem}-cutout.webp`);
-  if (!FORCE && existsSync(outPathEarly)) {
+  if (!FORCE && !RECUT && existsSync(outPathEarly)) {
     done.push({
       id: p.id,
       sku: p.sku,
@@ -384,6 +476,7 @@ for (const p of products) {
   let origin;
   let clearedPct = null;
   let layers = [];
+  let layersUndone = false;
   let backdropLeft = null;
   let mark;
 
@@ -403,13 +496,14 @@ for (const p of products) {
     const buf = await sharp(source).ensureAlpha().raw().toBuffer();
     let span;
     let ink;
-    ({ clearedPct, layers, backdropLeft, span, ink } = floodFillBackground(
+    ({ clearedPct, layers, layersUndone, backdropLeft, span, ink } = floodFillBackground(
       buf,
       meta.width,
       meta.height
     ));
 
     // The safety net. A photo that failed it keeps the white background it has.
+    //
     if (span < MIN_SPAN || ink < MIN_INK) {
       rejected.push({
         sku: p.sku,
@@ -450,6 +544,7 @@ for (const p of products) {
     origin,
     clearedPct,
     layers,
+    layersUndone,
     backdropLeft,
   };
   done.push(record);
