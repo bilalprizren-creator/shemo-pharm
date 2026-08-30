@@ -119,6 +119,141 @@ const MIN_INK = 0.06; // opaque pixels, as a share of the canvas
  */
 const MIN_LAYER_KEEP = 0.7;
 
+/**
+ * Photos the undo rescues from the fill and hands a studio backdrop instead.
+ *
+ * Where the layer passes were peeling a real coloured backdrop rather than
+ * eating the product, giving them back leaves that backdrop sitting behind the
+ * product as a slab. Two automatic tests were tried and neither separates these
+ * from the honest rescues, and the reasons are worth keeping so nobody spends
+ * the afternoon again:
+ *
+ *   - `backdropLeft` fires on every undone photo, Trodon 1734 included: on a
+ *     plain carton the carton's own face *is* the dominant colour ringing the
+ *     product. Rejecting on it would undo the repair this was all built for.
+ *   - "the slab fills all four edges of the bounding box" does not separate
+ *     them either — the oxygen mask 0422, which has an obvious slab, measures
+ *     the same 2% as Trodon, because the slab sits inside the box, not on it.
+ *
+ * So this is eyes, not arithmetic: rendered on the tinted card and looked at.
+ * They keep their original photo, and PhotoWell puts an uncut photo on plain
+ * white, where its white rectangle is invisible.
+ */
+const KEEP_FLAT = new Set([
+  // A backdrop slab survives the undo.
+  "2037", "5506", "7289C", "7782", "8356",
+  "9652", "9653", "9655", "9664", "9745",
+
+  // Photographs of a scene rather than a packshot: a model wearing the product,
+  // a hand pouring water onto a mattress, a bottle staged among leaves. The
+  // neutrality rule keeps the fill out of anything coloured, but a scene also
+  // has neutral parts — white clothing, a pale stone plinth, bed linen — and it
+  // walks in through those and leaves the rest in pieces. There is nothing to
+  // cut out here in the first place: the whole frame is the picture.
+  "1591", "2316", "2317", "3063", "8523", "8620",
+
+  // Pale product on a pale ground, where removing the ground takes the product
+  // with it: a white toilet-seat riser, a sterile gauze pouch, a clear infusion
+  // bottle, glass ampoules, a white-on-white carton.
+  "1164", "5287", "6241", "8832", "9065",
+]);
+
+
+/**
+ * How far one step of the backdrop may drift from the pixel it came from.
+ *
+ * `fillFrom` below measures every pixel against one seed colour, which is right
+ * for the flat white migrate-images.mjs painted on but wrong for what is inside
+ * it. Most packshots were taken on a lit studio backdrop: light at the top,
+ * shadowed at the bottom, drifting a long way from any one seed. The seeded
+ * fill eats the part within tolerance and stops dead at the rest, which is the
+ * ragged white "drip" along the bottom of the Belupo, Iruzid and Labello cards
+ * and the pale slab behind hundreds of others.
+ *
+ * Comparing each pixel to its own neighbour follows that ramp the whole way,
+ * because a gradient is smooth everywhere even when its ends are far apart. A
+ * product edge is a step rather than a ramp, so it still stops the fill.
+ *
+ * 6 measured against the range: at 10 the fill starts crossing the softer
+ * product edges (the Pantenol carton and the Labello blister both come apart),
+ * at 6 every slab tested went and every product survived.
+ */
+const RAMP = 6;
+
+/**
+ * How much colour a pixel may carry and still be treated as backdrop.
+ *
+ * The ramp alone is not enough. A lifestyle photograph — the Dulcolax woman on
+ * a lawn, the Krauterhof balsam in a styled scene — is also smooth everywhere,
+ * so the fill walks out of the white margin, along the floor and straight into
+ * the model. Brightness cannot stop it: measured on the range, a studio
+ * backdrop *darkens* as it falls into shadow, from 236,231,235 at the top of
+ * the Panklav card to 151,164,180 at the bottom, and refusing to follow that is
+ * refusing the whole repair.
+ *
+ * What separates them is colour. A backdrop is neutral, however dark it gets —
+ * the channel spread runs 0 to 29 across every slab measured (Labello 5,
+ * Iruzid 4, Panklav 5–29, the teal Rosix card 28). A photographed scene is not:
+ * the Dulcolax lawn is 87 and the skin on it 85. 38 sits in the gap.
+ */
+const NEUTRAL_MAX = 38;
+
+/**
+ * How dark the ramp may follow a backdrop before it stops.
+ *
+ * Neutrality alone lets the fill walk down a drop shadow, because a shadow is
+ * smooth, grey and therefore perfectly neutral all the way to the object
+ * casting it — which is how the black chamomile tin (9468) lost its lid. A
+ * backdrop is lit; it does not go darker than mid-grey. The darkest one
+ * measured on the range is the shadowed foot of the Panklav card at 151, so
+ * 130 leaves that intact while cutting the path into anything genuinely dark.
+ */
+const DARKEST = 130;
+
+/**
+ * Neighbour-relative flood fill from the border. Clears a backdrop however far
+ * it drifts, as long as it drifts smoothly and stays neutral.
+ */
+function rampFill(buf, width, height) {
+  const n = width * height;
+  const seen = new Uint8Array(n);
+  const stack = [];
+  const neutral = (i) => {
+    const r = buf[i * 4], g = buf[i * 4 + 1], b = buf[i * 4 + 2];
+    const hi = Math.max(r, g, b);
+    return hi - Math.min(r, g, b) <= NEUTRAL_MAX && hi >= DARKEST;
+  };
+  const near = (i, j) =>
+    neutral(i) &&
+    Math.abs(buf[i * 4] - buf[j * 4]) <= RAMP &&
+    Math.abs(buf[i * 4 + 1] - buf[j * 4 + 1]) <= RAMP &&
+    Math.abs(buf[i * 4 + 2] - buf[j * 4 + 2]) <= RAMP;
+
+  for (let x = 0; x < width; x++) stack.push(x, (height - 1) * width + x);
+  for (let y = 0; y < height; y++) stack.push(y * width, y * width + width - 1);
+  for (const i of stack) seen[i] = 1;
+
+  let cleared = 0;
+  while (stack.length) {
+    const i = stack.pop();
+    // Read the colour before clearing: alpha 0 is the marker the neighbours
+    // test against, and the RGB underneath stays put for the comparison.
+    const x = i % width;
+    const y = (i / width) | 0;
+    const push = (j) => {
+      if (seen[j] || buf[j * 4 + 3] === 0 || !near(j, i)) return;
+      seen[j] = 1;
+      stack.push(j);
+    };
+    if (x > 0) push(i - 1);
+    if (x < width - 1) push(i + 1);
+    if (y > 0) push(i - width);
+    if (y < height - 1) push(i + width);
+    buf[i * 4 + 3] = 0;
+    cleared++;
+  }
+  return cleared;
+}
 
 /**
  * One flood fill from the current transparent edge, clearing pixels within
@@ -225,10 +360,30 @@ function frontierColour(buf, width, height) {
  */
 function floodFillBackground(buf, width, height) {
   const n = width * height;
-  let cleared = fillFrom(buf, width, height, [255, 255, 255], 255 - WHITE_MIN);
 
-  // What the product looks like with only the white backdrop gone. The layer
-  // passes are measured against this and can be handed it back.
+  // The conservative pass, run first on a copy. It is wanted for two decisions
+  // and not usually for its result: it is the fallback when the ramp fill
+  // overreaches, and the yardstick for whether a backdrop slab was removed at
+  // all — which is what lets a product be legitimately smaller than the 86%
+  // frame migrate-images.mjs guaranteed.
+  const white = Buffer.from(buf);
+  const clearedWhite = fillFrom(white, width, height, [255, 255, 255], 255 - WHITE_MIN);
+  const inkWhite = countInk(white, n);
+
+  let cleared = rampFill(buf, width, height);
+  // Following the ramp into the product leaves nothing behind; where it does,
+  // the photo is no worse off than it was before any of this.
+  if (countInk(buf, n) < n * MIN_INK) {
+    buf.set(white);
+    cleared = clearedWhite;
+  }
+
+  // A photo framed at 86% whose product now spans far less has had a slab taken
+  // off it, and MIN_SPAN must not then be read as damage.
+  const slabRemoved = countInk(buf, n) < inkWhite * 0.9;
+
+  // What the product looks like with only the backdrop gone. The layer passes
+  // are measured against this and can be handed it back.
   const afterWhite = new Uint8Array(n);
   for (let i = 0; i < n; i++) afterWhite[i] = buf[i * 4 + 3];
   const inkAfterWhite = countInk(buf, n);
@@ -249,20 +404,16 @@ function floodFillBackground(buf, width, height) {
   // See MIN_LAYER_KEEP: a pale carton reads as a backdrop to the guard above, so
   // the only way to catch it is by what it cost.
   //
-  // The undo is only for the photos the layer passes damage *quietly* — the ones
-  // that still look plausible afterwards and so sail past the safety net at the
-  // call site. Where the layered result already fails that net, the photo is one
-  // of the white-on-white cases the rejected set deliberately holds: a surgical
-  // cap, a syringe, an orthopaedic pillow. Rescuing those does not give them
-  // their product back, it hands them the backdrop the passes were removing,
-  // which on nine of the twenty-seven is a visible grey slab behind the product.
-  // A white square on a tinted card is the better of the two, and is the call
-  // that set already encodes.
-  const layered = measure(buf, width, height);
-  const passesNet = layered.span >= MIN_SPAN && layered.ink >= MIN_INK;
-
+  // Judged on what the undo produces, never on the layered result it discards.
+  // Gating it the other way round — "only rescue photos whose damaged version
+  // still looked plausible" — rejected seventeen photos whose *undone* version
+  // is perfectly good, among them the silicone catheters and the 22g cannula,
+  // because their layered version was destroyed badly enough to fail the net.
+  // That is the wrong question: a photo should not be thrown away for the state
+  // of a buffer nobody will ever see. The safety net at the call site then
+  // judges the result, which is the only thing that ships.
   let layersUndone = false;
-  if (layers.length && passesNet && countInk(buf, n) < inkAfterWhite * MIN_LAYER_KEEP) {
+  if (layers.length && countInk(buf, n) < inkAfterWhite * MIN_LAYER_KEEP) {
     for (let i = 0; i < n; i++) buf[i * 4 + 3] = afterWhite[i];
     layers.length = 0;
     gainedByLayers = 0;
@@ -280,6 +431,7 @@ function floodFillBackground(buf, width, height) {
     clearedPct: (cleared / n) * 100,
     layers,
     layersUndone,
+    slabRemoved,
     backdropLeft,
     ...measure(buf, width, height),
   };
@@ -364,13 +516,28 @@ async function reframeTransparent(input) {
 }
 
 /** Jara's cut-outs, indexed by the product code in the filename. */
+/**
+ * An article code as a key both sides can agree on.
+ *
+ * The two projects punctuate the same code differently — Jara files it as
+ * "2004 B" where the database holds "2004b", and "8803 , 8804" against
+ * "8803, 8804". The old index also demanded `\d{3,5}[A-Za-z]?`, which no code
+ * carrying a comma could satisfy, so every multi-code product was invisible to
+ * it. Five photos were being flood-filled while a hand-cut original with a real
+ * alpha channel sat unused next door, one of them the Krauterhof balsam whose
+ * styled scene the fill takes apart.
+ */
+const skuKey = (s) => String(s ?? "").toLowerCase().replace(/\s+/g, "");
+
 function jaraIndex() {
   if (!existsSync(JARA)) return new Map();
   const byCode = new Map();
   for (const f of readdirSync(JARA)) {
     if (!f.startsWith("shemo-")) continue;
-    const code = /^shemo-(\d{3,5}[A-Za-z]?)-/.exec(f)?.[1];
-    if (code && !byCode.has(code.toLowerCase())) byCode.set(code.toLowerCase(), f);
+    // Everything up to the next hyphen: codes hold digits, letters, commas and
+    // spaces, but never a hyphen, which is what separates code from name.
+    const code = /^shemo-([^-]+)-/.exec(f)?.[1];
+    if (code && !byCode.has(skuKey(code))) byCode.set(skuKey(code), f);
   }
   return byCode;
 }
@@ -472,11 +639,12 @@ for (const p of products) {
     continue;
   }
 
-  const jaraFile = jara.get(p.sku.trim().toLowerCase());
+  const jaraFile = jara.get(skuKey(p.sku));
   let origin;
   let clearedPct = null;
   let layers = [];
   let layersUndone = false;
+  let slabRemoved = false;
   let backdropLeft = null;
   let mark;
 
@@ -496,21 +664,30 @@ for (const p of products) {
     const buf = await sharp(source).ensureAlpha().raw().toBuffer();
     let span;
     let ink;
-    ({ clearedPct, layers, layersUndone, backdropLeft, span, ink } = floodFillBackground(
+    ({ clearedPct, layers, layersUndone, slabRemoved, backdropLeft, span, ink } = floodFillBackground(
       buf,
       meta.width,
       meta.height
     ));
 
     // The safety net. A photo that failed it keeps the white background it has.
-    //
-    if (span < MIN_SPAN || ink < MIN_INK) {
+    // KEEP_FLAT is the reviewed half of the same decision, for the slabs no
+    // measurement separates from an honest rescue.
+    // MIN_SPAN only means damage while the frame is still the whole photo. Once
+    // a slab has come off, the product is the frame, and it is smaller than 86%
+    // for the right reason — a 15g tube of Belogent shot on a lit backdrop is
+    // a quarter of the canvas once that backdrop is gone. MIN_INK is what
+    // separates a real product from wreckage anyway: measured over the range,
+    // destroyed photos land at 0–3% and good ones at 8–69%.
+    const flat = KEEP_FLAT.has(String(p.sku ?? "").trim());
+    if ((span < MIN_SPAN && !slabRemoved) || ink < MIN_INK || flat) {
       rejected.push({
         sku: p.sku,
         name: p.name,
         kept: current,
         spanPct: span * 100,
         inkPct: ink * 100,
+        why: flat ? "reviewed: backdrop slab survives the undo" : "too little left",
       });
       continue;
     }

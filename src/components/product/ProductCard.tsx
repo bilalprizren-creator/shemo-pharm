@@ -5,7 +5,7 @@ import type { CardProduct } from "@/lib/types";
 import { langHref } from "@/lib/i18n";
 import type { SiteMode } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
-import { PhotoWell, PHOTO_SHADOW } from "./PhotoWell";
+import { PhotoWell, PHOTO_SHADOW, isCutOut } from "./PhotoWell";
 import { WishlistButton } from "./WishlistButton";
 import { AddToCartIconButton } from "@/components/cart/AddToCartButton";
 import { fmt } from "@/lib/i18n";
@@ -33,12 +33,13 @@ export function ProductCard({
   mode?: SiteMode;
 }) {
   const isKatalog = mode === "katalog";
+  const cutOut = isCutOut(product.image);
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
       {/* One well on both sites. It used to be a plain white box here and the
           tinted one only on the catalogue; see PhotoWell for why that was the
           wrong way round. */}
-      <PhotoWell className="aspect-square w-full">
+      <PhotoWell className="aspect-square w-full" cutOut={cutOut}>
         {product.image ? (
           <Image
             src={product.image}
@@ -46,7 +47,9 @@ export function ProductCard({
             fill
             sizes="(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 280px"
             priority={priority}
-            className={`relative object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04] ${PHOTO_SHADOW}`}
+            className={`relative object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04] ${
+              cutOut ? PHOTO_SHADOW : ""
+            }`}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>

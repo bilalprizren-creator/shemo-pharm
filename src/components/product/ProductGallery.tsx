@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Package } from "lucide-react";
-import { PhotoWell, PHOTO_SHADOW } from "./PhotoWell";
+import { PhotoWell, PHOTO_SHADOW, isCutOut } from "./PhotoWell";
 
 export function ProductGallery({
   images,
@@ -20,7 +20,12 @@ export function ProductGallery({
 
   return (
     <div>
-      <PhotoWell className="aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8">
+      {/* Per image, not per product: a gallery can mix a cut-out packshot with
+          an uncut detail photo, and each needs its own ground. */}
+      <PhotoWell
+        className="aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8"
+        cutOut={isCutOut(current)}
+      >
         {current ? (
           <Image
             src={current}
@@ -28,7 +33,7 @@ export function ProductGallery({
             fill
             priority
             sizes="(max-width: 1024px) 92vw, 540px"
-            className={`relative object-contain p-8 ${PHOTO_SHADOW}`}
+            className={`relative object-contain p-8 ${isCutOut(current) ? PHOTO_SHADOW : ""}`}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>
@@ -50,7 +55,9 @@ export function ProductGallery({
                 aria-current={i === index}
                 // Same ground as the big view, without the glow — at 72px it
                 // would only read as a smudge.
-                className={`relative size-18 shrink-0 overflow-hidden rounded-xl border-2 bg-gradient-to-b from-white to-tint transition-colors ${
+                className={`relative size-18 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
+                  isCutOut(src) ? "bg-gradient-to-b from-white to-[#f4f7f5]" : "bg-white"
+                } ${
                   i === index
                     ? "border-brand-500"
                     : "border-ink-900/8 hover:border-brand-300"
