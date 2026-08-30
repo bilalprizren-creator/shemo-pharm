@@ -5,7 +5,13 @@ import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { isAllowedImageSrc } from "@/lib/images";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
-import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
+import type {
+  CardProduct,
+  CatalogSection,
+  Category,
+  CategoryNode,
+  Product,
+} from "@/lib/types";
 
 /**
  * Catalog access layer. Products and categories live in Postgres (see
@@ -30,6 +36,7 @@ import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 interface CatalogData {
   products: Product[];
   categories: Category[];
+  sections: CatalogSection[];
 }
 
 interface ProductRow {
@@ -50,6 +57,15 @@ interface ProductRow {
   image_override: string | null;
   featured: boolean;
   updated_at: string | Date | null;
+  catalog_section_id: number | null;
+  catalog_sort: number | null;
+}
+
+interface CatalogSectionRow {
+  id: number;
+  catalog_no: string;
+  name: string;
+  sort: number;
 }
 
 interface CategoryRow {
@@ -68,7 +84,7 @@ async function fetchCatalog(): Promise<CatalogData> {
     SELECT p.id, p.name, p.slug, p.sku, p.price_cents, p.regular_cents,
            p.on_sale, p.currency, p.images, p.in_stock, p.description,
            p.short_description, p.display_name, p.image_override, p.featured,
-           p.updated_at,
+           p.updated_at, p.catalog_section_id, p.catalog_sort,
            COALESCE(
              array_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL),
              '{}'::int[]
@@ -83,6 +99,13 @@ async function fetchCatalog(): Promise<CatalogData> {
   const categoryRows = (await sql`
     SELECT id, name, slug, parent, count, display_name, kind, sort FROM categories
   `) as CategoryRow[];
+
+  // 63 rows. Read here rather than in its own cached function so the printed
+  // catalogue costs no extra round trip on top of the one this module already
+  // makes — the products it groups are in the same payload.
+  const sectionRows = (await sql`
+    SELECT id, catalog_no, name, sort FROM catalog_sections ORDER BY sort
+  `) as CatalogSectionRow[];
 
   const products: Product[] = productRows.map((r) => ({
     id: r.id,
@@ -110,6 +133,8 @@ async function fetchCatalog(): Promise<CatalogData> {
         : null,
     featured: r.featured,
     updatedAt: r.updated_at ? new Date(r.updated_at) : null,
+    catalogSectionId: r.catalog_section_id,
+    catalogSort: r.catalog_sort ?? 0,
   }));
 
   const categories: Category[] = categoryRows.map((r) => ({
@@ -123,7 +148,14 @@ async function fetchCatalog(): Promise<CatalogData> {
     sort: r.sort ?? 0,
   }));
 
-  return { products, categories };
+  const sections: CatalogSection[] = sectionRows.map((r) => ({
+    id: r.id,
+    catalogNo: r.catalog_no,
+    name: r.name,
+    sort: r.sort ?? 0,
+  }));
+
+  return { products, categories, sections };
 }
 
 /**
@@ -143,7 +175,11 @@ async function fetchCatalog(): Promise<CatalogData> {
  * are nearly all empty, which is why the figure is that small; should real
  * product copy ever be filled in, this needs re-measuring.
  */
-const cachedCatalog = unstable_cache(fetchCatalog, ["catalog-v1"], {
+// The key carries a version because the cached value is a shape, not just data:
+// an entry written before `sections` existed would deserialize without it and
+// every catalogue render would read undefined. Bump it whenever CatalogData
+// gains or loses a field.
+const cachedCatalog = unstable_cache(fetchCatalog, ["catalog-v2"], {
   tags: [CATALOG_TAG],
   revalidate: 60,
 });
@@ -303,6 +339,139 @@ export async function getUnbrandedCategories(names: readonly string[]): Promise<
       .filter((slug): slug is string => Boolean(slug))
   );
   return (await getBrandCategories()).filter((c) => !covered.has(c.slug));
+}
+
+export interface CatalogSectionWithProducts extends CatalogSection {
+  products: Product[];
+}
+
+/**
+ * URL segment for a printed section: "6.7 Cansin" becomes "6-7-cansin".
+ *
+ * Derived rather than stored, because it needs no uniqueness rule of its own —
+ * catalog_sections already has a unique index on (catalog_no, name), and this
+ * is a pure function of that pair. Both halves are required: "8.1" alone names
+ * two sections, and so does the number-less name in a couple of cases.
+ */
+export function catalogSectionSlug(section: CatalogSection): string {
+  return `${section.catalogNo}-${section.name}`
+    .toLowerCase()
+    .replace(/ç/g, "c")
+    .replace(/ë/g, "e")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+}
+
+export async function getCatalogSectionBySlug(
+  slug: string
+): Promise<CatalogSectionWithProducts | undefined> {
+  const sections = await getCatalogSections();
+  return sections.find((s) => catalogSectionSlug(s) === slug);
+}
+
+/**
+ * The printed catalogue, in printed order: 63 numbered sections, each holding
+ * its products in the sequence the paper edition puts them.
+ *
+ * Ordered by `sort` throughout, never by `catalogNo` — the printed run is
+ * 6.4, 6.1, 6.3, 6.5, and "8.1" names two different sections.
+ *
+ * Empty sections are dropped. A section can empty out entirely: every one of
+ * Denk Pharma's 29 printed products is absent from the database, so it would
+ * otherwise render as a numbered heading over nothing. See
+ * audit/catalog-order-import.md for what is missing and why.
+ */
+export async function getCatalogSections(): Promise<CatalogSectionWithProducts[]> {
+  const { products, sections } = await loadCatalog();
+
+  const bySection = new Map<number, Product[]>();
+  for (const p of products) {
+    if (p.catalogSectionId === null) continue;
+    const list = bySection.get(p.catalogSectionId) ?? [];
+    list.push(p);
+    bySection.set(p.catalogSectionId, list);
+  }
+
+  return sections
+    .slice()
+    .sort((a, b) => a.sort - b.sort)
+    .map((s) => ({
+      ...s,
+      products: (bySection.get(s.id) ?? []).sort(
+        (a, b) => a.catalogSort - b.catalogSort || a.id - b.id
+      ),
+    }))
+    .filter((s) => s.products.length > 0);
+}
+
+/**
+ * The printed sections `getCatalogSections()` drops, because not one of their
+ * products is in the database.
+ *
+ * Today that is 38 Denk Pharma (29 articles) and 7.3 Ivy Bear (9), which is why
+ * the site shows 61 sections where the paper edition prints 63. Read out of
+ * `catalog_sections` rather than written down anywhere: the import inserts all
+ * 63 rows whether or not their products landed (scripts/import-catalog-order.mjs),
+ * so this stays true on its own as articles are added or discontinued.
+ *
+ * Somebody holding the paper edition and looking for section 38 needs to be
+ * told, or they will read the gap as a broken website.
+ */
+export async function getEmptyCatalogSections(): Promise<CatalogSection[]> {
+  const { products, sections } = await loadCatalog();
+  const filled = new Set(
+    products.map((p) => p.catalogSectionId).filter((id): id is number => id !== null)
+  );
+  return sections
+    .filter((s) => !filled.has(s.id))
+    .sort((a, b) => a.sort - b.sort);
+}
+
+/** A product plus the printed section it sits in, or null if it was never printed. */
+export interface ProductInCatalogOrder {
+  product: Product;
+  section: CatalogSection | null;
+}
+
+/**
+ * Every visible product in one sequence, in the order the printed catalogue
+ * runs: section 1.1 through 45, and inside each section the printed order.
+ *
+ * The 311 products that never appeared in the printed catalogue follow at the
+ * end, alphabetically. They are part of the range and hiding them is what made
+ * the catalogue look like it held 1 733 products when the company sells 2 044 —
+ * so they are listed, under their own heading, rather than dropped.
+ *
+ * Reads the same `loadCatalog()` payload everything else does, so this costs no
+ * extra database round trip.
+ */
+export async function getAllProductsInCatalogOrder(): Promise<ProductInCatalogOrder[]> {
+  const { products, sections } = await loadCatalog();
+  const byId = new Map(sections.map((s) => [s.id, s]));
+  const order = new Map(
+    [...sections].sort((a, b) => a.sort - b.sort).map((s, i) => [s.id, i])
+  );
+
+  const printed: ProductInCatalogOrder[] = [];
+  const unprinted: ProductInCatalogOrder[] = [];
+  for (const product of products) {
+    const section =
+      product.catalogSectionId === null ? null : (byId.get(product.catalogSectionId) ?? null);
+    (section ? printed : unprinted).push({ product, section });
+  }
+
+  printed.sort(
+    (a, b) =>
+      order.get(a.section!.id)! - order.get(b.section!.id)! ||
+      a.product.catalogSort - b.product.catalogSort ||
+      a.product.id - b.product.id
+  );
+  unprinted.sort((a, b) => byName.compare(a.product.name, b.product.name));
+
+  return [...printed, ...unprinted];
 }
 
 /** The type tree, for the sidebar filter and /kategorite. Brands are omitted. */
@@ -627,9 +796,46 @@ export function productImage(product: Product): string | null {
   return product.imageOverride ?? product.images[0] ?? null;
 }
 
-/** The product's display name: admin override first, then the catalog name. */
+/**
+ * The product's display name: admin override first, then the catalog name with
+ * its own article code stripped off the end.
+ *
+ * 2 012 of the 2 044 visible products are named "Fix ear baby A6 (9408)" — the
+ * WooCommerce export appended the code — and every card already prints "Kodi
+ * 9408" on the line below, so the parentheses are the same fact twice.
+ *
+ * Only a trailing group whose contents are exactly the SKU goes. The other 23
+ * products end in parentheses that say something real (a size, a variant), and
+ * those stay. An admin `display_name` is returned untouched: somebody who typed
+ * a name meant it.
+ */
 export function productDisplayName(product: Product): string {
-  return product.displayName ?? product.name;
+  if (product.displayName) return product.displayName;
+  const sku = product.sku.trim().toLowerCase();
+  if (!sku) return product.name;
+
+  // Anywhere, not only at the end: eight products carry the code mid-name and
+  // then a brand or a size — "Losion … 100ml (5087) (AUTAN)", "Shokë … (8166)
+  // 32cm". Checked against the whole range, there is no product where a
+  // parenthesised group happens to equal its own code and mean something else,
+  // so this cannot eat a real qualifier.
+  let out = product.name.replace(/\(([^()]*)\)/g, (whole, inner: string) =>
+    inner.trim().toLowerCase() === sku ? "" : whole
+  );
+  if (out === product.name) return product.name;
+
+  out = out.replace(/\s{2,}/g, " ").trim();
+  // "Colidur 200mg X 12tab Rifaximin (5237))" has a typo'd extra bracket that
+  // is left dangling once the code goes.
+  while (
+    out.endsWith(")") &&
+    (out.match(/\(/g) ?? []).length < (out.match(/\)/g) ?? []).length
+  ) {
+    out = out.slice(0, -1).trim();
+  }
+
+  // Never return an empty name — a product called only "(9408)" keeps it.
+  return out || product.name;
 }
 
 function buildCard(

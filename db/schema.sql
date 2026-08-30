@@ -11,10 +11,18 @@
 -- Structure only — no rows. The catalogue is reseeded with `npm run seed:db`
 -- from src/data/*.json; customer data comes from a backup, never from here.
 --
--- Tables: categories, contact_messages, orders, product_categories, products, rate_limits, users
+-- Tables: catalog_sections, categories, contact_messages, orders, product_categories, products, rate_limits, users
 
 -- Sequences, before the tables that default to them
 
+CREATE SEQUENCE IF NOT EXISTS catalog_sections_id_seq
+  AS integer
+  INCREMENT BY 1
+  MINVALUE 1
+  MAXVALUE 2147483647
+  START WITH 1
+  CACHE 1
+  NO CYCLE;
 CREATE SEQUENCE IF NOT EXISTS contact_messages_id_seq
   AS integer
   INCREMENT BY 1
@@ -39,6 +47,16 @@ CREATE SEQUENCE IF NOT EXISTS users_id_seq
   START WITH 1
   CACHE 1
   NO CYCLE;
+
+CREATE TABLE IF NOT EXISTS catalog_sections (
+  id integer DEFAULT nextval('catalog_sections_id_seq'::regclass) NOT NULL,
+  catalog_no text NOT NULL,
+  name text NOT NULL,
+  sort integer DEFAULT 0 NOT NULL,
+  CONSTRAINT catalog_sections_pkey PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX catalog_sections_no_name_idx ON public.catalog_sections USING btree (catalog_no, name);
 
 CREATE TABLE IF NOT EXISTS categories (
   id integer NOT NULL,
@@ -108,9 +126,13 @@ CREATE TABLE IF NOT EXISTS products (
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
   blur_data_url text,
+  catalog_sort integer DEFAULT 0 NOT NULL,
+  catalog_section_id integer,
   CONSTRAINT products_pkey PRIMARY KEY (id),
   CONSTRAINT products_slug_key UNIQUE (slug)
 );
+
+CREATE INDEX IF NOT EXISTS products_catalog_section_idx ON public.products USING btree (catalog_section_id, catalog_sort) WHERE (catalog_section_id IS NOT NULL);
 
 CREATE TABLE IF NOT EXISTS rate_limits (
   bucket text NOT NULL,
@@ -143,6 +165,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Sequence ownership, so DROP TABLE takes the sequence too
 
+ALTER SEQUENCE catalog_sections_id_seq OWNED BY catalog_sections.id;
 ALTER SEQUENCE contact_messages_id_seq OWNED BY contact_messages.id;
 ALTER SEQUENCE orders_id_seq OWNED BY orders.id;
 ALTER SEQUENCE users_id_seq OWNED BY users.id;
@@ -151,3 +174,4 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 ALTER TABLE product_categories ADD CONSTRAINT product_categories_category_id_fkey FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;
 ALTER TABLE product_categories ADD CONSTRAINT product_categories_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
+ALTER TABLE products ADD CONSTRAINT products_catalog_section_id_fkey FOREIGN KEY (catalog_section_id) REFERENCES catalog_sections(id) ON DELETE SET NULL;

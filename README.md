@@ -62,6 +62,17 @@ dy nivele cache-i:
 `src/lib/admin-actions.ts`), prandaj ndryshimi duket menjëherë. Një skript që
 shkruan direkt në bazë **nuk** e pastron — aty pret deri në 5 minuta.
 
+### Dy faqe, një deployment
+
+`shemo-katalog.com` është faqe më vete, me domain të vetin, por e shërbyer nga i
+njëjti deployment — ndarja bëhet vetëm sipas hostname-it (`src/proxy.ts` →
+`src/lib/site-mode.ts`). Gjithçka që i takon vetëm asaj faqeje rri te
+`src/katalog/`, bashkë me një README që shpjeton rrugët, shtypjen dhe kurthet:
+**[src/katalog/README.md](src/katalog/README.md)**.
+
+Kujdes: domain-i ende s'është zhvendosur — `shemo-katalog.com` tregon te
+Hostinger, pra te faqja e vjetër.
+
 ## Llogaritë dhe çmimet (B2B)
 
 Çmimet shfaqen **vetëm** për llogaritë e aprovuara — kontrolli bëhet gjithmonë
@@ -263,5 +274,6 @@ e vet duhet `outline-none!` (me `!` në fund, sintaksa e v4).
 - Kuptimi i "200+ Distributor i autorizuar" nga faqja e vjetër.
 - URL e YouTube (vetëm Facebook dhe Instagram u verifikuan).
 - Numri që pranon WhatsApp (supozuar 049 600 934).
-- Katalog PDF nuk ekziston — butoni shfaqet automatikisht kur të vendoset
-  `catalogUrl` te `src/lib/site.ts`.
+- 176 artikuj që janë në katalogun e shtypur nuk gjenden në bazë — lista te
+  `audit/catalog-order-import.md`. Dy seksione mbeten bosh për këtë arsye
+  (38 Denk Pharma, 7.3 Ivy Bear), prandaj faqja tregon 61 seksione e jo 63.

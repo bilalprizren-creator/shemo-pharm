@@ -2,14 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { getAdminCategoryOptions } from "@/lib/admin-data";
+import {
+  getAdminCatalogSectionOptions,
+  getAdminCategoryOptions,
+} from "@/lib/admin-data";
 import { ProductForm } from "@/components/admin/ProductForm";
 
 export const metadata: Metadata = { title: "Produkt i ri" };
 
 export default async function AdminNewProductPage() {
   await requireAdmin();
-  const categories = await getAdminCategoryOptions();
+  const [categories, catalogSections] = await Promise.all([
+    getAdminCategoryOptions(),
+    getAdminCatalogSectionOptions(),
+  ]);
 
   return (
     <div className="max-w-5xl">
@@ -26,6 +32,7 @@ export default async function AdminNewProductPage() {
       <div className="mt-6">
         <ProductForm
           categories={categories}
+          catalogSections={catalogSections}
           values={{
             name: "",
             sku: "",
@@ -40,6 +47,8 @@ export default async function AdminNewProductPage() {
             shortDescription: "",
             description: "",
             categoryIds: [],
+            catalogSectionId: "",
+            catalogSort: "0",
           }}
         />
       </div>

@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { getAdminCategoryOptions, getAdminProduct } from "@/lib/admin-data";
+import {
+  getAdminCatalogSectionOptions,
+  getAdminCategoryOptions,
+  getAdminProduct,
+} from "@/lib/admin-data";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 
@@ -23,9 +27,10 @@ export default async function AdminEditProductPage({
   const productId = Number(id);
   if (!Number.isInteger(productId)) notFound();
 
-  const [product, categories] = await Promise.all([
+  const [product, categories, catalogSections] = await Promise.all([
     getAdminProduct(productId),
     getAdminCategoryOptions(),
+    getAdminCatalogSectionOptions(),
   ]);
   if (!product) notFound();
 
@@ -57,6 +62,7 @@ export default async function AdminEditProductPage({
       <div className="mt-6">
         <ProductForm
           categories={categories}
+          catalogSections={catalogSections}
           values={{
             id: product.id,
             name: product.name,
@@ -72,6 +78,9 @@ export default async function AdminEditProductPage({
             shortDescription: product.shortDescription,
             description: product.description,
             categoryIds: product.categoryIds,
+            catalogSectionId:
+              product.catalogSectionId === null ? "" : String(product.catalogSectionId),
+            catalogSort: String(product.catalogSort),
           }}
         />
       </div>

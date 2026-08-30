@@ -24,12 +24,21 @@ export interface ProductFormValues {
   shortDescription: string;
   description: string;
   categoryIds: number[];
+  /** "" when the product is not in the printed catalogue. */
+  catalogSectionId: string;
+  catalogSort: string;
 }
 
 export interface CategoryOption {
   id: number;
   label: string;
   depth: number;
+}
+
+/** A numbered section of the printed catalogue, e.g. "6.7 — Cansin". */
+export interface CatalogSectionOption {
+  id: number;
+  label: string;
 }
 
 const initialState: AdminFormState = {};
@@ -65,9 +74,11 @@ const areaCls =
 export function ProductForm({
   values,
   categories,
+  catalogSections,
 }: {
   values: ProductFormValues;
   categories: CategoryOption[];
+  catalogSections: CatalogSectionOption[];
 }) {
   const isNew = values.id === undefined;
   const [state, formAction, pending] = useActionState(
@@ -226,6 +237,44 @@ export function ProductForm({
               />
               Fshihe nga faqja publike
             </label>
+          </div>
+
+          {/* Where the product sits in the printed catalogue (/katalog). Most
+              products sit nowhere: 311 of 2 049 have never been printed, so
+              "not in it" is the default rather than an error state. */}
+          <div className="rounded-2xl border border-ink-900/8 bg-white p-4">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-ink-500">
+              Katalogu i shtypur
+            </h3>
+            <label className="mt-3 block text-sm font-medium text-ink-700">
+              Seksioni
+              <select
+                name="catalogSectionId"
+                defaultValue={values.catalogSectionId}
+                className="mt-1.5 w-full rounded-field border border-ink-900/12 bg-white px-3 py-2 text-sm text-ink-900"
+              >
+                <option value="">— Jo në katalogun e shtypur —</option>
+                {catalogSections.map((s) => (
+                  <option key={s.id} value={String(s.id)}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="mt-3 block text-sm font-medium text-ink-700">
+              Renditja brenda seksionit
+              <input
+                type="number"
+                name="catalogSort"
+                min={0}
+                max={9999}
+                defaultValue={values.catalogSort}
+                className="mt-1.5 w-full rounded-field border border-ink-900/12 bg-white px-3 py-2 text-sm text-ink-900"
+              />
+            </label>
+            <p className="mt-2 text-xs text-ink-400">
+              Numri më i vogël vjen i pari. Renditja fshihet nëse hiqet seksioni.
+            </p>
           </div>
 
           <div className="rounded-2xl border border-ink-900/8 bg-white p-4">

@@ -94,13 +94,22 @@ const nextConfig: NextConfig = {
   // Runs before src/proxy.ts (headers -> redirects -> proxy), so the sources
   // are the paths a browser actually asks for: Albanian bare, English prefixed.
   async redirects() {
-    return Object.entries(RETIRED_CATEGORY_SLUGS).flatMap(([from, to]) =>
-      ["", "/en"].map((prefix) => ({
-        source: `${prefix}/kategorite/${from}`,
-        destination: `${prefix}/kategorite/${to}`,
-        permanent: true,
-      }))
-    );
+    return [
+      ...Object.entries(RETIRED_CATEGORY_SLUGS).flatMap(([from, to]) =>
+        ["", "/en"].map((prefix) => ({
+          source: `${prefix}/kategorite/${from}`,
+          destination: `${prefix}/kategorite/${to}`,
+          permanent: true,
+        }))
+      ),
+      // The two URLs the old hand-written shemo-katalog.com had. They are the
+      // only ones it exposed — the whole range lived at / and there was exactly
+      // one link on the page — so these two cover every bookmark and every
+      // printed reference to it. Harmless before the domain moves; in place the
+      // moment it does.
+      { source: "/index.php", destination: "/katalog", permanent: true },
+      { source: "/login.php", destination: "/kycu", permanent: true },
+    ];
   },
 
   images: {

@@ -208,6 +208,10 @@ const productSchema = z.object({
   inStock: z.coerce.boolean(),
   featured: z.coerce.boolean(),
   hidden: z.coerce.boolean(),
+  /** Printed-catalogue placement. Optional because most products have none:
+   *  311 of the 2 049 have never appeared in the printed catalogue. */
+  catalogSectionId: z.coerce.number().int().positive().optional(),
+  catalogSort: z.coerce.number().int().min(0).max(9999).optional(),
   displayName: z.string().trim().max(200).optional().or(z.literal("")),
   imageOverride: z
     .string()
@@ -325,6 +329,10 @@ function productFromForm(formData: FormData) {
     inStock: formData.get("inStock") === "on",
     featured: formData.get("featured") === "on",
     hidden: formData.get("hidden") === "on",
+    // "" is the "not in the printed catalogue" option, and z.coerce.number()
+    // would turn it into 0 rather than leaving it unset.
+    catalogSectionId: formData.get("catalogSectionId") || undefined,
+    catalogSort: formData.get("catalogSort") || undefined,
     displayName: formData.get("displayName"),
     imageOverride: formData.get("imageOverride"),
     images: formData.get("images"),
@@ -346,6 +354,9 @@ function productFromForm(formData: FormData) {
       inStock: d.inStock,
       featured: d.featured,
       hidden: d.hidden,
+      catalogSectionId: d.catalogSectionId ?? null,
+      // A position means nothing without a section, so it clears with one.
+      catalogSort: d.catalogSectionId ? (d.catalogSort ?? 0) : 0,
       displayName: d.displayName || null,
       imageOverride: d.imageOverride || null,
       images: parseImages(d.images),
@@ -386,7 +397,7 @@ export async function createProductAction(
     INSERT INTO products (
       id, name, slug, sku, price_cents, regular_cents, on_sale, currency,
       images, in_stock, description, short_description, display_name,
-      image_override, featured, hidden
+      image_override, featured, hidden, catalog_section_id, catalog_sort
     )
     VALUES (
       (SELECT COALESCE(MAX(id), 0) + 1 FROM products),
@@ -396,7 +407,8 @@ export async function createProductAction(
       ${p.sku}, ${p.priceCents}, ${p.regularCents},
       ${p.regularCents > p.priceCents}, 'EUR', ${JSON.stringify(p.images)}::jsonb,
       ${p.inStock}, ${p.description}, ${p.shortDescription}, ${p.displayName},
-      ${p.imageOverride}, ${p.featured}, ${p.hidden}
+      ${p.imageOverride}, ${p.featured}, ${p.hidden},
+      ${p.catalogSectionId}, ${p.catalogSort}
     )
     RETURNING id
   `) as { id: number }[];
@@ -425,7 +437,9 @@ export async function updateProductAction(
       images = ${JSON.stringify(p.images)}::jsonb, in_stock = ${p.inStock},
       description = ${p.description}, short_description = ${p.shortDescription},
       display_name = ${p.displayName}, image_override = ${p.imageOverride},
-      featured = ${p.featured}, hidden = ${p.hidden}, updated_at = now()
+      featured = ${p.featured}, hidden = ${p.hidden},
+      catalog_section_id = ${p.catalogSectionId}, catalog_sort = ${p.catalogSort},
+      updated_at = now()
     WHERE id = ${id}
     RETURNING id
   `) as { id: number }[];

@@ -25,14 +25,14 @@ export const SITE = {
 
   phones: [
     { label: "+383 (0) 49 600 934", href: "tel:+38349600934" },
-    { label: "+383 (0) 49 333 119", href: "tel:+38349333119" },
+    { label: "+383 (0) 49 332 666", href: "tel:+38349332666" },
   ],
   // TODO: confirm which number receives WhatsApp messages (assumed 049 600 934)
   whatsapp: "https://wa.me/38349600934",
   emails: ["info@shemopharm.com", "ntp.shemo@gmail.com"],
 
   address: {
-    street: "Rr. Ernest Koliqi 165/A",
+    street: "Rr. Raif Elezi 34",
     city: "Prizren",
     postalCode: "20000",
     country: "Kosovë",
@@ -45,10 +45,6 @@ export const SITE = {
     // TODO: no YouTube profile could be verified — add it here once confirmed.
     youtube: null as string | null,
   },
-
-  /** TODO: no PDF catalog exists on the old site. Set a URL (e.g. "/katalogu.pdf")
-   *  once a real catalog file is available — the header button appears automatically. */
-  catalogUrl: null as string | null,
 
   // Five discrete company figures. The physical network (12 pharmacies + 2 depots)
   // is shown as two separate stats — never as a combined "12 + 2".

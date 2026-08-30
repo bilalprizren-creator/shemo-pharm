@@ -241,7 +241,7 @@ export const sq = {
         {
           heading: "Kush është përgjegjës",
           body: [
-            "Përgjegjës për përpunimin e të dhënave është SHEMO PHARM, Rr. Ernest Koliqi 165/A, 20000 Prizren, Kosovë.",
+            "Përgjegjës për përpunimin e të dhënave është SHEMO PHARM, Rr. Raif Elezi 34, 20000 Prizren, Kosovë.",
             "Për çdo pyetje lidhur me të dhënat tuaja mund të shkruani në info@shemopharm.com ose të telefononi në +383 (0) 49 600 934.",
           ],
         },
@@ -448,6 +448,45 @@ export const sq = {
     pageN: "Faqja {n}",
   },
 
+  printedCatalog: {
+    title: "Katalogu i shtypur",
+    subtitle:
+      "I njëjti katalog që keni në letër, me të njëjtat numra seksionesh — por i kërkueshëm, me foto që hapen shpejt dhe i lexueshëm edhe në telefon.",
+    metaDescription:
+      "Katalogu i shtypur i SHEMO PHARM sipas seksioneve të numëruara: pajisje mjekësore, ortopedi, suplemente dhe kozmetikë, me kodet e artikujve.",
+    contents: "Përmbajtja",
+    summary: "{sections} seksione, {products} produkte",
+    sectionMetaDescription:
+      "Seksioni {no} {name} nga katalogu i shtypur i SHEMO PHARM — {count} produkte me kodet e artikujve.",
+    searchInstead: "Kërko në katalog",
+    allTitle: "Të gjitha produktet",
+    allSubtitle:
+      "I gjithë asortimenti, njëri pas tjetrit, në radhën e katalogut të shtypur.",
+    allMetaDescription:
+      "Të gjitha produktet e SHEMO PHARM në një listë, në radhën e katalogut të shtypur — me kodet e artikujve.",
+    allLink: "Shiko të gjitha {n} produktet",
+    pageOf: "Faqja {page} nga {total}",
+    notPrintedHeading: "Produkte që nuk janë në katalogun e shtypur",
+    siteTitle: "SHEMO Katalog | Katalogu i produkteve mjekësore",
+    searchPlaceholder: "Kërko produkt ose kod artikulli…",
+    searchTitle: "Rezultatet e kërkimit",
+    searchEmpty: "Asnjë produkt nuk u gjet për “{q}”.",
+    searchPrompt: "Shkruani emrin e produktit ose kodin e artikullit.",
+    inSection: "Seksioni {no} — {name}",
+    moreTitle: "Më shumë",
+    toShop: "Faqja kryesore e SHEMO PHARM",
+    print: "Shtyp ose ruaj PDF",
+    printIntro:
+      "Faqja është përgatitur për shtypje në A4. Për PDF, zgjidhni “Ruaj si PDF” në dritaren e shtypjes.",
+    printPages: "{n} faqe A4",
+    printPage: "Faqe {page}/{total}",
+    printWaiting: "Duke pritur fotot…",
+    printProgress: "Fotot: {done}/{total}",
+    /** Sections the paper edition prints but the range no longer carries. */
+    missingSections:
+      "Këto seksione të katalogut të shtypur nuk janë këtu, sepse asnjë artikull i tyre nuk figuron në asortimentin e tanishëm: {names}.",
+  },
+
   categoriesPage: {
     title: "Kategoritë",
     sub: "Shfletoni gamën tonë të plotë sipas kategorive dhe brendeve.",
@@ -490,7 +529,7 @@ export const sq = {
       "Shemo Pharm operon si depo farmaceutike dhe distributor me shumicë i produkteve dhe pajisjeve mjekësore për territorin e Kosovës. Kompania është e licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, pranë Ministrisë së Shëndetësisë së Kosovës.",
     metaDescription:
       "SHEMO PHARM — depo farmaceutike dhe distributor me shumicë i produkteve dhe pajisjeve mjekësore në Kosovë, e licencuar nga Ministria e Shëndetësisë.",
-    depotCaption: "Depoja jonë në Prizren — Rr. Ernest Koliqi 165/A",
+    depotCaption: "Depoja jonë në Prizren — Rr. Raif Elezi 34",
     missionTitle: "Misioni ynë",
     missionText:
       "Të furnizojmë barnatoret dhe partnerët e sektorit të shëndetësisë në Kosovë me produkte dhe pajisje mjekësore cilësore, në kohë dhe me kushte korrekte — duke kontribuar në shëndetin dhe mirëqenien e komunitetit.",
@@ -516,7 +555,7 @@ export const sq = {
     heading: "Na kontaktoni",
     sub: "Jemi në dispozicion për pyetje rreth produkteve, disponueshmërisë, çmimeve me shumicë dhe bashkëpunimit.",
     metaDescription:
-      "Na kontaktoni: telefon, WhatsApp, email ose formulari i kontaktit. SHEMO PHARM, Rr. Ernest Koliqi 165/A, Prizren, Kosovë.",
+      "Na kontaktoni: telefon, WhatsApp, email ose formulari i kontaktit. SHEMO PHARM, Rr. Raif Elezi 34, Prizren, Kosovë.",
     phone: "Telefoni",
     whatsappDirect: "Na shkruani direkt",
     email: "Email",

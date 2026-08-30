@@ -217,7 +217,7 @@ export const en: Dictionary = {
         {
           heading: "Who is responsible",
           body: [
-            "The controller for this processing is SHEMO PHARM, Rr. Ernest Koliqi 165/A, 20000 Prizren, Kosovo.",
+            "The controller for this processing is SHEMO PHARM, Rr. Raif Elezi 34, 20000 Prizren, Kosovo.",
             "For any question about your data, write to info@shemopharm.com or call +383 (0) 49 600 934.",
           ],
         },
@@ -419,6 +419,45 @@ export const en: Dictionary = {
     pageN: "Page {n}",
   },
 
+  printedCatalog: {
+    title: "Printed catalogue",
+    subtitle:
+      "The same catalogue you hold on paper, with the same section numbers — but searchable, quick to load and readable on a phone.",
+    metaDescription:
+      "The SHEMO PHARM printed catalogue by numbered section: medical devices, orthopedics, supplements and cosmetics, with article codes.",
+    contents: "Contents",
+    summary: "{sections} sections, {products} products",
+    sectionMetaDescription:
+      "Section {no} {name} of the SHEMO PHARM printed catalogue — {count} products with their article codes.",
+    searchInstead: "Search the catalogue",
+    allTitle: "All products",
+    allSubtitle:
+      "The whole range, one after another, in the order of the printed catalogue.",
+    allMetaDescription:
+      "Every SHEMO PHARM product in one list, in the order of the printed catalogue — with article codes.",
+    allLink: "Browse all {n} products",
+    pageOf: "Page {page} of {total}",
+    notPrintedHeading: "Products not in the printed catalogue",
+    siteTitle: "SHEMO Katalog | Medical product catalogue",
+    searchPlaceholder: "Search by product or article code…",
+    searchTitle: "Search results",
+    searchEmpty: "No products found for “{q}”.",
+    searchPrompt: "Type a product name or an article code.",
+    inSection: "Section {no} — {name}",
+    moreTitle: "More",
+    toShop: "The main SHEMO PHARM site",
+    print: "Print or save as PDF",
+    printIntro:
+      "This page is laid out for A4. For a PDF, choose “Save as PDF” in the print dialog.",
+    printPages: "{n} A4 pages",
+    printPage: "Page {page}/{total}",
+    printWaiting: "Waiting for the photos…",
+    printProgress: "Photos: {done}/{total}",
+    /** Sections the paper edition prints but the range no longer carries. */
+    missingSections:
+      "These sections of the printed catalogue are not here, because none of their articles are in the current range: {names}.",
+  },
+
   categoriesPage: {
     title: "Categories",
     sub: "Browse our full range by category and brand.",
@@ -459,7 +498,7 @@ export const en: Dictionary = {
       "Shemo Pharm operates as a pharmaceutical warehouse and wholesale distributor of medical products and devices for the territory of Kosovo. The company is licensed by the Agency for Medical Products and Devices at the Kosovo Ministry of Health.",
     metaDescription:
       "SHEMO PHARM — a pharmaceutical warehouse and wholesale distributor of medical products and devices in Kosovo, licensed by the Ministry of Health.",
-    depotCaption: "Our warehouse in Prizren — Rr. Ernest Koliqi 165/A",
+    depotCaption: "Our warehouse in Prizren — Rr. Raif Elezi 34",
     missionTitle: "Our mission",
     missionText:
       "To supply pharmacies and healthcare partners in Kosovo with quality medical products and devices, on time and on fair terms — contributing to the health and well-being of the community.",
@@ -485,7 +524,7 @@ export const en: Dictionary = {
     heading: "Contact us",
     sub: "We are available for questions about products, availability, wholesale prices and cooperation.",
     metaDescription:
-      "Contact us: phone, WhatsApp, email or the contact form. SHEMO PHARM, Rr. Ernest Koliqi 165/A, Prizren, Kosovo.",
+      "Contact us: phone, WhatsApp, email or the contact form. SHEMO PHARM, Rr. Raif Elezi 34, Prizren, Kosovo.",
     phone: "Phone",
     whatsappDirect: "Message us directly",
     email: "Email",

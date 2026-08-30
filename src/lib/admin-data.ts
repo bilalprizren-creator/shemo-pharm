@@ -1,7 +1,10 @@
 import "server-only";
 import { assertAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import type { CategoryOption } from "@/components/admin/ProductForm";
+import type {
+  CatalogSectionOption,
+  CategoryOption,
+} from "@/components/admin/ProductForm";
 
 /**
  * Reads for the admin panel.
@@ -13,6 +16,21 @@ import type { CategoryOption } from "@/components/admin/ProductForm";
  * check is free (getSession is memoized per request), so the convention auth.ts
  * documents is worth actually following rather than assuming.
  */
+
+/**
+ * Printed-catalogue sections as options for the product form, in printed order.
+ *
+ * Read straight from the table rather than through getCatalogSections(), which
+ * drops sections that have no products — exactly the ones somebody opening this
+ * form may be trying to refill.
+ */
+export async function getAdminCatalogSectionOptions(): Promise<CatalogSectionOption[]> {
+  await assertAdmin();
+  const rows = (await sql`
+    SELECT id, catalog_no, name FROM catalog_sections ORDER BY sort
+  `) as { id: number; catalog_no: string; name: string }[];
+  return rows.map((r) => ({ id: r.id, label: `${r.catalog_no} — ${r.name}` }));
+}
 
 /** Category tree flattened to indented options for the product form. */
 export async function getAdminCategoryOptions(): Promise<CategoryOption[]> {
@@ -173,6 +191,22 @@ export async function listAdminProducts(opts: {
     total: number;
   }>;
 
+  // count(*) OVER () can only report a total when at least one row came back, so
+  // a page past the end answers "0" for a filter that in fact matches plenty —
+  // a stale bookmark or a hand-edited faqja is enough to produce it. The second
+  // query runs only in that case and never on a page that has rows.
+  let total = rows[0]?.total ?? 0;
+  if (rows.length === 0 && opts.page > 1) {
+    const counted = (await sql`
+      SELECT count(*)::int AS total
+      FROM products
+      WHERE (${opts.query} = '' OR name ILIKE ${like} OR sku ILIKE ${like})
+        AND (${inStock}::boolean IS NULL OR in_stock = ${inStock}::boolean)
+        AND (${hidden}::boolean IS NULL OR hidden = ${hidden}::boolean)
+    `) as { total: number }[];
+    total = counted[0]?.total ?? 0;
+  }
+
   return {
     rows: rows.map((r) => ({
       id: r.id,
@@ -183,7 +217,7 @@ export async function listAdminProducts(opts: {
       featured: r.featured,
       hidden: r.hidden,
     })),
-    total: rows[0]?.total ?? 0,
+    total,
   };
 }
 
@@ -203,6 +237,9 @@ export interface AdminProduct {
   shortDescription: string;
   description: string;
   categoryIds: number[];
+  /** Printed-catalogue placement; null for the 311 products never printed. */
+  catalogSectionId: number | null;
+  catalogSort: number;
 }
 
 export async function getAdminProduct(id: number): Promise<AdminProduct | null> {
@@ -233,6 +270,8 @@ export async function getAdminProduct(id: number): Promise<AdminProduct | null> 
     short_description: string;
     description: string;
     category_ids: number[];
+    catalog_section_id: number | null;
+    catalog_sort: number | null;
   }>;
   const r = rows[0];
   if (!r) return null;
@@ -252,5 +291,7 @@ export async function getAdminProduct(id: number): Promise<AdminProduct | null> 
     shortDescription: r.short_description,
     description: r.description,
     categoryIds: r.category_ids ?? [],
+    catalogSectionId: r.catalog_section_id,
+    catalogSort: r.catalog_sort ?? 0,
   };
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Eye, EyeOff, Plus, Search, Star } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { listAdminProducts } from "@/lib/admin-data";
@@ -50,17 +51,10 @@ export default async function AdminProductsPage({
   const query = sp.kerko?.trim() ?? "";
   const stock = pick(sp.stoku, STOCK_OPTIONS);
   const visibility = pick(sp.dukshmeria, VISIBILITY_OPTIONS);
-  const page = Math.max(1, Number(sp.faqja) || 1);
+  // Math.floor as well as the clamp: "faqja=2.5" would otherwise offset by a
+  // page and a half and label the result "Faqja 2.5".
+  const page = Math.max(1, Math.floor(Number(sp.faqja)) || 1);
   const filtering = query !== "" || stock !== "" || visibility !== "";
-
-  const { rows, total } = await listAdminProducts({
-    query,
-    stock,
-    visibility,
-    page,
-    perPage: PER_PAGE,
-  });
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   const pageHref = (p: number) => {
     const params = new URLSearchParams();
@@ -71,6 +65,20 @@ export default async function AdminProductsPage({
     const qs = params.toString();
     return `/admin/produktet${qs ? `?${qs}` : ""}`;
   };
+
+  const { rows, total } = await listAdminProducts({
+    query,
+    stock,
+    visibility,
+    page,
+    perPage: PER_PAGE,
+  });
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  // Past the last page there is nothing to show and — since "Mbrapa" only steps
+  // back one — no comfortable way back either. Land on the last real page
+  // instead of an empty table.
+  if (page > totalPages) redirect(pageHref(totalPages));
 
   return (
     <div>

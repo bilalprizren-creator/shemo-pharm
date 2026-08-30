@@ -170,3 +170,96 @@ h4 {
   display: none;
 }
 
+
+/* ---------------------------------------------------------------------------
+   Printed catalogue (/katalog/shtyp)
+   ---------------------------------------------------------------------------
+   Rebuilds the geometry of the paper edition: A4 portrait, three columns of
+   four, a new sheet per section. The old site drew this with a 1600x2263 PNG
+   behind every one of its 174 pages; here it is borders and grid, so nothing
+   is rasterised and nothing has to be redrawn when the range changes.
+
+   Screen rules first, so the page is legible before anyone opens the print
+   dialog. `.print-sheet` is sized in mm because that is the unit @page uses —
+   at any other unit the on-screen preview and the printed sheet drift apart. */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+.print-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 190mm;
+  min-height: 277mm;
+  margin: 0 auto 8mm;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  padding: 8mm;
+}
+
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6mm;
+  /* Takes the slack so the footer sits at the foot of the sheet; `start` keeps
+     the four rows at their own height instead of letting grid stretch them
+     across it. */
+  flex: 1;
+  align-content: start;
+}
+
+/* Sheet number, section and print date. A rep holding 163 loose sheets has no
+   other way to put one back, or to tell this run from last year's. */
+.print-sheet-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 4mm;
+  margin-top: 4mm;
+  padding-top: 2mm;
+  border-top: 1px solid var(--color-line);
+  font-size: 8pt;
+  color: var(--color-ink-400);
+}
+
+@media print {
+  /* The site chrome is not part of the catalogue. */
+  body > header,
+  body > footer,
+  .print-hide {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .print-sheet {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: auto;
+    /* The printable box inside `@page margin: 10mm` is 277mm tall, and this
+       deliberately stops short of it: at the exact height Chrome rounds up and
+       slips a blank page in after every sheet. 270mm still pushes the footer
+       to the bottom of a part-filled sheet, which is the point of it. */
+    min-height: 270mm;
+    break-after: page;
+  }
+  .print-sheet:last-child {
+    break-after: auto;
+  }
+
+  /* A product must not be split down the middle by a page break. */
+  .print-cell {
+    break-inside: avoid;
+  }
+
+  /* Backgrounds are off by default in most print dialogs, which would drop the
+     section number badge to white-on-white. */
+  .print-keep-color {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
