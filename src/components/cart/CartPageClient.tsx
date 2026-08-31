@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
-import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
 import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
@@ -86,7 +86,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
             <Link href={langHref(lang, `/produktet/${p.slug}`)} className="shrink-0">
               <PhotoWell
                 className="flex size-16 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 sm:size-20"
-                cutOut={isCutOut(p.image)}
+                cutOut={photoPresentation(p.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
               >
                 {p.image ? (
                   <Image
@@ -94,9 +94,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
                     alt=""
                     fill
                     sizes="80px"
-                    className={`relative object-contain p-1.5 ${
-                      isCutOut(p.image) ? PHOTO_SHADOW_SM : ""
-                    }`}
+                    className={photoPresentation(p.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className}
                   />
                 ) : (
                   <Package className="size-7 text-ink-300" aria-hidden />

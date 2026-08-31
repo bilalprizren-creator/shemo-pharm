@@ -13,7 +13,7 @@ import { langHref, fmt } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
-import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 
 /**
  * The printed catalogue's table of contents: the numbered sections in the order
@@ -117,7 +117,7 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                     sixteen. */}
                 <PhotoWell
                   className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-                  cutOut={isCutOut(cover)}
+                  cutOut={photoPresentation(cover, { pad: "p-2", shadow: PHOTO_SHADOW_SM }).cutOut}
                 >
                   {cover ? (
                     <Image
@@ -126,9 +126,9 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                       fill
                       sizes="64px"
                       priority={i < 6}
-                      className={`relative object-contain p-2 ${
-                        isCutOut(cover) ? PHOTO_SHADOW_SM : ""
-                      }`}
+                      className={
+                        photoPresentation(cover, { pad: "p-2", shadow: PHOTO_SHADOW_SM }).className
+                      }
                     />
                   ) : (
                     <Package className="size-6 text-ink-300" strokeWidth={1.25} aria-hidden />

@@ -217,6 +217,49 @@ const KEEP_FLAT = new Set([
 
 
 /**
+ * Photos that are a picture, not a product — and the cut-out was never the
+ * right idea for them.
+ *
+ * These arrive with a background of their own: a model wearing the support, a
+ * bottle on marble, a jar on a coloured studio sweep, a tube on a branded
+ * pattern, a sun cream on a beach. `migrate-images.mjs` centred each one at 86%
+ * on white and the fill then took the white margin off, so what ships is a
+ * hard-edged rectangle — and the ground and the drop shadow, which exist to
+ * seat a cut-out product, instead frame it like a photo pasted onto the card.
+ *
+ * 214 cut-outs measure as a solid rectangle, and **the measurement is not the
+ * answer**, for the same reason it never is here: a flat carton photographed
+ * straight on is also a solid rectangle, and Always, Pampers, Dolphi, Tanflex
+ * and a hundred others are exactly that. Those look right as they are. The
+ * separation is what the rectangle contains, which no number available here
+ * describes, so this is the reviewed half: read off the contact sheets, kept
+ * deliberately conservative. Full-bleeding a real carton is a worse mistake
+ * than leaving a photo padded, so a doubtful one is left out.
+ *
+ * They are written as `-scene.webp`, opaque and trimmed to their own edges, and
+ * `PhotoWell` gives them the whole tile: no padding, no ground, no shadow.
+ */
+const SCENE_PHOTOS = new Set([
+  // A model wearing the product.
+  "8705", "8704", "8221", "8511", "8514", "0346", "8004",
+
+  // A coloured or patterned studio backdrop.
+  "4405", "4979", "5175", "4116", "9850", "2068", "1707", "2043", "7182",
+  "6012", "0140", "7781",
+
+  // A branded pattern behind a children's line.
+  "3063", "3039", "3040", "3058", "3059", "3060", "3062", "3066", "3037",
+  "3043", "3042", "3046", "3070", "6051",
+
+  // A photographed scene or surface — marble, foliage, a table, a beach.
+  "7066", "2770", "7472", "7473", "7011", "9462", "9828", "9482", "2307",
+  "2308", "2309",
+
+  // Studio grey, where the product sits on a shot floor rather than on white.
+  "8395", "0445", "0421", "0427", "1095", "1070", "1502", "9813", "5032",
+]);
+
+/**
  * Photos whose backdrop the passes never reach, and the colour it is.
  *
  * The counterpart to KEEP_FLAT above, and it exists for the same reason: the
@@ -693,6 +736,37 @@ function measure(buf, width, height) {
   return { span, ink: ink / (width * height), offX, offY };
 }
 
+/**
+ * Grow a picture to a square with the colour it already carries at its edge.
+ *
+ * The mean of the border ring rather than sharp's dominant colour: dominant is
+ * whatever fills the most pixels, which on a beach photograph is the sky and on
+ * a packshot is the product — neither of which is what continues past the edge.
+ */
+async function padToSquare(input) {
+  const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({
+    resolveWithObject: true,
+  });
+  const { width: w, height: h, channels: c } = info;
+  if (w === h) return input;
+
+  let r = 0, g = 0, b = 0, n = 0;
+  const ring = Math.max(1, Math.round(Math.min(w, h) * 0.02));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (x >= ring && x < w - ring && y >= ring && y < h - ring) continue;
+      const i = (y * w + x) * c;
+      r += data[i]; g += data[i + 1]; b += data[i + 2]; n++;
+    }
+  }
+  const background = { r: Math.round(r / n), g: Math.round(g / n), b: Math.round(b / n) };
+  const size = Math.max(w, h);
+  return sharp(input)
+    .resize(size, size, { fit: "contain", background })
+    .png()
+    .toBuffer();
+}
+
 /** Crop to what is actually opaque, then centre it on a transparent square. */
 async function reframeTransparent(input) {
   const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({
@@ -839,6 +913,7 @@ const flagged = [];
 const rejected = [];
 const cameApart = [];
 const reverted = [];
+const scenes = [];
 
 let i = 0;
 for (const p of products) {
@@ -885,6 +960,47 @@ for (const p of products) {
       clearedPct: null,
       layers: [],
       backdropLeft: null,
+    });
+    i++;
+    continue;
+  }
+
+  /**
+   * A picture rather than a product: trim it to its own edges and ship it
+   * opaque.
+   *
+   * Deliberately before everything below, and using sharp's own trim rather
+   * than the flood fill. The fill exists to separate a product from its
+   * background, and here the background *is* the picture — on the model shots
+   * it walks straight out of the white margin into a white top and takes half
+   * the person with it. Trim only removes a uniform border, which is exactly
+   * the white margin migrate-images.mjs added and nothing else.
+   */
+  if (SCENE_PHOTOS.has(String(p.sku ?? "").trim())) {
+    const outName = `${stem}-scene.webp`;
+    const trimmed = await sharp(source)
+      .trim({ background: "#ffffff", threshold: 12 })
+      .flatten({ background: "#ffffff" })
+      .png()
+      .toBuffer();
+
+    /**
+     * Padded to square here rather than cropped to square in the browser.
+     *
+     * The tile is square and `object-cover` fills it by cutting the long axis,
+     * which on nine of these takes something that matters — OVA-Vit 9482 loses
+     * the line of body copy along the bottom edge. Padding with the colour the
+     * picture already has at its edge extends the backdrop instead of cutting
+     * the picture, and a photo that is square to begin with is untouched.
+     */
+    const square = await padToSquare(trimmed);
+    await sharp(square).webp({ quality: QUALITY }).toFile(path.join(OUT, outName));
+    scenes.push({
+      id: p.id,
+      sku: p.sku,
+      name: p.name,
+      from: current,
+      to: `/products/${outName}`,
     });
     i++;
     continue;
@@ -1078,6 +1194,7 @@ console.log(`  flood-filled      ${done.length - fromJara - reused}`);
 console.log(`  reused on disk    ${reused}`);
 console.log(`  backdrop remains  ${flagged.length}`);
 console.log(`kept white ${rejected.length} (cut-out would have eaten the product)`);
+console.log(`scenes     ${scenes.length} (trimmed, shown full bleed)`);
 console.log(`skipped    ${skipped.length}`);
 
 /* ------------------------------------------------------------------ report */
@@ -1096,6 +1213,7 @@ const report = [
   `| Kept their white background (cut-out rejected) | ${rejected.length} |`,
   `| A backdrop still shows | ${flagged.length} |`,
   `| Reframed after a slab came off | ${done.filter((d) => d.reframed).length} |`,
+  `| Pictures, trimmed and shown full bleed | ${scenes.length} |`,
   `| Came apart under the fill | ${cameApart.length} |`,
   `| Skipped | ${skipped.length} |`,
   ``,
@@ -1211,7 +1329,7 @@ if (!WRITE) {
 // Everything whose image path this run changed: the cuts it made, and the
 // products it sent back to their original photo because the cut they were on
 // is worse than no cut at all.
-const writes = [...done, ...reverted];
+const writes = [...done, ...reverted, ...scenes];
 
 await sql`
   UPDATE products AS p

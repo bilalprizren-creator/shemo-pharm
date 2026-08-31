@@ -8,7 +8,7 @@ import { Search, X, Loader2, PackageSearch } from "lucide-react";
 import type { PublicProduct } from "@/lib/types";
 import { langHref, fmt, type Lang } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
-import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 
 interface SearchBarProps {
   lang: Lang;
@@ -261,7 +261,7 @@ export function SearchBar({
                     >
                       <PhotoWell
                         className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6"
-                        cutOut={isCutOut(p.image)}
+                        cutOut={photoPresentation(p.image, { pad: "p-1", shadow: PHOTO_SHADOW_SM }).cutOut}
                       >
                         {p.image ? (
                           <Image
@@ -269,9 +269,7 @@ export function SearchBar({
                             alt=""
                             fill
                             sizes="44px"
-                            className={`relative object-contain p-1 ${
-                              isCutOut(p.image) ? PHOTO_SHADOW_SM : ""
-                            }`}
+                            className={photoPresentation(p.image, { pad: "p-1", shadow: PHOTO_SHADOW_SM }).className}
                           />
                         ) : (
                           <PackageSearch className="size-5 text-ink-300" aria-hidden />

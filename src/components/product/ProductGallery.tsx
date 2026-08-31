@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Package } from "lucide-react";
-import { PhotoWell, PHOTO_SHADOW, PHOTO_SHADOW_SM, isCutOut } from "./PhotoWell";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "./PhotoWell";
 
 export function ProductGallery({
   images,
@@ -24,7 +24,7 @@ export function ProductGallery({
           an uncut detail photo, and each needs its own ground. */}
       <PhotoWell
         className="aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8"
-        cutOut={isCutOut(current)}
+        cutOut={photoPresentation(current, { pad: "p-8" }).cutOut}
       >
         {current ? (
           <Image
@@ -34,7 +34,7 @@ export function ProductGallery({
             priority
             sizes="(max-width: 1024px) 92vw, 540px"
             quality={85}
-            className={`relative object-contain p-8 ${isCutOut(current) ? PHOTO_SHADOW : ""}`}
+            className={photoPresentation(current, { pad: "p-8" }).className}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>
@@ -64,16 +64,16 @@ export function ProductGallery({
                       ? "border-brand-500"
                       : "border-ink-900/8 hover:border-brand-300"
                   }`}
-                  cutOut={isCutOut(src)}
+                  cutOut={photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                 >
                   <Image
                     src={src}
                     alt=""
                     fill
                     sizes="72px"
-                    className={`relative object-contain p-1.5 ${
-                      isCutOut(src) ? PHOTO_SHADOW_SM : ""
-                    }`}
+                    className={
+                      photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className
+                    }
                   />
                 </PhotoWell>
               </button>

@@ -56,6 +56,53 @@ export function isCutOut(image: string | null | undefined): boolean {
   return !!image && /-cutout(-v\d+)?\.webp$/i.test(image);
 }
 
+/**
+ * Some photos are a picture, not a product.
+ *
+ * They came with a background of their own — a model wearing the support, a jar
+ * on a coloured sweep, a sun cream on a beach — so there is nothing to cut out
+ * and nothing to seat. Padding them and dropping a shadow behind them frames
+ * them like a photograph pasted onto the card, which is what they looked like.
+ * They get the whole tile instead: edge to edge, no ground, no shadow.
+ *
+ * The filename is the signal again, for the same reason `-cutout` is: the
+ * script writes `-scene.webp` and nothing else does. Which photos those are is
+ * a reviewed list in scripts/cutout-images.mjs, because a flat carton shot
+ * straight on measures exactly the same as a picture and must not be treated
+ * this way.
+ */
+export function isScenePhoto(image: string | null | undefined): boolean {
+  return !!image && /-scene\.webp$/i.test(image);
+}
+
+/**
+ * How one product photo should be presented, in one place.
+ *
+ * Eight surfaces render a product photo and each needs the same three-way
+ * decision — picture, cut-out, or plain opaque packshot. Returning it from here
+ * rather than repeating it is the argument the header of this file already
+ * makes about the ground: a grid where two cards answer this differently reads
+ * as a bug long before anyone can say which card is wrong.
+ *
+ * `pad` is the caller's padding utility, since the wells differ by a factor of
+ * twelve between a menu circle and the detail gallery.
+ */
+export function photoPresentation(
+  image: string | null | undefined,
+  { pad, shadow = PHOTO_SHADOW }: { pad: string; shadow?: string }
+): { cutOut: boolean; scene: boolean; className: string } {
+  if (isScenePhoto(image)) {
+    return { cutOut: false, scene: true, className: "object-cover" };
+  }
+  const cutOut = isCutOut(image);
+  return {
+    cutOut,
+    scene: false,
+    // `relative` lifts the photo above the ground painted behind it.
+    className: `relative object-contain ${pad} ${cutOut ? shadow : ""}`,
+  };
+}
+
 export function PhotoWell({
   className = "",
   /**

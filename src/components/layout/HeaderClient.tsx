@@ -28,7 +28,7 @@ import { SearchBar } from "./SearchBar";
 import { MobileNav } from "./MobileNav";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 import { useCart } from "@/components/cart/CartProvider";
-import { PhotoWell, PHOTO_SHADOW_SM, isCutOut } from "@/components/product/PhotoWell";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 
 export interface NavCategory {
   slug: string;
@@ -413,7 +413,7 @@ export function HeaderClient({
                           >
                             <PhotoWell
                               className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-ink-900/6"
-                              cutOut={isCutOut(c.image)}
+                              cutOut={photoPresentation(c.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                             >
                               {c.image ? (
                                 <Image
@@ -421,9 +421,7 @@ export function HeaderClient({
                                   alt=""
                                   fill
                                   sizes="56px"
-                                  className={`relative object-contain p-1.5 transition-transform duration-300 group-hover:scale-110 ${
-                                    isCutOut(c.image) ? PHOTO_SHADOW_SM : ""
-                                  }`}
+                                  className={`${photoPresentation(c.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className} transition-transform duration-300 group-hover:scale-110`}
                                 />
                               ) : (
                                 <Package
