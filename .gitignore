@@ -43,6 +43,13 @@ next-env.d.ts
 # Design reference screenshots (not part of the app)
 reference/
 
+# Backdrop review: the before/after strips scripts/clean-backdrops.mjs --sheets
+# writes so its proposals can be looked at, and the report of one run. Both are
+# rebuilt by re-running pass 1. What review *decided* is committed, in
+# scripts/backdrop-approved.json.
+audit/backdrops/
+scripts/.backdrop-report.json
+
 # Category-audit thumbnails: 30 MB of derived files, rebuilt in a minute with
 # `node scripts/audit-thumbnails.mjs`. The audit's inputs and verdicts under
 # audit/batches and audit/out ARE committed — those cannot be regenerated.

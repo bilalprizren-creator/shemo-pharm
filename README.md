@@ -49,6 +49,25 @@ Dega `development` u pastrua nga të dhënat e klientëve
 `src/data/*.json` **nuk lexohen në runtime** (përjashtim: `offers.json`). Janë
 hyrje dhe kopje sigurie për skriptet.
 
+### Emri dhe të dhënat e produktit
+
+Eksporti i WooCommerce e ka futur kodin e artikullit brenda emrit të **çdo**
+produkti — "4 Joint 15 stick sachets (4108)" — kurse faqja e shfaq atë kod edhe
+një herë, veçmas, me etiketën "Kodi i produktit". `cleanProductName`
+(`src/lib/product-name.ts`) e heq nga emri që lexon klienti; `Product.name` te
+baza nuk ndryshon, ndaj paneli i adminit ende redakton rreshtin që redakton dhe
+kërkimi ende e gjen produktin me kodin e tij. Rregulli është **forma** e kodit,
+jo krahasimi me `sku`: 15 produkte e shkruajnë kodin ndryshe brenda emrit, 8 nuk
+kanë sku fare dhe një e ka çmimin te ajo kolonë. 2 044 emra ndryshojnë.
+
+Pa kodin, pjesa tjetër e emrit del të jetë e dhënë. 2 027 nga 2 049 produkte nuk
+kanë asnjë përshkrim, ndaj `readProductFacts` (`src/lib/product-facts.ts`) i
+nxjerr nga emri sasinë në paketim, vëllimin, peshën, përqendrimin, përmasat,
+SPF-në, madhësitë dhe klasën e kompresionit. **Asgjë nuk shpiket:** çdo vlerë
+është nënvarg i emrit të vetë produktit, dhe 494 produkte që nuk thonë asgjë
+marrin bosh. Marka te ai bllok vjen nga auditi i fotove (kategoritë `kind =
+brand`), ndaj 1 235 produkte pa markë të lexuar në paketim mbeten pa markë.
+
 ### Katalogu dhe cache-i
 
 `src/lib/catalog.ts` e ngarkon katalogun e plotë (2 049 produkte) dhe e mban në
@@ -135,9 +154,34 @@ produktet; kategoritë me `count = 0` nuk shfaqen askund.
 
 ### Fotot e produkteve
 
-2 049 foto WebP 1000×1000 ndodhen në `public/products/` (≈64 MB, në repo).
+2 049 foto WebP 1000×1000 ndodhen në `public/products/` (≈68 MB, në repo).
 Foto të reja ngarkohen nga `/admin/produktet/…` te **Vercel Blob** përmes
 `src/app/api/admin/upload/route.ts`.
+
+**Sfondi i fotove.** 722 nga 2 049 fotot nuk janë shkrepur mbi të bardhë, por mbi
+një tavolinë gri a bezhë — dhe në rrjetë ajo pllakë duket si pjesë e kartelës, jo
+e fotos. `scripts/clean-backdrops.mjs` e heq atë sipërfaqe: mbush nga skaji i
+fotos me dy toleranca (lokale mes fusheve fqinje, dhe një tavan të **matur** te
+vetë sfondi), e hap maskën morfologjikisht që rrjedhjet nëpër kanale të holla të
+shkëputen, dhe e rikuadron me të njëjtat konstante si `migrate-images.mjs`.
+
+Skripti është **dy kalime**, dhe mes tyre rri një sy, jo një formalitet:
+
+```bash
+node scripts/clean-backdrops.mjs --sheets       # kalimi 1 — vetëm lexon
+node scripts/clean-backdrops.mjs --commit --approved scripts/backdrop-approved.json
+```
+
+Kalimi 1 i ngushton 2 049 fotot te një grup mjaft i vogël sa të shihet një nga
+një (49 herën e fundit) dhe shkruan shirita para/pas te `audit/backdrops/`.
+Kalimi 2 **refuzon të nisë** pa listën që doli nga ai shikim: nga 49 propozimet,
+34 kaluan dhe 15 u hodhën poshtë sepse i hanin shkronjat e paketimit ose linin
+njolla sfondi pezull. Pragjet e skriptit nuk mund ta bëjnë vetë atë dallim —
+shpërndarjet mbivendosen, `MAX_INLETS` e shpjegon — prandaj nuk u lejohet.
+
+Origjinalet janë vetëm te git, ndaj kthimi është `git checkout -- public/products`;
+për këtë arsye kalimi 2 nuk niset mbi një `public/products` me ndryshime të
+pakomituara.
 
 Skedari kalon **nëpër serverin tonë**, nuk shkon drejt te depoja. Kështu duhet,
 sepse vetëm ashtu mund të kontrollohen bajtat: tipi i deklaruar, prapashtesa e
@@ -228,6 +272,7 @@ npm run migrate:rate-limits   # tabela rate_limits — kufij që i ndajnë insta
 | Skript | Çfarë bëri |
 | --- | --- |
 | `migrate-images.mjs` | 2 049 foto → WebP 1000×1000, standardizim + manifest |
+| `clean-backdrops.mjs` | Heqja e sfondit fotografik — 34 foto, të gjitha të shikuara |
 | `restructure-categories.mjs` | Ndarja markë/lloj produkti (`kind`, `sort`) |
 | `apply-taxonomy.mjs` | Zbatoi auditin e `audit/` mbi katalogun |
 | `fix-categories.mjs` | 121 produkte pa kategori + rillogaritje e `count` |
