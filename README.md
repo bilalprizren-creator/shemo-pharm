@@ -62,6 +62,28 @@ dy nivele cache-i:
 `src/lib/admin-actions.ts`), prandaj ndryshimi duket menjëherë. Një skript që
 shkruan direkt në bazë **nuk** e pastron — aty pret deri në 5 minuta.
 
+### Ndarja e një pamjeje të katalogut
+
+Çdo filtër i listës jeton në URL — kërkimi (`kerko`), renditja (`renditja`),
+vetëm-në-stok (`stok`), lloji brenda një marke (`lloji`) dhe faqja (`faqja`).
+Prandaj adresa aktuale **është** pamja: kopjimi i saj e hap te tjetri saktësisht
+të njëjtën listë. Butoni "Ndaje" (`src/components/catalog/ShareLink.tsx`) e
+merr atë adresë te sistemi i ndarjes (WhatsApp, Viber), te clipboard-i ose — kur
+shfletuesi i brendshëm i Facebook-ut a Instagram-it e refuzon clipboard-in — te
+një fushë gati për kopjim.
+
+`listingMetadata` (te `CatalogView.tsx`) e emërton lidhjen te kartela Open
+Graph: pa të, çdo listë e trashëgonte kartelën e përgjithshme të faqes dhe një
+link për "Vitaminat", për një markë dhe për një kërkim dukeshin të njëjtë në
+WhatsApp.
+
+Dy gjëra **nuk** udhëtojnë me linkun, me qëllim:
+
+- **Çmimet** — shihen sipas llogarisë së atij që e hap (shih më poshtë), jo
+  sipas llogarisë së atij që e dërgoi.
+- **Lista e dëshirave dhe shporta** — rrinë te `localStorage` i shfletuesit,
+  ndaj `/lista-e-deshirave` te marrësi hapet bosh.
+
 ## Llogaritë dhe çmimet (B2B)
 
 Çmimet shfaqen **vetëm** për llogaritë e aprovuara — kontrolli bëhet gjithmonë

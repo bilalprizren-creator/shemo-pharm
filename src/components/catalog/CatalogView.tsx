@@ -12,7 +12,8 @@ import {
   toCardProducts,
   type ProductSort,
 } from "@/lib/catalog";
-import { langHref, fmt, type Lang } from "@/lib/i18n";
+import { langHref, fmt } from "@/lib/i18n";
+import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs, type Crumb } from "./Breadcrumbs";
@@ -22,6 +23,7 @@ import { CategoryFilter } from "./CategoryFilter";
 import { EmptyState } from "./EmptyState";
 import { MobileFilters } from "./MobileFilters";
 import { Pagination } from "./Pagination";
+import { ShareLink } from "./ShareLink";
 import { SortSelect } from "./SortSelect";
 
 export interface CatalogSearchParams {
@@ -37,7 +39,8 @@ export interface CatalogSearchParams {
 const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
 
 /**
- * Canonical URL and robots directive for a paginated listing.
+ * Title, description, canonical URL, robots directive and share card for a
+ * paginated listing — everything about the page that is not the page itself.
  *
  * Two things were wrong before. Every page of /produktet declared itself
  * canonical to /produktet, so 85 of the 86 pages claimed to be a page they
@@ -50,34 +53,74 @@ const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
  * product-type narrowing is a view of that listing rather than a page of its
  * own — it points at the plain equivalent and is marked noindex, follow, so
  * the crawler still walks through to the products.
+ *
+ * The Open Graph block is here for a different audience: a person pasting the
+ * link into WhatsApp or Viber, which is how this catalog actually travels.
+ * Without it every listing inherited the site-wide card from the root layout,
+ * so a link to Vitaminat, a link to a brand shelf and a link to a search all
+ * previewed as the same "SHEMO PHARM" tile — the recipient could not tell what
+ * they had been sent until they opened it. Naming the listing and the search
+ * term is the whole fix. `url` stays on the canonical rather than the filtered
+ * address, so the card never contradicts the canonical tag above it.
  */
 export function listingMetadata({
-  lang,
+  dict,
   path,
+  name,
+  description,
   searchParams,
 }: {
-  lang: Lang;
+  dict: Dictionary;
   /** Unprefixed, e.g. "/produktet" or "/kategorite/barnat". */
   path: string;
+  /** What this listing is called: "Produktet", or a category or brand name. */
+  name: string;
+  description: string;
   searchParams: CatalogSearchParams;
-}): Pick<Metadata, "alternates" | "robots"> {
+}): Pick<
+  Metadata,
+  "title" | "description" | "alternates" | "robots" | "openGraph"
+> {
+  const lang = dict.lang;
   const page = Math.max(1, Number(searchParams.faqja) || 1);
+  const query = searchParams.kerko?.trim();
   const isView =
-    Boolean(searchParams.kerko?.trim()) ||
+    Boolean(query) ||
     (searchParams.renditja !== undefined && searchParams.renditja !== "emri-asc") ||
     searchParams.stok === "1" ||
     Boolean(searchParams.lloji?.trim());
 
   const suffix = !isView && page > 1 ? `?faqja=${page}` : "";
+  const canonical = `${langHref(lang, path)}${suffix}`;
+
+  // The page number belongs in the title too, or every result page is
+  // indistinguishable from the first in a list of search results.
+  const title = page > 1 ? `${name} — ${page}` : name;
+
   return {
+    title,
+    description,
     alternates: {
-      canonical: `${langHref(lang, path)}${suffix}`,
+      canonical,
       languages: {
         sq: `${path}${suffix}`,
         en: `/en${path}${suffix}`,
       },
     },
     ...(isView ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      type: "website",
+      locale: lang === "en" ? "en" : "sq",
+      siteName: SITE.name,
+      // A shared search is a search: saying so beats a card that names the
+      // whole catalog and then opens on eleven products.
+      title: query
+        ? `${fmt(dict.catalog.searchChip, { q: query })} — ${title}`
+        : title,
+      description,
+      url: canonical,
+      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+    },
   };
 }
 
@@ -314,6 +357,17 @@ export async function CatalogView({
                 az: dict.catalog.sortAZ,
                 za: dict.catalog.sortZA,
                 newest: dict.catalog.sortNewest,
+              }}
+            />
+            {/* Last in the row on purpose: you share a view once you have
+                finished building it out of the controls to its left. */}
+            <ShareLink
+              labels={{
+                share: dict.catalog.share,
+                hint: dict.catalog.shareHint,
+                copied: dict.catalog.linkCopied,
+                copyManually: dict.catalog.copyLinkManually,
+                close: dict.catalog.closeShareLink,
               }}
             />
           </div>

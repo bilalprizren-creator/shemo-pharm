@@ -19,14 +19,13 @@ export async function generateMetadata({
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
   const sp = await searchParams;
-  const page = Math.max(1, Number(sp.faqja) || 1);
-  return {
-    // The page number belongs in the title too, or every result page is
-    // indistinguishable from the first in a list of search results.
-    title: page > 1 ? `${dict.catalog.title} — ${page}` : dict.catalog.title,
+  return listingMetadata({
+    dict,
+    path: "/produktet",
+    name: dict.catalog.title,
     description: dict.catalog.metaDescription,
-    ...listingMetadata({ lang: dict.lang, path: "/produktet", searchParams: sp }),
-  };
+    searchParams: sp,
+  });
 }
 
 export default async function ProductsPage({ params, searchParams }: Props) {

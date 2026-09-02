@@ -29,19 +29,16 @@ export async function generateMetadata({
   if (!cat) return {};
   const name = categoryDisplayName(cat);
   const sp = await searchParams;
-  const page = Math.max(1, Number(sp.faqja) || 1);
-  return {
-    title: page > 1 ? `${name} — ${page}` : name,
+  return listingMetadata({
+    dict,
+    path: `/kategorite/${slug}`,
+    name,
     description: fmt(dict.categoriesPage.categoryMetaDescription, {
       name,
       count: cat.count,
     }),
-    ...listingMetadata({
-      lang: dict.lang,
-      path: `/kategorite/${slug}`,
-      searchParams: sp,
-    }),
-  };
+    searchParams: sp,
+  });
 }
 
 /** Breadcrumb trail: parent categories up to the root. */

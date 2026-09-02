@@ -438,6 +438,12 @@ export const sq = {
     emptyTextCategory: "Kjo kategori nuk ka produkte për momentin.",
     emptyTextDefault: "Provoni një kërkim tjetër ose shfletoni kategoritë tona.",
     emptyAction: "Shiko të gjitha produktet",
+    /** Sharing the listing as it is currently filtered — see ShareLink.tsx. */
+    share: "Ndaje",
+    shareHint: "Ndaje këtë listë produktesh ashtu si është filtruar",
+    linkCopied: "Linku u kopjua",
+    copyLinkManually: "Kopjoni linkun",
+    closeShareLink: "Mbyll",
     sortLabel: "Renditja:",
     sortAZ: "Emri A–Zh",
     sortZA: "Emri Zh–A",
