@@ -399,6 +399,26 @@ export const sq = {
     wishlistAdd: "Shto “{name}” në listën e dëshirave",
     wishlistRemove: "Hiq “{name}” nga lista e dëshirave",
     discountBadge: "-{pct}%",
+    /** Spec block. Every value is read out of the product's own name — see
+     *  src/lib/product-facts.ts. Nothing here is written by hand per product. */
+    specsHeading: "Të dhënat e produktit",
+    brandLabel: "Marka",
+    packLabel: "Në paketim",
+    volumeLabel: "Vëllimi",
+    weightLabel: "Pesha",
+    strengthLabel: "Përqendrimi",
+    dimensionsLabel: "Përmasat",
+    spfLabel: "Faktori i mbrojtjes",
+    sizesLabel: "Madhësitë",
+    compressionLabel: "Klasa e kompresionit",
+    packUnits: {
+      tab: "tableta",
+      caps: "kapsula",
+      eff: "tableta efervishente",
+      sachet: "qese",
+      amp: "ampula",
+      piece: "copë",
+    },
   },
 
   catalog: {

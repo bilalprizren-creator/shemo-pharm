@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   brandMatches,
   primaryCategoryOf,
+  productBrandOf,
+  productDisplayName,
   rankRelated,
   searchProducts,
 } from "@/lib/catalog";
@@ -189,5 +191,37 @@ describe("brandMatches", () => {
 
   it("finds nothing rather than guessing when no product carries the name", () => {
     expect(brandMatches(list, "Kräuterhof")).toEqual([]);
+  });
+});
+
+describe("productDisplayName", () => {
+  it("takes the article code out of the catalog name", () => {
+    expect(productDisplayName(product(1, "Bensedin 2mg 30tab (9814)"))).toBe(
+      "Bensedin 2mg 30tab"
+    );
+  });
+
+  it("uses an admin override exactly as it was typed", () => {
+    const p = product(1, "Bensedin 2mg 30tab (9814)", {
+      displayName: "Bensedin 2 mg (30)",
+    });
+    expect(productDisplayName(p)).toBe("Bensedin 2 mg (30)");
+  });
+});
+
+describe("productBrandOf", () => {
+  const CANSIN = category(9, "Cansin", { kind: "brand", count: 61 });
+  const WITH_BRAND = [...CATEGORIES, CANSIN];
+
+  it("finds the brand shelf the packshot audit put the product on", () => {
+    const p = product(1, "Fllaster klasik", { categoryIds: [3, 9] });
+    expect(productBrandOf(p, WITH_BRAND)).toBe(CANSIN);
+  });
+
+  it("answers nothing rather than guessing", () => {
+    // 1 235 of 2 049 products have no brand we can stand behind. Type
+    // categories must never be mistaken for one.
+    const p = product(2, "Nivea Soft 100ml", { categoryIds: [1, 2, 3] });
+    expect(productBrandOf(p, WITH_BRAND)).toBeUndefined();
   });
 });

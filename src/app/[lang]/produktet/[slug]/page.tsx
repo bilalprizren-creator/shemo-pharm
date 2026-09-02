@@ -17,8 +17,12 @@ import {
   getRelatedProducts,
   primaryCategory,
   primaryCategoryOf,
+  productBrandOf,
+  productDisplayName,
+  productImage,
   toCardProducts,
 } from "@/lib/catalog";
+import { readProductFacts } from "@/lib/product-facts";
 import { formatPrice } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
@@ -28,6 +32,7 @@ import { BreadcrumbJsonLd, ProductJsonLd } from "@/components/seo/JsonLd";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductCarousel } from "@/components/product/ProductCarousel";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductSpecs } from "@/components/product/ProductSpecs";
 import { WishlistButton } from "@/components/product/WishlistButton";
 import { AddToCartWithQty } from "@/components/cart/AddToCartButton";
 
@@ -41,9 +46,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(slug);
   if (!product) return {};
   const cat = await primaryCategory(product);
+  const name = productDisplayName(product);
+  const image = productImage(product);
   return {
-    title: product.name,
-    description: `${product.name}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
+    title: name,
+    description: `${name}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
     alternates: {
       canonical: langHref(dict.lang, `/produktet/${slug}`),
       languages: {
@@ -51,9 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         en: `/en/produktet/${slug}`,
       },
     },
-    openGraph: product.images[0]
-      ? { images: [{ url: product.images[0] }] }
-      : undefined,
+    openGraph: image ? { images: [{ url: image }] } : undefined,
   };
 }
 
@@ -69,13 +74,27 @@ export default async function ProductPage({ params }: Props) {
   const all = await getAllCategories();
   // The same category the card, the search suggestion and the JSON-LD name.
   const mainCat = primaryCategoryOf(product, all);
+  const brand = productBrandOf(product, all) ?? null;
+
+  // Everything below reads this, not product.name: an admin rename has to
+  // reach the h1, the tab title, the breadcrumb and the WhatsApp message, and
+  // the article code has no business in any of them.
+  const name = productDisplayName(product);
+  const facts = readProductFacts(name);
+
+  // The card and the gallery used to open on different pictures: productImage
+  // honours the admin's image_override and the gallery read product.images
+  // straight. The override leads now, and the catalog shots stay behind it.
+  const gallery = [
+    ...new Set([productImage(product), ...product.images].filter((src) => src !== null)),
+  ];
 
   const crumbs: Crumb[] = [
     { label: dict.catalog.title, href: "/produktet" },
     ...(mainCat
       ? [{ label: categoryDisplayName(mainCat), href: `/kategorite/${mainCat.slug}` }]
       : []),
-    { label: product.name },
+    { label: name },
   ];
 
   const related = await toCardProducts(
@@ -84,20 +103,20 @@ export default async function ProductPage({ params }: Props) {
   );
 
   const whatsappText = encodeURIComponent(
-    `${fmt(dict.product.whatsappInterest, { name: product.name })}${
+    `${fmt(dict.product.whatsappInterest, { name })}${
       product.sku ? ` (${dict.common.code}: ${product.sku})` : ""
     }`
   );
   const mailSubject = encodeURIComponent(
-    fmt(dict.product.mailSubject, { name: product.name })
+    fmt(dict.product.mailSubject, { name })
   );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
       <ProductJsonLd
-        name={product.name}
+        name={name}
         sku={product.sku}
-        image={product.images[0] ?? null}
+        image={productImage(product)}
         category={mainCat ? categoryDisplayName(mainCat) : null}
         slug={product.slug}
       />
@@ -113,15 +132,15 @@ export default async function ProductPage({ params }: Props) {
                 },
               ]
             : []),
-          { name: product.name },
+          { name },
         ]}
       />
       <Breadcrumbs items={crumbs} dict={dict} />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <ProductGallery
-          images={product.images}
-          name={product.name}
+          images={gallery}
+          name={name}
           labels={{
             list: dict.product.galleryLabel,
             image: dict.product.galleryImage,
@@ -138,7 +157,7 @@ export default async function ProductPage({ params }: Props) {
             </Link>
           )}
           <h1 className="mt-2 text-2xl font-extrabold leading-tight text-ink-900 sm:text-3xl">
-            {product.name}
+            {name}
           </h1>
 
           <dl className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-500">
@@ -196,11 +215,11 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-4 border-t border-ink-900/6 pt-4">
               <AddToCartWithQty
                 productId={product.id}
-                productName={product.name}
+                productName={name}
                 labels={{
                   add: dict.product.addToCart,
                   added: dict.product.addedToCart,
-                  addAria: fmt(dict.product.addToCartAria, { name: product.name }),
+                  addAria: fmt(dict.product.addToCartAria, { name }),
                   increase: dict.product.increaseQty,
                   decrease: dict.product.decreaseQty,
                   qty: dict.product.qtyLabel,
@@ -209,6 +228,13 @@ export default async function ProductPage({ params }: Props) {
               />
             </div>
           </div>
+
+          <ProductSpecs
+            facts={facts}
+            brand={brand}
+            brandName={brand ? categoryDisplayName(brand) : null}
+            dict={dict}
+          />
 
           {(product.shortDescription || product.description) && (
             <div className="mt-6 space-y-3 text-[15px] leading-relaxed text-ink-500">
@@ -250,10 +276,10 @@ export default async function ProductPage({ params }: Props) {
               </a>
               <WishlistButton
                 productId={product.id}
-                productName={product.name}
+                productName={name}
                 labels={{
-                  add: fmt(dict.product.wishlistAdd, { name: product.name }),
-                  remove: fmt(dict.product.wishlistRemove, { name: product.name }),
+                  add: fmt(dict.product.wishlistAdd, { name }),
+                  remove: fmt(dict.product.wishlistRemove, { name }),
                 }}
                 className="size-12"
               />

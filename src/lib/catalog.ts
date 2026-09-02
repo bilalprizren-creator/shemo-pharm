@@ -5,6 +5,7 @@ import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { isAllowedImageSrc } from "@/lib/images";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
+import { cleanProductName } from "@/lib/product-name";
 import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
 /**
@@ -627,9 +628,42 @@ export function productImage(product: Product): string | null {
   return product.imageOverride ?? product.images[0] ?? null;
 }
 
-/** The product's display name: admin override first, then the catalog name. */
+/**
+ * The product's display name: admin override first, then the catalog name with
+ * its article code taken out (see cleanProductName — the code is printed again
+ * on its own, labelled, so inside the name it is noise).
+ *
+ * An override is used verbatim. Whoever typed it typed what they wanted to see,
+ * and a rule that then edits it would be arguing with the editor.
+ */
 export function productDisplayName(product: Product): string {
-  return product.displayName ?? product.name;
+  return product.displayName ?? cleanProductName(product.name);
+}
+
+/**
+ * The brand shelf a product sits on, or null.
+ *
+ * This is the packshot audit's finding, not a guess: a brand category is only
+ * on a product because the mark was legible on the package, or because the
+ * article-code rule or a pin in src/data/brand-pins.json put it there. 814 of
+ * 2 049 products carry one. The rest genuinely have no brand *we can stand
+ * behind* — the catalog is full of Nivea and Johnson's, and inventing a brand
+ * field for them would undo the one rule the whole audit was built on.
+ *
+ * Brand categories are flat (`parent === 0`), so a product can only be on one.
+ */
+export function productBrandOf(
+  product: Product,
+  categories: Category[]
+): Category | undefined {
+  const brands = new Map(
+    categories.filter((c) => c.kind === "brand").map((c) => [c.id, c])
+  );
+  for (const id of product.categoryIds) {
+    const brand = brands.get(id);
+    if (brand) return brand;
+  }
+  return undefined;
 }
 
 function buildCard(
