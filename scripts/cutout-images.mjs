@@ -173,23 +173,25 @@ const KEEP_FLAT = new Set([
   "2037", "5506", "7289C", "7782", "8356",
   "9652", "9653", "9655", "9664", "9745",
 
-  // Photographs of a scene rather than a packshot: a model wearing the product,
-  // a hand pouring water onto a mattress, a bottle staged among leaves. The
-  // neutrality rule keeps the fill out of anything coloured, but a scene also
-  // has neutral parts — white clothing, a pale stone plinth, bed linen — and it
-  // walks in through those and leaves the rest in pieces. There is nothing to
-  // cut out here in the first place: the whole frame is the picture.
-  "1591", "2316", "2317", "3063", "8523", "8620",
-  // 8702 belongs here too, and it took a seeded fill to prove it: given its
-  // backdrop colour the fill clears the grey and leaves a soft grey cloud
-  // behind the model's hand, because a photographed arm on a lit ground has a
-  // shadow that no flat colour describes.
+  // Photographs of a scene rather than a packshot used to sit here too (the
+  // Dulcolax model 1591, the SOS sprays 2316/2317, the corset 8523, the
+  // mattress 8620). They are pictures, and SCENE_PHOTOS below is the list for
+  // pictures — moved there on 2026-09-07, because here they only ever stopped
+  // a cut, and the cut had already been made: all five were still shipping the
+  // cut-out, with the white clothing eaten out of the model shots.
+  //
+  // 8702 stays: it took a seeded fill to prove it. Given its backdrop colour
+  // the fill clears the grey and leaves a soft grey cloud behind the model's
+  // hand, because a photographed arm on a lit ground has a shadow that no flat
+  // colour describes.
   "8702",
 
-  // Pale product on a pale ground, where removing the ground takes the product
-  // with it: a white toilet-seat riser, a sterile gauze pouch, a clear infusion
-  // bottle, glass ampoules, a white-on-white carton.
-  "1164", "5287", "6241", "8832", "9065",
+  // Pale product on a pale ground — a white toilet-seat riser 8832, the gauze
+  // pouch 1164, the Dextrose bottle 5287, the Oxytocin ampoules 6241, the
+  // Muconeb carton 9065 — were listed here on the expectation that removing the
+  // ground would take the product with it. Checked against the checked-in
+  // files on 2026-09-07: every one of those five cuts is intact, product whole,
+  // so the entries were only a threat to a good file and are gone.
 
   /**
    * White cartons the fill went through rather than around.
@@ -250,10 +252,22 @@ const SCENE_PHOTOS = new Set([
   // A branded pattern behind a children's line.
   "3063", "3039", "3040", "3058", "3059", "3060", "3062", "3066", "3037",
   "3043", "3042", "3046", "3070", "6051",
+  // The rest of that line, found on the contact sheets 2026-09-07: on these the
+  // fill either stopped at the pattern and shipped it as a rectangle with a
+  // drop shadow (Mickey 3032/3033, Minions 3049, Princess 3064, Turtles 3071)
+  // or walked in through the white in the pattern and left fragments (Paw
+  // Patrol 3067/3068). Same artwork as their siblings above, same answer.
+  "3032", "3033", "3049", "3064", "3067", "3068", "3071",
+  // A cartoon landscape behind a repellent roll-on; the fill took the sky.
+  "2318",
 
   // A photographed scene or surface — marble, foliage, a table, a beach.
   "7066", "2770", "7472", "7473", "7011", "9462", "9828", "9482", "2307",
   "2308", "2309",
+  // Moved from KEEP_FLAT 2026-09-07 (see there): the SOS sprays on a plinth
+  // among leaves, the Dulcolax model, the corset on a model, water on a
+  // mattress.
+  "2316", "2317", "1591", "8523", "8620",
 
   // Studio grey, where the product sits on a shot floor rather than on white.
   "8395", "0445", "0421", "0427", "1095", "1070", "1502", "9813", "5032",

@@ -1,17 +1,17 @@
-# Product cut-outs — 2026-08-31
+# Product cut-outs — 2026-09-07
 
 Target: development (DATABASE_URL_DEVELOPMENT: ep-rapid-cherry-aj1pxq2q-pooler.c-3.us-east-2.aws.neon.tech/neondb)
-Mode:   images only, no database
+Mode:   WRITE (database + products.json updated)
 
 | | |
 |---|---|
-| Photos cut out | 1 |
+| Photos cut out | 0 |
 | — from Jara's original alpha | 0 |
-| — white background flood-filled | 1 |
-| Kept their white background (cut-out rejected) | 2 |
+| — white background flood-filled | 0 |
+| Kept their white background (cut-out rejected) | 0 |
 | A backdrop still shows | 0 |
-| Reframed after a slab came off | 1 |
-| Pictures, trimmed and shown full bleed | 0 |
+| Reframed after a slab came off | 0 |
+| Pictures, trimmed and shown full bleed | 13 |
 | Came apart under the fill | 0 |
 | Skipped | 0 |
 
@@ -29,7 +29,7 @@ product shows its original photo on plain white instead.
 
 None.
 
-## Kept their white background (2)
+## Kept their white background (0)
 
 The cut-out was computed and thrown away: what survived was too small or too
 narrow to be the product, which happens when the product is itself white —
@@ -37,10 +37,7 @@ a surgical cap, an orthopaedic pillow, compression stockings. These still
 point at their original photo, so nothing is broken; they simply show a
 white square on a tinted card. Re-shoot or hand-cut them to fix.
 
-| Code | Product | Opaque box | Opaque area |
-|---|---|---|---|
-| 8508 | Hollaopke për vena të mbyllura (CCL2) ERSA-511 Nr. 1, 2, 3, 4, 5, 6, 7 (8508) | 71% | 13.3% |
-| 9889 | Citoles 20MG X 28 tab (9889) | 80% | 5.8% |
+None.
 
 ## A backdrop still shows (0)
 
