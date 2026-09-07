@@ -1,12 +1,12 @@
 # Product cut-outs — 2026-09-07
 
 Target: development (DATABASE_URL_DEVELOPMENT: ep-rapid-cherry-aj1pxq2q-pooler.c-3.us-east-2.aws.neon.tech/neondb)
-Mode:   images only, no database
+Mode:   WRITE (database + products.json updated)
 
 | | |
 |---|---|
-| Photos cut out | 0 |
-| — from a segmentation model's cut | 0 |
+| Photos cut out | 15 |
+| — from a segmentation model's cut | 15 |
 | — from Jara's original alpha | 0 |
 | — from the old catalogue's alpha | 0 |
 | — filled from the old catalogue's white photo | 0 |
@@ -17,7 +17,7 @@ Mode:   images only, no database
 | Pictures, trimmed and shown full bleed | 0 |
 | Came apart under the fill | 0 |
 | Skipped | 0 |
-| Unchanged (identical to what is served) | 39 |
+| Unchanged (identical to what is served) | 24 |
 
 ## Came apart under the fill (0)
 

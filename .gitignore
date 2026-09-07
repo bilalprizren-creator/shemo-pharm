@@ -57,4 +57,13 @@ data/
 # scripts/fetch-katalog-images.mjs downloads and scripts/cutout-images.mjs reads
 # as an alpha source. Re-fetched in minutes; the cuts made from them under
 # public/products ARE committed.
-sources/
+#
+# sources/segmented/recipe.json is the exception, and has to be: 2 KB of crops
+# read off a grid by eye and decisions made one product at a time, with no second
+# copy anywhere and nothing to derive it from — 332 MB of model weights cannot
+# reconstruct a judgement. A negation cannot reach into an excluded directory, so
+# the parents are opened one at a time to let that one file back through.
+sources/*
+!sources/segmented/
+sources/segmented/*
+!sources/segmented/recipe.json

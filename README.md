@@ -177,16 +177,23 @@ katër burime, sipas besueshmërisë:
 
 1. `sources/segmented/<kodi>.png` — foto të skenuara (një shishe në plazh, një
    tubë mbi motiv) të prera me model segmentimi nga `scripts/segment-scenes.mjs`.
-   Modeli (332 MB) nuk është varësi e aplikacionit; instalohet me
-   `npm i -D @imgly/background-removal-node`. Prerjet dhe kornizat e rishikuara
-   rrinë te `sources/segmented/recipe.json`.
+   Modeli (332 MB) nuk është varësi e aplikacionit dhe nuk guxon të bëhet: brenda
+   `node_modules` të këtij projekti ai përplaset me `sharp` dhe procesi vdes.
+   Instalohet në dosje të vetën, jashtë repos, dhe arrihet me `SEGMENT_MODEL_DIR`.
+   Prerjet dhe kornizat e rishikuara rrinë te `sources/segmented/recipe.json`.
+   Korniza thotë ku të shihet, kurrë ku mbaron produkti: një prerje që prek buzën
+   e kornizës së vet u pre nga korniza dhe jo nga modeli, dhe skripti ndalon me
+   gabim. Çdo ekzekutim lë `sources/segmented-proof.png` — çdo kornizë e vizatuar
+   mbi origjinalin e vet, përkrah asaj që u kthye.
 2. Alfa origjinale e projektit Jara.
 3. Prerjet e vetë faqes së vjetër shemo-katalog.com, të shkarkuara me
    `scripts/fetch-katalog-images.mjs` te `sources/shemo-katalog/` (≈360 MB).
 4. Mbushja nga kufiri i bardhë (flood fill).
 
-`sources/` nuk hyn në git — shkarkohet përsëri për disa minuta. Prerjet e bëra
-prej tyre nën `public/products/` **janë** në repo.
+`sources/` nuk hyn në git — shkarkohet përsëri për disa minuta. Bën përjashtim
+`sources/segmented/recipe.json`, që **është** në repo: 2 KB vendimesh të lexuara
+me sy, pa kopje tjetër askund dhe pa asgjë prej së cilës të rindërtohet. Prerjet
+e bëra prej tyre nën `public/products/` janë gjithashtu në repo.
 
 ⚠️ Shtegu i fotos rri në bazë, jo në kod: një prerje e re nuk duket në prodhim
 derisa të bëhet `DATABASE_TARGET=production node scripts/sync-image-paths.mjs --write`.
