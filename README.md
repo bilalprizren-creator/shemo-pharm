@@ -62,6 +62,39 @@ dy nivele cache-i:
 `src/lib/admin-actions.ts`), prandaj ndryshimi duket menjëherë. Një skript që
 shkruan direkt në bazë **nuk** e pastron — aty pret deri në 5 minuta.
 
+### Emrat e produkteve
+
+Emrat vijnë nga WooCommerce ashtu siç ishin, dhe **1 994 nga 2 049 mbarojnë me
+kodin e vet të artikullit në kllapa** — `A+D3 pika 10ml (1501)` — ndërsa rreshti
+poshtë tij te kartela shkruan tashmë `Kodi 1501`. Edhe 45 vijnë krejt me
+shkronja të mëdha, 133 me vizë tipografike që katalogu nuk e përdor, dhe 60 me
+hapësira të humbura brenda kllapave.
+
+`cleanProductName()` te [`src/lib/product-name.ts`](src/lib/product-name.ts) e
+**nxjerr** emrin që lexon klienti; nuk e migron. Kolona `products.name` mban
+gjithnjë atë që dërgoi dyqani, ndaj një rregull i gabuar rregullohet me një
+deploy dhe një import i ri nuk përplaset me pastrimin. `display_name` i
+redaktorit fiton mbi të dyja.
+
+Çka **nuk** preket, sepse është pjesë e produktit e jo kod: masa e pelenës apo
+tamponit — `Pampers Active Baby (3) 6-10kg` — një numër modeli si `(SHM-102)`,
+`(REF-720)` ose `(CCL1)`, marka, shija, përbërja, dhe çdo njësi matëse në
+kllapa, që `(250 ml)` të mos lexohet kurrë si kodi 250 me një njësi pas.
+
+Një emër i bërtitur kthehet në shkronjë të vogël si fjalia, që të ulet pranë
+2 004 emrave që nuk preken fare, por brenda kllapave shkronja e madhe mbetet —
+aty rrinë markat: `CAJ BEKUNIS A20 ( BIO ALPINA )` → `Caj bekunis A20 (Bio Alpina)`.
+
+`productDisplayName()` te `src/lib/catalog.ts` është e vetmja hyrje, dhe tani e
+përdor **çdo** vend që shfaq një emër — kartela, faqja e produktit, sugjerimet e
+kërkimit, JSON-LD, rreshtat e shportës, teksti i porosisë në WhatsApp dhe
+renditja A–Z. Më parë vetëm kartelat e thërrisnin, ndaj një produkt i riemërtuar
+nga paneli riemërtohej te rrjeti dhe askund tjetër.
+
+**Kërkimi mbetet te emri i importuar plus SKU** (`searchProducts` te
+`src/lib/catalog.ts`), që klienti i cili shtyp kodin nga fletëdërgesa, ose
+shkrimin e vjetër, ta gjejë prapë produktin. Ka test për pikërisht këtë.
+
 ### Ndarja e një pamjeje të katalogut
 
 Çdo filtër i listës jeton në URL — kërkimi (`kerko`), renditja (`renditja`),
@@ -161,6 +194,54 @@ në një xhiro. Ngarkime individuale janë në rregull; importe masive jo.
 ⚠️ **Depoja është aktualmente e pezulluar** (billing-u joaktiv), ndaj çdo ngarkim
 i re përfundon me `503 store_suspended` dhe paneli e thotë hapur se riprovimi nuk
 ndihmon. Të 2 049 fotot ekzistuese nuk preken.
+
+#### Fotot që ende kanë sfond
+
+`scripts/lib/reframe.mjs` e pret foton te kutia kufizuese e asaj që nuk është e
+bardhë. Për një foto të bërë mbi sfond të bardhë kjo punon; për një foto të bërë
+mbi një plantacion çaji kutia është i gjithë kuadri, ndaj plantacioni mbërrin te
+faqja. `npm run audit:photos` i numëron dhe shkruan
+[`audit/PHOTOS.md`](audit/PHOTOS.md):
+
+| | |
+|---|---|
+| Packshot i pastër mbi të bardhë | 1 779 |
+| **Sfond i sheshtë — hiqet** | **20** |
+| **Skenë e fotografuar — do foto të re** | **250** |
+
+Dëshmia është `markPct` te `scripts/.image-manifest.json` — sa nga origjinali e
+mbajti prerja, ku 100 do të thotë se s'kishte fare buzë të bardhë — e verifikuar
+kundër pikselave të dërguar.
+
+`npm run fix:photo-backgrounds` e heq sfondin e sheshtë: vërshon nga buza e
+kanavacës përmes së bardhës dhe asaj ngjyre, ndalet te produkti, dhe e kthen
+rezultatin nëpër tubacionin normal. **11 foto u rregulluan kështu**; 20 të tjerat
+i refuzon vetë. Refuzimet janë thelbi — çdo prag aty doli nga shikimi i çifteve
+para/pas (`--preview <dir>`), jo nga përqindjet:
+
+- **Sfond i errët nuk provohet.** Buzët me hije të vetë produktit bien brenda çdo
+  tolerance të përdorshme; te kartoni Bioblas u hëngr buza e djathtë.
+- **Një ishull i vogël pastrohet vetëm nëse ka ende ngjyrën e sfondit.** Pastrimi
+  sipas madhësisë fshiu çdo `I` nga *NOT GETTING A GOOD NIGHT'S SLEEP?*.
+- **Buza e prerjes matet.** Një hije e butë e zbeh sfondin ngadalë, ndaj vërshimi
+  ndalet brenda saj dhe lë një jakë të grisur; dhe aty ku ngjyra e sfondit
+  ndodhet edhe brenda paketimit, vërshimi hyn brenda dhe i kafshon një cep të
+  bardhë produktit. Të dyja e lënë prerjen të rrethuar nga sfondi, jo nga
+  produkti, dhe të dyja refuzohen nga i njëjti numër.
+
+Për të 250 skenat nuk ka zgjidhje automatike — duhet foto e re. Depoja e
+pezulluar nuk pengon: `isAllowedImageSrc` pranon çdo shteg lokal, ndaj mjafton
+një skedar te `public/products/` dhe shtegu i tij te fusha e mbivendosjes së
+fotos në formularin e produktit.
+
+#### Kur një produkt nuk shfaq fare foto
+
+Faqja lexon bazën, jo repon. `npm run verify:images` (vetëm SELECT) tregon për
+çdo produkt se ç'ka te `products.images`, a e pranon `src/lib/images.ts`, dhe a
+ekziston skedari lokal. Rreshtat që tregojnë ende te Vercel Blob janë kalimi i
+dytë i migrimit që s'përfundoi kurrë — depoja është e pezulluar, ndaj ata japin
+kartelë bosh; `node scripts/localize-images.mjs --commit` i drejton te kopjet që
+janë tashmë te `public/products/`.
 
 ## Shporta (kërkesë porosie)
 
