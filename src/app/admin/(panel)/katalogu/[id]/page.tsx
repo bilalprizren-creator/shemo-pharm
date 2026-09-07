@@ -15,15 +15,30 @@ import {
   X,
 } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { getAdminCatalogSection, searchProductsToPlace } from "@/lib/admin-data";
+import {
+  getAdminCatalogSection,
+  getAdminCatalogSectionOptions,
+  searchProductsToPlace,
+} from "@/lib/admin-data";
 import {
   moveCatalogProductAction,
   placeProductInCatalogAction,
   renumberCatalogSectionAction,
   toggleProductFlagAction,
 } from "@/lib/admin-actions";
+import {
+  NO_PRODUCT_FILTER,
+  productFilterFields,
+} from "@/lib/product-filter";
+import {
+  ProductBulkBar,
+  ProductSelectAll,
+} from "@/components/admin/ProductBulkBar";
 
 export const metadata: Metadata = { title: "Seksioni i katalogut" };
+
+/** Ties the row checkboxes to the bulk form they are not nested inside. */
+const BULK_FORM = "bulk-section";
 
 const iconButton =
   "inline-flex size-8 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-tint hover:text-ink-900 disabled:opacity-40";
@@ -49,7 +64,10 @@ export default async function AdminCatalogSectionPage({
   const sectionId = Number(id);
   if (!Number.isInteger(sectionId)) notFound();
 
-  const section = await getAdminCatalogSection(sectionId);
+  const [section, sectionOptions] = await Promise.all([
+    getAdminCatalogSection(sectionId),
+    getAdminCatalogSectionOptions(),
+  ]);
   if (!section) notFound();
 
   const sp = await searchParams;
@@ -138,6 +156,12 @@ export default async function AdminCatalogSectionPage({
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
+              <th className="w-10 py-3 pl-4 pr-1">
+                <ProductSelectAll
+                  formId={BULK_FORM}
+                  pageCount={section.products.length}
+                />
+              </th>
               <th className="px-4 py-3 font-semibold">#</th>
               <th className="px-4 py-3 font-semibold">Produkti</th>
               <th className="px-4 py-3 font-semibold">Kodi</th>
@@ -155,6 +179,19 @@ export default async function AdminCatalogSectionPage({
                   p.catalogHidden ? "opacity-55" : ""
                 }`}
               >
+                {/* Associated with the bulk form by id rather than nested in
+                    it: every other cell in this row holds a form of its own,
+                    and a form inside a form is not something HTML has. */}
+                <td className="w-10 py-2.5 pl-4 pr-1">
+                  <input
+                    type="checkbox"
+                    name="ids"
+                    value={p.id}
+                    form={BULK_FORM}
+                    aria-label={`Zgjidh ${p.name}`}
+                    className="size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40"
+                  />
+                </td>
                 <td className="px-4 py-2.5 tabular-nums text-ink-400">{i + 1}</td>
                 <td className="max-w-[320px] px-4 py-2.5">
                   <Link
@@ -247,7 +284,7 @@ export default async function AdminCatalogSectionPage({
             ))}
             {section.products.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-ink-400">
+                <td colSpan={8} className="px-4 py-10 text-center text-ink-400">
                   Asnjë produkt në këtë seksion.
                 </td>
               </tr>
@@ -255,6 +292,21 @@ export default async function AdminCatalogSectionPage({
           </tbody>
         </table>
       </div>
+
+      {/*
+        The same bar as /admin/produktet, filtered to this section — so "all
+        matching" is exactly the contents of this section, and because that
+        equals what is on screen, the bar leaves the "select all N" line out.
+        The section id in the filter is also what tells the action to refresh
+        this page after the write.
+      */}
+      <ProductBulkBar
+        formId={BULK_FORM}
+        pageCount={section.products.length}
+        total={section.products.length}
+        filter={productFilterFields({ ...NO_PRODUCT_FILTER, sectionId: section.id })}
+        sections={sectionOptions}
+      />
 
       <section className="mt-8 rounded-2xl border border-ink-900/8 bg-white p-5">
         <h2 className="font-display text-lg font-bold text-ink-900">

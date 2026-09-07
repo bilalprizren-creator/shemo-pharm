@@ -150,7 +150,23 @@ bosh. Seksionet fshihen vetëm kur janë bosh: çelësi i huaj është
 të gjithë ata nga katalogu pa asnjë paralajmërim. Te `/admin/produktet` filtrat
 **Dyqani**, **Katalogu** dhe **Seksioni** i ndajnë të tri pyetjet: a shitet, a
 shtypet, a ka fare vend në katalog — p.sh. `?seksioni=pa-seksion` jep 311
-produktet që nuk janë shtypur kurrë.
+produktet që nuk janë shtypur kurrë. Filtrat **Kategoria** dhe **Seksioni i
+shtypur** zgjedhin një grup: kategoria numërohet bashkë me nënkategoritë e saj,
+si te `recountCategories`, ndryshe një fshehje masive do të linte pjesën më të
+madhe të degës jashtë.
+
+**Ndryshimet masive.** Kutitë te rreshtat plus shiriti poshtë tabelës —
+te `/admin/produktet` dhe te `/admin/katalogu/<id>` — vendosin dukshmërinë e një
+grupi për njërën faqe pa e prekur tjetrën, ose e zhvendosin grupin në një
+seksion të shtypur (produktet shkojnë në fund të tij, sepse rendi i shtypur
+është vendim njeriu). Vlera vendoset absolute, jo si ndërrim: mbi një zgjedhje
+të përzier, një ndërrim përfundon gjysmë e shfaqur e gjysmë e fshehur. Kutia
+**«Zgjidh të gjitha N që përputhen»** nënkupton filtrin, jo faqen e dukshme —
+me filtrat bosh ajo është i gjithë asortimenti, prandaj mbi 25 produkte kërkohet
+një konfirmim. Fjalori i filtrave rri te
+[`src/lib/product-filter.ts`](src/lib/product-filter.ts), i njëjti për URL-në
+dhe për POST-in e shiritit, që të mos ndryshojë kurrë grupi ndërmjet asaj që
+tabela numëron dhe asaj që butoni shkruan.
 
 **Dukshmëria është e ndarë për dy faqet.** `products.hidden` fsheh nga dyqani,
 `products.catalog_hidden` nga katalogu i shtypur, dhe asnjëri nuk rrjedh nga
@@ -183,7 +199,7 @@ katër burime, sipas besueshmërisë:
    Prerjet dhe kornizat e rishikuara rrinë te `sources/segmented/recipe.json`.
    Korniza thotë ku të shihet, kurrë ku mbaron produkti: një prerje që prek buzën
    e kornizës së vet u pre nga korniza dhe jo nga modeli, dhe skripti ndalon me
-   gabim. Çdo ekzekutim lë `sources/segmented-proof.png` — çdo kornizë e vizatuar
+   gabim. Çdo ekzekutim lë `sources/segmented/proof.png` — çdo kornizë e vizatuar
    mbi origjinalin e vet, përkrah asaj që u kthye.
 2. Alfa origjinale e projektit Jara.
 3. Prerjet e vetë faqes së vjetër shemo-katalog.com, të shkarkuara me

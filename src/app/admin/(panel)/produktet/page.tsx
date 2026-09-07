@@ -3,97 +3,71 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BookOpen, BookX, Eye, EyeOff, Plus, Search, Star } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
-import { listAdminProducts } from "@/lib/admin-data";
+import {
+  getAdminCatalogSectionOptions,
+  getAdminCategoryOptions,
+  listAdminProducts,
+} from "@/lib/admin-data";
 import { toggleProductFlagAction } from "@/lib/admin-actions";
+import {
+  isFiltering,
+  parseProductFilter,
+  productFilterFields,
+  productFilterParams,
+  SECTION_OPTIONS,
+  STOCK_OPTIONS,
+  VISIBILITY_OPTIONS,
+} from "@/lib/product-filter";
 import { ProductFilterSelects } from "@/components/admin/ProductFilterSelects";
 import { ProductPriceCell } from "@/components/admin/ProductPriceCell";
+import {
+  ProductBulkBar,
+  ProductSelectAll,
+} from "@/components/admin/ProductBulkBar";
 
 export const metadata: Metadata = { title: "Produktet" };
 
 const PER_PAGE = 50;
 
-/**
- * The filter vocabulary lives here, not in the select component, so the page can
- * validate a URL against exactly the options it offers. First entry is the
- * absent filter and doubles as the fallback for anything else the URL carries.
- */
-const STOCK_OPTIONS = [
-  { value: "", label: "Të gjitha" },
-  { value: "ne-stok", label: "Në stok" },
-  { value: "pa-stok", label: "Pa stok" },
-] as const;
-
-const VISIBILITY_OPTIONS = [
-  { value: "", label: "Të gjitha" },
-  { value: "e-dukshme", label: "E dukshme" },
-  { value: "e-fshehur", label: "E fshehur" },
-] as const;
-
-// Placement in the printed catalogue, which is not the same question as
-// visibility: "pa seksion" products appear on shemo-katalog.com only under
-// /te-gjitha, never in a numbered section. Visibility there is filtered with
-// VISIBILITY_OPTIONS again, under its own key — the two sites are hidden
-// separately, so they are filtered separately.
-const SECTION_OPTIONS = [
-  { value: "", label: "Të gjitha" },
-  { value: "me-seksion", label: "Me seksion" },
-  { value: "pa-seksion", label: "Pa seksion" },
-] as const;
-
-function pick<T extends string>(
-  raw: string | undefined,
-  options: readonly { readonly value: T }[]
-): T {
-  return options.find((o) => o.value === raw)?.value ?? options[0].value;
-}
+/** Ties the row checkboxes to the bulk form they are not nested inside. */
+const BULK_FORM = "bulk-products";
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    kerko?: string;
-    faqja?: string;
-    stoku?: string;
-    dukshmeria?: string;
-    katalogu?: string;
-    seksioni?: string;
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireAdmin();
   const sp = await searchParams;
-  const query = sp.kerko?.trim() ?? "";
-  const stock = pick(sp.stoku, STOCK_OPTIONS);
-  const visibility = pick(sp.dukshmeria, VISIBILITY_OPTIONS);
-  const catalogVisibility = pick(sp.katalogu, VISIBILITY_OPTIONS);
-  const section = pick(sp.seksioni, SECTION_OPTIONS);
+  // Both lists are needed twice over — to validate the URL, and to fill the
+  // dropdowns in the filter row and in the bulk bar.
+  const [sectionOptions, categoryOptions] = await Promise.all([
+    getAdminCatalogSectionOptions(),
+    getAdminCategoryOptions(),
+  ]);
+
+  // The same parser the bulk actions use on the fields the bar posts back, so
+  // "all matching" cannot mean a set other than the one counted here.
+  const filter = parseProductFilter(sp, {
+    sectionIds: new Set(sectionOptions.map((s) => s.id)),
+    categoryIds: new Set(categoryOptions.map((c) => c.id)),
+  });
+  const { query, stock, visibility, catalogVisibility, section } = filter;
+  const { sectionId, categoryId } = filter;
   // Math.floor as well as the clamp: "faqja=2.5" would otherwise offset by a
   // page and a half and label the result "Faqja 2.5".
   const page = Math.max(1, Math.floor(Number(sp.faqja)) || 1);
-  const filtering =
-    query !== "" ||
-    stock !== "" ||
-    visibility !== "" ||
-    catalogVisibility !== "" ||
-    section !== "";
+  const filtering = isFiltering(filter);
 
   const pageHref = (p: number) => {
-    const params = new URLSearchParams();
-    if (query) params.set("kerko", query);
-    if (stock) params.set("stoku", stock);
-    if (visibility) params.set("dukshmeria", visibility);
-    if (catalogVisibility) params.set("katalogu", catalogVisibility);
-    if (section) params.set("seksioni", section);
+    const params = productFilterParams(filter);
     if (p > 1) params.set("faqja", String(p));
     const qs = params.toString();
     return `/admin/produktet${qs ? `?${qs}` : ""}`;
   };
 
   const { rows, total } = await listAdminProducts({
-    query,
-    stock,
-    visibility,
-    catalogVisibility,
-    section,
+    ...filter,
     page,
     perPage: PER_PAGE,
   });
@@ -141,7 +115,7 @@ export default async function AdminProductsPage({
         and puts both selects back to "Të gjitha".
       */}
       <form
-        key={`${query}|${stock}|${visibility}|${catalogVisibility}|${section}`}
+        key={`${query}|${stock}|${visibility}|${catalogVisibility}|${section}|${sectionId}|${categoryId}`}
         action="/admin/produktet"
         method="get"
         role="search"
@@ -181,6 +155,37 @@ export default async function AdminProductsPage({
               value: section,
               options: SECTION_OPTIONS,
             },
+            // The two filters that name a group rather than a state. They are
+            // what makes "the shop sells this, the catalogue prints that" a
+            // decision somebody can act on: pick the brand or the section, then
+            // set its visibility for one site in a single press.
+            {
+              name: "kategoria",
+              label: "Kategoria",
+              value: categoryId === null ? "" : String(categoryId),
+              options: [
+                { value: "", label: "Të gjitha kategoritë" },
+                ...categoryOptions.map((c) => ({
+                  value: String(c.id),
+                  // Non-breaking spaces: a <option> collapses ordinary ones, and
+                  // the tree is unreadable flattened — 200-odd entries of which
+                  // most are children of something.
+                  label: `${"  ".repeat(c.depth)}${c.label}`,
+                })),
+              ],
+            },
+            {
+              name: "seksioniId",
+              label: "Seksioni i shtypur",
+              value: sectionId === null ? "" : String(sectionId),
+              options: [
+                { value: "", label: "Të gjithë seksionet" },
+                ...sectionOptions.map((s) => ({
+                  value: String(s.id),
+                  label: s.label,
+                })),
+              ],
+            },
           ]}
         />
         <button
@@ -192,9 +197,12 @@ export default async function AdminProductsPage({
       </form>
 
       <div className="mt-4 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
-        <table className="w-full min-w-[940px] text-left text-sm">
+        <table className="w-full min-w-[980px] text-left text-sm">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
+              <th className="w-10 pl-4 pr-1 py-3">
+                <ProductSelectAll formId={BULK_FORM} pageCount={rows.length} />
+              </th>
               <th className="px-4 py-3 font-semibold">Produkti</th>
               <th className="px-4 py-3 font-semibold">Kodi</th>
               <th className="px-4 py-3 font-semibold">Çmimi</th>
@@ -215,6 +223,19 @@ export default async function AdminProductsPage({
                   p.hidden && p.catalogHidden ? "opacity-55" : ""
                 }`}
               >
+                {/* Associated with the bulk form by id rather than nested in
+                    it: this cell's siblings are forms of their own, and a form
+                    inside a form is not something HTML has. */}
+                <td className="w-10 py-2.5 pl-4 pr-1">
+                  <input
+                    type="checkbox"
+                    name="ids"
+                    value={p.id}
+                    form={BULK_FORM}
+                    aria-label={`Zgjidh ${p.name}`}
+                    className="size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40"
+                  />
+                </td>
                 <td className="max-w-[320px] px-4 py-2.5">
                   <Link
                     href={`/admin/produktet/${p.id}`}
@@ -316,7 +337,7 @@ export default async function AdminProductsPage({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-ink-400">
+                <td colSpan={8} className="px-4 py-10 text-center text-ink-400">
                   Asnjë produkt nuk përputhet me kërkimin dhe filtrat.
                 </td>
               </tr>
@@ -324,6 +345,14 @@ export default async function AdminProductsPage({
           </tbody>
         </table>
       </div>
+
+      <ProductBulkBar
+        formId={BULK_FORM}
+        pageCount={rows.length}
+        total={total}
+        filter={productFilterFields(filter)}
+        sections={sectionOptions}
+      />
 
       {totalPages > 1 && (
         <nav className="mt-5 flex items-center justify-center gap-2" aria-label="Faqet">

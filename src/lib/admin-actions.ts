@@ -14,6 +14,8 @@ import {
   type Session,
 } from "@/lib/auth";
 import { logSecurityEvent } from "@/lib/security-log";
+import { matchingProductIds } from "@/lib/admin-data";
+import { parseProductFilter } from "@/lib/product-filter";
 import { sql } from "@/lib/db";
 import { catalogSectionSlug } from "@/lib/catalog";
 import { moveInOrder } from "@/lib/catalog-order";
@@ -489,6 +491,147 @@ export async function toggleProductFlagAction(formData: FormData): Promise<void>
     await sql`UPDATE products SET in_stock = NOT in_stock, updated_at = now() WHERE id = ${id}`;
   }
   revalidateCatalog();
+}
+
+/* ---------------------------- Bulk edits -------------------------------- */
+
+/**
+ * Which products a bulk button applies to: the ticked rows, or — when "all
+ * matching" is on — everything behind the filter, including the pages the
+ * editor never scrolled to.
+ *
+ * The filter is rebuilt from the bar's own hidden fields with the same parser
+ * the table read the URL with (product-filter.ts), so "all matching" cannot
+ * mean a different set here than the count the editor was looking at when they
+ * pressed the button. Anything unrecognised falls back to "not filtering", so a
+ * crafted POST cannot invent a filter the panel does not offer.
+ *
+ * "All matching" is deliberately not "all products": with every filter empty it
+ * is the whole range, which is a real thing to want — one press to take
+ * everything out of the shop and leave the catalogue printing — but it is a
+ * thing the editor has to have asked for by clearing the filters first.
+ */
+async function bulkTargetIds(formData: FormData): Promise<number[]> {
+  if (formData.get("scope") === "all") {
+    return matchingProductIds(parseProductFilter(formData));
+  }
+  const ids = formData
+    .getAll("ids")
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n > 0);
+  return [...new Set(ids)];
+}
+
+/**
+ * The section page a bulk edit was pressed on, if it was pressed on one.
+ *
+ * /admin/katalogu/[id] shows the bar with its own section as the filter, and
+ * that page is not one of the three revalidateCatalog() refreshes — without
+ * this, the page the button is on is the one page still showing the old state.
+ */
+function revalidateFilteredSection(formData: FormData): void {
+  const id = parseProductFilter(formData).sectionId;
+  if (id !== null) revalidatePath(`/admin/katalogu/${id}`);
+}
+
+/**
+ * Shows or hides many products at once, on one site or the other.
+ *
+ * The two sites are the whole point: `hidden` is shemopharm's shop and
+ * `catalog_hidden` is shemo-katalog.com, and this writes one without reading
+ * the other. Setting an absolute value rather than toggling, because a toggle
+ * over a mixed selection ends in a state nobody asked for — half shown, half
+ * hidden, and which half depends on where each product started.
+ */
+export async function bulkProductVisibilityAction(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const op = String(formData.get("op"));
+  const site = op.startsWith("catalog") ? "catalog" : op.startsWith("shop") ? "shop" : null;
+  const hide = op.endsWith("-hide") ? true : op.endsWith("-show") ? false : null;
+  if (site === null || hide === null) return;
+
+  const ids = await bulkTargetIds(formData);
+  if (ids.length === 0) return;
+
+  if (site === "shop") {
+    await sql`
+      UPDATE products SET hidden = ${hide}, updated_at = now()
+      WHERE id = ANY(${ids}::int[]) AND hidden IS DISTINCT FROM ${hide}
+    `;
+    // Same reason as the single toggle: category totals count `hidden = false`,
+    // and `count > 0` is what puts a category in the nav, on /kategorite, on the
+    // homepage and in the sitemap. A bulk hide moves far more of them at once.
+    await recountCategories();
+  } else {
+    await sql`
+      UPDATE products SET catalog_hidden = ${hide}, updated_at = now()
+      WHERE id = ANY(${ids}::int[]) AND catalog_hidden IS DISTINCT FROM ${hide}
+    `;
+  }
+
+  await logMutation(admin, "bulk-visibility", { site, hide, count: ids.length });
+  revalidateCatalog();
+  revalidateFilteredSection(formData);
+}
+
+/**
+ * Moves many products into one printed section, or takes them out of the
+ * catalogue's sections altogether.
+ *
+ * A product belongs to exactly one section, so this is a move, not an addition,
+ * and the ones already in the target are left where they are rather than being
+ * shuffled to the end. New arrivals land after everything already there, in
+ * name order: the printed order is a decision somebody made by hand, and
+ * guessing a position inside it would be wrong more often than right.
+ */
+export async function bulkPlaceInCatalogAction(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const raw = String(formData.get("sectionId") ?? "");
+  if (raw === "") return;
+  const sectionId = raw === "none" ? null : Number(raw);
+  if (sectionId !== null && !(Number.isInteger(sectionId) && sectionId > 0)) return;
+
+  const ids = await bulkTargetIds(formData);
+  if (ids.length === 0) return;
+
+  if (sectionId === null) {
+    // A position means nothing without a section, so it clears with one.
+    await sql`
+      UPDATE products
+      SET catalog_section_id = NULL, catalog_sort = 0, updated_at = now()
+      WHERE id = ANY(${ids}::int[]) AND catalog_section_id IS NOT NULL
+    `;
+  } else {
+    // Joined against catalog_sections rather than trusting the id: a section
+    // that does not exist then moves nothing, instead of raising a foreign-key
+    // error out of a POST that anybody can craft. `base` is evaluated against
+    // the table as it was, so every arrival gets a distinct position after the
+    // last one already printed.
+    await sql`
+      WITH base AS (
+        SELECT COALESCE(MAX(catalog_sort), 0) AS top
+        FROM products WHERE catalog_section_id = ${sectionId}
+      ), picked AS (
+        SELECT id, row_number() OVER (ORDER BY name, id) AS rn
+        FROM products
+        WHERE id = ANY(${ids}::int[])
+          AND catalog_section_id IS DISTINCT FROM ${sectionId}
+      )
+      UPDATE products p
+      SET catalog_section_id = s.id,
+          catalog_sort = base.top + picked.rn,
+          updated_at = now()
+      FROM picked, base, catalog_sections s
+      WHERE p.id = picked.id AND s.id = ${sectionId}
+    `;
+  }
+
+  await logMutation(admin, "bulk-place", { sectionId, count: ids.length });
+  revalidateCatalog();
+  // Both ends of a move: the section the products land in, and the one the
+  // button was pressed on — which is the section they are leaving.
+  if (sectionId) revalidatePath(`/admin/katalogu/${sectionId}`);
+  revalidateFilteredSection(formData);
 }
 
 /**

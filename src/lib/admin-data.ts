@@ -2,6 +2,7 @@ import "server-only";
 import { assertAdmin } from "@/lib/auth";
 import { catalogSectionSlug } from "@/lib/catalog";
 import { sql } from "@/lib/db";
+import type { ProductFilter } from "@/lib/product-filter";
 import type {
   CatalogSectionOption,
   CategoryOption,
@@ -131,12 +132,6 @@ export async function getAdminCategories(): Promise<AdminCategory[]> {
   return [...types, ...brands];
 }
 
-/** URL values for the list filters. "" is the absent filter, not a state. */
-export type StockFilter = "" | "ne-stok" | "pa-stok";
-export type VisibilityFilter = "" | "e-dukshme" | "e-fshehur";
-/** Whether the product has a place in the printed catalogue at all. */
-export type SectionFilter = "" | "me-seksion" | "pa-seksion";
-
 /** One row of the admin product table — deliberately less than AdminProduct. */
 export interface AdminProductListItem {
   id: number;
@@ -152,49 +147,88 @@ export interface AdminProductListItem {
 }
 
 /**
- * The product table, searched and filtered.
+ * Every product the filter matches, in the order the table lists them.
  *
- * Both filters arrive as `boolean | null`, null meaning "not filtering", because
- * the neon HTTP driver is a plain tagged template with no way to compose SQL
- * fragments — every condition has to be in the statement and switched off by a
- * parameter. The `::boolean` casts are what let a NULL parameter have a type at
- * all, and the parentheses around the search clause are load-bearing: without
- * them the trailing ANDs would bind tighter than the ORs and quietly filter the
- * search away.
+ * The single place the filter is expressed as SQL. Paging, the "N match"
+ * count and the bulk writes all go through here, so they cannot drift apart.
  *
- * `total` is the count *after* filtering, which is what the page reports.
+ * Each condition arrives as a nullable parameter, null meaning "not filtering",
+ * because the neon HTTP driver is a plain tagged template with no way to
+ * compose SQL fragments — every condition has to be in the statement and
+ * switched off by a parameter. The `::boolean` and `::int` casts are what let a
+ * NULL parameter have a type at all, and the parentheses around the search
+ * clause are load-bearing: without them the trailing ANDs would bind tighter
+ * than the ORs and quietly filter the search away.
+ *
+ * The category is matched with its descendants, the same way the site counts
+ * one (catalog.ts categoryIdWithDescendants): "Kozmetikë" has to mean the 481
+ * products under it, not the 280 tagged on the parent itself, or a bulk hide
+ * from that filter would leave most of the branch behind. The depth guard is
+ * insurance — a cycle in `parent` would otherwise recurse forever.
+ *
+ * Returning ids rather than a count keeps the whole range at ~2k integers,
+ * which is small enough to hand back on every page load and simpler than a
+ * second statement that has to repeat the same WHERE.
  */
-export async function listAdminProducts(opts: {
-  query: string;
-  stock: StockFilter;
-  visibility: VisibilityFilter;
-  catalogVisibility: VisibilityFilter;
-  section: SectionFilter;
-  page: number;
-  perPage: number;
-}): Promise<{ rows: AdminProductListItem[]; total: number }> {
+export async function matchingProductIds(f: ProductFilter): Promise<number[]> {
   await assertAdmin();
-  const like = `%${opts.query}%`;
-  const offset = (opts.page - 1) * opts.perPage;
-  const inStock = opts.stock === "" ? null : opts.stock === "ne-stok";
-  const hidden = opts.visibility === "" ? null : opts.visibility === "e-fshehur";
+  const like = `%${f.query}%`;
+  const inStock = f.stock === "" ? null : f.stock === "ne-stok";
+  const hidden = f.visibility === "" ? null : f.visibility === "e-fshehur";
   const catalogHidden =
-    opts.catalogVisibility === "" ? null : opts.catalogVisibility === "e-fshehur";
-  const placed = opts.section === "" ? null : opts.section === "me-seksion";
+    f.catalogVisibility === "" ? null : f.catalogVisibility === "e-fshehur";
+  const placed = f.section === "" ? null : f.section === "me-seksion";
 
   const rows = (await sql`
-    SELECT id, name, sku, price_cents, in_stock, featured, hidden, catalog_hidden,
-           count(*) OVER ()::int AS total
-    FROM products
-    WHERE (${opts.query} = '' OR name ILIKE ${like} OR sku ILIKE ${like})
-      AND (${inStock}::boolean IS NULL OR in_stock = ${inStock}::boolean)
-      AND (${hidden}::boolean IS NULL OR hidden = ${hidden}::boolean)
+    WITH RECURSIVE subtree AS (
+      SELECT id AS node, 0 AS depth FROM categories WHERE id = ${f.categoryId}::int
+      UNION ALL
+      SELECT c.id, s.depth + 1
+      FROM categories c JOIN subtree s ON c.parent = s.node
+      WHERE s.depth < 10
+    )
+    SELECT p.id, p.name
+    FROM products p
+    WHERE (${f.query} = '' OR p.name ILIKE ${like} OR p.sku ILIKE ${like})
+      AND (${inStock}::boolean IS NULL OR p.in_stock = ${inStock}::boolean)
+      AND (${hidden}::boolean IS NULL OR p.hidden = ${hidden}::boolean)
       AND (${catalogHidden}::boolean IS NULL
-           OR catalog_hidden = ${catalogHidden}::boolean)
+           OR p.catalog_hidden = ${catalogHidden}::boolean)
       AND (${placed}::boolean IS NULL
-           OR (catalog_section_id IS NOT NULL) = ${placed}::boolean)
-    ORDER BY name ASC
-    LIMIT ${opts.perPage} OFFSET ${offset}
+           OR (p.catalog_section_id IS NOT NULL) = ${placed}::boolean)
+      AND (${f.sectionId}::int IS NULL
+           OR p.catalog_section_id = ${f.sectionId}::int)
+      AND (${f.categoryId}::int IS NULL
+           OR EXISTS (SELECT 1 FROM product_categories pc
+                      JOIN subtree s ON s.node = pc.category_id
+                      WHERE pc.product_id = p.id))
+    ORDER BY p.name ASC, p.id
+  `) as { id: number }[];
+
+  return rows.map((r) => r.id);
+}
+
+/**
+ * One page of the product table, and how many products the filter matches.
+ *
+ * Two statements rather than the `count(*) OVER ()` this used to do: that
+ * window function can only report a total when at least one row comes back, so
+ * a page past the end answered "0 match" for a filter matching plenty. Slicing
+ * a list of ids has no such edge, and the ids are what the bulk bar needs anyway.
+ */
+export async function listAdminProducts(
+  opts: ProductFilter & { page: number; perPage: number }
+): Promise<{ rows: AdminProductListItem[]; total: number }> {
+  const ids = await matchingProductIds(opts);
+  const total = ids.length;
+  const offset = (opts.page - 1) * opts.perPage;
+  const slice = ids.slice(offset, offset + opts.perPage);
+  if (slice.length === 0) return { rows: [], total };
+
+  const rows = (await sql`
+    SELECT id, name, sku, price_cents, in_stock, featured, hidden, catalog_hidden
+    FROM products
+    WHERE id = ANY(${slice}::int[])
   `) as Array<{
     id: number;
     name: string;
@@ -204,40 +238,29 @@ export async function listAdminProducts(opts: {
     featured: boolean;
     hidden: boolean;
     catalog_hidden: boolean;
-    total: number;
   }>;
 
-  // count(*) OVER () can only report a total when at least one row came back, so
-  // a page past the end answers "0" for a filter that in fact matches plenty —
-  // a stale bookmark or a hand-edited faqja is enough to produce it. The second
-  // query runs only in that case and never on a page that has rows.
-  let total = rows[0]?.total ?? 0;
-  if (rows.length === 0 && opts.page > 1) {
-    const counted = (await sql`
-      SELECT count(*)::int AS total
-      FROM products
-      WHERE (${opts.query} = '' OR name ILIKE ${like} OR sku ILIKE ${like})
-        AND (${inStock}::boolean IS NULL OR in_stock = ${inStock}::boolean)
-        AND (${hidden}::boolean IS NULL OR hidden = ${hidden}::boolean)
-      AND (${catalogHidden}::boolean IS NULL
-           OR catalog_hidden = ${catalogHidden}::boolean)
-      AND (${placed}::boolean IS NULL
-           OR (catalog_section_id IS NOT NULL) = ${placed}::boolean)
-    `) as { total: number }[];
-    total = counted[0]?.total ?? 0;
-  }
-
+  // ANY() answers in whatever order the planner likes, so the page order comes
+  // back from the slice, which is the order matchingProductIds decided.
+  const byId = new Map(rows.map((r) => [r.id, r]));
   return {
-    rows: rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      sku: r.sku,
-      priceCents: r.price_cents,
-      inStock: r.in_stock,
-      featured: r.featured,
-      hidden: r.hidden,
-      catalogHidden: r.catalog_hidden,
-    })),
+    rows: slice.flatMap((id) => {
+      const r = byId.get(id);
+      return r
+        ? [
+            {
+              id: r.id,
+              name: r.name,
+              sku: r.sku,
+              priceCents: r.price_cents,
+              inStock: r.in_stock,
+              featured: r.featured,
+              hidden: r.hidden,
+              catalogHidden: r.catalog_hidden,
+            },
+          ]
+        : [];
+    }),
     total,
   };
 }
