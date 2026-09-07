@@ -17,7 +17,7 @@ Mode:   images only, no database
 | Pictures, trimmed and shown full bleed | 0 |
 | Came apart under the fill | 0 |
 | Skipped | 0 |
-| Unchanged (identical to what is served) | 25 |
+| Unchanged (identical to what is served) | 39 |
 
 ## Came apart under the fill (0)
 

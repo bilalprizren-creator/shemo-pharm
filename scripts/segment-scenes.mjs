@@ -45,6 +45,17 @@
  *         tube, so they survive it and need a crop instead). Set false where a
  *         product is genuinely two pieces — a carton beside its tube.
  *
+ *   alpha The model's own confidence, used as the knife. On a blister pack lying
+ *         on printed wrapping paper it is certain about the pack and hesitant
+ *         about the characters printed behind it, so the leftovers come back
+ *         faint — a pale ghost of a paw or a spider hanging off the product.
+ *         Anything under this alpha is cut away before the pieces are counted,
+ *         which also breaks the faint bridges that were keeping a ghost attached
+ *         and let `one` drop it. 16 (the default) keeps everything the model
+ *         admitted to; 200 keeps only what it was sure of. Above ~230 the
+ *         product's own anti-aliased edge starts to go, so it is raised per
+ *         product rather than globally.
+ *
  * Re-runnable: it always recomputes, because the recipe is what changes between
  * runs and a cached answer would hide that.
  */
@@ -115,14 +126,17 @@ const wanted = ALL ? scenes : CODES;
 if (wanted.length === 0) throw new Error("nothing to do: pass --all-scenes or --codes a,b,c");
 
 /**
- * Keep only the biggest connected run of alpha, and say what the pieces held.
+ * Pick the piece of alpha that is the product, and say what the pieces held.
  *
  * Flood fill over the mask rather than sharp: this asks a question about the
  * shape of the alpha, which no image operation answers.
  */
-async function largestPiece(buf) {
+async function pickPiece(buf, floor = 16, mode = "centre") {
   const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: w, height: h } = info;
+  // Everything the model was unsure of goes first, so a ghost hanging off the
+  // product by a few faint pixels becomes a piece of its own and can be dropped.
+  if (floor > 16) for (let i = 3; i < data.length; i += 4) if (data[i] < floor) data[i] = 0;
   const alphaAt = (i) => data[i * 4 + 3];
   const label = new Int32Array(w * h).fill(-1);
   const sizes = [];
@@ -151,15 +165,51 @@ async function largestPiece(buf) {
     }
     sizes.push(n);
   }
-  if (sizes.length === 0) return { buf, pieces: 0, largest: 0 };
-  const biggest = Math.max(...sizes);
-  const keep = sizes.indexOf(biggest);
+  const asPng = (bytes) =>
+    sharp(bytes, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
+  const all = await asPng(data);
+  if (sizes.length === 0) return { buf: all, all, pieces: 0, kept: 0 };
+
+  /**
+   * Which piece is the product.
+   *
+   * "largest" is the obvious answer and the wrong one for half of these. The
+   * children's line is photographed on printed wrapping paper, and the printed
+   * characters are objects to the model too — on 3049 the Minions cover more of
+   * the frame than the toothbrush does.
+   *
+   * "centre" is the answer the photographs themselves give: the product is what
+   * the picture is of, so it is in the middle, and the paper is what surrounds
+   * it. Scored rather than picked by the centre pixel alone, because the centre
+   * can land in a gap — a blister's hang-hole, the space between a brush's
+   * bristles — so a piece is judged on how much of it lies in the middle third
+   * and how near its own middle is to the frame's.
+   */
+  const centres = sizes.map(() => ({ n: 0, sx: 0, sy: 0, mid: 0 }));
+  const bandX0 = w / 3, bandX1 = (2 * w) / 3;
+  for (let i = 0; i < w * h; i++) {
+    const id = label[i];
+    if (id === -1) continue;
+    const x = i % w, y = (i / w) | 0;
+    const c = centres[id];
+    c.n++; c.sx += x; c.sy += y;
+    if (x >= bandX0 && x <= bandX1) c.mid++;
+  }
+  const score = centres.map((c) => {
+    const dx = (c.sx / c.n - w / 2) / w;
+    const dy = (c.sy / c.n - h / 2) / h;
+    const pull = 1 - Math.min(1, Math.hypot(dx, dy) * 2); // 1 dead centre, 0 at a corner
+    return (c.mid / c.n) * pull * Math.sqrt(c.n);
+  });
+  const keep = mode === "centre" ? score.indexOf(Math.max(...score)) : sizes.indexOf(Math.max(...sizes));
+
   const out = Buffer.from(data);
   for (let i = 0; i < w * h; i++) if (label[i] !== keep) out[i * 4 + 3] = 0;
   return {
-    buf: await sharp(out, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer(),
+    buf: await asPng(out),
+    all,
     pieces: sizes.length,
-    largest: +((100 * biggest) / sizes.reduce((a, b) => a + b, 0)).toFixed(1),
+    kept: +((100 * sizes[keep]) / sizes.reduce((a, b) => a + b, 0)).toFixed(1),
   };
 }
 
@@ -199,8 +249,10 @@ for (const code of wanted) {
     output: { format: "image/png" },
   });
   let cut = Buffer.from(await blob.arrayBuffer());
-  const piece = await largestPiece(cut);
-  if (rule.one !== false) cut = piece.buf;
+  const piece = await pickPiece(cut, rule.alpha ?? 16, rule.pick ?? "centre");
+  // The floor applies whether or not the pieces are being reduced to one: it is
+  // about what the model was sure of, not about how many objects it found.
+  cut = rule.one === false ? piece.all : piece.buf;
 
   const { data, info } = await sharp(cut).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let clear = 0;
@@ -212,14 +264,14 @@ for (const code of wanted) {
     code,
     name: product.name,
     pieces: piece.pieces,
-    largestPct: piece.largest,
+    keptPct: piece.kept,
     clearPct,
     crop: rule.crop ?? null,
     onePiece: rule.one !== false,
   });
   console.log(
     `${code.padEnd(6)} ${((Date.now() - started) / 1000).toFixed(1).padStart(5)}s  ` +
-      `pieces=${String(piece.pieces).padStart(3)} largest=${String(piece.largest).padStart(5)}%  ` +
+      `pieces=${String(piece.pieces).padStart(3)} kept=${String(piece.kept).padStart(5)}%  ` +
       `clear=${String(clearPct).padStart(5)}%${rule.crop ? "  cropped" : ""}  ${product.name.slice(0, 34)}`
   );
 }
