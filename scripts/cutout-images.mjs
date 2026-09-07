@@ -5,6 +5,7 @@
  *   node scripts/cutout-images.mjs --limit 40      # a sample, for eyeballing
  *   node scripts/cutout-images.mjs --write         # also updates the DB and products.json
  *   node scripts/cutout-images.mjs --katalog       # recut from the old catalogue's cut-outs, where they beat the fill
+ *   node scripts/cutout-images.mjs --segmented     # recut the staged photos a segmentation model has cut out
  *   DATABASE_TARGET=production node scripts/cutout-images.mjs --write
  *
  * Why this is needed: scripts/migrate-images.mjs deliberately did
@@ -13,7 +14,15 @@
  * product cards that is invisible; on any tinted surface — which the catalogue
  * site uses — each photo reads as a white box.
  *
- * Three sources, in order of trust:
+ * Four sources, in order of trust:
+ *
+ *   0. sources/segmented/<code>.png, when one is there. These are the staged
+ *      photographs — a bottle on a beach, a tube on a branded pattern — that
+ *      no fill can reach and neither archive holds: put through a segmentation
+ *      model outside this repo (332 MB of weights, see the folder's README),
+ *      reviewed by eye, and saved as plain RGBA. A file existing there is a
+ *      decision somebody made about that one product, so it outranks
+ *      everything below it.
  *
  *   1. The Jara Pharmacy project still holds 1 484 of these products as
  *      `shemo-<code>-*-original.png` WITH their original alpha channel — the
@@ -114,10 +123,21 @@ function skuKeyRaw(s) {
  */
 const KATALOG = argv.includes("--katalog");
 
+/**
+ * Recut every product a segmentation model has already cut out for us.
+ *
+ * The set is simply "has a file in sources/segmented", because putting one
+ * there is the decision. Implies --recut for those and nothing else; a product
+ * still listed in SCENE_PHOTOS is included, since a segmented file is the
+ * statement that it need not stay a picture.
+ */
+const SEGMENTED = argv.includes("--segmented");
+
 const JARA = "C:/calude code/Jara pharmcay/public/products";
 const OUT = path.join(ROOT, "public/products");
 const KATALOG_DIR = path.join(ROOT, "sources/shemo-katalog");
 const KATALOG_MANIFEST = path.join(KATALOG_DIR, "manifest.json");
+const SEGMENTED_DIR = path.join(ROOT, "sources/segmented");
 
 // Same constants migrate-images.mjs framed the originals with, so a re-cut
 // photo lands in exactly the same place in the grid as the one it replaces.
@@ -282,6 +302,17 @@ const KEEP_FLAT = new Set([
  *
  * They are written as `-scene.webp`, opaque and trimmed to their own edges, and
  * `PhotoWell` gives them the whole tile: no padding, no ground, no shadow.
+ *
+ * Twenty-five of the codes below no longer reach that, and are deliberately
+ * left here anyway. A file in sources/segmented/ outranks this list (see the
+ * top of the file), so those products ship a real cut-out; the entry stays as
+ * the fallback, because without it a deleted segmented file would send a
+ * staged photograph to the flood fill, which is what destroys them. What is
+ * still genuinely a picture, measured on the contact sheets, is the medical
+ * range worn by a model — a brace, a corset, a sling, a hand pouring water —
+ * where the person is the point, and the blister packs of the children's line,
+ * whose printed backdrop is the same artwork as the packaging and cannot be
+ * told from it by any model or any crop.
  */
 const SCENE_PHOTOS = new Set([
   // A model wearing the product.
@@ -968,6 +999,29 @@ function katalogIndex() {
   return byCode;
 }
 
+/**
+ * The segmented cut-outs on disk, by article code. Named by the code and
+ * nothing else, so the index is the directory listing.
+ */
+function segmentedIndex() {
+  if (!existsSync(SEGMENTED_DIR)) return new Map();
+  const byCode = new Map();
+  for (const f of readdirSync(SEGMENTED_DIR)) {
+    if (!f.toLowerCase().endsWith(".png")) continue;
+    const code = f.slice(0, -4);
+    for (const k of skuKeys(code)) if (!byCode.has(k)) byCode.set(k, f);
+  }
+  return byCode;
+}
+
+const segmentedFor = (sku) => {
+  for (const k of skuKeys(sku)) {
+    const f = segmented.get(k);
+    if (f) return path.join(SEGMENTED_DIR, f);
+  }
+  return null;
+};
+
 const katalogFor = (sku) => {
   for (const k of skuKeys(sku)) {
     const e = katalog.get(k);
@@ -1106,6 +1160,8 @@ const jara = jaraIndex();
 console.log(`Jara cut-outs available: ${jara.size}`);
 const katalog = katalogIndex();
 console.log(`katalog cut-outs available: ${katalog.size}`);
+const segmented = segmentedIndex();
+console.log(`segmented cut-outs available: ${segmented.size}`);
 console.log(`target: ${describeTarget()}`);
 
 const sql = connect();
@@ -1127,6 +1183,7 @@ let i = 0;
 for (const p of products) {
   if (i >= LIMIT) break;
   if (ONLY && !ONLY.has(skuKey(p.sku))) continue;
+  if (SEGMENTED && !segmentedFor(p.sku)) continue;
   if (KATALOG) {
     const e = katalogFor(p.sku);
     let why = null;
@@ -1145,7 +1202,7 @@ for (const p of products) {
   // `-cutout-v2` and any later revision, not just the first cut.
   const cutSuffix = stem.match(/-cutout(-v\d+)?$/);
   if (cutSuffix) {
-    if (!RECUT && !ONLY && !KATALOG) {
+    if (!RECUT && !ONLY && !KATALOG && !SEGMENTED) {
       skipped.push({ ...p, why: "already a cut-out" });
       continue;
     }
@@ -1165,7 +1222,8 @@ for (const p of products) {
   // any other product: the scene file is the trimmed picture, and nothing is
   // to be cut from that. A picture still on the list keeps its stem — the
   // scene branch below re-trims it in place, under the same name.
-  if (stem.endsWith("-scene") && !SCENE_PHOTOS.has(String(p.sku ?? "").trim())) {
+  const segmentedFile = segmentedFor(p.sku);
+  if (stem.endsWith("-scene") && (segmentedFile || !SCENE_PHOTOS.has(String(p.sku ?? "").trim()))) {
     stem = stem.slice(0, -"-scene".length);
     current = `/products/${stem}.webp`;
   }
@@ -1179,7 +1237,7 @@ for (const p of products) {
   // pay that again for work already on disk. A file that is already there is
   // reused; --force recuts everything.
   const outPathEarly = path.join(OUT, `${stem}-cutout.webp`);
-  if (!FORCE && !RECUT && !ONLY && !KATALOG && existsSync(outPathEarly)) {
+  if (!FORCE && !RECUT && !ONLY && !KATALOG && !SEGMENTED && existsSync(outPathEarly)) {
     done.push({
       id: p.id,
       sku: p.sku,
@@ -1206,7 +1264,7 @@ for (const p of products) {
    * the person with it. Trim only removes a uniform border, which is exactly
    * the white margin migrate-images.mjs added and nothing else.
    */
-  if (SCENE_PHOTOS.has(String(p.sku ?? "").trim())) {
+  if (!segmentedFile && SCENE_PHOTOS.has(String(p.sku ?? "").trim())) {
     const outName = `${stem}-scene.webp`;
     const trimmed = await sharp(source)
       .trim({ background: "#ffffff", threshold: 12 })
@@ -1253,7 +1311,10 @@ for (const p of products) {
 
   const katalogEntry = katalogFor(p.sku);
   const katalogHas = await katalogMode(katalogEntry);
-  if (await jaraUsable(p.sku)) {
+  if (segmentedFile) {
+    origin = "segmented";
+    ({ mark } = await reframeTransparent(segmentedFile));
+  } else if (await jaraUsable(p.sku)) {
     origin = "jara";
     ({ mark } = await reframeTransparent(path.join(JARA, jaraFile)));
   } else if (katalogHas === "alpha") {
@@ -1440,15 +1501,17 @@ for (const p of products) {
 }
 
 const fromJara = done.filter((d) => d.origin === "jara").length;
+const fromSegmented = done.filter((d) => d.origin === "segmented").length;
 const fromKatalogAlpha = done.filter((d) => d.origin === "katalog").length;
 const fromKatalogWhite = done.filter((d) => d.origin === "katalog (white, filled)").length;
 const fromKatalog = fromKatalogAlpha + fromKatalogWhite;
 const reused = done.filter((d) => d.origin === "reused").length;
 console.log(`\ncut out    ${done.length}`);
+console.log(`  from a model's cut  ${fromSegmented}`);
 console.log(`  from Jara alpha     ${fromJara}`);
 console.log(`  from katalog alpha  ${fromKatalogAlpha}`);
 console.log(`  katalog, filled     ${fromKatalogWhite}`);
-console.log(`  flood-filled        ${done.length - fromJara - fromKatalog - reused}`);
+console.log(`  flood-filled        ${done.length - fromJara - fromKatalog - fromSegmented - reused}`);
 console.log(`  reused on disk      ${reused}`);
 console.log(`  backdrop remains    ${flagged.length}`);
 console.log(`kept white ${rejected.length} (cut-out would have eaten the product)`);
@@ -1472,10 +1535,11 @@ const report = [
   `| | |`,
   `|---|---|`,
   `| Photos cut out | ${done.length} |`,
+  `| — from a segmentation model's cut | ${fromSegmented} |`,
   `| — from Jara's original alpha | ${fromJara} |`,
   `| — from the old catalogue's alpha | ${fromKatalogAlpha} |`,
   `| — filled from the old catalogue's white photo | ${fromKatalogWhite} |`,
-  `| — white background flood-filled | ${done.length - fromJara - fromKatalog - reused} |`,
+  `| — white background flood-filled | ${done.length - fromJara - fromKatalog - fromSegmented - reused} |`,
   `| Kept their white background (cut-out rejected) | ${rejected.length} |`,
   `| A backdrop still shows | ${flagged.length} |`,
   `| Reframed after a slab came off | ${done.filter((d) => d.reframed).length} |`,

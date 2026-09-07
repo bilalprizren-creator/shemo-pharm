@@ -170,6 +170,26 @@ produktet; kategoritë me `count = 0` nuk shfaqen askund.
 ### Fotot e produkteve
 
 2 049 foto WebP 1000×1000 ndodhen në `public/products/` (≈64 MB, në repo).
+
+**Nga vijnë sfondet e pastra.** Fotot origjinale erdhën nga WordPress-i i vjetër,
+të rrafshuara mbi të bardhë, dhe `scripts/cutout-images.mjs` u heq atë sfond. Ka
+katër burime, sipas besueshmërisë:
+
+1. `sources/segmented/<kodi>.png` — foto të skenuara (një shishe në plazh, një
+   tubë mbi motiv) të prera me model segmentimi nga `scripts/segment-scenes.mjs`.
+   Modeli (332 MB) nuk është varësi e aplikacionit; instalohet me
+   `npm i -D @imgly/background-removal-node`. Prerjet dhe kornizat e rishikuara
+   rrinë te `sources/segmented/recipe.json`.
+2. Alfa origjinale e projektit Jara.
+3. Prerjet e vetë faqes së vjetër shemo-katalog.com, të shkarkuara me
+   `scripts/fetch-katalog-images.mjs` te `sources/shemo-katalog/` (≈360 MB).
+4. Mbushja nga kufiri i bardhë (flood fill).
+
+`sources/` nuk hyn në git — shkarkohet përsëri për disa minuta. Prerjet e bëra
+prej tyre nën `public/products/` **janë** në repo.
+
+⚠️ Shtegu i fotos rri në bazë, jo në kod: një prerje e re nuk duket në prodhim
+derisa të bëhet `DATABASE_TARGET=production node scripts/sync-image-paths.mjs --write`.
 Foto të reja ngarkohen nga `/admin/produktet/…` te **Vercel Blob** përmes
 `src/app/api/admin/upload/route.ts`.
 
@@ -262,6 +282,10 @@ npm run migrate:rate-limits   # tabela rate_limits — kufij që i ndajnë insta
 | Skript | Çfarë bëri |
 | --- | --- |
 | `migrate-images.mjs` | 2 049 foto → WebP 1000×1000, standardizim + manifest |
+| `cutout-images.mjs` | Heq sfondin: 4 burime, raport te `audit/cutout-images.md` |
+| `fetch-katalog-images.mjs` | Shkarkon prerjet e shemo-katalog.com te `sources/` |
+| `segment-scenes.mjs` | Pret produktin nga një foto e skenuar (model segmentimi) |
+| `sync-image-paths.mjs` | Çon shtigjet e `products.json` në bazën e zgjedhur |
 | `restructure-categories.mjs` | Ndarja markë/lloj produkti (`kind`, `sort`) |
 | `apply-taxonomy.mjs` | Zbatoi auditin e `audit/` mbi katalogun |
 | `fix-categories.mjs` | 121 produkte pa kategori + rillogaritje e `count` |

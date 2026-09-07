@@ -1,0 +1,231 @@
+/**
+ * Cut a product out of a photograph the flood fill cannot touch.
+ *
+ *   mkdir ../segment-model && cd ../segment-model
+ *   npm init -y && npm i @imgly/background-removal-node     # 332 MB of weights
+ *   SEGMENT_MODEL_DIR=../segment-model node scripts/segment-scenes.mjs --all-scenes
+ *   SEGMENT_MODEL_DIR=../segment-model node scripts/segment-scenes.mjs --codes 3039,3058
+ *   node scripts/cutout-images.mjs --segmented --write
+ *
+ * scripts/cutout-images.mjs can only separate a product from a background it
+ * can walk in from: a white border, or a flat colour it has been handed. A tube
+ * on a Winx pattern, a bottle staged on a beach, a jar on a coloured sweep —
+ * those it either leaves alone (SCENE_PHOTOS, shipped full bleed as a picture)
+ * or takes apart. Neither of the two alpha archives holds them: measured over
+ * the 66 scene photos, Jara has 2 and shemo-katalog.com has 9, and those nine
+ * are the ones already dealt with.
+ *
+ * This is the remaining answer — a segmentation model, which finds the salient
+ * object rather than a background. It writes plain RGBA PNGs into
+ * sources/segmented/<code>.png, and cutout-images.mjs reads that folder as its
+ * most trusted source: a file being there is a decision somebody made about
+ * that one product, which is more than any of the automatic paths can claim.
+ *
+ * Why the model is not a dependency of this project, and must not become one:
+ * 332 MB of ONNX weights for something run by hand a few times a year, in an app
+ * whose whole node_modules is smaller than that — and, measured, it does not
+ * survive this project's node_modules. Installed here, the first
+ * removeBackground() call ends the process with a segmentation fault; installed
+ * in a folder of its own and reached through SEGMENT_MODEL_DIR, the identical
+ * code runs. Both it and sharp load native binaries, and only that arrangement
+ * keeps them apart.
+ *
+ * Two knobs, both eyes rather than arithmetic, because the failure is not one a
+ * number separates — see sources/segmented/recipe.json:
+ *
+ *   crop  The model keeps every salient object, and a marketing photograph is
+ *         usually staged with props: 2307's bottle comes back with the
+ *         surfboards beside it, and they are the larger of the two. Segment a
+ *         region that holds only the product. Fractions of the frame,
+ *         [left, top, width, height], read off a grid laid over the original.
+ *
+ *   one   Keep only the largest connected piece, which is the default. It drops
+ *         a prop that stands apart (the painted sun beside 2308's bottle) but
+ *         not one that touches the product (3058's spiderman balls overlap the
+ *         tube, so they survive it and need a crop instead). Set false where a
+ *         product is genuinely two pieces — a carton beside its tube.
+ *
+ * Re-runnable: it always recomputes, because the recipe is what changes between
+ * runs and a cached answer would hide that.
+ */
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { ROOT, dataPath, readJson } from "./lib/db.mjs";
+import { skuKeys } from "./lib/catalog-html.mjs";
+
+const MODEL_DIR = process.env.SEGMENT_MODEL_DIR;
+if (!MODEL_DIR) {
+  throw new Error(
+    "SEGMENT_MODEL_DIR is not set. The model lives in a folder of its own, " +
+      "never in this project's node_modules (see the note above):\n" +
+      "  mkdir ../segment-model && cd ../segment-model\n" +
+      "  npm init -y && npm i @imgly/background-removal-node\n" +
+      "  SEGMENT_MODEL_DIR=../segment-model node scripts/segment-scenes.mjs --all-scenes"
+  );
+}
+const modelEntry = path.resolve(
+  MODEL_DIR,
+  "node_modules/@imgly/background-removal-node/dist/index.mjs"
+);
+if (!existsSync(modelEntry)) throw new Error(`no model at ${modelEntry}`);
+// The model finds its own weights relative to the working directory, not to the
+// module that imported it, so it has to be run from where it is installed.
+// Everything this script touches is an absolute path off ROOT, so moving is free.
+process.chdir(path.resolve(MODEL_DIR));
+const { removeBackground } = await import(pathToFileURL(modelEntry).href);
+
+/**
+ * sharp after the model, and that order is the whole reason it is a dynamic
+ * import rather than a line at the top of the file.
+ *
+ * Measured: model first then sharp works; sharp first then model ends the
+ * process with a segmentation fault before either has done anything. Two
+ * native libraries in one process, and only one order of loading them survives.
+ * A static `import sharp from "sharp"` is hoisted above everything here, so the
+ * order cannot be expressed any other way.
+ */
+const sharp = (await import("sharp")).default;
+
+const argv = process.argv.slice(2);
+const at = (flag) => {
+  const i = argv.indexOf(flag);
+  return i === -1 ? null : argv[i + 1];
+};
+const ALL = argv.includes("--all-scenes");
+const CODES = (at("--codes") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
+const OUT = path.join(ROOT, "sources/segmented");
+const RECIPE_FILE = path.join(OUT, "recipe.json");
+mkdirSync(OUT, { recursive: true });
+const recipe = existsSync(RECIPE_FILE) ? JSON.parse(readFileSync(RECIPE_FILE, "utf8")) : {};
+
+const products = readJson(dataPath("products.json"));
+const byCode = new Map();
+for (const p of products) for (const k of skuKeys(p.sku)) if (!byCode.has(k)) byCode.set(k, p);
+const lookup = (code) => skuKeys(code).map((k) => byCode.get(k)).find(Boolean) ?? null;
+
+// The scene list lives in cutout-images.mjs, which is where it is reviewed; read
+// it rather than keeping a second copy that can drift out of step with it.
+const cutter = readFileSync(path.join(ROOT, "scripts/cutout-images.mjs"), "utf8");
+const from = cutter.indexOf("const SCENE_PHOTOS = new Set([");
+const scenes = [...cutter.slice(from, cutter.indexOf("]);", from)).matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+
+const wanted = ALL ? scenes : CODES;
+if (wanted.length === 0) throw new Error("nothing to do: pass --all-scenes or --codes a,b,c");
+
+/**
+ * Keep only the biggest connected run of alpha, and say what the pieces held.
+ *
+ * Flood fill over the mask rather than sharp: this asks a question about the
+ * shape of the alpha, which no image operation answers.
+ */
+async function largestPiece(buf) {
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const alphaAt = (i) => data[i * 4 + 3];
+  const label = new Int32Array(w * h).fill(-1);
+  const sizes = [];
+  const stack = [];
+  for (let seed = 0; seed < w * h; seed++) {
+    if (label[seed] !== -1 || alphaAt(seed) <= 16) continue;
+    const id = sizes.length;
+    let n = 0;
+    stack.push(seed);
+    label[seed] = id;
+    while (stack.length) {
+      const i = stack.pop();
+      n++;
+      const x = i % w;
+      const y = (i / w) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const j = ny * w + nx;
+        if (label[j] === -1 && alphaAt(j) > 16) {
+          label[j] = id;
+          stack.push(j);
+        }
+      }
+    }
+    sizes.push(n);
+  }
+  if (sizes.length === 0) return { buf, pieces: 0, largest: 0 };
+  const biggest = Math.max(...sizes);
+  const keep = sizes.indexOf(biggest);
+  const out = Buffer.from(data);
+  for (let i = 0; i < w * h; i++) if (label[i] !== keep) out[i * 4 + 3] = 0;
+  return {
+    buf: await sharp(out, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer(),
+    pieces: sizes.length,
+    largest: +((100 * biggest) / sizes.reduce((a, b) => a + b, 0)).toFixed(1),
+  };
+}
+
+const report = [];
+for (const code of wanted) {
+  const product = lookup(code);
+  if (!product) {
+    console.log(`${code}: no product carries this code`);
+    continue;
+  }
+  // The original, never the scene file: a scene file is the picture already
+  // trimmed to its own edges, and trimming is not what has to be undone here.
+  const stem = path.basename(product.images[0], ".webp").replace(/-(scene|cutout(-v\d+)?)$/, "");
+  const source = path.join(ROOT, "public/products", `${stem}.webp`);
+  if (!existsSync(source)) {
+    console.log(`${code}: no original beside ${product.images[0]}`);
+    continue;
+  }
+
+  const started = Date.now();
+  const rule = recipe[code] ?? {};
+  let input = sharp(source);
+  if (rule.crop) {
+    const meta = await sharp(source).metadata();
+    const [left, top, width, height] = rule.crop;
+    input = sharp(source).extract({
+      left: Math.round(left * meta.width),
+      top: Math.round(top * meta.height),
+      width: Math.round(width * meta.width),
+      height: Math.round(height * meta.height),
+    });
+  }
+  // PNG on the way in: the model reads a Blob and decodes by MIME type, and it
+  // has no decoder for the WebP everything here is stored as.
+  const png = await input.png().toBuffer();
+  const blob = await removeBackground(new Blob([png], { type: "image/png" }), {
+    output: { format: "image/png" },
+  });
+  let cut = Buffer.from(await blob.arrayBuffer());
+  const piece = await largestPiece(cut);
+  if (rule.one !== false) cut = piece.buf;
+
+  const { data, info } = await sharp(cut).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let clear = 0;
+  for (let i = 3; i < data.length; i += 4) if (data[i] <= 8) clear++;
+  const clearPct = +((100 * clear) / (info.width * info.height)).toFixed(1);
+
+  writeFileSync(path.join(OUT, `${code}.png`), cut);
+  report.push({
+    code,
+    name: product.name,
+    pieces: piece.pieces,
+    largestPct: piece.largest,
+    clearPct,
+    crop: rule.crop ?? null,
+    onePiece: rule.one !== false,
+  });
+  console.log(
+    `${code.padEnd(6)} ${((Date.now() - started) / 1000).toFixed(1).padStart(5)}s  ` +
+      `pieces=${String(piece.pieces).padStart(3)} largest=${String(piece.largest).padStart(5)}%  ` +
+      `clear=${String(clearPct).padStart(5)}%${rule.crop ? "  cropped" : ""}  ${product.name.slice(0, 34)}`
+  );
+}
+
+writeFileSync(path.join(OUT, "segmented.json"), JSON.stringify(report, null, 1));
+console.log(`\n${report.length} cut out into sources/segmented/`);
+console.log(`Nothing is live yet: review them, then`);
+console.log(`  node scripts/cutout-images.mjs --segmented          # writes the images`);
+console.log(`  node scripts/cutout-images.mjs --segmented --write  # points the database at them`);
