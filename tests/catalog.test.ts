@@ -3,6 +3,7 @@ import {
   brandMatches,
   catalogSectionSlug,
   primaryCategoryOf,
+  printedProducts,
   productDisplayName,
   rankRelated,
   searchProducts,
@@ -30,6 +31,7 @@ function product(id: number, name: string, over: Partial<Product> = {}): Product
     updatedAt: null,
     catalogSectionId: null,
     catalogSort: 0,
+    catalogHidden: false,
     ...over,
   };
 }
@@ -289,5 +291,44 @@ describe("productDisplayName", () => {
   it("copes with a product that has no code", () => {
     const p = product(1, "Produkt pa kod (X)", { sku: "" });
     expect(productDisplayName(p)).toBe("Produkt pa kod (X)");
+  });
+});
+
+/**
+ * The two sites hide products separately — `hidden` is the shop,
+ * `catalog_hidden` is shemo-katalog.com — and this is the one function that
+ * puts the two halves of the loaded catalog back together for the printed side.
+ * Getting it wrong is invisible in the shop and wrong on paper: either an
+ * article somebody withdrew gets printed, or one that is only withdrawn from
+ * the shop silently vanishes from the catalogue a partner is holding.
+ */
+describe("printedProducts", () => {
+  const shopVisible = [
+    product(1, "Printed and sold"),
+    product(2, "Sold but withdrawn from the catalogue", { catalogHidden: true }),
+  ];
+  /** Hidden in the shop, still in the printed catalogue — fetchCatalog keeps
+   *  these apart because `products` must keep meaning "visible in the shop". */
+  const catalogOnly = [product(3, "Discontinued in the shop, still on paper")];
+
+  it("prints what the shop shows", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).toContain(1);
+  });
+
+  it("drops a product withdrawn from the catalogue, however well the shop sells it", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).not.toContain(2);
+  });
+
+  it("keeps a product the shop hides but the catalogue still carries", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).toContain(3);
+  });
+
+  it("lists each product once", () => {
+    const ids = printedProducts(shopVisible, catalogOnly).map((p) => p.id);
+    expect(ids).toHaveLength(new Set(ids).size);
+  });
+
+  it("prints nothing when everything is withdrawn", () => {
+    expect(printedProducts([product(9, "Gone", { catalogHidden: true })], [])).toEqual([]);
   });
 });

@@ -31,6 +31,7 @@ function product(id: number): Product {
     updatedAt: null,
     catalogSectionId: null,
     catalogSort: 0,
+    catalogHidden: false,
   };
 }
 

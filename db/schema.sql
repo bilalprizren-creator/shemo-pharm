@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS products (
   blur_data_url text,
   catalog_sort integer DEFAULT 0 NOT NULL,
   catalog_section_id integer,
+  catalog_hidden boolean DEFAULT false NOT NULL,
   CONSTRAINT products_pkey PRIMARY KEY (id),
   CONSTRAINT products_slug_key UNIQUE (slug)
 );

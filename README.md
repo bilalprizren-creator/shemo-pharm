@@ -115,7 +115,30 @@ POST dhe kontrolli i layout-it nuk mjafton.
 | `/admin/kerkesat` | Aprovimi i llogarive B2B |
 | `/admin/produktet` | CRUD i produkteve + ngarkim fotosh |
 | `/admin/kategorite` | Emri i shfaqur, lloji, prindi, renditja |
+| `/admin/katalogu` | Seksionet e katalogut të shtypur dhe rendi brenda tyre |
 | `/admin/mesazhet` | Mesazhet nga formulari i kontaktit |
+
+**Katalogu i shtypur redaktohet te `/admin/katalogu`**, jo te kategoritë:
+janë dy taksonomi të ndryshme (`catalog_sections` kundrejt `categories`) dhe
+vetëm 14 nga 63 seksionet e shtypura përputhen me ndonjë kategori. Aty krijohen
+e riemërtohen seksionet, lëviz produkti lart e poshtë brenda seksionit, dhe
+shihet se cilat seksione nuk shfaqen fare në `shemo-katalog.com` sepse janë
+bosh. Seksionet fshihen vetëm kur janë bosh: çelësi i huaj është
+`ON DELETE SET NULL`, prandaj fshirja e një seksioni me produkte do t'i hiqte
+të gjithë ata nga katalogu pa asnjë paralajmërim. Te `/admin/produktet` filtrat
+**Dyqani**, **Katalogu** dhe **Seksioni** i ndajnë të tri pyetjet: a shitet, a
+shtypet, a ka fare vend në katalog — p.sh. `?seksioni=pa-seksion` jep 311
+produktet që nuk janë shtypur kurrë.
+
+**Dukshmëria është e ndarë për dy faqet.** `products.hidden` fsheh nga dyqani,
+`products.catalog_hidden` nga katalogu i shtypur, dhe asnjëri nuk rrjedh nga
+tjetri: një artikull i ndërprerë mund të mbetet në katalogun që partneri e ka në
+letër, dhe një listim i dyqanit mund të mos ketë vend në shtyp. Te tabela e
+produkteve secila ka kolonën e vet (sy / libër), te formulari secila ka kutinë e
+vet, dhe te `/admin/katalogu/<id>` kolona **Shtypet** e ndryshon vetëm atë të
+katalogut. Migrimi që e shtoi kolonën
+(`npm run migrate:catalog-visibility`) i nisi të dyja njësoj, ndaj asgjë nuk
+ndryshoi në momentin e kalimit.
 
 **Kategoritë nuk fshihen nga paneli me qëllim.** `product_categories` është
 `ON DELETE CASCADE` — fshirja e një rreshti kategorie heq në heshtje të gjitha

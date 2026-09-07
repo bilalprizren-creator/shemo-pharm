@@ -72,6 +72,7 @@ export default async function AdminEditProductPage({
             inStock: product.inStock,
             featured: product.featured,
             hidden: product.hidden,
+            catalogHidden: product.catalogHidden,
             displayName: product.displayName ?? "",
             imageOverride: product.imageOverride ?? "",
             images: product.images.join("\n"),

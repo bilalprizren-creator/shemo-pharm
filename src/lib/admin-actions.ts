@@ -15,6 +15,8 @@ import {
 } from "@/lib/auth";
 import { logSecurityEvent } from "@/lib/security-log";
 import { sql } from "@/lib/db";
+import { catalogSectionSlug } from "@/lib/catalog";
+import { moveInOrder } from "@/lib/catalog-order";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
 import { isAllowedImageSrc } from "@/lib/images";
 import { parsePriceEuros } from "@/lib/price-input";
@@ -207,7 +209,10 @@ const productSchema = z.object({
   regularPrice: z.coerce.number().min(0).optional(),
   inStock: z.coerce.boolean(),
   featured: z.coerce.boolean(),
+  /** Two sites, two decisions: `hidden` is the shop, `catalogHidden` is the
+   *  printed catalogue on shemo-katalog.com. */
   hidden: z.coerce.boolean(),
+  catalogHidden: z.coerce.boolean(),
   /** Printed-catalogue placement. Optional because most products have none:
    *  311 of the 2 049 have never appeared in the printed catalogue. */
   catalogSectionId: z.coerce.number().int().positive().optional(),
@@ -329,6 +334,7 @@ function productFromForm(formData: FormData) {
     inStock: formData.get("inStock") === "on",
     featured: formData.get("featured") === "on",
     hidden: formData.get("hidden") === "on",
+    catalogHidden: formData.get("catalogHidden") === "on",
     // "" is the "not in the printed catalogue" option, and z.coerce.number()
     // would turn it into 0 rather than leaving it unset.
     catalogSectionId: formData.get("catalogSectionId") || undefined,
@@ -354,6 +360,7 @@ function productFromForm(formData: FormData) {
       inStock: d.inStock,
       featured: d.featured,
       hidden: d.hidden,
+      catalogHidden: d.catalogHidden,
       catalogSectionId: d.catalogSectionId ?? null,
       // A position means nothing without a section, so it clears with one.
       catalogSort: d.catalogSectionId ? (d.catalogSort ?? 0) : 0,
@@ -380,6 +387,7 @@ function productFromForm(formData: FormData) {
 function revalidateCatalog(): void {
   revalidateTag(CATALOG_TAG, { expire: 0 });
   revalidatePath("/admin/produktet");
+  revalidatePath("/admin/katalogu");
   revalidatePath("/admin");
 }
 
@@ -397,7 +405,8 @@ export async function createProductAction(
     INSERT INTO products (
       id, name, slug, sku, price_cents, regular_cents, on_sale, currency,
       images, in_stock, description, short_description, display_name,
-      image_override, featured, hidden, catalog_section_id, catalog_sort
+      image_override, featured, hidden, catalog_hidden, catalog_section_id,
+      catalog_sort
     )
     VALUES (
       (SELECT COALESCE(MAX(id), 0) + 1 FROM products),
@@ -407,7 +416,7 @@ export async function createProductAction(
       ${p.sku}, ${p.priceCents}, ${p.regularCents},
       ${p.regularCents > p.priceCents}, 'EUR', ${JSON.stringify(p.images)}::jsonb,
       ${p.inStock}, ${p.description}, ${p.shortDescription}, ${p.displayName},
-      ${p.imageOverride}, ${p.featured}, ${p.hidden},
+      ${p.imageOverride}, ${p.featured}, ${p.hidden}, ${p.catalogHidden},
       ${p.catalogSectionId}, ${p.catalogSort}
     )
     RETURNING id
@@ -438,6 +447,7 @@ export async function updateProductAction(
       description = ${p.description}, short_description = ${p.shortDescription},
       display_name = ${p.displayName}, image_override = ${p.imageOverride},
       featured = ${p.featured}, hidden = ${p.hidden},
+      catalog_hidden = ${p.catalogHidden},
       catalog_section_id = ${p.catalogSectionId}, catalog_sort = ${p.catalogSort},
       updated_at = now()
     WHERE id = ${id}
@@ -468,6 +478,13 @@ export async function toggleProductFlagAction(formData: FormData): Promise<void>
     // a category leaves it advertised — count > 0 is what puts a category in
     // the nav, on /kategorite, on the homepage and in the sitemap.
     await recountCategories();
+  } else if (flag === "catalogHidden") {
+    // The printed catalogue's own visibility. No recount: the category totals
+    // are the shop's, and they count `hidden` alone.
+    await sql`
+      UPDATE products SET catalog_hidden = NOT catalog_hidden, updated_at = now()
+      WHERE id = ${id}
+    `;
   } else if (flag === "inStock") {
     await sql`UPDATE products SET in_stock = NOT in_stock, updated_at = now() WHERE id = ${id}`;
   }
@@ -696,6 +713,295 @@ export async function deleteOrderAction(formData: FormData): Promise<void> {
   await logMutation(admin, "delete-order", { orderId: id });
   revalidatePath("/admin/porosite");
   revalidatePath("/admin");
+}
+
+/* -------------------------- Printed catalogue ---------------------------- */
+
+/**
+ * The 63 numbered sections of the printed catalogue, and which products sit in
+ * which of them — the taxonomy behind shemo-katalog.com.
+ *
+ * Deliberately not categories, and it has to stay that way: only 14 of the
+ * printed sections name anything in the site taxonomy, the other 49 are
+ * manufacturers (Belupo, HEMOFARM, Denk Pharma), wholesalers (Rabir, NT41) or
+ * print-only catch-alls. Folding them into `categories` would dump 49 supplier
+ * names into the customer-facing brand filters. See src/katalog/README.md.
+ */
+
+const catalogSectionSchema = z.object({
+  catalogNo: z
+    .string()
+    .trim()
+    .min(1, "Shkruani numrin e seksionit, p.sh. 6.7.")
+    .max(20, "Numri është shumë i gjatë."),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Emri duhet të ketë të paktën 2 shkronja.")
+    .max(120, "Emri është shumë i gjatë."),
+  sort: z.coerce.number().int().min(0).max(9999),
+});
+
+/**
+ * Whether another section would answer at the same URL.
+ *
+ * The table has a unique index on (catalog_no, name), but the address bar sees
+ * `catalogSectionSlug()` of that pair — "8.1 Corega" and "8-1 corega" are two
+ * legal rows with one slug, and getCatalogSectionBySlug() would hand every
+ * visit to whichever came first. 63 rows, so reading them all is cheaper than
+ * being clever about it.
+ */
+async function catalogSlugTaken(
+  slug: string,
+  exceptId: number | null
+): Promise<boolean> {
+  const rows = (await sql`
+    SELECT id, catalog_no, name FROM catalog_sections
+  `) as { id: number; catalog_no: string; name: string }[];
+  return rows.some(
+    (r) =>
+      r.id !== exceptId &&
+      catalogSectionSlug({
+        id: r.id,
+        catalogNo: r.catalog_no,
+        name: r.name,
+        sort: 0,
+      }) === slug
+  );
+}
+
+export async function createCatalogSectionAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const parsed = catalogSectionSchema.safeParse({
+    catalogNo: formData.get("catalogNo"),
+    name: formData.get("name"),
+    sort: formData.get("sort") || 0,
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrorsFrom(parsed.error) };
+  const d = parsed.data;
+
+  const slug = catalogSectionSlug({
+    id: 0,
+    catalogNo: d.catalogNo,
+    name: d.name,
+    sort: 0,
+  });
+  if (!slug) {
+    return { fieldErrors: { name: "Ky emër nuk jep asnjë adresë të lexueshme." } };
+  }
+  if (await catalogSlugTaken(slug, null)) {
+    return { error: "Ekziston tashmë një seksion me këtë numër dhe emër." };
+  }
+
+  // The id comes from the sequence here, unlike products and categories, whose
+  // ids were carried over from WooCommerce and are assigned by hand.
+  const rows = (await sql`
+    INSERT INTO catalog_sections (catalog_no, name, sort)
+    VALUES (${d.catalogNo}, ${d.name}, ${d.sort})
+    ON CONFLICT (catalog_no, name) DO NOTHING
+    RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) {
+    return { error: "Ekziston tashmë një seksion me këtë numër dhe emër." };
+  }
+
+  await logMutation(admin, "create-catalog-section", {
+    sectionId: rows[0].id,
+    name: `${d.catalogNo} ${d.name}`,
+  });
+  revalidateCatalog();
+  return { success: `Seksioni "${d.catalogNo} ${d.name}" u krijua.` };
+}
+
+export async function updateCatalogSectionAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return { error: "ID e pavlefshme." };
+
+  const parsed = catalogSectionSchema.safeParse({
+    catalogNo: formData.get("catalogNo"),
+    name: formData.get("name"),
+    sort: formData.get("sort") || 0,
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrorsFrom(parsed.error) };
+  const d = parsed.data;
+
+  const slug = catalogSectionSlug({
+    id,
+    catalogNo: d.catalogNo,
+    name: d.name,
+    sort: 0,
+  });
+  if (!slug) {
+    return { fieldErrors: { name: "Ky emër nuk jep asnjë adresë të lexueshme." } };
+  }
+  if (await catalogSlugTaken(slug, id)) {
+    return { error: "Një seksion tjetër ka të njëjtin numër dhe emër." };
+  }
+
+  const updated = (await sql`
+    UPDATE catalog_sections
+    SET catalog_no = ${d.catalogNo}, name = ${d.name}, sort = ${d.sort}
+    WHERE id = ${id}
+    RETURNING id
+  `) as { id: number }[];
+  if (updated.length === 0) return { error: "Seksioni nuk u gjet." };
+
+  await logMutation(admin, "update-catalog-section", { sectionId: id, name: d.name });
+  revalidateCatalog();
+  revalidatePath(`/admin/katalogu/${id}`);
+  // Number and name together are the slug, so a rename moves the page and the
+  // old address stops answering. Said out loud rather than left to be found.
+  return { success: `U ruajt. Adresa e seksionit tani është /${slug}.` };
+}
+
+/**
+ * Deletes an empty section.
+ *
+ * The foreign key is ON DELETE SET NULL, so dropping a section that still holds
+ * products would not fail — it would quietly take every one of them out of the
+ * printed catalogue, the kind of loss nobody notices until the next print run.
+ * Hence the guard: emptying a section stays a separate, visible act.
+ */
+export async function deleteCatalogSectionAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return { error: "ID e pavlefshme." };
+
+  const rows = (await sql`
+    SELECT (SELECT count(*) FROM products WHERE catalog_section_id = ${id})::int AS products,
+           (SELECT name FROM catalog_sections WHERE id = ${id}) AS name
+  `) as { products: number; name: string | null }[];
+  const row = rows[0];
+  if (!row?.name) return { error: "Seksioni nuk u gjet." };
+  if (row.products > 0) {
+    return { error: `Seksioni ka ende ${row.products} produkte. Zhvendosini së pari.` };
+  }
+
+  await sql`DELETE FROM catalog_sections WHERE id = ${id}`;
+  await logMutation(admin, "delete-catalog-section", { sectionId: id, name: row.name });
+  revalidateCatalog();
+  return { success: `Seksioni "${row.name}" u fshi.` };
+}
+
+/** One section's products in printed order — `catalog_sort`, then id for ties. */
+async function catalogSectionOrder(sectionId: number): Promise<number[]> {
+  const rows = (await sql`
+    SELECT id FROM products
+    WHERE catalog_section_id = ${sectionId}
+    ORDER BY catalog_sort, id
+  `) as { id: number }[];
+  return rows.map((r) => r.id);
+}
+
+/**
+ * Writes positions 1..n for a section in one statement.
+ *
+ * One `unnest` of two arrays rather than n updates: the biggest section holds
+ * 155 products and the neon HTTP driver charges a round trip per statement. The
+ * `IS DISTINCT FROM` guard keeps `updated_at` off the rows that did not move —
+ * that column is what the sitemap reports as the product's last change.
+ */
+async function writeCatalogSectionOrder(
+  sectionId: number,
+  ids: number[]
+): Promise<void> {
+  if (ids.length === 0) return;
+  const sorts = ids.map((_, i) => i + 1);
+  await sql`
+    UPDATE products p
+    SET catalog_sort = v.sort, updated_at = now()
+    FROM unnest(${ids}::int[], ${sorts}::int[]) AS v(id, sort)
+    WHERE p.id = v.id
+      AND p.catalog_section_id = ${sectionId}
+      AND p.catalog_sort IS DISTINCT FROM v.sort
+  `;
+}
+
+/**
+ * Moves one product a step up or down inside its section.
+ *
+ * Every move renumbers the whole section, because `catalog_sort` came out of the
+ * import with duplicates in it and swapping two equal numbers moves nothing.
+ */
+export async function moveCatalogProductAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const sectionId = Number(formData.get("sectionId"));
+  const productId = Number(formData.get("productId"));
+  const dir = formData.get("dir") === "up" ? "up" : "down";
+  if (!Number.isInteger(sectionId) || !Number.isInteger(productId)) return;
+
+  const ids = await catalogSectionOrder(sectionId);
+  await writeCatalogSectionOrder(sectionId, moveInOrder(ids, productId, dir));
+  revalidateCatalog();
+  revalidatePath(`/admin/katalogu/${sectionId}`);
+}
+
+/** Rewrites a section's positions as 1, 2, 3 … without changing their order. */
+export async function renumberCatalogSectionAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const sectionId = Number(formData.get("sectionId"));
+  if (!Number.isInteger(sectionId)) return;
+  await writeCatalogSectionOrder(sectionId, await catalogSectionOrder(sectionId));
+  revalidateCatalog();
+  revalidatePath(`/admin/katalogu/${sectionId}`);
+}
+
+/**
+ * Puts a product into a printed section, or takes it out of the catalogue.
+ *
+ * A product belongs to exactly one section, so adding it to a second one is a
+ * move out of the first. New arrivals land at the end of the section: the
+ * printed order is a decision somebody made, and guessing a position inside it
+ * would be wrong more often than right.
+ */
+export async function placeProductInCatalogAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const productId = Number(formData.get("productId"));
+  if (!Number.isInteger(productId)) return;
+  const raw = String(formData.get("sectionId") ?? "");
+  const sectionId = raw === "" ? null : Number(raw);
+
+  if (sectionId === null) {
+    // A position means nothing without a section, exactly as in the product form.
+    await sql`
+      UPDATE products
+      SET catalog_section_id = NULL, catalog_sort = 0, updated_at = now()
+      WHERE id = ${productId}
+    `;
+  } else {
+    if (!Number.isInteger(sectionId) || sectionId <= 0) return;
+    // Joined against catalog_sections rather than trusting the id: a section
+    // that does not exist then updates nothing, instead of raising a foreign-key
+    // error out of a POST that anybody can craft.
+    await sql`
+      UPDATE products p
+      SET catalog_section_id = s.id,
+          catalog_sort = (
+            SELECT COALESCE(MAX(catalog_sort), 0) + 1
+            FROM products WHERE catalog_section_id = s.id
+          ),
+          updated_at = now()
+      FROM catalog_sections s
+      WHERE p.id = ${productId} AND s.id = ${sectionId}
+    `;
+  }
+
+  revalidateCatalog();
+  // Both ends of a move: the section it left is a page that now shows one row
+  // fewer, and it is the page the button was pressed on.
+  const from = Number(formData.get("fromSectionId"));
+  if (Number.isInteger(from) && from > 0) revalidatePath(`/admin/katalogu/${from}`);
+  if (sectionId) revalidatePath(`/admin/katalogu/${sectionId}`);
 }
 
 // There was a redirectIfAdmin() here, exported and called by nobody — the login

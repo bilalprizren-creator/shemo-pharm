@@ -22,6 +22,11 @@ export interface Product {
    *  it at all — 311 of the 2 049 products have never been printed. */
   catalogSectionId: number | null;
   catalogSort: number;
+  /** Hidden from the printed catalogue site, which is a separate decision from
+   *  `hidden` (the shop): a discontinued article can be worth leaving in the
+   *  catalogue a partner holds on paper, and vice versa. Products loaded for
+   *  the shop carry it too, because the two sites share one catalog payload. */
+  catalogHidden: boolean;
 }
 
 /**

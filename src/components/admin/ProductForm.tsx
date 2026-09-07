@@ -17,7 +17,10 @@ export interface ProductFormValues {
   regularPrice: string;
   inStock: boolean;
   featured: boolean;
+  /** Hidden from the shop. */
   hidden: boolean;
+  /** Hidden from the printed catalogue — the other site, the other decision. */
+  catalogHidden: boolean;
   displayName: string;
   imageOverride: string;
   images: string; // one URL per line
@@ -235,8 +238,12 @@ export function ProductForm({
                 defaultChecked={values.hidden}
                 className="size-4.5 rounded accent-brand-600"
               />
-              Fshihe nga faqja publike
+              Fshihe nga dyqani
             </label>
+            <p className="mt-1.5 text-xs text-ink-400">
+              Vlen vetëm për dyqanin. Katalogu i shtypur ka çelësin e vet më
+              poshtë.
+            </p>
           </div>
 
           {/* Where the product sits in the printed catalogue (/katalog). Most
@@ -274,6 +281,22 @@ export function ProductForm({
             </label>
             <p className="mt-2 text-xs text-ink-400">
               Numri më i vogël vjen i pari. Renditja fshihet nëse hiqet seksioni.
+            </p>
+            {/* The second visibility. A product can be discontinued in the shop
+                and still belong in the catalogue a partner holds on paper, or
+                the reverse — so the two flags are never derived from each other. */}
+            <label className="mt-3 flex items-center gap-2.5 border-t border-ink-900/8 pt-3 text-sm font-medium text-ink-900">
+              <input
+                type="checkbox"
+                name="catalogHidden"
+                defaultChecked={values.catalogHidden}
+                className="size-4.5 rounded accent-brand-600"
+              />
+              Fshihe nga katalogu i shtypur
+            </label>
+            <p className="mt-1.5 text-xs text-ink-400">
+              Produkti mbetet në dyqan; nuk shfaqet as te seksioni, as te
+              kërkimi, as te fletët për shtyp.
             </p>
           </div>
 

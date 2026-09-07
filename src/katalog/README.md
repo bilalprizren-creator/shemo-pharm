@@ -93,6 +93,57 @@ The geometry itself is CSS, in the `Printed catalogue` block of
 `src/app/globals.css`. The old site drew the same thing with a 1600x2263 PNG
 behind every one of its 174 pages.
 
+## Editing it
+
+The catalogue is edited from the shop's own admin, at `/admin/katalogu` — one
+panel for both sites, which is the point of the arrangement. The sections list
+is the whole `catalog_sections` table in printed order, including the sections
+the public site drops for being empty, with a count of what sits in each and a
+badge on the ones that therefore do not appear. Opening a section gives its
+products in printed order, a step up and a step down per row, a search box that
+places a product at the end of the section, and an × that takes it out of the
+catalogue without touching the shop.
+
+Three rules are enforced there rather than left to care:
+
+- **A section is deleted only when empty.** `products.catalog_section_id` is
+  `ON DELETE SET NULL`, so deleting a full one would quietly empty it into
+  nowhere. The row hides the button and the action re-checks.
+- **The slug is checked, not just the pair.** `catalog_sections` is unique on
+  (`catalog_no`, `name`), but the address bar sees `catalogSectionSlug()` of
+  that pair, and two legal rows can share one slug — after which
+  `getCatalogSectionBySlug()` hands every visit to whichever came first.
+- **Every move renumbers the section 1..n**, in one `unnest` update. Positions
+  arrived from the import 0-based and with ties in them, and swapping two equal
+  numbers moves nothing. The section page offers a *Rinumëro* button exactly
+  when ties are left, because that is the case where the printed order is
+  decided by an id rather than by a person.
+
+Placement is also on the product form (`/admin/produktet/<id>`), which is the
+right place for one product; this is the right place for the running order.
+`/admin/produktet?seksioni=pa-seksion` lists the 311 that were never printed.
+
+## Two sites, two visibilities
+
+`products.hidden` hides from the shop. `products.catalog_hidden` hides from
+this site. Neither is derived from the other, because they answer different
+questions: an article the shop has stopped selling can be worth leaving in the
+catalogue a partner is holding on paper, and a shop listing can be something the
+print run has no room for.
+
+`fetchCatalog()` therefore loads `hidden = false OR catalog_hidden = false` and
+splits the result on the way in: `products` still means *visible in the shop* —
+so the shop's twenty-odd readers of it did not change and cannot leak — and
+`catalogOnly` holds the other direction. `printedProducts()` puts them back
+together for exactly three functions: `getCatalogSections()`,
+`getEmptyCatalogSections()` and `getAllProductsInCatalogOrder()`. Every page of
+this site reads one of those three, `/kerko` and `/shtyp` included, so that is
+the whole surface.
+
+A section whose products are all `catalog_hidden` disappears from the site the
+same way an empty one does — `getCatalogSections()` drops it — which is why the
+admin list counts *printed*, not *sold*, and flags the difference.
+
 ## Open points
 
 - **The domain has not moved.** `shemo-katalog.com` still resolves to Hostinger,

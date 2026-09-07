@@ -33,8 +33,19 @@ import type {
  * rather than after the revalidate window.
  */
 
+/**
+ * One read, two sites.
+ *
+ * `products` means what it has always meant — **visible in the shop** — so every
+ * reader written before the visibility split still gets exactly what it expects,
+ * and a new one cannot leak a hidden product by forgetting a filter.
+ * `catalogOnly` holds the other direction: hidden in the shop, still printed.
+ * printedProducts() is the only place the two are put back together.
+ */
 interface CatalogData {
   products: Product[];
+  /** Hidden in the shop but still in the printed catalogue. Normally a handful. */
+  catalogOnly: Product[];
   categories: Category[];
   sections: CatalogSection[];
 }
@@ -59,6 +70,8 @@ interface ProductRow {
   updated_at: string | Date | null;
   catalog_section_id: number | null;
   catalog_sort: number | null;
+  hidden: boolean;
+  catalog_hidden: boolean;
 }
 
 interface CatalogSectionRow {
@@ -85,13 +98,14 @@ async function fetchCatalog(): Promise<CatalogData> {
            p.on_sale, p.currency, p.images, p.in_stock, p.description,
            p.short_description, p.display_name, p.image_override, p.featured,
            p.updated_at, p.catalog_section_id, p.catalog_sort,
+           p.hidden, p.catalog_hidden,
            COALESCE(
              array_agg(pc.category_id) FILTER (WHERE pc.category_id IS NOT NULL),
              '{}'::int[]
            ) AS category_ids
     FROM products p
     LEFT JOIN product_categories pc ON pc.product_id = p.id
-    WHERE p.hidden = false
+    WHERE p.hidden = false OR p.catalog_hidden = false
     GROUP BY p.id
     ORDER BY p.id
   `) as ProductRow[];
@@ -107,7 +121,7 @@ async function fetchCatalog(): Promise<CatalogData> {
     SELECT id, catalog_no, name, sort FROM catalog_sections ORDER BY sort
   `) as CatalogSectionRow[];
 
-  const products: Product[] = productRows.map((r) => ({
+  const toProduct = (r: ProductRow): Product => ({
     id: r.id,
     name: r.name,
     slug: r.slug,
@@ -135,7 +149,17 @@ async function fetchCatalog(): Promise<CatalogData> {
     updatedAt: r.updated_at ? new Date(r.updated_at) : null,
     catalogSectionId: r.catalog_section_id,
     catalogSort: r.catalog_sort ?? 0,
-  }));
+    catalogHidden: r.catalog_hidden,
+  });
+
+  // Split on the way in rather than filtering at every call site: the shop's
+  // twenty-odd readers of `products` predate the second flag and none of them
+  // should have to know it exists.
+  const products: Product[] = [];
+  const catalogOnly: Product[] = [];
+  for (const r of productRows) {
+    (r.hidden ? catalogOnly : products).push(toProduct(r));
+  }
 
   const categories: Category[] = categoryRows.map((r) => ({
     id: r.id,
@@ -155,7 +179,26 @@ async function fetchCatalog(): Promise<CatalogData> {
     sort: r.sort ?? 0,
   }));
 
-  return { products, categories, sections };
+  return { products, catalogOnly, categories, sections };
+}
+
+/**
+ * What shemo-katalog.com prints: everything with `catalog_hidden = false`,
+ * whether or not the shop shows it.
+ *
+ * The three catalogue readers below are the only callers, and between them they
+ * feed every page of that site — the contents, a section, /te-gjitha, /kerko and
+ * the print sheets all come through one of the three.
+ *
+ * Exported for tests: this is the one place the two visibilities are put back
+ * together, and getting it wrong either drops products off the paper edition or
+ * prints ones somebody withdrew.
+ */
+export function printedProducts(
+  shopVisible: readonly Product[],
+  catalogOnly: readonly Product[]
+): Product[] {
+  return [...shopVisible.filter((p) => !p.catalogHidden), ...catalogOnly];
 }
 
 /**
@@ -179,7 +222,7 @@ async function fetchCatalog(): Promise<CatalogData> {
 // an entry written before `sections` existed would deserialize without it and
 // every catalogue render would read undefined. Bump it whenever CatalogData
 // gains or loses a field.
-const cachedCatalog = unstable_cache(fetchCatalog, ["catalog-v2"], {
+const cachedCatalog = unstable_cache(fetchCatalog, ["catalog-v3"], {
   tags: [CATALOG_TAG],
   revalidate: 60,
 });
@@ -383,9 +426,15 @@ export async function getCatalogSectionBySlug(
  * Denk Pharma's 29 printed products is absent from the database, so it would
  * otherwise render as a numbered heading over nothing. See
  * audit/catalog-order-import.md for what is missing and why.
+ *
+ * "Its products" means the ones the catalogue prints — `catalog_hidden = false`
+ * — which is not the same set the shop lists. /admin/katalogu shows both counts
+ * side by side for exactly this reason.
  */
 export async function getCatalogSections(): Promise<CatalogSectionWithProducts[]> {
-  const { products, sections } = await loadCatalog();
+  const data = await loadCatalog();
+  const { sections } = data;
+  const products = printedProducts(data.products, data.catalogOnly);
 
   const bySection = new Map<number, Product[]>();
   for (const p of products) {
@@ -421,7 +470,9 @@ export async function getCatalogSections(): Promise<CatalogSectionWithProducts[]
  * told, or they will read the gap as a broken website.
  */
 export async function getEmptyCatalogSections(): Promise<CatalogSection[]> {
-  const { products, sections } = await loadCatalog();
+  const data = await loadCatalog();
+  const { sections } = data;
+  const products = printedProducts(data.products, data.catalogOnly);
   const filled = new Set(
     products.map((p) => p.catalogSectionId).filter((id): id is number => id !== null)
   );
@@ -449,7 +500,9 @@ export interface ProductInCatalogOrder {
  * extra database round trip.
  */
 export async function getAllProductsInCatalogOrder(): Promise<ProductInCatalogOrder[]> {
-  const { products, sections } = await loadCatalog();
+  const data = await loadCatalog();
+  const { sections } = data;
+  const products = printedProducts(data.products, data.catalogOnly);
   const byId = new Map(sections.map((s) => [s.id, s]));
   const order = new Map(
     [...sections].sort((a, b) => a.sort - b.sort).map((s, i) => [s.id, i])

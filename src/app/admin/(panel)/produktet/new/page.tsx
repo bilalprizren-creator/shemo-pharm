@@ -41,6 +41,7 @@ export default async function AdminNewProductPage() {
             inStock: true,
             featured: false,
             hidden: false,
+            catalogHidden: false,
             displayName: "",
             imageOverride: "",
             images: "",

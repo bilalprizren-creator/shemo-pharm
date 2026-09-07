@@ -1,8 +1,13 @@
 # Baza e të dhënave
 
 Neon Postgres 17, projekti `shemo-pharm` (`bold-boat-97200520`), regjioni
-`aws-us-east-2`. Shtatë tabela: `categories`, `products`, `product_categories`,
-`users`, `contact_messages`, `orders`, `rate_limits`.
+`aws-us-east-2`. Tetë tabela: `categories`, `products`, `product_categories`,
+`catalog_sections`, `users`, `contact_messages`, `orders`, `rate_limits`.
+
+`catalog_sections` mban 63 seksionet e katalogut të shtypur; te `products`,
+`catalog_section_id` dhe `catalog_sort` thonë ku bie produkti brenda tij, ndërsa
+**`hidden` dhe `catalog_hidden` janë dy çelësa të ndarë** — i pari fsheh nga
+dyqani, i dyti nga katalogu i shtypur.
 
 ## Dy baza, të ndara
 
