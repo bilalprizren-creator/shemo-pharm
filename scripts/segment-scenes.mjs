@@ -254,6 +254,63 @@ for (const code of wanted) {
   // about what the model was sure of, not about how many objects it found.
   cut = rule.one === false ? piece.all : piece.buf;
 
+  /**
+   * `rect`: use the model to *find* the product, then cut the original at that
+   * rectangle instead of at the product's outline.
+   *
+   * For anything that is already a rectangle — a blister card, a boxed set, a
+   * carton — this is the better answer and the simpler one. Tracing the outline
+   * of a card gains nothing, because the card has no interesting outline, and it
+   * loses something real: the model reads the card's own white as background and
+   * eats it, so a pack with a white margin comes back with holes in it. A
+   * rectangle keeps every pixel the photographer put there.
+   *
+   * The model still does the hard part. Finding the card by hand means reading a
+   * crop off a grid, and a grid read to ±2% is ±20px, which is how eleven of
+   * these ended up clipped. The mask's bounding box is exact.
+   */
+  if (rule.rect) {
+    const { data, info } = await sharp(cut).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { width: w, height: h } = info;
+    /**
+     * The edge is where the mask gets dense, not where its last pixel is.
+     *
+     * An outermost-pixel box is inflated by every scrap the model left behind —
+     * half a printed paw, the corner of a cartoon — and the rectangle then
+     * carries a rim of wrapping paper. A column that is part of the card is
+     * opaque down most of its length; a column that only holds a scrap is opaque
+     * for a few pixels. Cutting at a fraction of the busiest column separates the
+     * two without knowing anything about either.
+     */
+    const cols = new Int32Array(w);
+    const rows = new Int32Array(h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (data[(y * w + x) * 4 + 3] > 16) { cols[x]++; rows[y]++; }
+      }
+    }
+    const dense = (counts) => {
+      const cut = Math.max(...counts) * (rule.dense ?? 0.15);
+      let lo = 0, hi = counts.length - 1;
+      while (lo < counts.length && counts[lo] < cut) lo++;
+      while (hi >= 0 && counts[hi] < cut) hi--;
+      return [lo, hi];
+    };
+    const [minX, maxX] = dense(cols);
+    const [minY, maxY] = dense(rows);
+    if (maxX < minX || maxY < minY) throw new Error(`${code}: the model found nothing to take a rectangle from`);
+    const pad = Math.round((rule.pad ?? 0) * Math.max(maxX - minX + 1, maxY - minY + 1));
+    const box = {
+      left: Math.max(0, minX - pad),
+      top: Math.max(0, minY - pad),
+      width: Math.min(w, maxX + 1 + pad) - Math.max(0, minX - pad),
+      height: Math.min(h, maxY + 1 + pad) - Math.max(0, minY - pad),
+    };
+    // Opaque on purpose: cutout-images.mjs frames whatever is opaque, so a fully
+    // opaque rectangle lands at the same 86% as every silhouette beside it.
+    cut = await sharp(png).extract(box).removeAlpha().ensureAlpha().png().toBuffer();
+  }
+
   const { data, info } = await sharp(cut).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let clear = 0;
   for (let i = 3; i < data.length; i += 4) if (data[i] <= 8) clear++;
