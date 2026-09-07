@@ -7,6 +7,7 @@ import {
   toCardProducts,
 } from "@/lib/catalog";
 import { langHref, fmt } from "@/lib/i18n";
+import { getSiteMode, sitePath } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
@@ -34,6 +35,11 @@ export async function SearchResults({
   const sections = await getCatalogSections();
   const session = await getSession();
   const showPrices = canSeePrices(session);
+  // The page is reachable on both domains now, so "back to the catalogue"
+  // cannot be a bare "/" — on the shop's domain that is the shop's homepage,
+  // and a reader who searched the catalogue would land somewhere else entirely.
+  const mode = await getSiteMode();
+  const href = (p: string) => langHref(dict.lang, sitePath(mode, p));
 
   const sectionOf = new Map(
     sections.flatMap((s) => s.products.map((p) => [p.id, s] as const))
@@ -48,7 +54,7 @@ export async function SearchResults({
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
       <Breadcrumbs
         items={[
-          { label: dict.printedCatalog.title, href: "/" },
+          { label: dict.printedCatalog.title, href: href("/katalog") },
           { label: dict.printedCatalog.searchTitle },
         ]}
         dict={dict}
@@ -72,7 +78,7 @@ export async function SearchResults({
             title={fmt(dict.printedCatalog.searchEmpty, { q: trimmed })}
             text={dict.printedCatalog.searchPrompt}
             actionLabel={dict.printedCatalog.contents}
-            actionHref={langHref(dict.lang, "/")}
+            actionHref={href("/katalog")}
           />
         </div>
       )}
@@ -86,7 +92,7 @@ export async function SearchResults({
                 <ProductCard product={product} dict={dict} mode="katalog" priority={i < 5} />
                 {section && (
                   <Link
-                    href={langHref(dict.lang, `/${catalogSectionSlug(section)}`)}
+                    href={href(`/katalog/${catalogSectionSlug(section)}`)}
                     className="mt-1.5 truncate text-xs font-medium text-brand-600 transition-colors hover:text-brand-800"
                   >
                     {fmt(dict.printedCatalog.inSection, {

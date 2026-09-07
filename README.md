@@ -155,6 +155,14 @@ shtypur** zgjedhin një grup: kategoria numërohet bashkë me nënkategoritë e 
 si te `recountCategories`, ndryshe një fshehje masive do të linte pjesën më të
 madhe të degës jashtë.
 
+**Sa produkte shfaqen ku.** Te `/admin` dhe te `/admin/produktet` rri një
+përmbledhje me katër numra — gjithsej, në dyqan, në katalog, askund — dhe secili
+është lidhje drejt asaj pjese të tabelës. Dy kolona të pavarura, ndaj «në
+dyqan» dhe «në katalog» nuk mblidhen te «gjithsej»; **«askund»** është ai që
+krijohet pa u vënë re, kur një produkt fshihet nga njëra faqe një javë dhe nga
+tjetra javën tjetër. Vetë tabela e produkteve është vendi ku shfaqen *të gjitha*
+produktet, të fshehurat përfshirë — asnjë faqe publike nuk i tregon.
+
 **Ndryshimet masive.** Kutitë te rreshtat plus shiriti poshtë tabelës —
 te `/admin/produktet` dhe te `/admin/katalogu/<id>` — vendosin dukshmërinë e një
 grupi për njërën faqe pa e prekur tjetrën, ose e zhvendosin grupin në një

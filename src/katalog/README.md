@@ -42,15 +42,21 @@ out when rendering links.
 | `/6-7-cansin` | `app/[lang]/katalog/[seksioni]/page.tsx` | `SectionView.tsx` |
 | `/te-gjitha` | `app/[lang]/katalog/te-gjitha/page.tsx` | `AllProducts.tsx` |
 | `/shtyp` | `app/[lang]/katalog/shtyp/page.tsx` | `PrintSheets.tsx` |
-| `/kerko` | `app/[lang]/kerko/page.tsx` | `SearchResults.tsx` |
+| `/kerko` | `app/[lang]/katalog/kerko/page.tsx` | `SearchResults.tsx` |
 
 English lives under a visible `/en` on both sites, as everywhere else.
 
 **The trap:** any real route that is not a section slug must be listed in
 `SHARED_PATHS` (`src/lib/site-mode.ts`), or the mapping turns its path into a
 section slug that does not exist and it 404s. That list is why the partner
-login, the contact page and the legal pages work here. `/kerko` is in it too,
-even though it exists only on this site.
+login, the contact page and the legal pages work here.
+
+`/kerko` used to be in that list, and should not have been. Being shared kept
+it off `/katalog` on the shop's domain — which is where this site is actually
+read until `shemo-katalog.com` moves — so the catalogue there had no search of
+its own and its search button pointed at `/produktet`, dropping the reader into
+the shop's listing over the shop's range. It is a catalogue page like the rest
+now: `/katalog/kerko` on the shop's domain, `/kerko` here, one route.
 
 ## What this site does not have
 

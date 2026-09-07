@@ -111,9 +111,23 @@ describe("every catalogue route is reachable", () => {
    * the list of routes that are not sections.
    */
   it("leaves the catalogue's own non-section routes unmapped", () => {
-    for (const path of ["/kerko", "/kycu", "/llogaria"]) {
+    for (const path of ["/kycu", "/llogaria"]) {
       expect(isSharedPath(path)).toBe(true);
       expect(sitePath("katalog", path)).toBe(path);
     }
+  });
+
+  /**
+   * The catalogue's search is a catalogue page, not a shared one. Listing it in
+   * SHARED_PATHS is what once kept it off the shop's domain: the catalogue is
+   * served there under /katalog, and its search button had nowhere to point but
+   * /produktet — the shop's listing over a different range.
+   */
+  it("keeps the catalogue's search inside the catalogue on both sites", () => {
+    expect(isSharedPath("/kerko")).toBe(false);
+    // The shop's domain serves it at the full path…
+    expect(sitePath("shop", "/katalog/kerko")).toBe("/katalog/kerko");
+    // …and the catalogue's domain at the short one the proxy folds back.
+    expect(sitePath("katalog", "/katalog/kerko")).toBe("/kerko");
   });
 });

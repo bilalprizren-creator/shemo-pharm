@@ -9,7 +9,9 @@ import {
   Users,
 } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
+import { getSiteVisibilityCounts } from "@/lib/admin-data";
 import { sql } from "@/lib/db";
+import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
 
 interface Stats {
   pending_users: number;
@@ -24,6 +26,8 @@ interface Stats {
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
+
+  const siteCounts = await getSiteVisibilityCounts();
 
   const [stats] = (await sql`
     SELECT
@@ -119,6 +123,11 @@ export default async function AdminDashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* Two sites off one table: the overview is where somebody notices that
+          the shop and the printed catalogue have drifted apart — or that
+          products have quietly fallen out of both. */}
+      <SiteVisibilitySummary counts={siteCounts} className="mt-8" />
 
       <div className="mt-8 rounded-2xl border border-ink-900/8 bg-white p-5">
         <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-ink-900">

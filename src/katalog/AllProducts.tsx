@@ -92,7 +92,7 @@ export async function AllProducts({
             {dict.printedCatalog.contents}
           </Link>
           <Link
-            href={href(mode === "katalog" ? "/kerko" : "/produktet")}
+            href={href("/katalog/kerko")}
             className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
           >
             <Search className="size-4" aria-hidden />

@@ -411,6 +411,44 @@ export async function getAdminCatalogSections(): Promise<AdminCatalogSection[]> 
   }));
 }
 
+/** What each of the two sites currently shows, and what neither shows. */
+export interface SiteVisibilityCounts {
+  /** Every product in the database, shown or not. */
+  total: number;
+  /** Listed in the shop: `hidden = false`. */
+  shop: number;
+  /** Printed by shemo-katalog.com: `catalog_hidden = false`. */
+  katalog: number;
+  /** Hidden from both — in the database, on neither site. */
+  nowhere: number;
+}
+
+/**
+ * The two ranges side by side.
+ *
+ * The point of the panel is that the shop sells one part of the range and the
+ * printed catalogue shows another, and until these four numbers were on a page
+ * there was no way to see whether that was actually true — only to open each
+ * site and count. `shop` and `katalog` are independent tallies of two columns,
+ * so they do not add up to `total` and are not meant to: most products are in
+ * both.
+ *
+ * `nowhere` is the one that is easy to create by accident and impossible to
+ * notice: a product hidden from the shop one week and from the catalogue the
+ * next is in the database and on neither site, and nothing else counts it.
+ */
+export async function getSiteVisibilityCounts(): Promise<SiteVisibilityCounts> {
+  await assertAdmin();
+  const rows = (await sql`
+    SELECT count(*)::int                                            AS total,
+           (count(*) FILTER (WHERE NOT hidden))::int                 AS shop,
+           (count(*) FILTER (WHERE NOT catalog_hidden))::int         AS katalog,
+           (count(*) FILTER (WHERE hidden AND catalog_hidden))::int  AS nowhere
+    FROM products
+  `) as SiteVisibilityCounts[];
+  return rows[0] ?? { total: 0, shop: 0, katalog: 0, nowhere: 0 };
+}
+
 /**
  * How much of the range is in the printed catalogue at all.
  *

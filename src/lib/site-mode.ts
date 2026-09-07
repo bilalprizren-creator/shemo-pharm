@@ -67,12 +67,14 @@ export function modeForHost(host: string | null | undefined): SiteMode {
  * means any real route that is not a section has to be named here, or the
  * mapping turns it into a section slug that does not exist.
  *
- * Most of these are genuinely shared with the shop — the partner login above
- * all, since prices depend on it. `/kerko` is the exception: it exists only on
- * the catalogue and answers 404 on the shop, but it still must not be folded in.
+ * Everything here is genuinely shared with the shop — the partner login above
+ * all, since prices depend on it. Nothing else belongs: `/kerko` used to be
+ * listed as an exception, which kept the catalogue's search off the shop's
+ * domain entirely. It is a catalogue page like any other and lives at
+ * /katalog/kerko now, so the mapping folds it in and the catalogue domain still
+ * serves it at /kerko.
  */
 export const SHARED_PATHS: readonly string[] = [
-  "/kerko",
   "/kycu",
   "/regjistrohu",
   "/rikthe-fjalekalimin",

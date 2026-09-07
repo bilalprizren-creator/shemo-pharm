@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import {
   getAdminCatalogSectionOptions,
   getAdminCategoryOptions,
+  getSiteVisibilityCounts,
   listAdminProducts,
 } from "@/lib/admin-data";
 import { toggleProductFlagAction } from "@/lib/admin-actions";
@@ -24,6 +25,7 @@ import {
   ProductBulkBar,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
+import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
 
 export const metadata: Metadata = { title: "Produktet" };
 
@@ -41,9 +43,10 @@ export default async function AdminProductsPage({
   const sp = await searchParams;
   // Both lists are needed twice over — to validate the URL, and to fill the
   // dropdowns in the filter row and in the bulk bar.
-  const [sectionOptions, categoryOptions] = await Promise.all([
+  const [sectionOptions, categoryOptions, siteCounts] = await Promise.all([
     getAdminCatalogSectionOptions(),
     getAdminCategoryOptions(),
+    getSiteVisibilityCounts(),
   ]);
 
   // The same parser the bulk actions use on the fields the bar posts back, so
@@ -108,6 +111,11 @@ export default async function AdminProductsPage({
           Produkt i ri
         </Link>
       </div>
+
+      {/* The two ranges, before the table that mixes them. This is also the
+          page where "all products" actually means all of them: the table is
+          unfiltered by default, hidden ones included, which no public page is. */}
+      <SiteVisibilitySummary counts={siteCounts} className="mt-5" />
 
       {/*
         Keyed on the active filters so "Pastro filtrat" — a client-side Link, which

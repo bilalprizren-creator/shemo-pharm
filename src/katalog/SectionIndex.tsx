@@ -63,9 +63,12 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
             {fmt(dict.printedCatalog.allLink, { n: allCount })}
           </Link>
           <Link
-            // The catalogue has its own narrow search; /produktet is the shop's
-            // filterable listing and does not exist on the catalogue domain.
-            href={href(mode === "katalog" ? "/kerko" : "/produktet")}
+            // The catalogue's own search, on both domains. It used to send the
+            // shop's visitors to /produktet, which is the shop's listing over
+            // the shop's range — the one place the two sites were not kept
+            // apart, and the loudest one, since it is the button somebody
+            // presses to look a printed code up.
+            href={href("/katalog/kerko")}
             className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
           >
             <Search className="size-4" aria-hidden />
