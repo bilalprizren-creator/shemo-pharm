@@ -18,6 +18,32 @@ export interface Product {
   featured: boolean;
   /** Last edit, for the sitemap. Null on rows the import never touched again. */
   updatedAt: Date | null;
+  /** Where the product sits in the printed catalogue. Null when it is not in
+   *  it at all — 311 of the 2 049 products have never been printed. */
+  catalogSectionId: number | null;
+  catalogSort: number;
+  /** Hidden from the printed catalogue site, which is a separate decision from
+   *  `hidden` (the shop): a discontinued article can be worth leaving in the
+   *  catalogue a partner holds on paper, and vice versa. Products loaded for
+   *  the shop carry it too, because the two sites share one catalog payload. */
+  catalogHidden: boolean;
+}
+
+/**
+ * A numbered section of the printed catalogue — "1.1 SHEMO", "5.5 Rabir".
+ *
+ * Deliberately not a Category: only 14 of the 63 printed sections name anything
+ * in the site taxonomy. The rest are manufacturers (Belupo, HEMOFARM, Denk
+ * Pharma), wholesalers (Rabir, NT41), or print-only catch-alls, and none of
+ * those belong in the customer-facing filters. See scripts/add-catalog-order.mjs.
+ */
+export interface CatalogSection {
+  id: number;
+  /** The number as printed. Not unique — "8.1" names two sections — and not
+   *  sortable: the printed run is 6.4, 6.1, 6.3, 6.5. Use `sort`. */
+  catalogNo: string;
+  name: string;
+  sort: number;
 }
 
 /** Product data that is safe to send to any visitor — never contains prices. */

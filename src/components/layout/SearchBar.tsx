@@ -8,6 +8,7 @@ import { Search, X, Loader2, PackageSearch } from "lucide-react";
 import type { PublicProduct } from "@/lib/types";
 import { langHref, fmt, type Lang } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 
 interface SearchBarProps {
   lang: Lang;
@@ -258,19 +259,22 @@ export function SearchBar({
                         i === active ? "bg-brand-50" : "hover:bg-brand-50"
                       }`}
                     >
-                      <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 bg-white">
+                      <PhotoWell
+                        className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6"
+                        cutOut={photoPresentation(p.image, { pad: "p-1", shadow: PHOTO_SHADOW_SM }).cutOut}
+                      >
                         {p.image ? (
                           <Image
                             src={p.image}
                             alt=""
                             fill
                             sizes="44px"
-                            className="object-contain p-1"
+                            className={photoPresentation(p.image, { pad: "p-1", shadow: PHOTO_SHADOW_SM }).className}
                           />
                         ) : (
                           <PackageSearch className="size-5 text-ink-300" aria-hidden />
                         )}
-                      </span>
+                      </PhotoWell>
                       <span className="min-w-0">
                         <span className="block truncate font-medium text-ink-900">
                           {p.name}

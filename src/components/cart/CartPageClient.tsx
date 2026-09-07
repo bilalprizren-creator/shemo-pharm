@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { langHref, fmt } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
 import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
@@ -82,15 +83,23 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
             // above it the row is unchanged.
             className="flex flex-wrap items-center gap-3 p-3.5 sm:gap-4 sm:p-4"
           >
-            <Link
-              href={langHref(lang, `/produktet/${p.slug}`)}
-              className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 bg-white sm:size-20"
-            >
-              {p.image ? (
-                <Image src={p.image} alt="" fill sizes="80px" className="object-contain p-1.5" />
-              ) : (
-                <Package className="size-7 text-ink-300" aria-hidden />
-              )}
+            <Link href={langHref(lang, `/produktet/${p.slug}`)} className="shrink-0">
+              <PhotoWell
+                className="flex size-16 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6 sm:size-20"
+                cutOut={photoPresentation(p.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
+              >
+                {p.image ? (
+                  <Image
+                    src={p.image}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className={photoPresentation(p.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className}
+                  />
+                ) : (
+                  <Package className="size-7 text-ink-300" aria-hidden />
+                )}
+              </PhotoWell>
             </Link>
 
             <div className="min-w-20 flex-1">

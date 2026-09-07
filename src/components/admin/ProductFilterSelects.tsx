@@ -35,7 +35,16 @@ export function ProductFilterSelects({
             name={f.name}
             defaultValue={f.value}
             aria-label={f.label}
-            onChange={(e) => e.currentTarget.form?.requestSubmit()}
+            onChange={(e) => {
+              // Only when the choice actually differs from what the URL already
+              // carries. A select that is unmounted while still focused — which
+              // is what "Pastro filtrat" does to the one you just used — fires a
+              // parting change event, and without this guard that event submits
+              // the form a second time, landing on ?kerko=&stoku=&dukshmeria=
+              // instead of the clean path the link pointed at.
+              if (e.currentTarget.value === f.value) return;
+              e.currentTarget.form?.requestSubmit();
+            }}
             className="h-11 rounded-xl border border-ink-900/10 bg-white px-2.5 text-sm font-medium text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
           >
             {f.options.map((o) => (

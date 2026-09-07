@@ -5,7 +5,11 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { SITE } from "@/lib/site";
 import { LANGS, isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
+import { getSession } from "@/lib/auth";
+import { SITE_ORIGINS, getSiteMode } from "@/lib/site-mode";
 import { Header } from "@/components/layout/Header";
+import { KatalogHeader } from "@/katalog/KatalogHeader";
+import { KatalogFooter } from "@/katalog/KatalogFooter";
 import { Footer } from "@/components/layout/Footer";
 import { StickyMobileBar } from "@/components/layout/StickyMobileBar";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
@@ -49,22 +53,31 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? lang : "sq");
+  const mode = await getSiteMode();
+  const isKatalog = mode === "katalog";
   return {
-    metadataBase: new URL(SITE.domain),
+    // Per site, not per deployment: a catalogue page that resolved its
+    // canonical URL against the shop's domain would tell a crawler the
+    // catalogue is a duplicate of a page that does not exist there.
+    metadataBase: new URL(SITE_ORIGINS[mode]),
     title: {
-      default: dict.site.titleDefault,
-      template: "%s | SHEMO PHARM",
+      default: isKatalog ? dict.printedCatalog.siteTitle : dict.site.titleDefault,
+      template: isKatalog ? "%s | SHEMO Katalog" : "%s | SHEMO PHARM",
     },
-    description: dict.site.description,
+    description: isKatalog
+      ? dict.printedCatalog.metaDescription
+      : dict.site.description,
     alternates: {
       languages: { sq: "/", en: "/en" },
     },
     openGraph: {
       type: "website",
       locale: dict.lang === "en" ? "en" : "sq",
-      siteName: SITE.name,
-      title: dict.site.titleDefault,
-      description: dict.site.description,
+      siteName: isKatalog ? dict.printedCatalog.siteTitle : SITE.name,
+      title: isKatalog ? dict.printedCatalog.siteTitle : dict.site.titleDefault,
+      description: isKatalog
+        ? dict.printedCatalog.metaDescription
+        : dict.site.description,
       // Declaring openGraph here suppresses the app/opengraph-image.tsx file
       // convention for this branch, so the generated card is named explicitly.
       // It stays at the bare /opengraph-image path (the proxy matcher skips it),
@@ -87,6 +100,35 @@ export default async function RootLayout({
   // Next stamps its own scripts with the nonce automatically; the two this
   // project writes by hand have to ask for it. Set in src/proxy.ts.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const mode = await getSiteMode();
+
+  // The catalogue site is the same pages under different chrome, and without a
+  // cart. Its providers are left out rather than rendered empty: CartProvider
+  // fetches the basket on mount, which on a site that has no basket is a
+  // request for nothing on every single page view.
+  if (mode === "katalog") {
+    const session = await getSession();
+    return (
+      <html
+        lang={lang}
+        className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      >
+        <body className="flex min-h-full flex-col">
+          <a
+            href={`${langHref(dict.lang, "/")}#permbajtja`}
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-card"
+          >
+            {dict.common.skipToContent}
+          </a>
+          <KatalogHeader dict={dict} user={session ? { name: session.name } : null} />
+          <main id="permbajtja" className="flex-1">
+            {children}
+          </main>
+          <KatalogFooter dict={dict} />
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html

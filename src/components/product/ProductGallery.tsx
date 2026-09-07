@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Package } from "lucide-react";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "./PhotoWell";
 
 export function ProductGallery({
   images,
@@ -19,7 +20,12 @@ export function ProductGallery({
 
   return (
     <div>
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8 bg-white">
+      {/* Per image, not per product: a gallery can mix a cut-out packshot with
+          an uncut detail photo, and each needs its own ground. */}
+      <PhotoWell
+        className="aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8"
+        cutOut={photoPresentation(current, { pad: "p-8" }).cutOut}
+      >
         {current ? (
           <Image
             src={current}
@@ -27,14 +33,15 @@ export function ProductGallery({
             fill
             priority
             sizes="(max-width: 1024px) 92vw, 540px"
-            className="object-contain p-8"
+            quality={85}
+            className={photoPresentation(current, { pad: "p-8" }).className}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>
             <Package className="size-20 text-ink-300" strokeWidth={1} />
           </div>
         )}
-      </div>
+      </PhotoWell>
 
       {images.length > 1 && (
         <ul className="mt-3 flex gap-2.5 overflow-x-auto pb-1" aria-label={labels.list}>
@@ -47,19 +54,28 @@ export function ProductGallery({
                   .replace("{i}", String(i + 1))
                   .replace("{total}", String(images.length))}
                 aria-current={i === index}
-                className={`relative size-18 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition-colors ${
-                  i === index
-                    ? "border-brand-500"
-                    : "border-ink-900/8 hover:border-brand-300"
-                }`}
+                className="relative block"
               >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  sizes="72px"
-                  className="object-contain p-1.5"
-                />
+                {/* The same well as the big view above rather than a hand-copied
+                    gradient, which is how the two drifted apart before. */}
+                <PhotoWell
+                  className={`size-18 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
+                    i === index
+                      ? "border-brand-500"
+                      : "border-ink-900/8 hover:border-brand-300"
+                  }`}
+                  cutOut={photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
+                >
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    className={
+                      photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className
+                    }
+                  />
+                </PhotoWell>
               </button>
             </li>
           ))}

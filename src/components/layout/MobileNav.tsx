@@ -23,6 +23,7 @@ import type { NavCategory } from "./HeaderClient";
 const LINK_PATHS = [
   { href: "/", key: "home" },
   { href: "/produktet", key: "products" },
+  { href: "/katalog", key: "catalog" },
   { href: "/markat", key: "brands" },
   { href: "/oferta", key: "offers" },
   { href: "/rreth-nesh", key: "about" },

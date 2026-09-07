@@ -84,6 +84,17 @@ Dy gjëra **nuk** udhëtojnë me linkun, me qëllim:
 - **Lista e dëshirave dhe shporta** — rrinë te `localStorage` i shfletuesit,
   ndaj `/lista-e-deshirave` te marrësi hapet bosh.
 
+### Dy faqe, një deployment
+
+`shemo-katalog.com` është faqe më vete, me domain të vetin, por e shërbyer nga i
+njëjti deployment — ndarja bëhet vetëm sipas hostname-it (`src/proxy.ts` →
+`src/lib/site-mode.ts`). Gjithçka që i takon vetëm asaj faqeje rri te
+`src/katalog/`, bashkë me një README që shpjeton rrugët, shtypjen dhe kurthet:
+**[src/katalog/README.md](src/katalog/README.md)**.
+
+Kujdes: domain-i ende s'është zhvendosur — `shemo-katalog.com` tregon te
+Hostinger, pra te faqja e vjetër.
+
 ## Llogaritë dhe çmimet (B2B)
 
 Çmimet shfaqen **vetëm** për llogaritë e aprovuara — kontrolli bëhet gjithmonë
@@ -126,7 +137,30 @@ POST dhe kontrolli i layout-it nuk mjafton.
 | `/admin/kerkesat` | Aprovimi i llogarive B2B |
 | `/admin/produktet` | CRUD i produkteve + ngarkim fotosh |
 | `/admin/kategorite` | Emri i shfaqur, lloji, prindi, renditja |
+| `/admin/katalogu` | Seksionet e katalogut të shtypur dhe rendi brenda tyre |
 | `/admin/mesazhet` | Mesazhet nga formulari i kontaktit |
+
+**Katalogu i shtypur redaktohet te `/admin/katalogu`**, jo te kategoritë:
+janë dy taksonomi të ndryshme (`catalog_sections` kundrejt `categories`) dhe
+vetëm 14 nga 63 seksionet e shtypura përputhen me ndonjë kategori. Aty krijohen
+e riemërtohen seksionet, lëviz produkti lart e poshtë brenda seksionit, dhe
+shihet se cilat seksione nuk shfaqen fare në `shemo-katalog.com` sepse janë
+bosh. Seksionet fshihen vetëm kur janë bosh: çelësi i huaj është
+`ON DELETE SET NULL`, prandaj fshirja e një seksioni me produkte do t'i hiqte
+të gjithë ata nga katalogu pa asnjë paralajmërim. Te `/admin/produktet` filtrat
+**Dyqani**, **Katalogu** dhe **Seksioni** i ndajnë të tri pyetjet: a shitet, a
+shtypet, a ka fare vend në katalog — p.sh. `?seksioni=pa-seksion` jep 311
+produktet që nuk janë shtypur kurrë.
+
+**Dukshmëria është e ndarë për dy faqet.** `products.hidden` fsheh nga dyqani,
+`products.catalog_hidden` nga katalogu i shtypur, dhe asnjëri nuk rrjedh nga
+tjetri: një artikull i ndërprerë mund të mbetet në katalogun që partneri e ka në
+letër, dhe një listim i dyqanit mund të mos ketë vend në shtyp. Te tabela e
+produkteve secila ka kolonën e vet (sy / libër), te formulari secila ka kutinë e
+vet, dhe te `/admin/katalogu/<id>` kolona **Shtypet** e ndryshon vetëm atë të
+katalogut. Migrimi që e shtoi kolonën
+(`npm run migrate:catalog-visibility`) i nisi të dyja njësoj, ndaj asgjë nuk
+ndryshoi në momentin e kalimit.
 
 **Kategoritë nuk fshihen nga paneli me qëllim.** `product_categories` është
 `ON DELETE CASCADE` — fshirja e një rreshti kategorie heq në heshtje të gjitha
@@ -285,5 +319,6 @@ e vet duhet `outline-none!` (me `!` në fund, sintaksa e v4).
 - Kuptimi i "200+ Distributor i autorizuar" nga faqja e vjetër.
 - URL e YouTube (vetëm Facebook dhe Instagram u verifikuan).
 - Numri që pranon WhatsApp (supozuar 049 600 934).
-- Katalog PDF nuk ekziston — butoni shfaqet automatikisht kur të vendoset
-  `catalogUrl` te `src/lib/site.ts`.
+- 176 artikuj që janë në katalogun e shtypur nuk gjenden në bazë — lista te
+  `audit/catalog-order-import.md`. Dy seksione mbeten bosh për këtë arsye
+  (38 Denk Pharma, 7.3 Ivy Bear), prandaj faqja tregon 61 seksione e jo 63.

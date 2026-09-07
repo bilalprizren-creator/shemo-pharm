@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   brandMatches,
+  catalogSectionSlug,
   primaryCategoryOf,
+  printedProducts,
+  productDisplayName,
   rankRelated,
   searchProducts,
 } from "@/lib/catalog";
@@ -26,6 +29,9 @@ function product(id: number, name: string, over: Partial<Product> = {}): Product
     imageOverride: null,
     featured: false,
     updatedAt: null,
+    catalogSectionId: null,
+    catalogSort: 0,
+    catalogHidden: false,
     ...over,
   };
 }
@@ -189,5 +195,140 @@ describe("brandMatches", () => {
 
   it("finds nothing rather than guessing when no product carries the name", () => {
     expect(brandMatches(list, "Kräuterhof")).toEqual([]);
+  });
+});
+
+describe("catalogSectionSlug", () => {
+  const section = (catalogNo: string, name: string) => ({
+    id: 1,
+    catalogNo,
+    name,
+    sort: 0,
+  });
+
+  it("joins the printed number to the name", () => {
+    expect(catalogSectionSlug(section("6.7", "Cansin"))).toBe("6-7-cansin");
+  });
+
+  it("keeps sections apart when the number repeats", () => {
+    // "8.1" names two sections; the number alone would collide.
+    expect(catalogSectionSlug(section("8.1", "Corega"))).toBe("8-1-corega");
+    expect(catalogSectionSlug(section("8.1", "Eferveta me brende te ndryshme"))).toBe(
+      "8-1-eferveta-me-brende-te-ndryshme"
+    );
+  });
+
+  it("folds Albanian ë and ç rather than dropping them", () => {
+    expect(catalogSectionSlug(section("5", "Bebe dhe Nëna"))).toBe("5-bebe-dhe-nena");
+    expect(catalogSectionSlug(section("8", "Çokollada"))).toBe("8-cokollada");
+  });
+
+  it("collapses punctuation the printed names carry", () => {
+    expect(catalogSectionSlug(section("7", "Love,Hitman,Dolphi"))).toBe(
+      "7-love-hitman-dolphi"
+    );
+    expect(catalogSectionSlug(section("23.4", "Johnson's Baby"))).toBe(
+      "23-4-johnson-s-baby"
+    );
+  });
+});
+
+describe("productDisplayName", () => {
+  it("drops the article code the catalog export appended", () => {
+    // 2 012 of 2 044 products are named this way, and every card prints the
+    // code again on the line below.
+    const p = product(1, "Fix ear baby A6 (9408)", { sku: "9408" });
+    expect(productDisplayName(p)).toBe("Fix ear baby A6");
+  });
+
+  it("keeps parentheses that say something other than the code", () => {
+    const p = product(1, "Termometer digjital SHM-01 (Frog)", { sku: "0023" });
+    expect(productDisplayName(p)).toBe("Termometer digjital SHM-01 (Frog)");
+  });
+
+  /**
+   * Eight products carry the code mid-name and then a brand or a size. Checked
+   * against the whole range, no product has a parenthesised group that equals
+   * its own code and means something else, so stripping anywhere is safe.
+   */
+  it("strips the code mid-name too, keeping what follows", () => {
+    const p = product(1, "Losion kunder mushkonjave 100ml (5087) (AUTAN)", {
+      sku: "5087",
+    });
+    expect(productDisplayName(p)).toBe("Losion kunder mushkonjave 100ml (AUTAN)");
+  });
+
+  it("closes up the gap rather than leaving a double space", () => {
+    const p = product(1, "Shokë me shufra (8166) 32cm", { sku: "8166" });
+    expect(productDisplayName(p)).toBe("Shokë me shufra 32cm");
+  });
+
+  it("drops a bracket left dangling by a typo in the source name", () => {
+    // "Colidur 200mg X 12tab Rifaximin (5237))" is real data.
+    const p = product(1, "Colidur 200mg X 12tab Rifaximin (5237))", { sku: "5237" });
+    expect(productDisplayName(p)).toBe("Colidur 200mg X 12tab Rifaximin");
+  });
+
+  it("leaves a name without parentheses alone", () => {
+    const p = product(1, "Accu-Chek aparat", { sku: "0300" });
+    expect(productDisplayName(p)).toBe("Accu-Chek aparat");
+  });
+
+  it("returns an admin display_name untouched, code and all", () => {
+    // Somebody who typed a name meant it.
+    const p = product(1, "Fix ear baby A6 (9408)", {
+      sku: "9408",
+      displayName: "Fix ear baby A6 (9408)",
+    });
+    expect(productDisplayName(p)).toBe("Fix ear baby A6 (9408)");
+  });
+
+  it("never returns an empty name", () => {
+    const p = product(1, "(9408)", { sku: "9408" });
+    expect(productDisplayName(p)).toBe("(9408)");
+  });
+
+  it("copes with a product that has no code", () => {
+    const p = product(1, "Produkt pa kod (X)", { sku: "" });
+    expect(productDisplayName(p)).toBe("Produkt pa kod (X)");
+  });
+});
+
+/**
+ * The two sites hide products separately — `hidden` is the shop,
+ * `catalog_hidden` is shemo-katalog.com — and this is the one function that
+ * puts the two halves of the loaded catalog back together for the printed side.
+ * Getting it wrong is invisible in the shop and wrong on paper: either an
+ * article somebody withdrew gets printed, or one that is only withdrawn from
+ * the shop silently vanishes from the catalogue a partner is holding.
+ */
+describe("printedProducts", () => {
+  const shopVisible = [
+    product(1, "Printed and sold"),
+    product(2, "Sold but withdrawn from the catalogue", { catalogHidden: true }),
+  ];
+  /** Hidden in the shop, still in the printed catalogue — fetchCatalog keeps
+   *  these apart because `products` must keep meaning "visible in the shop". */
+  const catalogOnly = [product(3, "Discontinued in the shop, still on paper")];
+
+  it("prints what the shop shows", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).toContain(1);
+  });
+
+  it("drops a product withdrawn from the catalogue, however well the shop sells it", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).not.toContain(2);
+  });
+
+  it("keeps a product the shop hides but the catalogue still carries", () => {
+    expect(printedProducts(shopVisible, catalogOnly).map((p) => p.id)).toContain(3);
+  });
+
+  it("lists each product once", () => {
+    const ids = printedProducts(shopVisible, catalogOnly).map((p) => p.id);
+    expect(ids).toHaveLength(new Set(ids).size);
+  });
+
+  it("prints nothing when everything is withdrawn", () => {
+    expect(printedProducts([product(9, "Gone", { catalogHidden: true })], [])).toEqual([]);
   });
 });

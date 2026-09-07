@@ -35,8 +35,23 @@ describe("parsePriceEuros", () => {
   });
 
   it("refuses amounts that would overflow the integer column", () => {
-    expect(parsePriceEuros("1e400")).toBeNull();
     expect(parsePriceEuros("99999999")).toBeNull();
+  });
+
+  it("refuses notation Number() would happily misread", () => {
+    // Each of these is a plausible mistype, and each one Number() turns into a
+    // number that is nothing like what was meant: 16, 1000, 1000.
+    expect(parsePriceEuros("0x10")).toBeNull();
+    expect(parsePriceEuros("1e3")).toBeNull();
+    expect(parsePriceEuros("1e400")).toBeNull();
+    expect(parsePriceEuros("Infinity")).toBeNull();
+    expect(parsePriceEuros("12 50")).toBeNull();
+    expect(parsePriceEuros("12€")).toBeNull();
+  });
+
+  it("still takes the sloppy but unambiguous forms", () => {
+    expect(parsePriceEuros(",5")).toBe(50);
+    expect(parsePriceEuros("12.")).toBe(1200);
   });
 
   it("refuses a value that is not a string at all", () => {

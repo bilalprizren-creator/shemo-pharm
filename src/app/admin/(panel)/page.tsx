@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  BookOpen,
   Inbox,
   Package,
   ShoppingBag,
@@ -17,6 +18,8 @@ interface Stats {
   hidden_products: number;
   unread_messages: number;
   open_orders: number;
+  catalog_sections: number;
+  unplaced_products: number;
 }
 
 export default async function AdminDashboardPage() {
@@ -29,7 +32,9 @@ export default async function AdminDashboardPage() {
       (SELECT count(*) FROM products)::int                                              AS products,
       (SELECT count(*) FROM products WHERE hidden)::int                                 AS hidden_products,
       (SELECT count(*) FROM contact_messages WHERE NOT is_read)::int                    AS unread_messages,
-      (SELECT count(*) FROM orders WHERE NOT is_handled)::int                           AS open_orders
+      (SELECT count(*) FROM orders WHERE NOT is_handled)::int                           AS open_orders,
+      (SELECT count(*) FROM catalog_sections)::int                                      AS catalog_sections,
+      (SELECT count(*) FROM products WHERE catalog_section_id IS NULL)::int             AS unplaced_products
   `) as Stats[];
 
   const cards = [
@@ -58,6 +63,14 @@ export default async function AdminDashboardPage() {
       highlight: false,
     },
     {
+      href: "/admin/katalogu",
+      label: "Produkte pa seksion",
+      value: stats.unplaced_products,
+      hint: `${stats.catalog_sections} seksione në katalogun e shtypur`,
+      icon: BookOpen,
+      highlight: false,
+    },
+    {
       href: "/admin/mesazhet",
       label: "Mesazhe të palexuara",
       value: stats.unread_messages,
@@ -76,7 +89,7 @@ export default async function AdminDashboardPage() {
         Menaxhoni kërkesat e klientëve B2B, katalogun e produkteve dhe mesazhet.
       </p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((c) => (
           <Link
             key={c.href}

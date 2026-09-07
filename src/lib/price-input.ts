@@ -17,14 +17,26 @@
  */
 const MAX_EUROS = 1_000_000;
 
+/**
+ * Plain decimal notation and nothing else.
+ *
+ * Number() is far too willing on its own: it reads "0x10" as 16, "1e3" as 1000
+ * and "" as 0. Those are all things a slip of the hand produces at a keyboard,
+ * and none of them is a price anybody meant to type — a field that turns "1e3"
+ * into a thousand euros without comment is worse than one that refuses it.
+ * Anchored, so a stray character anywhere rejects the whole string.
+ */
+const DECIMAL = /^(\d+(\.\d*)?|\.\d+)$/;
+
 /** Euros as typed → cents, or null when the input is not a price. */
 export function parsePriceEuros(raw: unknown): number | null {
   if (typeof raw !== "string") return null;
   const text = raw.trim().replace(",", ".");
-  // Number("") is 0, so the blank has to be caught before the conversion.
-  if (!text) return null;
+  // Rejects the blank, the negative and the exponent in one go, so only the
+  // ceiling is left to check.
+  if (!DECIMAL.test(text)) return null;
   const euros = Number(text);
-  if (!Number.isFinite(euros) || euros < 0 || euros > MAX_EUROS) return null;
+  if (!Number.isFinite(euros) || euros > MAX_EUROS) return null;
   // The same rounding the full product form does, so the two routes into
   // price_cents cannot disagree about what "12.345" is worth.
   return Math.round(euros * 100);

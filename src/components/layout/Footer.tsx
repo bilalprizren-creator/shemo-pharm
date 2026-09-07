@@ -12,6 +12,7 @@ import { InstagramIcon } from "@/components/icons/InstagramIcon";
 const NAV_PATHS = [
   { href: "/", key: "home" },
   { href: "/produktet", key: "products" },
+  { href: "/katalog", key: "catalog" },
   { href: "/markat", key: "brands" },
   { href: "/oferta", key: "offers" },
   { href: "/kategorite", key: "categories" },

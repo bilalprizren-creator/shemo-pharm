@@ -28,6 +28,7 @@ import { SearchBar } from "./SearchBar";
 import { MobileNav } from "./MobileNav";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 import { useCart } from "@/components/cart/CartProvider";
+import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 
 export interface NavCategory {
   slug: string;
@@ -39,6 +40,12 @@ export interface NavCategory {
 
 const NAV_PATHS = [
   { href: "/produktet", key: "products" },
+  // Its own rubric rather than a footer link: the printed catalogue is how
+  // partners holding the paper edition navigate, and it answers a different
+  // question from /produktet — "what is on section 6.7" rather than "show me
+  // everything filterable". It also lives on its own domain, which nobody
+  // discovers from a shop that never mentions it.
+  { href: "/katalog", key: "catalog" },
   { href: "/markat", key: "brands" },
   { href: "/oferta", key: "offers" },
   { href: "/rreth-nesh", key: "about" },
@@ -404,14 +411,17 @@ export function HeaderClient({
                             href={langHref(lang, `/kategorite/${c.slug}`)}
                             className="group flex h-full items-center gap-3 rounded-2xl border border-ink-900/6 bg-surface p-3 transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-white hover:shadow-card"
                           >
-                            <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-ink-900/6">
+                            <PhotoWell
+                              className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-ink-900/6"
+                              cutOut={photoPresentation(c.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
+                            >
                               {c.image ? (
                                 <Image
                                   src={c.image}
                                   alt=""
                                   fill
                                   sizes="56px"
-                                  className="object-contain p-1.5 transition-transform duration-300 group-hover:scale-110"
+                                  className={`${photoPresentation(c.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).className} transition-transform duration-300 group-hover:scale-110`}
                                 />
                               ) : (
                                 <Package
@@ -420,7 +430,7 @@ export function HeaderClient({
                                   aria-hidden
                                 />
                               )}
-                            </span>
+                            </PhotoWell>
                             <span className="min-w-0">
                               {/* Two lines for the long names — "Kozmetikë dhe
                                   kujdes personal" used to be cut mid-word */}

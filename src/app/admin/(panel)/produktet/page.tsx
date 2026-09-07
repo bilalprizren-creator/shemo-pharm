@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Eye, EyeOff, Plus, Search, Star } from "lucide-react";
+import { redirect } from "next/navigation";
+import { BookOpen, BookX, Eye, EyeOff, Plus, Search, Star } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { listAdminProducts } from "@/lib/admin-data";
 import { toggleProductFlagAction } from "@/lib/admin-actions";
@@ -28,6 +29,17 @@ const VISIBILITY_OPTIONS = [
   { value: "e-fshehur", label: "E fshehur" },
 ] as const;
 
+// Placement in the printed catalogue, which is not the same question as
+// visibility: "pa seksion" products appear on shemo-katalog.com only under
+// /te-gjitha, never in a numbered section. Visibility there is filtered with
+// VISIBILITY_OPTIONS again, under its own key — the two sites are hidden
+// separately, so they are filtered separately.
+const SECTION_OPTIONS = [
+  { value: "", label: "Të gjitha" },
+  { value: "me-seksion", label: "Me seksion" },
+  { value: "pa-seksion", label: "Pa seksion" },
+] as const;
+
 function pick<T extends string>(
   raw: string | undefined,
   options: readonly { readonly value: T }[]
@@ -43,6 +55,8 @@ export default async function AdminProductsPage({
     faqja?: string;
     stoku?: string;
     dukshmeria?: string;
+    katalogu?: string;
+    seksioni?: string;
   }>;
 }) {
   await requireAdmin();
@@ -50,27 +64,45 @@ export default async function AdminProductsPage({
   const query = sp.kerko?.trim() ?? "";
   const stock = pick(sp.stoku, STOCK_OPTIONS);
   const visibility = pick(sp.dukshmeria, VISIBILITY_OPTIONS);
-  const page = Math.max(1, Number(sp.faqja) || 1);
-  const filtering = query !== "" || stock !== "" || visibility !== "";
-
-  const { rows, total } = await listAdminProducts({
-    query,
-    stock,
-    visibility,
-    page,
-    perPage: PER_PAGE,
-  });
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const catalogVisibility = pick(sp.katalogu, VISIBILITY_OPTIONS);
+  const section = pick(sp.seksioni, SECTION_OPTIONS);
+  // Math.floor as well as the clamp: "faqja=2.5" would otherwise offset by a
+  // page and a half and label the result "Faqja 2.5".
+  const page = Math.max(1, Math.floor(Number(sp.faqja)) || 1);
+  const filtering =
+    query !== "" ||
+    stock !== "" ||
+    visibility !== "" ||
+    catalogVisibility !== "" ||
+    section !== "";
 
   const pageHref = (p: number) => {
     const params = new URLSearchParams();
     if (query) params.set("kerko", query);
     if (stock) params.set("stoku", stock);
     if (visibility) params.set("dukshmeria", visibility);
+    if (catalogVisibility) params.set("katalogu", catalogVisibility);
+    if (section) params.set("seksioni", section);
     if (p > 1) params.set("faqja", String(p));
     const qs = params.toString();
     return `/admin/produktet${qs ? `?${qs}` : ""}`;
   };
+
+  const { rows, total } = await listAdminProducts({
+    query,
+    stock,
+    visibility,
+    catalogVisibility,
+    section,
+    page,
+    perPage: PER_PAGE,
+  });
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  // Past the last page there is nothing to show and — since "Mbrapa" only steps
+  // back one — no comfortable way back either. Land on the last real page
+  // instead of an empty table.
+  if (page > totalPages) redirect(pageHref(totalPages));
 
   return (
     <div>
@@ -109,7 +141,7 @@ export default async function AdminProductsPage({
         and puts both selects back to "Të gjitha".
       */}
       <form
-        key={`${query}|${stock}|${visibility}`}
+        key={`${query}|${stock}|${visibility}|${catalogVisibility}|${section}`}
         action="/admin/produktet"
         method="get"
         role="search"
@@ -133,9 +165,21 @@ export default async function AdminProductsPage({
             { name: "stoku", label: "Stoku", value: stock, options: STOCK_OPTIONS },
             {
               name: "dukshmeria",
-              label: "Dukshmëria",
+              label: "Dyqani",
               value: visibility,
               options: VISIBILITY_OPTIONS,
+            },
+            {
+              name: "katalogu",
+              label: "Katalogu",
+              value: catalogVisibility,
+              options: VISIBILITY_OPTIONS,
+            },
+            {
+              name: "seksioni",
+              label: "Seksioni",
+              value: section,
+              options: SECTION_OPTIONS,
             },
           ]}
         />
@@ -148,7 +192,7 @@ export default async function AdminProductsPage({
       </form>
 
       <div className="mt-4 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[940px] text-left text-sm">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
               <th className="px-4 py-3 font-semibold">Produkti</th>
@@ -156,15 +200,19 @@ export default async function AdminProductsPage({
               <th className="px-4 py-3 font-semibold">Çmimi</th>
               <th className="px-4 py-3 font-semibold">Stoku</th>
               <th className="px-4 py-3 font-semibold text-center">Kryesor</th>
-              <th className="px-4 py-3 font-semibold text-center">Dukshmëria</th>
+              <th className="px-4 py-3 font-semibold text-center">Dyqani</th>
+              <th className="px-4 py-3 font-semibold text-center">Katalogu</th>
             </tr>
           </thead>
           <tbody>
+            {/* Dimmed only when the product is nowhere to be seen. Hidden in one
+                site and shown in the other is a normal state now, and the two
+                buttons on the right say which is which. */}
             {rows.map((p) => (
               <tr
                 key={p.id}
                 className={`border-b border-ink-900/4 last:border-0 ${
-                  p.hidden ? "opacity-55" : ""
+                  p.hidden && p.catalogHidden ? "opacity-55" : ""
                 }`}
               >
                 <td className="max-w-[320px] px-4 py-2.5">
@@ -227,14 +275,40 @@ export default async function AdminProductsPage({
                     <button
                       type="submit"
                       className="rounded-full p-1.5 hover:bg-tint"
-                      title={p.hidden ? "Shfaqe në faqe" : "Fshihe nga faqja"}
+                      title={p.hidden ? "Shfaqe në dyqan" : "Fshihe nga dyqani"}
                     >
                       {p.hidden ? (
                         <EyeOff className="size-4 text-red-500" aria-hidden />
                       ) : (
                         <Eye className="size-4 text-ink-400" aria-hidden />
                       )}
-                      <span className="sr-only">{p.hidden ? "E fshehur" : "E dukshme"}</span>
+                      <span className="sr-only">
+                        {p.hidden ? "E fshehur në dyqan" : "E dukshme në dyqan"}
+                      </span>
+                    </button>
+                  </form>
+                </td>
+                <td className="px-4 py-2.5 text-center">
+                  <form action={toggleProductFlagAction} className="inline">
+                    <input type="hidden" name="id" value={p.id} />
+                    <input type="hidden" name="flag" value="catalogHidden" />
+                    <button
+                      type="submit"
+                      className="rounded-full p-1.5 hover:bg-tint"
+                      title={
+                        p.catalogHidden
+                          ? "Shfaqe në katalogun e shtypur"
+                          : "Fshihe nga katalogu i shtypur"
+                      }
+                    >
+                      {p.catalogHidden ? (
+                        <BookX className="size-4 text-red-500" aria-hidden />
+                      ) : (
+                        <BookOpen className="size-4 text-ink-400" aria-hidden />
+                      )}
+                      <span className="sr-only">
+                        {p.catalogHidden ? "Jashtë katalogut" : "Në katalog"}
+                      </span>
                     </button>
                   </form>
                 </td>
@@ -242,7 +316,7 @@ export default async function AdminProductsPage({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-ink-400">
+                <td colSpan={7} className="px-4 py-10 text-center text-ink-400">
                   Asnjë produkt nuk përputhet me kërkimin dhe filtrat.
                 </td>
               </tr>
