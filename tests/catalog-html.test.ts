@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCatalog, skuCandidates } from "../scripts/lib/catalog-html.mjs";
+import { parseCatalog, skuCandidates, skuKeys } from "../scripts/lib/catalog-html.mjs";
 
 /**
  * The reader for the old hand-written shemo-katalog.com.
@@ -120,5 +120,30 @@ describe("skuCandidates", () => {
 
   it("ignores surrounding whitespace", () => {
     expect(skuCandidates("  0445RR ,F  ")).toContain("0445RR");
+  });
+});
+
+/**
+ * The key the old site's photos and our products are matched on. Both sides
+ * write the same code differently — "4517 , 4533" here, "4517,4533" there,
+ * "8448." with a period only on ours — and the match has to survive that.
+ */
+describe("skuKeys", () => {
+  it("keys a multi-code cell under the whole cell and under each code", () => {
+    expect(skuKeys("4517 , 4533")).toEqual(expect.arrayContaining(["4517,4533", "4517", "4533"]));
+  });
+
+  it("drops a trailing period or comma, which is how our side writes some codes", () => {
+    expect(skuKeys("8448.")).toContain("8448");
+    expect(skuKeys("5506,")).toContain("5506");
+  });
+
+  it("lower-cases, and expands variant letters the way skuCandidates does", () => {
+    expect(skuKeys("0023A, B, C, D, E")).toContain("0023c");
+  });
+
+  it("has no keys for an empty code, so an empty code never matches anything", () => {
+    expect(skuKeys("")).toEqual([]);
+    expect(skuKeys(null)).toEqual([]);
   });
 });

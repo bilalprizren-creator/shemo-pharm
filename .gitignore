@@ -52,3 +52,9 @@ audit/thumbs/
 # in the database now and data/ no longer exists, but the entry stays so an old
 # checkout or a script writing there can never commit customer data.
 data/
+
+# The old catalogue site's product photos: 390 MB of remove.bg cut-outs that
+# scripts/fetch-katalog-images.mjs downloads and scripts/cutout-images.mjs reads
+# as an alpha source. Re-fetched in minutes; the cuts made from them under
+# public/products ARE committed.
+sources/

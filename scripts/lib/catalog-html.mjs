@@ -87,3 +87,26 @@ export function skuCandidates(raw) {
   }
   return [...found];
 }
+
+/** An article code as a key both sides can agree on: lower-case, no whitespace. */
+export const skuKey = (s) => String(s ?? "").toLowerCase().replace(/\s+/g, "");
+
+/**
+ * Every key a code could be filed under: the whole code first, then each code a
+ * multi-code cell stands for — and each of those again with a trailing "." or
+ * "," taken off, which is how "8448." and "5506," are written on our side.
+ *
+ * Both sides use it: an index files every cell under all of its keys (first
+ * writer wins), a lookup takes the first key of the product's own code that
+ * hits. An empty code has no keys and so never matches anything.
+ */
+export function skuKeys(raw) {
+  const out = new Set();
+  for (const c of skuCandidates(String(raw ?? ""))) {
+    const k = skuKey(c);
+    out.add(k);
+    out.add(k.replace(/[.,]+$/, ""));
+  }
+  out.delete("");
+  return [...out];
+}

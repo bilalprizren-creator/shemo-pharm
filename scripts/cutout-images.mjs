@@ -4,6 +4,7 @@
  *   node scripts/cutout-images.mjs                 # writes images + report, no DB
  *   node scripts/cutout-images.mjs --limit 40      # a sample, for eyeballing
  *   node scripts/cutout-images.mjs --write         # also updates the DB and products.json
+ *   node scripts/cutout-images.mjs --katalog       # recut from the old catalogue's cut-outs, where they beat the fill
  *   DATABASE_TARGET=production node scripts/cutout-images.mjs --write
  *
  * Why this is needed: scripts/migrate-images.mjs deliberately did
@@ -12,14 +13,21 @@
  * product cards that is invisible; on any tinted surface — which the catalogue
  * site uses — each photo reads as a white box.
  *
- * Two sources, in order of trust:
+ * Three sources, in order of trust:
  *
  *   1. The Jara Pharmacy project still holds 1 484 of these products as
  *      `shemo-<code>-*-original.png` WITH their original alpha channel — the
  *      background-removed files the old catalogue used. Where one exists, its
  *      alpha is authoritative and nothing is guessed.
  *
- *   2. Otherwise the white background is flood-filled from the border. Flood
+ *   2. The old catalogue site's own photos, saved by
+ *      scripts/fetch-katalog-images.mjs under sources/shemo-katalog/: the
+ *      remove.bg files shemo-katalog.com was laid out from, ~500 px RGBA with
+ *      nothing behind the product. Used where Jara has nothing usable. They
+ *      are the same photographs the WordPress originals were made from, so no
+ *      resolution is lost — only the flattening is undone.
+ *
+ *   3. Otherwise the white background is flood-filled from the border. Flood
  *      fill rather than "every white pixel becomes transparent": the latter
  *      eats the white of a white box, a gauze pad or a label, which is most of
  *      a pharmacy range. Reliable here because migrate-images.mjs already
@@ -45,6 +53,8 @@ import {
 import path from "node:path";
 import sharp from "sharp";
 import { connect, describeTarget, ROOT, dataPath } from "./lib/db.mjs";
+import { skuKeys } from "./lib/catalog-html.mjs";
+import { reframe } from "./lib/reframe.mjs";
 
 const argv = process.argv.slice(2);
 const WRITE = argv.includes("--write");
@@ -91,8 +101,23 @@ function skuKeyRaw(s) {
   return String(s ?? "").toLowerCase().replace(/\s+/g, "");
 }
 
+/**
+ * Recut every product the old catalogue site can do better than the fill.
+ *
+ * Exactly that set and nothing else: the site holds a real cut-out for the
+ * code, the product is not a picture (SCENE_PHOTOS), and Jara has nothing
+ * usable for it — so what it ships today is a flood fill or a flat original.
+ * A product with a usable Jara file keeps its Jara cut. Implies --recut for
+ * the set it selects, combines with --only, and can be run again: a cut that
+ * comes out byte for byte as the one served is reported as unchanged, not
+ * written under a new name.
+ */
+const KATALOG = argv.includes("--katalog");
+
 const JARA = "C:/calude code/Jara pharmcay/public/products";
 const OUT = path.join(ROOT, "public/products");
+const KATALOG_DIR = path.join(ROOT, "sources/shemo-katalog");
+const KATALOG_MANIFEST = path.join(KATALOG_DIR, "manifest.json");
 
 // Same constants migrate-images.mjs framed the originals with, so a re-cut
 // photo lands in exactly the same place in the grid as the one it replaces.
@@ -119,6 +144,16 @@ const QUALITY = 82;
  */
 const MIN_SPAN = 0.8; // opaque bounding box, as a share of the canvas
 const MIN_INK = 0.06; // opaque pixels, as a share of the canvas
+
+/**
+ * How much of a katalog photo must be clear, and how much must not be.
+ *
+ * `isOpaque` catches the screenshot that was pasted in with a full alpha
+ * channel (5225, alpha 255 edge to edge). This catches the alpha that is real
+ * but says almost nothing, or almost everything: a remove.bg result is never
+ * under 2% clear and never under 2% ink.
+ */
+const MIN_CLEAR = 0.02;
 
 /**
  * How much of the product the layer passes are allowed to take.
@@ -167,6 +202,13 @@ const MIN_LAYER_KEEP = 0.7;
  * So this is eyes, not arithmetic: rendered on the tinted card and looked at.
  * They keep their original photo, and PhotoWell puts an uncut photo on plain
  * white, where its white rectangle is invisible.
+ *
+ * The list speaks to the fill and to nothing else. A cut made from a real
+ * alpha channel — Jara's, or the old catalogue site's — never reaches the test
+ * at the call site, because it is the fill that destroys these products, not
+ * the cut. Twenty-two of the codes below are white cartons the old site holds
+ * as clean remove.bg files; --katalog is what gives them the cut this list
+ * had to deny.
  */
 const KEEP_FLAT = new Set([
   // A backdrop slab survives the undo.
@@ -246,8 +288,7 @@ const SCENE_PHOTOS = new Set([
   "8705", "8704", "8221", "8511", "8514", "0346", "8004",
 
   // A coloured or patterned studio backdrop.
-  "4405", "4979", "5175", "4116", "9850", "2068", "1707", "2043", "7182",
-  "6012", "0140", "7781",
+  "4405", "4979", "5175", "4116", "2068", "1707", "2043", "6012", "7781",
 
   // A branded pattern behind a children's line.
   "3063", "3039", "3040", "3058", "3059", "3060", "3062", "3066", "3037",
@@ -262,15 +303,22 @@ const SCENE_PHOTOS = new Set([
   "2318",
 
   // A photographed scene or surface — marble, foliage, a table, a beach.
-  "7066", "2770", "7472", "7473", "7011", "9462", "9828", "9482", "2307",
-  "2308", "2309",
+  "7066", "2770", "7472", "7473", "7011", "9462", "2307", "2308", "2309",
   // Moved from KEEP_FLAT 2026-09-07 (see there): the SOS sprays on a plinth
-  // among leaves, the Dulcolax model, the corset on a model, water on a
-  // mattress.
-  "2316", "2317", "1591", "8523", "8620",
+  // among leaves, the corset on a model, water on a mattress.
+  "2316", "2317", "8523", "8620",
 
   // Studio grey, where the product sits on a shot floor rather than on white.
-  "8395", "0445", "0421", "0427", "1095", "1070", "1502", "9813", "5032",
+  "8395", "0445", "0421", "0427", "1095",
+
+  // Ten codes left this list on 2026-09-07 because the old catalogue site
+  // holds a packshot for them — a clean cut-out, or the product on plain white
+  // — and in a catalogue a packshot beats a picture: Rosix 9850, Oligovit
+  // 9828, OVA-Vit 9482, Diklofen 1070, Acetazolamide 1502, Defrinol 9813, the
+  // urine bag 5032, the Dulcolax pack 1591, Turmeric 0140, Alpenwell Calcium
+  // 7182. Two stayed although the site has them too: the posture corrector
+  // 0346 is a model shot there as well, and the mattress 8620 is the same
+  // picture on white.
 ]);
 
 /**
@@ -305,6 +353,42 @@ const SCENE_PHOTOS = new Set([
  * away. They keep the cut-out they already had, slab and all. Clearing those
  * needs a hand or a re-shoot, not a better number.
  */
+/**
+ * Products --katalog leaves alone although the old site has a photo for them.
+ *
+ * Read off the before/after sheets of the first full run (298 pairs,
+ * 2026-09-07). The old site is a printed catalogue, and a printed catalogue
+ * is allowed things a product card is not: one photo of the whole Labello
+ * range under every flavour, Batman and Spiderman side by side under each,
+ * the three Stitch kits under one code. A card wants the one product it is
+ * about, and for these ours already is that. A few are the other way round —
+ * the old site's photo is a different article (gloves of another brand, blue
+ * masks for the black ones, blue caps for the white) — and one multi-code
+ * product of ours ("9606, 9607, 9608", interdental brushes) matched the site's
+ * single 9606, which is a collagen box. Two the white-photo fill got wrong:
+ * the WC seat riser 8832 is white on white and came apart, and the clog NT-044
+ * kept a grey slab. 5225 came out the same as it already was.
+ *
+ * Keyed with skuKey, like everything here. --only still cuts them, on purpose:
+ * this list says what the automatic run must not decide, not what nobody may.
+ */
+const KATALOG_SKIP = new Set(
+  [
+    // the fill on the site's white photo made it worse
+    "8832", "NT-044",
+    // the same as it already was
+    "5225",
+    // a group or a pair where a card wants one product
+    "3036", "7663", "7664", "4692", "4694", "6050", "9617", "9622", "3097",
+    "3107", "5062", "5063",
+    "4698", "4699", "4996", "4995", "5000", "4997",
+    // a different article on the old site
+    "4524", "4523", "4522", "4527", "4971", "4957", "4960",
+    // our multi-code matched a single code that is something else there
+    "9606, 9607, 9608",
+  ].map((s) => s.toLowerCase().replace(/\s+/g, ""))
+);
+
 const BACKDROP_REVIEWED = [
   // Cleared, and the slab measured afterwards at under 2% of the ink: Bio
   // Hanfol 2111 went from 80% grey to 0.2%, the cod liver oil 0139 from 66% to
@@ -866,6 +950,112 @@ function jaraIndex() {
   return byCode;
 }
 
+/**
+ * The old catalogue site's photos, keyed the way parseCatalog() read them off
+ * the page — by the article code in the cell, never by filename, and under
+ * every key a multi-code cell stands for. An absent manifest is an empty map,
+ * and the script then behaves exactly as it did before there was a second
+ * source.
+ */
+function katalogIndex() {
+  if (!existsSync(KATALOG_MANIFEST)) return new Map();
+  const { entries } = JSON.parse(readFileSync(KATALOG_MANIFEST, "utf8"));
+  const byCode = new Map();
+  for (const e of entries) {
+    if (e.status !== "ok") continue;
+    for (const k of skuKeys(e.sku)) if (!byCode.has(k)) byCode.set(k, e);
+  }
+  return byCode;
+}
+
+const katalogFor = (sku) => {
+  for (const k of skuKeys(sku)) {
+    const e = katalog.get(k);
+    if (e) return e;
+  }
+  return null;
+};
+
+/**
+ * What a katalog photo is good for.
+ *
+ *   "alpha" — a real cut-out, used as it is;
+ *   "white" — an opaque packshot on plain white (7182 is a JPEG, 0140 a
+ *             screenshot), which the same flood fill that cut our originals
+ *             cuts just as well, because it is the same kind of file our
+ *             originals were — only ours, for these, is the marketing picture;
+ *   null    — a picture on a coloured ground, an alpha that says nothing, or
+ *             nothing on disk.
+ *
+ * Corners decide "white": all four within WHITE_MIN of pure white. Memoised;
+ * the opaque ones need a decode.
+ */
+const katalogModeMemo = new Map();
+async function katalogMode(e) {
+  if (!e || !e.file) return null;
+  const file = path.join(KATALOG_DIR, e.file);
+  if (!existsSync(file)) return null;
+  const clear = (e.transparentPct ?? 0) / 100;
+  if (!e.opaque && clear >= MIN_CLEAR && clear <= 1 - MIN_CLEAR) return "alpha";
+  if (!katalogModeMemo.has(file)) {
+    const { data, info } = await sharp(file)
+      .toColourspace("srgb")
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width: w, height: h, channels: c } = info;
+    const white = (x, y) => {
+      const i = (y * w + x) * c;
+      return Math.min(data[i], data[i + 1], data[i + 2]) >= WHITE_MIN;
+    };
+    const corners = white(1, 1) && white(w - 2, 1) && white(1, h - 2) && white(w - 2, h - 2);
+    katalogModeMemo.set(file, corners ? "white" : null);
+  }
+  return katalogModeMemo.get(file);
+}
+
+/**
+ * Having an alpha channel is not the same as having a transparent background:
+ * a good number of Jara's PNGs carry alpha that is opaque edge to edge, because
+ * those photos were never background-removed. Trusting the filename alone
+ * leaves their backdrop baked in. Memoised, because --katalog needs the answer
+ * before the loop decides whether a product is its business at all.
+ */
+const jaraUsableMemo = new Map();
+async function jaraUsable(sku) {
+  const k = skuKey(sku);
+  if (!jaraUsableMemo.has(k)) {
+    const f = jara.get(k);
+    jaraUsableMemo.set(k, Boolean(f) && !(await sharp(path.join(JARA, f)).stats()).isOpaque);
+  }
+  return jaraUsableMemo.get(k);
+}
+
+/**
+ * Where a new cut goes: the first name after the one the product serves —
+ * -cutout, then -v2, -v3… — that is either free or already holds these exact
+ * bytes.
+ *
+ * Never lower than the served version and never over a different file:
+ * --prune may have deleted -cutout.webp under a -v2, and writing under that
+ * old URL hands next/image's month-long cache its stale variants back; a
+ * -cutout.webp still on disk beside a reverted KEEP_FLAT product was served
+ * once too. Reusing a name that holds the same bytes is what lets a run
+ * without --write be followed by one with it: the second run finds the file
+ * the first one wrote instead of minting a -v4 for it.
+ */
+function placeCut(stem, servedVersion, out) {
+  for (let v = servedVersion + 1; ; v++) {
+    const name = v === 1 ? `${stem}-cutout.webp` : `${stem}-cutout-v${v}.webp`;
+    const file = path.join(OUT, name);
+    if (!existsSync(file)) {
+      writeFileSync(file, out);
+      return name;
+    }
+    if (readFileSync(file).equals(out)) return name;
+  }
+}
+
 const sqlEarly = PRUNE ? connect() : null;
 
 /**
@@ -914,6 +1104,8 @@ if (PRUNE) {
 
 const jara = jaraIndex();
 console.log(`Jara cut-outs available: ${jara.size}`);
+const katalog = katalogIndex();
+console.log(`katalog cut-outs available: ${katalog.size}`);
 console.log(`target: ${describeTarget()}`);
 
 const sql = connect();
@@ -928,17 +1120,32 @@ const rejected = [];
 const cameApart = [];
 const reverted = [];
 const scenes = [];
+const unchanged = [];
+const leftAlone = {}; // --katalog: why a product was not its business, and how many
 
 let i = 0;
 for (const p of products) {
   if (i >= LIMIT) break;
   if (ONLY && !ONLY.has(skuKey(p.sku))) continue;
+  if (KATALOG) {
+    const e = katalogFor(p.sku);
+    let why = null;
+    if (!e) why = "no katalog photo";
+    else if (!(await katalogMode(e))) why = "katalog photo on a coloured ground, or opaque";
+    else if (SCENE_PHOTOS.has(String(p.sku ?? "").trim())) why = "a picture";
+    else if (KATALOG_SKIP.has(skuKey(p.sku))) why = "reviewed, ours is the better card";
+    else if (await jaraUsable(p.sku)) why = "Jara has it";
+    if (why) {
+      leftAlone[why] = (leftAlone[why] ?? 0) + 1;
+      continue;
+    }
+  }
   let current = p.images[0];
   let stem = path.basename(current, path.extname(current));
   // `-cutout-v2` and any later revision, not just the first cut.
   const cutSuffix = stem.match(/-cutout(-v\d+)?$/);
   if (cutSuffix) {
-    if (!RECUT && !ONLY) {
+    if (!RECUT && !ONLY && !KATALOG) {
       skipped.push({ ...p, why: "already a cut-out" });
       continue;
     }
@@ -953,6 +1160,15 @@ for (const p of products) {
       continue;
     }
   }
+  // A picture that has since been struck off SCENE_PHOTOS, because the old
+  // site turned out to hold a packshot for it, starts from its original like
+  // any other product: the scene file is the trimmed picture, and nothing is
+  // to be cut from that. A picture still on the list keeps its stem — the
+  // scene branch below re-trims it in place, under the same name.
+  if (stem.endsWith("-scene") && !SCENE_PHOTOS.has(String(p.sku ?? "").trim())) {
+    stem = stem.slice(0, -"-scene".length);
+    current = `/products/${stem}.webp`;
+  }
   const source = path.join(OUT, path.basename(current));
   if (!existsSync(source)) {
     skipped.push({ sku: p.sku, name: p.name, why: `missing file ${current}` });
@@ -963,7 +1179,7 @@ for (const p of products) {
   // pay that again for work already on disk. A file that is already there is
   // reused; --force recuts everything.
   const outPathEarly = path.join(OUT, `${stem}-cutout.webp`);
-  if (!FORCE && !RECUT && !ONLY && existsSync(outPathEarly)) {
+  if (!FORCE && !RECUT && !ONLY && !KATALOG && existsSync(outPathEarly)) {
     done.push({
       id: p.id,
       sku: p.sku,
@@ -1035,20 +1251,30 @@ for (const p of products) {
   let offY = 0;
   let mark;
 
-  // Having an alpha channel is not the same as having a transparent
-  // background: a good number of Jara's PNGs carry alpha that is opaque
-  // edge to edge, because those photos were never background-removed. Trusting
-  // the filename alone leaves their backdrop baked in.
-  const jaraUsable =
-    jaraFile && !(await sharp(path.join(JARA, jaraFile)).stats()).isOpaque;
-
-  if (jaraUsable) {
+  const katalogEntry = katalogFor(p.sku);
+  const katalogHas = await katalogMode(katalogEntry);
+  if (await jaraUsable(p.sku)) {
     origin = "jara";
     ({ mark } = await reframeTransparent(path.join(JARA, jaraFile)));
+  } else if (katalogHas === "alpha") {
+    origin = "katalog";
+    ({ mark } = await reframeTransparent(path.join(KATALOG_DIR, katalogEntry.file)));
   } else {
-    origin = jaraFile ? "floodfill (jara opaque)" : "floodfill";
-    const meta = await sharp(source).metadata();
-    const buf = await sharp(source).ensureAlpha().raw().toBuffer();
+    // The old site's packshot on plain white, framed exactly as
+    // migrate-images.mjs framed ours, is a better thing to fill than our own
+    // file when ours is the marketing picture (7182: the tube on an orange
+    // sweep). Same fill, cleaner start. Otherwise the fill works on what we have.
+    const white = katalogHas === "white";
+    const input = white ? (await reframe(path.join(KATALOG_DIR, katalogEntry.file))).webp : source;
+    origin = white
+      ? "katalog (white, filled)"
+      : jaraFile
+        ? "floodfill (jara opaque)"
+        : katalogEntry
+          ? "floodfill (katalog opaque)"
+          : "floodfill";
+    const meta = await sharp(input).metadata();
+    const buf = await sharp(input).ensureAlpha().raw().toBuffer();
     let span;
     let ink;
     ({
@@ -1062,8 +1288,10 @@ for (const p of products) {
     ));
 
     // The safety net. A photo that failed it keeps the white background it has.
-    // KEEP_FLAT is the reviewed half of the same decision, for the slabs no
-    // measurement separates from an honest rescue.
+    // KEEP_FLAT is the reviewed half of the fill's decision, for the slabs no
+    // measurement separates from an honest rescue — the fill's and nobody
+    // else's: a cut from a real alpha channel took a branch above and never
+    // arrives here.
     // MIN_SPAN only means damage while the frame is still the whole photo. Once
     // a slab has come off, the product is the frame, and it is smaller than 86%
     // for the right reason — a 15g tube of Belogent shot on a lit backdrop is
@@ -1154,11 +1382,11 @@ for (const p of products) {
    * just as much to the second cut as it did to the first — recutting
    * `…-cutout.webp` in place would fix nothing anybody can see until the cache
    * expires. `-v2` is what makes it visible, and the DB write below is what
-   * points the product at it.
+   * points the product at it. Which name is next is placeCut()'s business —
+   * the first one after the served version, and not always -v2.
    */
-  const revised = Boolean(cutSuffix);
-  const outName = revised ? `${stem}-cutout-v2.webp` : `${stem}-cutout.webp`;
-  await sharp({
+  const served = !cutSuffix ? 0 : cutSuffix[1] ? Number(cutSuffix[1].slice(2)) : 1;
+  const out = await sharp({
     create: {
       width: CANVAS,
       height: CANVAS,
@@ -1168,13 +1396,24 @@ for (const p of products) {
   })
     .composite([{ input: mark, gravity: "centre" }])
     .webp({ quality: QUALITY, alphaQuality: 100 })
-    .toFile(path.join(OUT, outName));
+    .toBuffer();
+
+  // Same source, same pixels: a second run must not mint a new name for a file
+  // that is byte for byte what the product already serves.
+  const servedFile = path.join(OUT, path.basename(p.images[0]));
+  if (cutSuffix && existsSync(servedFile) && readFileSync(servedFile).equals(out)) {
+    unchanged.push({ sku: p.sku, name: p.name, origin });
+    i++;
+    continue;
+  }
+  const outName = placeCut(stem, served, out);
 
   const record = {
     id: p.id,
     sku: p.sku,
     name: p.name,
     from: current,
+    was: p.images[0],
     to: `/products/${outName}`,
     origin,
     clearedPct,
@@ -1201,15 +1440,26 @@ for (const p of products) {
 }
 
 const fromJara = done.filter((d) => d.origin === "jara").length;
+const fromKatalogAlpha = done.filter((d) => d.origin === "katalog").length;
+const fromKatalogWhite = done.filter((d) => d.origin === "katalog (white, filled)").length;
+const fromKatalog = fromKatalogAlpha + fromKatalogWhite;
 const reused = done.filter((d) => d.origin === "reused").length;
 console.log(`\ncut out    ${done.length}`);
-console.log(`  from Jara alpha   ${fromJara}`);
-console.log(`  flood-filled      ${done.length - fromJara - reused}`);
-console.log(`  reused on disk    ${reused}`);
-console.log(`  backdrop remains  ${flagged.length}`);
+console.log(`  from Jara alpha     ${fromJara}`);
+console.log(`  from katalog alpha  ${fromKatalogAlpha}`);
+console.log(`  katalog, filled     ${fromKatalogWhite}`);
+console.log(`  flood-filled        ${done.length - fromJara - fromKatalog - reused}`);
+console.log(`  reused on disk      ${reused}`);
+console.log(`  backdrop remains    ${flagged.length}`);
 console.log(`kept white ${rejected.length} (cut-out would have eaten the product)`);
 console.log(`scenes     ${scenes.length} (trimmed, shown full bleed)`);
+console.log(`unchanged  ${unchanged.length} (identical to what is served)`);
 console.log(`skipped    ${skipped.length}`);
+if (KATALOG) {
+  for (const [why, n] of Object.entries(leftAlone)) {
+    console.log(`left alone ${String(n).padStart(5)}  ${why}`);
+  }
+}
 
 /* ------------------------------------------------------------------ report */
 
@@ -1223,14 +1473,33 @@ const report = [
   `|---|---|`,
   `| Photos cut out | ${done.length} |`,
   `| — from Jara's original alpha | ${fromJara} |`,
-  `| — white background flood-filled | ${done.length - fromJara} |`,
+  `| — from the old catalogue's alpha | ${fromKatalogAlpha} |`,
+  `| — filled from the old catalogue's white photo | ${fromKatalogWhite} |`,
+  `| — white background flood-filled | ${done.length - fromJara - fromKatalog - reused} |`,
   `| Kept their white background (cut-out rejected) | ${rejected.length} |`,
   `| A backdrop still shows | ${flagged.length} |`,
   `| Reframed after a slab came off | ${done.filter((d) => d.reframed).length} |`,
   `| Pictures, trimmed and shown full bleed | ${scenes.length} |`,
   `| Came apart under the fill | ${cameApart.length} |`,
   `| Skipped | ${skipped.length} |`,
+  `| Unchanged (identical to what is served) | ${unchanged.length} |`,
   ``,
+  ...(fromKatalog
+    ? [
+        `## From the old catalogue (${fromKatalog})`,
+        ``,
+        `Cut from the remove.bg file shemo-katalog.com holds for the same code,`,
+        `where Jara had nothing usable — so what shipped before was a flood fill`,
+        `or a flat original. Every row is a before/after pair on the contact sheet.`,
+        ``,
+        `| Code | Product | Origin | Was | Now |`,
+        `|---|---|---|---|---|`,
+        ...done
+          .filter((d) => d.origin.startsWith("katalog"))
+          .map((d) => `| ${d.sku} | ${d.name} | ${d.origin} | ${d.was} | ${d.to} |`),
+        ``,
+      ]
+    : []),
   `## Came apart under the fill (${cameApart.length})`,
   ``,
   `The fill went through the product rather than around it: the largest`,
@@ -1306,8 +1575,22 @@ const sheet = [
   `h1{font-size:18px}h2{font-size:15px;margin-top:32px}`,
   `.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}`,
   `figure{margin:0;text-align:center}img{width:100%;aspect-ratio:1;object-fit:contain}`,
-  `figcaption{font-size:11px;color:#456}</style>`,
+  `figcaption{font-size:11px;color:#456}`,
+  `.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}`,
+  `.pair{display:grid;grid-template-columns:1fr 1fr;gap:4px}</style>`,
   `<h1>Cut-out review — tinted background, so any leftover white box shows</h1>`,
+  ...(fromKatalog
+    ? [
+        `<h2>From the old catalogue — before / after (${fromKatalog})</h2><div class="g2">`,
+        ...done
+          .filter((d) => d.origin.startsWith("katalog"))
+          .map(
+            (d) =>
+              `<figure><div class="pair"><img src="../public${d.was}" loading="lazy"><img src="../public${d.to}" loading="lazy"></div><figcaption>${d.sku}<br>${d.name.slice(0, 40)}</figcaption></figure>`
+          ),
+        `</div>`,
+      ]
+    : []),
   `<h2>A backdrop still shows (${flagged.length})</h2><div class="g">`,
   ...flagged.map(
     (f) =>
