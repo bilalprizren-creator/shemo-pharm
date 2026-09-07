@@ -114,7 +114,7 @@ export function ProductForm({
             <Field
               label="Emri i shfaqur (opsional)"
               error={err.displayName}
-              hint="Mbishkruan emrin në kartela — p.sh. formati «Lloji – marka & modeli»."
+              hint="Mbishkruan emrin e importuar kudo në faqe. Lëre bosh dhe emri pastrohet vetvetiu — kodi i artikullit hiqet, shkronjat e mëdha ulen."
             >
               <input name="displayName" defaultValue={values.displayName} className={inputCls} />
             </Field>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   brandMatches,
   primaryCategoryOf,
+  productDisplayName,
   rankRelated,
   searchProducts,
 } from "@/lib/catalog";
@@ -75,6 +76,36 @@ describe("searchProducts", () => {
 
   it("returns everything for an empty query rather than nothing", () => {
     expect(searchProducts(list, "   ")).toHaveLength(3);
+  });
+
+  /**
+   * The catalog is searched on the imported name, while the site renders the
+   * cleaned one. A customer who knows the old spelling, or reads the article
+   * code off a delivery note, has to keep finding the product.
+   */
+  it("searches the imported name, not the cleaned one", () => {
+    const shouted = product(4, "CAJ BEKUNIS A20 (5195)", { sku: "5195" });
+    expect(productDisplayName(shouted)).toBe("Caj bekunis A20");
+
+    expect(searchProducts([shouted], "CAJ BEKUNIS").map((p) => p.id)).toEqual([4]);
+    expect(searchProducts([shouted], "caj bekunis").map((p) => p.id)).toEqual([4]);
+    expect(searchProducts([shouted], "5195").map((p) => p.id)).toEqual([4]);
+  });
+});
+
+describe("productDisplayName", () => {
+  it("cleans the imported name", () => {
+    expect(productDisplayName(product(1, "A+D3 pika 10ml (1501)", { sku: "1501" }))).toBe(
+      "A+D3 pika 10ml"
+    );
+  });
+
+  it("lets an editor's override win over the cleanup", () => {
+    expect(
+      productDisplayName(
+        product(1, "A+D3 pika 10ml (1501)", { sku: "1501", displayName: "Vitamina A+D3, pika" })
+      )
+    ).toBe("Vitamina A+D3, pika");
   });
 });
 

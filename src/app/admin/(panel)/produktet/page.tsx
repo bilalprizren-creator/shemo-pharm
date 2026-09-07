@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Eye, EyeOff, Plus, Search, Star } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
+import { productDisplayName } from "@/lib/catalog";
 import { listAdminProducts } from "@/lib/admin-data";
 import { toggleProductFlagAction } from "@/lib/admin-actions";
 import { ProductFilterSelects } from "@/components/admin/ProductFilterSelects";
@@ -168,17 +169,23 @@ export default async function AdminProductsPage({
                 }`}
               >
                 <td className="max-w-[320px] px-4 py-2.5">
+                  {/* The row shows what the customer reads; the imported name,
+                      which differs for all but three products, is on hover. */}
                   <Link
                     href={`/admin/produktet/${p.id}`}
                     className="block truncate font-medium text-ink-900 hover:text-brand-700"
                     title={p.name}
                   >
-                    {p.name}
+                    {productDisplayName(p)}
                   </Link>
                 </td>
                 <td className="px-4 py-2.5 text-ink-500">{p.sku || "—"}</td>
                 <td className="px-4 py-2">
-                  <ProductPriceCell id={p.id} name={p.name} priceCents={p.priceCents} />
+                  <ProductPriceCell
+                    id={p.id}
+                    name={productDisplayName(p)}
+                    priceCents={p.priceCents}
+                  />
                 </td>
                 <td className="px-4 py-2.5">
                   <form action={toggleProductFlagAction}>

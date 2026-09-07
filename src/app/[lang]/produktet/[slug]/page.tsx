@@ -17,6 +17,7 @@ import {
   getRelatedProducts,
   primaryCategory,
   primaryCategoryOf,
+  productDisplayName,
   toCardProducts,
 } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
@@ -41,9 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(slug);
   if (!product) return {};
   const cat = await primaryCategory(product);
+  const name = productDisplayName(product);
   return {
-    title: product.name,
-    description: `${product.name}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
+    title: name,
+    description: `${name}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
     alternates: {
       canonical: langHref(dict.lang, `/produktet/${slug}`),
       languages: {
@@ -63,6 +65,10 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
+  // The same name the card, the search suggestion and the basket show — see
+  // productDisplayName in src/lib/catalog.ts.
+  const name = productDisplayName(product);
+
   const session = await getSession();
   const showPrices = canSeePrices(session);
 
@@ -75,7 +81,7 @@ export default async function ProductPage({ params }: Props) {
     ...(mainCat
       ? [{ label: categoryDisplayName(mainCat), href: `/kategorite/${mainCat.slug}` }]
       : []),
-    { label: product.name },
+    { label: name },
   ];
 
   const related = await toCardProducts(
@@ -84,18 +90,18 @@ export default async function ProductPage({ params }: Props) {
   );
 
   const whatsappText = encodeURIComponent(
-    `${fmt(dict.product.whatsappInterest, { name: product.name })}${
+    `${fmt(dict.product.whatsappInterest, { name })}${
       product.sku ? ` (${dict.common.code}: ${product.sku})` : ""
     }`
   );
   const mailSubject = encodeURIComponent(
-    fmt(dict.product.mailSubject, { name: product.name })
+    fmt(dict.product.mailSubject, { name })
   );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
       <ProductJsonLd
-        name={product.name}
+        name={name}
         sku={product.sku}
         image={product.images[0] ?? null}
         category={mainCat ? categoryDisplayName(mainCat) : null}
@@ -113,7 +119,7 @@ export default async function ProductPage({ params }: Props) {
                 },
               ]
             : []),
-          { name: product.name },
+          { name },
         ]}
       />
       <Breadcrumbs items={crumbs} dict={dict} />
@@ -121,7 +127,7 @@ export default async function ProductPage({ params }: Props) {
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <ProductGallery
           images={product.images}
-          name={product.name}
+          name={name}
           labels={{
             list: dict.product.galleryLabel,
             image: dict.product.galleryImage,
@@ -138,7 +144,7 @@ export default async function ProductPage({ params }: Props) {
             </Link>
           )}
           <h1 className="mt-2 text-2xl font-extrabold leading-tight text-ink-900 sm:text-3xl">
-            {product.name}
+            {name}
           </h1>
 
           <dl className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-500">
@@ -196,11 +202,11 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-4 border-t border-ink-900/6 pt-4">
               <AddToCartWithQty
                 productId={product.id}
-                productName={product.name}
+                productName={name}
                 labels={{
                   add: dict.product.addToCart,
                   added: dict.product.addedToCart,
-                  addAria: fmt(dict.product.addToCartAria, { name: product.name }),
+                  addAria: fmt(dict.product.addToCartAria, { name }),
                   increase: dict.product.increaseQty,
                   decrease: dict.product.decreaseQty,
                   qty: dict.product.qtyLabel,
@@ -250,10 +256,10 @@ export default async function ProductPage({ params }: Props) {
               </a>
               <WishlistButton
                 productId={product.id}
-                productName={product.name}
+                productName={name}
                 labels={{
-                  add: fmt(dict.product.wishlistAdd, { name: product.name }),
-                  remove: fmt(dict.product.wishlistRemove, { name: product.name }),
+                  add: fmt(dict.product.wishlistAdd, { name }),
+                  remove: fmt(dict.product.wishlistRemove, { name }),
                 }}
                 className="size-12"
               />

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts, primaryCategory, categoryDisplayName } from "@/lib/catalog";
+import {
+  categoryDisplayName,
+  getProducts,
+  primaryCategory,
+  productDisplayName,
+} from "@/lib/catalog";
 import { MINUTE_MS, rateLimited } from "@/lib/rate-limit";
 import type { PublicProduct } from "@/lib/types";
 
@@ -31,7 +36,7 @@ export async function GET(request: NextRequest) {
       const cat = await primaryCategory(p);
       return {
         id: p.id,
-        name: p.name,
+        name: productDisplayName(p),
         slug: p.slug,
         sku: p.sku,
         image: p.images[0] ?? null,

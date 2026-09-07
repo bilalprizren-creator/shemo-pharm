@@ -5,6 +5,7 @@ import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { isAllowedImageSrc } from "@/lib/images";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
+import { cleanProductName } from "@/lib/product-name";
 import type { CardProduct, Category, CategoryNode, Product } from "@/lib/types";
 
 /**
@@ -373,6 +374,20 @@ export interface ProductPage {
  */
 const byName = new Intl.Collator("sq", { numeric: true });
 
+/**
+ * A-Z on the name the customer actually reads, not the imported one — the two
+ * differ for all but three products, so sorting on the import would order the
+ * page by something invisible ("(1501)" sorts under A+D3, "CAJ" under C but
+ * displayed as "Caj").
+ *
+ * The key is computed once per product rather than inside the comparator, which
+ * would clean the same name a dozen times over a 2 049-row sort.
+ */
+function sortByDisplayName(list: Product[], direction: 1 | -1): void {
+  const keys = new Map(list.map((p) => [p.id, productDisplayName(p)]));
+  list.sort((a, b) => direction * byName.compare(keys.get(a.id)!, keys.get(b.id)!));
+}
+
 export function searchProducts(list: Product[], query: string): Product[] {
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return list;
@@ -418,13 +433,13 @@ export async function getProducts({
   list = [...list];
   switch (sort) {
     case "emri-desc":
-      list.sort((a, b) => byName.compare(b.name, a.name));
+      sortByDisplayName(list, -1);
       break;
     case "te-rejat":
       list.sort((a, b) => b.id - a.id);
       break;
     default:
-      list.sort((a, b) => byName.compare(a.name, b.name));
+      sortByDisplayName(list, 1);
   }
 
   const total = list.length;
@@ -613,7 +628,7 @@ export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
       const rb = FEATURED_ORDER.indexOf(b.slug);
       const ka = ra === -1 ? Number.MAX_SAFE_INTEGER : ra;
       const kb = rb === -1 ? Number.MAX_SAFE_INTEGER : rb;
-      return ka - kb || byName.compare(a.name, b.name);
+      return ka - kb || byName.compare(productDisplayName(a), productDisplayName(b));
     });
   if (featured.length >= limit) return featured.slice(0, limit);
   const fill = (await getShowcaseProducts(undefined, limit * 2)).filter(
@@ -627,9 +642,22 @@ export function productImage(product: Product): string | null {
   return product.imageOverride ?? product.images[0] ?? null;
 }
 
-/** The product's display name: admin override first, then the catalog name. */
-export function productDisplayName(product: Product): string {
-  return product.displayName ?? product.name;
+/**
+ * The product's display name: an editor's override first, then the imported
+ * name tidied by src/lib/product-name.ts (the article number the card already
+ * prints as "Kodi" removed, shouting undone, brackets closed up).
+ *
+ * Everything a customer reads goes through here — card, product page, search
+ * suggestion, basket line, JSON-LD, the WhatsApp order text. Search itself does
+ * not: searchProducts and getProducts match the raw `name` plus the SKU, so
+ * typing the code, or the old spelling, still finds the product.
+ */
+export function productDisplayName(
+  // A structural subset, so the admin tables can name a row the same way the
+  // public site does without first loading a full catalog Product.
+  product: Pick<Product, "name" | "sku" | "displayName">
+): string {
+  return product.displayName ?? cleanProductName(product.name, product.sku);
 }
 
 function buildCard(
@@ -799,10 +827,15 @@ export async function getCategoryImage(categorySlug: string): Promise<string | n
   const ids = categoryIdWithDescendants(cat.id, categories);
 
   let best: Product | undefined;
+  let bestName = "";
   for (const p of products) {
     if (p.images.length === 0) continue;
     if (!p.categoryIds.some((id) => ids.has(id))) continue;
-    if (!best || byName.compare(p.name, best.name) < 0) best = p;
+    const name = productDisplayName(p);
+    if (!best || byName.compare(name, bestName) < 0) {
+      best = p;
+      bestName = name;
+    }
   }
   return best ? productImage(best) : null;
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
+import { productDisplayName } from "@/lib/catalog";
 import { getAdminCategoryOptions, getAdminProduct } from "@/lib/admin-data";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
@@ -51,8 +52,15 @@ export default async function AdminEditProductPage({
       </div>
 
       <h1 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-ink-900">
-        {product.name}
+        {productDisplayName(product)}
       </h1>
+      {productDisplayName(product) !== product.name && (
+        // What the shop exported, kept in view: the field below edits that
+        // string, while the heading is what the site renders from it.
+        <p className="mt-1 text-sm text-ink-400">
+          I importuar si: <span className="text-ink-500">{product.name}</span>
+        </p>
+      )}
 
       <div className="mt-6">
         <ProductForm

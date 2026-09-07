@@ -121,6 +121,8 @@ export interface AdminProductListItem {
   id: number;
   name: string;
   sku: string;
+  /** The editor's override, so the table can name a row the way the site does. */
+  displayName: string | null;
   priceCents: number;
   inStock: boolean;
   featured: boolean;
@@ -154,7 +156,7 @@ export async function listAdminProducts(opts: {
   const hidden = opts.visibility === "" ? null : opts.visibility === "e-fshehur";
 
   const rows = (await sql`
-    SELECT id, name, sku, price_cents, in_stock, featured, hidden,
+    SELECT id, name, sku, display_name, price_cents, in_stock, featured, hidden,
            count(*) OVER ()::int AS total
     FROM products
     WHERE (${opts.query} = '' OR name ILIKE ${like} OR sku ILIKE ${like})
@@ -166,6 +168,7 @@ export async function listAdminProducts(opts: {
     id: number;
     name: string;
     sku: string;
+    display_name: string | null;
     price_cents: number;
     in_stock: boolean;
     featured: boolean;
@@ -178,6 +181,7 @@ export async function listAdminProducts(opts: {
       id: r.id,
       name: r.name,
       sku: r.sku,
+      displayName: r.display_name,
       priceCents: r.price_cents,
       inStock: r.in_stock,
       featured: r.featured,
