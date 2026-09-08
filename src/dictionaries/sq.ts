@@ -39,6 +39,9 @@ export const sq = {
     account: "Llogaria",
     wishlist: "Të preferuarat",
     cart: "Shporta",
+    /** The icon links carry a count the badge shows only visually. */
+    cartWithCount: "Shporta, {n} artikuj",
+    wishlistWithCount: "Të preferuarat, {n} artikuj",
     catalog: "Katalogu",
     mainLabel: "Navigimi kryesor",
     menuLabel: "Menyja",
@@ -438,6 +441,12 @@ export const sq = {
     emptyTextCategory: "Kjo kategori nuk ka produkte për momentin.",
     emptyTextDefault: "Provoni një kërkim tjetër ose shfletoni kategoritë tona.",
     emptyAction: "Shiko të gjitha produktet",
+    /**
+     * The narrower ways out of an empty result, offered instead of only the
+     * total reset. Which one shows depends on what emptied the page.
+     */
+    emptySearchEverywhere: "Kërko \"{q}\" në të gjitha produktet",
+    emptyIncludeOutOfStock: "Shfaq edhe produktet pa stok",
     /** Sharing the listing as it is currently filtered — see ShareLink.tsx. */
     share: "Ndaje",
     shareHint: "Ndaje këtë listë produktesh ashtu si është filtruar",

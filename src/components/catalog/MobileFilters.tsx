@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 import { usePathname } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 
@@ -18,6 +19,9 @@ export function MobileFilters({
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Stable, so the hook's effect does not tear down and rebuild every render.
+  const close = useCallback(() => setOpen(false), []);
 
   // Close when navigation changes the route (category picked) —
   // state adjustment during render instead of an effect.
@@ -27,17 +31,11 @@ export function MobileFilters({
     setOpen(false);
   }
 
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  // The sheet had scroll lock, initial focus and Escape, but Tab walked
+  // straight out of an aria-modal dialog into the page behind it, and closing
+  // dropped focus on <body> instead of the button that opened it. Both come
+  // from the shared hook now, the same one the cart drawer uses.
+  useDialogFocus({ open, panelRef, initialRef: closeRef, onClose: close });
 
   return (
     <div className="lg:hidden">
@@ -55,17 +53,20 @@ export function MobileFilters({
           <button
             type="button"
             aria-label={labels.close}
-            onClick={() => setOpen(false)}
+            onClick={close}
             className="absolute inset-0 bg-ink-900/45"
             tabIndex={-1}
           />
-          <div className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-drawer">
+          <div
+            ref={panelRef}
+            className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-drawer"
+          >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-ink-900">{labels.filters}</h2>
               <button
                 ref={closeRef}
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={close}
                 aria-label={labels.close}
                 className="flex size-11 items-center justify-center rounded-full text-ink-700 hover:bg-ink-900/5"
               >

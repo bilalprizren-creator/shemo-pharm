@@ -21,7 +21,7 @@ import {
   Stethoscope,
   User,
 } from "lucide-react";
-import { langHref, switchLangPath, type Lang } from "@/lib/i18n";
+import { fmt, langHref, switchLangPath, type Lang } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { SearchBar } from "./SearchBar";
@@ -57,31 +57,44 @@ const TRUST_ICONS = [ShieldCheck, BadgeCheck, Stethoscope];
 function IconAction({
   href,
   label,
+  countLabel,
   icon: Icon,
   badge,
   onClick,
 }: {
   href: string;
   label: string;
+  /**
+   * The label with the count in it, e.g. "Shporta, 12 artikuj".
+   *
+   * The badge itself is aria-hidden — it has to be, it is a bare number beside
+   * an icon — so without this the count reached nobody using a screen reader:
+   * the link announced a flat "Shporta" whether it held nothing or forty lines.
+   */
+  countLabel?: (n: number) => string;
   icon: typeof Heart;
   badge?: number;
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
+  const counted = badge !== undefined && badge > 0;
+  const name = counted && countLabel ? countLabel(badge) : label;
   return (
     <Link
       href={href}
-      aria-label={label}
-      title={label}
+      aria-label={name}
+      title={name}
       onClick={onClick}
       className="group relative flex size-10 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 sm:size-11"
     >
       <Icon className="size-5.5" strokeWidth={1.75} aria-hidden />
-      {badge !== undefined && badge > 0 && (
+      {counted && (
         <span
           aria-hidden
           className="absolute right-0.5 top-0.5 flex min-w-4.5 items-center justify-center rounded-full bg-accent-500 px-1 text-[10px] font-bold leading-4 text-white"
         >
-          {badge > 99 ? "99" : badge}
+          {/* "99+", not "99": a hundred and fifty items reading as ninety-nine
+              is not a rounding, it is a different number. */}
+          {badge > 99 ? "99+" : badge}
         </span>
       )}
     </Link>
@@ -359,8 +372,16 @@ export function HeaderClient({
                 label={dict.nav.account}
                 icon={User}
               />
-              <WishlistAction lang={lang} label={dict.nav.wishlist} />
-              <CartAction lang={lang} label={dict.nav.cart} />
+              <WishlistAction
+                lang={lang}
+                label={dict.nav.wishlist}
+                countLabel={(n) => fmt(dict.nav.wishlistWithCount, { n })}
+              />
+              <CartAction
+                lang={lang}
+                label={dict.nav.cart}
+                countLabel={(n) => fmt(dict.nav.cartWithCount, { n })}
+              />
 
               <button
                 type="button"
@@ -513,12 +534,21 @@ export function HeaderClient({
 }
 
 /** Wishlist + cart badges need the providers — split so hooks stay simple. */
-function CartAction({ lang, label }: { lang: Lang; label: string }) {
+function CartAction({
+  lang,
+  label,
+  countLabel,
+}: {
+  lang: Lang;
+  label: string;
+  countLabel: (n: number) => string;
+}) {
   const { count, ready, openCart } = useCart();
   return (
     <IconAction
       href={langHref(lang, "/shporta")}
       label={label}
+      countLabel={countLabel}
       icon={ShoppingBag}
       badge={ready ? count : 0}
       // A plain click slides the basket in beside the page; it stays a real
@@ -533,12 +563,21 @@ function CartAction({ lang, label }: { lang: Lang; label: string }) {
   );
 }
 
-function WishlistAction({ lang, label }: { lang: Lang; label: string }) {
+function WishlistAction({
+  lang,
+  label,
+  countLabel,
+}: {
+  lang: Lang;
+  label: string;
+  countLabel: (n: number) => string;
+}) {
   const { count, ready } = useWishlist();
   return (
     <IconAction
       href={langHref(lang, "/lista-e-deshirave")}
       label={label}
+      countLabel={countLabel}
       icon={Heart}
       badge={ready ? count : 0}
     />

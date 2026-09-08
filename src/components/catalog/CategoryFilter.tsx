@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import type { CategoryNode } from "@/lib/types";
-import { langHref } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 
 /**
@@ -13,11 +12,25 @@ export function CategoryFilter({
   tree,
   activeSlug,
   displayName,
+  hrefFor,
+  allHref,
   dict,
 }: {
   tree: CategoryNode[];
   activeSlug?: string;
   displayName: Record<string, string>;
+  /**
+   * Where a category row links to.
+   *
+   * A callback rather than a bare slug because narrowing to a category has to
+   * keep the rest of the view: someone who ticked "in stock only" and then
+   * picked Barnat used to lose it with no indication, which is the same fault
+   * listingHref() was written to fix for the chips. BrandTypeFilter takes
+   * hrefForType for the same reason.
+   */
+  hrefFor: (slug: string) => string;
+  /** The unfiltered listing, with the current view carried across. */
+  allHref: string;
   dict: Dictionary;
 }) {
   const containsActive = (node: CategoryNode): boolean =>
@@ -28,7 +41,7 @@ export function CategoryFilter({
     const name = displayName[node.slug] ?? node.name;
     const link = (
       <Link
-        href={langHref(dict.lang, `/kategorite/${node.slug}`)}
+        href={hrefFor(node.slug)}
         aria-current={isActive ? "page" : undefined}
         className={`flex min-h-10 flex-1 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
           isActive
@@ -68,22 +81,41 @@ export function CategoryFilter({
       );
     }
 
+    /**
+     * The link is a sibling of <details>, not a child of <summary>.
+     *
+     * Interactive content inside <summary> is invalid, and browsers act on it
+     * twice: clicking "Barnat" navigated *and* collapsed the branch under it,
+     * and the keyboard reached the summary (where Enter toggles) before it
+     * reached the link. So <summary> now holds nothing but the chevron.
+     *
+     * The children then cannot live inside <details> — content after <summary>
+     * is what <details> hides, and the link has to stay visible when the branch
+     * is shut. They sit beside it instead and follow the same [open] state
+     * through the peer variant, which needs no script, so the "works without
+     * JS" property this list was built for survives. flex-wrap puts the w-full
+     * child list on its own line beneath the row.
+     */
     return (
-      <li key={node.id}>
-        <details open={containsActive(node)} className="group/details">
-          <summary className="flex cursor-pointer list-none items-center gap-0.5 [&::-webkit-details-marker]:hidden">
-            {link}
-            <span
+      <li key={node.id} className="flex flex-wrap items-center gap-0.5">
+        {link}
+        <details
+          open={containsActive(node)}
+          className="peer/branch group/details shrink-0"
+        >
+          <summary
+            aria-label={name}
+            className="flex size-9 cursor-pointer list-none items-center justify-center rounded-lg text-ink-400 hover:bg-brand-50 [&::-webkit-details-marker]:hidden"
+          >
+            <ChevronDown
+              className="size-4 transition-transform group-open/details:rotate-180"
               aria-hidden
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink-400 hover:bg-brand-50"
-            >
-              <ChevronDown className="size-4 transition-transform group-open/details:rotate-180" />
-            </span>
+            />
           </summary>
-          <ul className="ml-3 mt-0.5 space-y-0.5 border-l-2 border-brand-100 pl-2">
-            {node.children.map((c) => renderNode(c, depth + 1))}
-          </ul>
         </details>
+        <ul className="ml-3 mt-0.5 hidden w-full space-y-0.5 border-l-2 border-brand-100 pl-2 peer-open/branch:block">
+          {node.children.map((c) => renderNode(c, depth + 1))}
+        </ul>
       </li>
     );
   };
@@ -93,7 +125,7 @@ export function CategoryFilter({
       <ul className="space-y-0.5">
         <li>
           <Link
-            href={langHref(dict.lang, "/produktet")}
+            href={allHref}
             aria-current={!activeSlug ? "page" : undefined}
             className={`flex min-h-10 items-center rounded-lg px-3 py-2 text-sm transition-colors ${
               !activeSlug

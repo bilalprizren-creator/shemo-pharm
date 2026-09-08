@@ -294,6 +294,22 @@ export async function CatalogView({
   const showStockFilter = inStockOnly || (await hasOutOfStockProducts());
 
   /**
+   * A different shelf, with the view carried across.
+   *
+   * Only the two settings that mean the same thing on any shelf: "in stock
+   * only" and the sort order. The search term and the brand's type filter are
+   * left behind on purpose — a query that matched inside Barnat means nothing
+   * in Kozmetikë, and a type belongs to the brand it was offered on.
+   */
+  const categoryHref = (path: string) => {
+    const carried = new URLSearchParams();
+    if (sort !== "emri-asc") carried.set("renditja", sort);
+    if (inStockOnly) carried.set("stok", "1");
+    const qs = carried.toString();
+    return `${langHref(dict.lang, path)}${qs ? `?${qs}` : ""}`;
+  };
+
+  /**
    * One panel, rendered twice — desktop sidebar and mobile sheet — so a brand
    * shelf gets its type breakdown on both without a second control.
    *
@@ -324,6 +340,8 @@ export async function CatalogView({
       tree={tree}
       activeSlug={categorySlug}
       displayName={displayName}
+      hrefFor={(slug) => categoryHref(`/kategorite/${slug}`)}
+      allHref={categoryHref("/produktet")}
       dict={dict}
     />
   );
@@ -387,12 +405,17 @@ export async function CatalogView({
             </MobileFilters>
             {/* A link, not a checkbox: the state lives in the URL so it
                 survives sorting, paging and the back button, and the control
-                needs no JavaScript to work. */}
+                needs no JavaScript to work.
+
+                It used to carry role="switch" with aria-checked, which is a
+                promise an anchor cannot keep — the role overrides the link
+                semantics, so a screen reader announced a switch, and Space,
+                the key that operates a switch, does nothing on an anchor.
+                It is a link, so it is named like the chips are: the visible
+                label, plus what following it does when the filter is on. */}
             {showStockFilter && (
               <Link
                 href={stockToggleHref}
-                role="switch"
-                aria-checked={inStockOnly}
                 className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors ${
                   inStockOnly
                     ? "border-brand-500 bg-brand-50 text-brand-800"
@@ -410,6 +433,9 @@ export async function CatalogView({
                   {inStockOnly && <Check className="size-3" strokeWidth={3} />}
                 </span>
                 {dict.catalog.inStockOnly}
+                {inStockOnly && (
+                  <span className="sr-only">{dict.catalog.removeFilter}</span>
+                )}
               </Link>
             )}
             <SortSelect
@@ -477,12 +503,20 @@ export async function CatalogView({
                   <span className="sr-only">{dict.catalog.removeFilter}</span>
                 </Link>
               )}
-              <Link
-                href={productsBase}
-                className="text-[13px] font-medium text-ink-400 underline-offset-2 hover:text-ink-700 hover:underline"
-              >
-                {dict.catalog.clearFilters}
-              </Link>
+              {/* Clears what is clearable *here*. On /kategorite/barnat the
+                  obvious reading of "clear the filters" is "drop the search
+                  and the stock filter", not "leave Barnat" — the category has
+                  its own chip beside this for that. Shown only when there is
+                  something besides the category to clear, or it duplicates
+                  that chip. */}
+              {(query || inStockOnly || activeType) && (
+                <Link
+                  href={localBase}
+                  className="text-[13px] font-medium text-ink-400 underline-offset-2 hover:text-ink-700 hover:underline"
+                >
+                  {dict.catalog.clearFilters}
+                </Link>
+              )}
             </div>
           )}
 
@@ -498,6 +532,20 @@ export async function CatalogView({
               }
               actionLabel={dict.catalog.emptyAction}
               actionHref={productsBase}
+              /* The reason the page is empty, undone on its own. "In stock
+                 only" is checked first because it is the one filter a visitor
+                 forgets is on; a search inside a shelf is the other common
+                 dead end, and widening it beats starting over. */
+              secondaryAction={
+                inStockOnly
+                  ? { label: dict.catalog.emptyIncludeOutOfStock, href: stockToggleHref }
+                  : query && categorySlug
+                    ? {
+                        label: fmt(dict.catalog.emptySearchEverywhere, { q: query }),
+                        href: `${productsBase}?kerko=${encodeURIComponent(query)}`,
+                      }
+                    : undefined
+              }
             />
           ) : (
             <>

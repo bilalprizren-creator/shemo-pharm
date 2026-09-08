@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 import Image from "next/image";
 import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
@@ -67,38 +68,10 @@ function CartPanel({ dict }: { dict: Dictionary }) {
     closeCart();
   }, [pathname, closeCart]);
 
-  // Scroll lock + initial focus + Escape + focus trap, as in the mobile nav
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.activeElement as HTMLElement | null;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeCart();
-      if (e.key === "Tab" && panelRef.current) {
-        const focusables = panelRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled])'
-        );
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", onKey);
-      previous?.focus();
-    };
-  }, [open, closeCart]);
+  // Scroll lock, initial focus, Escape, the Tab cycle and putting focus back
+  // where it came from — all of it shared with the mobile filter sheet, which
+  // had the first three and neither of the last two.
+  useDialogFocus({ open, panelRef, initialRef: closeRef, onClose: closeCart });
 
   if (!open) return null;
 
