@@ -55,29 +55,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified?: Date
   ) => entry(base, path, freq, priority, lastModified);
 
-  if (mode === "katalog") {
-    // The catalogue is the contents page and its sections, and nothing else.
-    // Its product cards are not links, so there are no product URLs to list;
-    // the print sheets and the search results are noindex by their own choice.
+  /**
+   * The catalogue's own pages, under whichever prefix serves them.
+   *
+   * The contents page, every printed section, and the run through everything
+   * page by page — each of those pages carries products no section repeats, the
+   * 311 that were never printed among them. Product cards there are not links,
+   * so there are no product URLs to list, and the print sheets and the search
+   * results are noindex by their own choice.
+   *
+   * Written once and used by both branches, because it was not. The shop's
+   * branch listed exactly two catalogue URLs and the other 60-odd lived only in
+   * the branch for shemo-katalog.com — a domain that still points elsewhere and
+   * is not being moved. So the section pages, which are the ones a partner
+   * actually searches for by manufacturer, were in no sitemap that any crawler
+   * ever fetched.
+   */
+  const catalogueEntries = async (
+    prefix: "" | "/katalog"
+  ): Promise<MetadataRoute.Sitemap> => {
     const sections = await getCatalogSections();
     const all = await getAllProductsInCatalogOrder();
     const pages = Math.max(1, Math.ceil(all.length / PER_PAGE));
     return [
-      at("", "weekly", 1),
-      ...sections.map((s) => at(`/${catalogSectionSlug(s)}`, "weekly", 0.8)),
-      // The run through every product, page by page. Each page carries products
-      // no section page repeats — the 311 that were never printed among them.
+      at(prefix === "" ? "" : prefix, "weekly", 0.8),
+      ...sections.map((s) => at(`${prefix}/${catalogSectionSlug(s)}`, "weekly", 0.8)),
       ...Array.from({ length: pages }, (_, i) =>
-        at(i === 0 ? "/te-gjitha" : `/te-gjitha?faqja=${i + 1}`, "weekly", 0.6)
+        at(
+          i === 0 ? `${prefix}/te-gjitha` : `${prefix}/te-gjitha?faqja=${i + 1}`,
+          "weekly",
+          0.6
+        )
       ),
     ];
+  };
+
+  if (mode === "katalog") {
+    // On its own domain the catalogue *is* the site, so its contents page is
+    // the root and outranks everything.
+    const [root, ...rest] = await catalogueEntries("");
+    return [{ ...root!, priority: 1 }, ...rest];
   }
 
   const staticPages: MetadataRoute.Sitemap = [
     at("", "weekly", 1),
     at("/produktet", "daily", 0.9),
-    at("/katalog", "weekly", 0.8),
-    at("/katalog/te-gjitha", "weekly", 0.6),
+    ...(await catalogueEntries("/katalog")),
     at("/kategorite", "weekly", 0.8),
     at("/markat", "monthly", 0.7),
     at("/rreth-nesh", "monthly", 0.6),
