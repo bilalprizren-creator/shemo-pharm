@@ -133,18 +133,34 @@ export function BreadcrumbJsonLd({
   );
 }
 
-/** Product data without price or availability — B2B prices stay private. */
+/**
+ * Product data, minus the price.
+ *
+ * B2B prices stay behind the partner login, so there is no `offers` block: an
+ * Offer without a `price` is a "missing field" warning in Search Console and
+ * buys nothing, since a product snippet without a price is not shown anyway.
+ * `availability` lives only on an Offer, so it goes with it.
+ *
+ * `brand` used to be hard-coded to SITE.name, which said SHEMO PHARM makes
+ * Belupo's medicines — wrong on roughly two thousand pages. The catalog has a
+ * brand taxonomy (`kind: "brand"`); when it holds no brand for a product the
+ * field is left out entirely, because no claim beats a false one.
+ */
 export function ProductJsonLd({
   name,
   sku,
-  image,
+  images,
   category,
+  brand,
+  description,
   slug,
 }: {
   name: string;
   sku: string;
-  image: string | null;
+  images: string[];
   category: string | null;
+  brand: string | null;
+  description: string;
   slug: string;
 }) {
   return (
@@ -154,10 +170,11 @@ export function ProductJsonLd({
         "@type": "Product",
         name,
         ...(sku ? { sku } : {}),
-        ...(image ? { image } : {}),
+        ...(images.length > 0 ? { image: images } : {}),
+        ...(description ? { description } : {}),
         ...(category ? { category } : {}),
         url: `${SITE.domain}/produktet/${slug}`,
-        brand: { "@type": "Organization", name: SITE.name },
+        ...(brand ? { brand: { "@type": "Brand", name: brand } } : {}),
       }}
     />
   );

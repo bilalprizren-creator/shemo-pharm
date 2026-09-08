@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { List, Printer, Search } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
@@ -45,6 +46,13 @@ export async function AllProducts({
   const totalPages = Math.max(1, Math.ceil(all.length / PER_PAGE));
   const current = Math.min(Math.max(1, page), totalPages);
   const slice = all.slice((current - 1) * PER_PAGE, current * PER_PAGE);
+
+  // Same rule as the shop's listing: an out-of-range page number renders the
+  // last real page, so it must not stay in the address bar declaring itself
+  // canonical. See CatalogView for the full reasoning.
+  if (page !== current) {
+    redirect(`${href("/katalog/te-gjitha")}${current > 1 ? `?faqja=${current}` : ""}`);
+  }
 
   const session = await getSession();
   const cards = await toCardProducts(

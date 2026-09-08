@@ -149,13 +149,17 @@ export default async function AccountPage({ params }: Props) {
         </dl>
       )}
 
-      {orders.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-display text-lg font-bold text-ink-900">
-            {dict.accountPage.ordersTitle}
-          </h2>
-          <p className="mt-0.5 text-sm text-ink-500">{dict.accountPage.ordersSub}</p>
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-bold text-ink-900">
+          {dict.accountPage.ordersTitle}
+        </h2>
+        <p className="mt-0.5 text-sm text-ink-500">{dict.accountPage.ordersSub}</p>
 
+        {orders.length === 0 ? (
+          <p className="mt-4 rounded-2xl border border-dashed border-ink-900/12 bg-white px-4 py-8 text-center text-sm text-ink-400">
+            {dict.accountPage.ordersEmpty}
+          </p>
+        ) : (
           <ul className="mt-4 space-y-3">
             {orders.map((o) => {
               const lines = o.items
@@ -196,8 +200,8 @@ export default async function AccountPage({ params }: Props) {
               );
             })}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link

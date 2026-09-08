@@ -5,7 +5,12 @@ import {
   REPORTING_ENDPOINTS_VALUE,
   contentSecurityPolicy,
 } from "@/lib/csp";
-import { SITE_MODE_HEADER, isSharedPath, modeForHost } from "@/lib/site-mode";
+import {
+  PATHNAME_HEADER,
+  SITE_MODE_HEADER,
+  isSharedPath,
+  modeForHost,
+} from "@/lib/site-mode";
 
 /**
  * Three jobs, in this order:
@@ -45,6 +50,10 @@ export function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set(CSP_HEADER, csp);
   requestHeaders.set(SITE_MODE_HEADER, mode);
+  // The path as the visitor typed it. not-found.tsx receives no route params
+  // and must still know its language; without this it has to be a client
+  // component purely to read usePathname(). See src/app/[lang]/not-found.tsx.
+  requestHeaders.set(PATHNAME_HEADER, pathname);
 
   const withCsp = <T extends NextResponse>(response: T): T => {
     response.headers.set(CSP_HEADER, csp);

@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { headers } from "next/headers";
 import {
   catalogSectionSlug,
   getAllCategories,
@@ -8,20 +7,8 @@ import {
   getProducts,
 } from "@/lib/catalog";
 import { offersAvailable } from "@/lib/offers";
-import { SITE_ORIGINS, modeForHost, type SiteMode } from "@/lib/site-mode";
+import { SITE_ORIGINS, modeFromHost } from "@/lib/site-mode";
 import { PER_PAGE } from "@/katalog/AllProducts";
-
-/**
- * Two sites, two sitemaps, one file.
- *
- * The proxy's matcher skips /sitemap.xml, so the `x-site` header it normally
- * sets is not there — the host has to be read directly. Getting this wrong
- * would hand a crawler on the catalogue domain a list of shop URLs.
- */
-async function currentMode(): Promise<SiteMode> {
-  const h = await headers();
-  return modeForHost(h.get("x-forwarded-host") ?? h.get("host"));
-}
 
 /** One entry per Albanian URL, with the English /en twin as an alternate. */
 function entry(
@@ -46,7 +33,7 @@ function entry(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const mode = await currentMode();
+  const mode = await modeFromHost();
   const base = SITE_ORIGINS[mode];
   const at = (
     path: string,

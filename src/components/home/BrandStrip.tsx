@@ -24,6 +24,9 @@ export function BrandStrip({ dict }: { dict: Dictionary }) {
           >
             {dict.home.brandsTitle}
           </h2>
+          <p className="mt-2 text-sm text-ink-500 sm:text-base">
+            {dict.home.brandsSub}
+          </p>
         </div>
 
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:gap-4">

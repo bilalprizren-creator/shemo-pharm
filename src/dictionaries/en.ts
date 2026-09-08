@@ -613,7 +613,6 @@ export const en: Dictionary = {
     wishlist: "Wishlist",
     logout: "Log out",
     dateLocale: "en-GB",
-    emailVerifiedTitle: "Email verified",
     emailUnverifiedTitle: "Verify your email",
     emailUnverifiedText:
       "We sent a verification link to {email}. Click it to confirm the address — that way we can reach you with the answer to your order.",

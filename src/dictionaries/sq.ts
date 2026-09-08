@@ -648,7 +648,6 @@ export const sq = {
     wishlist: "Lista e dëshirave",
     logout: "Dilni",
     dateLocale: "sq-AL",
-    emailVerifiedTitle: "Email-i është verifikuar",
     emailUnverifiedTitle: "Verifikoni email-in tuaj",
     emailUnverifiedText:
       "Ju dërguam një lidhje verifikimi te {email}. Klikojeni për të konfirmuar adresën — kështu jemi të sigurt se ju gjejmë me përgjigjen e porosisë.",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
+import { parsePage } from "@/lib/catalog";
 import { SearchResults } from "@/katalog/SearchResults";
 
 /**
@@ -33,8 +34,7 @@ export default async function KatalogSearchPage({ params, searchParams }: Props)
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
   const { kerko, faqja } = await searchParams;
-  // Math.floor as well as the clamp, so "faqja=2.5" cannot offset by half a
-  // page. SearchResults clamps the upper end against the real total.
-  const page = Math.max(1, Math.floor(Number(faqja)) || 1);
+  // SearchResults clamps the upper end against the real total.
+  const page = parsePage(faqja);
   return <SearchResults query={kerko ?? ""} page={page} dict={dict} />;
 }

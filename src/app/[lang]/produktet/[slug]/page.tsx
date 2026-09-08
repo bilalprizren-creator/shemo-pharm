@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
+  brandCategoryOf,
   categoryDisplayName,
   getAllCategories,
   getProductBySlug,
@@ -45,19 +46,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // The same name the cards show: the catalog code belongs in the code field,
   // not in the page title.
   const title = productDisplayName(product);
+  const description = `${title}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`;
+  const canonical = langHref(dict.lang, `/produktet/${slug}`);
+  const photo = product.images[0];
+
   return {
     title,
-    description: `${title}${cat ? ` — ${categoryDisplayName(cat)}` : ""}. ${dict.site.description}`,
+    description,
     alternates: {
-      canonical: langHref(dict.lang, `/produktet/${slug}`),
+      canonical,
       languages: {
         sq: `/produktet/${slug}`,
         en: `/en/produktet/${slug}`,
       },
     },
-    openGraph: product.images[0]
-      ? { images: [{ url: product.images[0] }] }
-      : undefined,
+    // Declaring `openGraph` replaces the layout's block wholesale rather than
+    // merging into it, so everything it set has to be repeated here — this was
+    // the one route that set only `images` and silently lost type, locale and
+    // siteName. listingMetadata() in CatalogView is the same shape.
+    //
+    // The photo is square and its dimensions are declared as such: WhatsApp and
+    // Viber are where these links are actually shared, and an undeclared image
+    // is assumed wide and centre-cropped, which cuts the top and bottom off a
+    // carton. Products without a photo fall back to the generated site card.
+    openGraph: {
+      type: "website",
+      locale: dict.lang === "en" ? "en" : "sq",
+      siteName: SITE.name,
+      title,
+      description,
+      url: canonical,
+      images: photo
+        ? [{ url: photo, width: 1000, height: 1000, alt: title }]
+        : [{ url: "/opengraph-image", width: 1200, height: 630 }],
+    },
   };
 }
 
@@ -74,6 +96,9 @@ export default async function ProductPage({ params }: Props) {
   const all = await getAllCategories();
   // The same category the card, the search suggestion and the JSON-LD name.
   const mainCat = primaryCategoryOf(product, all);
+  // A different axis of the same table: what the product *is* versus who makes
+  // it. The JSON-LD needs both, and must not put one in the other's field.
+  const brandCat = brandCategoryOf(product, all);
 
   const crumbs: Crumb[] = [
     { label: dict.catalog.title, href: "/produktet" },
@@ -102,8 +127,10 @@ export default async function ProductPage({ params }: Props) {
       <ProductJsonLd
         name={title}
         sku={product.sku}
-        image={product.images[0] ?? null}
+        images={product.images}
         category={mainCat ? categoryDisplayName(mainCat) : null}
+        brand={brandCat ? categoryDisplayName(brandCat) : null}
+        description={product.shortDescription || product.description}
         slug={product.slug}
       />
       <BreadcrumbJsonLd

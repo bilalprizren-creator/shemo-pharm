@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Check, X } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
@@ -9,6 +10,7 @@ import {
   getCategoryTree,
   getProducts,
   hasOutOfStockProducts,
+  parsePage,
   toCardProducts,
   type ProductSort,
 } from "@/lib/catalog";
@@ -82,7 +84,7 @@ export function listingMetadata({
   "title" | "description" | "alternates" | "robots" | "openGraph"
 > {
   const lang = dict.lang;
-  const page = Math.max(1, Number(searchParams.faqja) || 1);
+  const page = parsePage(searchParams.faqja);
   const query = searchParams.kerko?.trim();
   const isView =
     Boolean(query) ||
@@ -162,7 +164,7 @@ export async function CatalogView({
   const sort = VALID_SORTS.includes(searchParams.renditja as ProductSort)
     ? (searchParams.renditja as ProductSort)
     : "emri-asc";
-  const page = Math.max(1, Number(searchParams.faqja) || 1);
+  const page = parsePage(searchParams.faqja);
   const inStockOnly = searchParams.stok === "1";
   // Only meaningful on a brand shelf; ignored everywhere else so the parameter
   // cannot be used to narrow a page that offers no way to widen it again.
@@ -206,6 +208,22 @@ export async function CatalogView({
   if (sort !== "emri-asc") params.set("renditja", sort);
   if (inStockOnly) params.set("stok", "1");
   if (activeType) params.set("lloji", activeType.slug);
+
+  /**
+   * An out-of-range page number redirects to the last real page.
+   *
+   * getProducts() already clamps, so ?faqja=999 rendered page 86 — but the
+   * address bar, the <title> and, worst, the canonical tag all still named 999.
+   * A page declaring itself canonical at a URL that serves different content is
+   * exactly what a crawler is entitled to believe. Redirecting fixes all three
+   * at once, and leaves the visitor somewhere they can bookmark.
+   */
+  if (page !== result.page) {
+    const target = new URLSearchParams(params);
+    if (result.page > 1) target.set("faqja", String(result.page));
+    const qs = target.toString();
+    redirect(`${localBase}${qs ? `?${qs}` : ""}`);
+  }
 
   /**
    * This same listing with one thing changed and the page number dropped.
@@ -431,7 +449,9 @@ export async function CatalogView({
               text={
                 query
                   ? fmt(dict.catalog.emptyTextQuery, { q: query })
-                  : dict.catalog.emptyTextCategory
+                  : categorySlug
+                    ? dict.catalog.emptyTextCategory
+                    : dict.catalog.emptyTextDefault
               }
               actionLabel={dict.catalog.emptyAction}
               actionHref={productsBase}

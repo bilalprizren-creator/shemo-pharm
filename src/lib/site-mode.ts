@@ -22,6 +22,16 @@ export type SiteMode = "shop" | "katalog";
 export const SITE_MODE_HEADER = "x-site";
 
 /**
+ * The request path, as src/proxy.ts saw it — before the locale rewrite and
+ * before the catalogue mapping.
+ *
+ * It exists for not-found.tsx, which receives no route params: without it that
+ * page has to be a client component purely to call usePathname(), and then it
+ * cannot read the site mode at all.
+ */
+export const PATHNAME_HEADER = "x-pathname";
+
+/**
  * Hosts that serve the printed-catalogue site. Bare hostnames, no scheme, no
  * port — compared against the request's host with the port stripped.
  *
@@ -115,4 +125,18 @@ export function sitePath(mode: SiteMode, path: string): string {
   if (path === "/katalog") return "/";
   if (path.startsWith("/katalog/")) return path.slice("/katalog".length);
   return path;
+}
+
+/**
+ * The current request's site, read from the host rather than the `x-site`
+ * header.
+ *
+ * For the metadata routes only. The proxy's matcher skips /sitemap.xml and
+ * /robots.txt, so the header getSiteMode() relies on is not there — the host
+ * has to be read directly. Getting this wrong would hand a crawler on the
+ * catalogue domain a list of the shop's URLs, and the shop's sitemap.
+ */
+export async function modeFromHost(): Promise<SiteMode> {
+  const h = await headers();
+  return modeForHost(h.get("x-forwarded-host") ?? h.get("host"));
 }

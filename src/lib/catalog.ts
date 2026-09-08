@@ -585,6 +585,26 @@ export interface ProductPage {
 }
 
 /**
+ * The `?faqja=` parameter as a page number: a whole number, at least 1.
+ *
+ * `Math.floor` as well as the clamp, because `Number("2.5")` is 2.5 and a
+ * fractional page offsets the slice by half a page — `?faqja=2.5` on a 48-item
+ * listing served items 72 to 120, a window straddling two pages, under a title
+ * that read "— 2.5". Four of the five places that read this parameter had the
+ * clamp and not the floor.
+ *
+ * Non-finite input ("Infinity", "1e400") is a 1 as well: it survives the
+ * clamp below arithmetically but has no business reaching a URL.
+ *
+ * The upper end is not clamped here: only the caller knows the total, and
+ * getProducts() already clamps against it.
+ */
+export function parsePage(raw: unknown): number {
+  const n = Math.floor(Number(raw));
+  return Number.isFinite(n) ? Math.max(1, n || 1) : 1;
+}
+
+/**
  * One collator for the whole module.
  *
  * `a.name.localeCompare(b.name, "sq")` builds a fresh collator on every
@@ -801,6 +821,26 @@ export function primaryCategoryOf(
 export async function primaryCategory(product: Product): Promise<Category | undefined> {
   const { categories } = await loadCatalog();
   return primaryCategoryOf(product, categories);
+}
+
+/**
+ * The brand a product belongs to, if the taxonomy records one.
+ *
+ * Separate from primaryCategoryOf because that one answers "what is this",
+ * which is usually a product type — the brand is a different axis of the same
+ * table, told apart by `kind`. Passing a map holding only the brand rows reuses
+ * pickPrimary's tie-breaking unchanged: ids it cannot resolve are skipped.
+ *
+ * Products carry at most one brand today, so the tie-break rarely runs.
+ */
+export function brandCategoryOf(
+  product: Product,
+  categories: Category[]
+): Category | undefined {
+  const brands = new Map(
+    categories.filter((c) => c.kind === "brand").map((c) => [c.id, c] as const)
+  );
+  return pickPrimary(product, brands);
 }
 
 /**

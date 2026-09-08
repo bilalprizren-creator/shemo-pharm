@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   brandMatches,
+  brandCategoryOf,
   catalogSectionSlug,
+  parsePage,
   primaryCategoryOf,
   printedProducts,
   productDisplayName,
@@ -330,5 +332,51 @@ describe("printedProducts", () => {
 
   it("prints nothing when everything is withdrawn", () => {
     expect(printedProducts([product(9, "Gone", { catalogHidden: true })], [])).toEqual([]);
+  });
+});
+
+describe("parsePage", () => {
+  it("reads a plain page number", () => {
+    expect(parsePage("3")).toBe(3);
+  });
+
+  it("floors a fractional page instead of offsetting the slice", () => {
+    // ?faqja=2.5 used to slice items 72..120 out of a 48-per-page listing —
+    // a window straddling two pages, under a title reading "— 2.5".
+    expect(parsePage("2.5")).toBe(2);
+    expect(parsePage("1.9")).toBe(1);
+  });
+
+  it("clamps anything below the first page to 1", () => {
+    expect(parsePage("0")).toBe(1);
+    expect(parsePage("0.5")).toBe(1);
+    expect(parsePage("-4")).toBe(1);
+  });
+
+  it("falls back to 1 for anything that is not a number", () => {
+    expect(parsePage(undefined)).toBe(1);
+    expect(parsePage("")).toBe(1);
+    expect(parsePage("abc")).toBe(1);
+    expect(parsePage("Infinity")).toBe(1);
+  });
+});
+
+describe("brandCategoryOf", () => {
+  const belupo = category(1, "Belupo", { kind: "brand" });
+  const barnat = category(2, "Barnat");
+  const syrups = category(3, "Shurupa", { parent: 2, count: 4 });
+  const cats = [belupo, barnat, syrups];
+
+  it("finds the brand rather than the product type", () => {
+    const p = product(1, "Lupocet", { categoryIds: [2, 3, 1] });
+    expect(brandCategoryOf(p, cats)?.name).toBe("Belupo");
+    // The type axis is unaffected — the two answer different questions.
+    expect(primaryCategoryOf(p, cats)?.name).toBe("Shurupa");
+  });
+
+  it("returns nothing when the taxonomy records no brand", () => {
+    // The JSON-LD leaves `brand` out entirely in this case rather than
+    // claiming SHEMO PHARM makes it, which is what it used to do.
+    expect(brandCategoryOf(product(2, "Fasha", { categoryIds: [2] }), cats)).toBeUndefined();
   });
 });

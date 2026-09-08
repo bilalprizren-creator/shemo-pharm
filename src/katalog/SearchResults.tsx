@@ -88,7 +88,7 @@ export async function SearchResults({
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
       <Breadcrumbs
         items={[
-          { label: dict.printedCatalog.title, href: href("/katalog") },
+          { label: dict.printedCatalog.title, href: sitePath(mode, "/katalog") },
           { label: dict.printedCatalog.searchTitle },
         ]}
         dict={dict}
