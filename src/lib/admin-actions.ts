@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
+import { del } from "@vercel/blob";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
@@ -228,6 +229,72 @@ export async function rejectUserAction(
   return { success: "Llogaria u fshi" };
 }
 
+
+/* ------------------------------ Blob cleanup ----------------------------- */
+
+/** Photos we host ourselves, and can therefore delete. */
+function isOurBlob(src: string): boolean {
+  try {
+    return new URL(src).hostname.endsWith(".public.blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}
+
+/** Every photo a product row points at, in one flat list. */
+function photosOf(row: { images: unknown; image_override: string | null }): string[] {
+  const list = Array.isArray(row.images) ? row.images.filter((s) => typeof s === "string") : [];
+  return row.image_override ? [...list, row.image_override] : list;
+}
+
+async function productPhotos(id: number): Promise<string[]> {
+  const rows = (await sql`
+    SELECT images, image_override FROM products WHERE id = ${id}
+  `) as { images: unknown; image_override: string | null }[];
+  return rows[0] ? photosOf(rows[0]) : [];
+}
+
+/**
+ * Deletes uploaded photos that no product points at any more.
+ *
+ * There was no del() anywhere in this project — the upload route was the only
+ * @vercel/blob call site — so every replaced or deleted photo stayed in the
+ * store for good. On a store whose billing has already been stopped once by
+ * volume, that is not an academic tidiness question.
+ *
+ * Re-checked against the live table rather than trusted from the diff: between
+ * reading the old list and getting here another editor may have pointed a
+ * different product at the same file, and a cleanup that deletes a photo still
+ * in use is worse than one that leaves a stray file behind. Local /products/
+ * paths are never touched — those are in git.
+ *
+ * Runs after the response and swallows its own failures: an editor saving a
+ * product must not see an error because a storage call timed out.
+ */
+function deleteOrphanPhotos(candidates: string[]): void {
+  const ours = [...new Set(candidates)].filter(isOurBlob);
+  if (ours.length === 0) return;
+
+  after(async () => {
+    try {
+      const still = (await sql`
+        SELECT DISTINCT url FROM (
+          SELECT jsonb_array_elements_text(images) AS url FROM products
+          UNION ALL
+          SELECT image_override FROM products WHERE image_override IS NOT NULL
+        ) AS used
+        WHERE url = ANY(${ours})
+      `) as { url: string }[];
+      const referenced = new Set(still.map((r) => r.url));
+      const orphans = ours.filter((u) => !referenced.has(u));
+      if (orphans.length === 0) return;
+      await del(orphans);
+      console.log(`[blob] deleted ${orphans.length} orphaned photo(s)`);
+    } catch (err) {
+      console.error("[blob] could not delete orphaned photos:", err);
+    }
+  });
+}
 /* ------------------------------ Products -------------------------------- */
 
 /**
@@ -309,11 +376,17 @@ function parseCategoryIds(formData: FormData): number[] {
  * loss into every ancestor's count. The neon HTTP driver takes an array of
  * un-awaited queries and sends them as a single non-interactive transaction.
  */
-async function syncProductCategories(
-  productId: number,
-  categoryIds: number[]
-): Promise<void> {
-  await sql.transaction([
+/**
+ * The statements that make a product's category links match `categoryIds`.
+ *
+ * Returned rather than executed, so a caller that is already opening a
+ * transaction can put them inside it. updateProductAction does: the product row
+ * and its category links used to be two separate round trips, and a failure
+ * between them saved the product with the old category set while the form
+ * answered "u ruajt".
+ */
+function categorySyncStatements(productId: number, categoryIds: number[]) {
+  return [
     sql`DELETE FROM product_categories WHERE product_id = ${productId}`,
     ...(categoryIds.length
       ? [
@@ -324,7 +397,14 @@ async function syncProductCategories(
           `,
         ]
       : []),
-  ]);
+  ];
+}
+
+async function syncProductCategories(
+  productId: number,
+  categoryIds: number[]
+): Promise<void> {
+  await sql.transaction(categorySyncStatements(productId, categoryIds));
   await recountCategories();
 }
 
@@ -479,27 +559,57 @@ export async function updateProductAction(
   const result = productFromForm(formData);
   if ("fieldErrors" in result) return { fieldErrors: result.fieldErrors };
   const p = result.data;
+  // Read before the write, so the photos this save drops can be cleaned up.
+  const oldPhotos = await productPhotos(id);
 
-  const updated = (await sql`
-    UPDATE products SET
-      name = ${p.name}, sku = ${p.sku}, price_cents = ${p.priceCents},
-      regular_cents = ${p.regularCents}, on_sale = ${p.regularCents > p.priceCents},
-      images = ${JSON.stringify(p.images)}::jsonb, in_stock = ${p.inStock},
-      description = ${p.description}, short_description = ${p.shortDescription},
-      display_name = ${p.displayName}, image_override = ${p.imageOverride},
-      featured = ${p.featured}, hidden = ${p.hidden},
-      catalog_hidden = ${p.catalogHidden},
-      catalog_section_id = ${p.catalogSectionId}, catalog_sort = ${p.catalogSort},
-      updated_at = now()
-    WHERE id = ${id}
-    RETURNING id
-  `) as { id: number }[];
+  /**
+   * The product row and its category links, in one transaction.
+   *
+   * They used to be two round trips with a `return` between them: a Neon
+   * hiccup after the UPDATE saved the product carrying its *old* categories,
+   * and the form still answered "u ruajt". The categories decide which shelves
+   * a product appears on, so half a save is a product quietly on the wrong one.
+   *
+   * recountCategories stays outside on purpose — it is a recomputation of
+   * derived totals, not part of the fact being written, and holding a recursive
+   * CTE over the whole taxonomy inside the transaction would lengthen the lock
+   * for no correctness gained.
+   */
+  let updated: { id: number }[];
+  try {
+    const [rows] = (await sql.transaction([
+      sql`
+        UPDATE products SET
+          name = ${p.name}, sku = ${p.sku}, price_cents = ${p.priceCents},
+          regular_cents = ${p.regularCents}, on_sale = ${p.regularCents > p.priceCents},
+          images = ${JSON.stringify(p.images)}::jsonb, in_stock = ${p.inStock},
+          description = ${p.description}, short_description = ${p.shortDescription},
+          display_name = ${p.displayName}, image_override = ${p.imageOverride},
+          featured = ${p.featured}, hidden = ${p.hidden},
+          catalog_hidden = ${p.catalogHidden},
+          catalog_section_id = ${p.catalogSectionId}, catalog_sort = ${p.catalogSort},
+          updated_at = now()
+        WHERE id = ${id}
+        RETURNING id
+      `,
+      ...categorySyncStatements(id, parseCategoryIds(formData)),
+    ])) as [{ id: number }[], ...unknown[]];
+    updated = rows;
+  } catch {
+    // The likeliest failure is the product_categories foreign key, which is
+    // what a save against an id that no longer exists trips on now that the
+    // link write is inside the transaction. Same message either way: from the
+    // editor's side the row is gone.
+    return { error: "Produkti nuk u gjet." };
+  }
   // Without this the form answers "saved" for a product that is not there —
-  // an id edited in the URL, or a row deleted in another tab — and then goes
-  // on to write category links for it.
+  // an id edited in the URL, or a row deleted in another tab.
   if (updated.length === 0) return { error: "Produkti nuk u gjet." };
 
-  await syncProductCategories(id, parseCategoryIds(formData));
+  await recountCategories();
+  // Photos the editor removed from the form, if nothing else points at them.
+  const kept = new Set([...p.images, ...(p.imageOverride ? [p.imageOverride] : [])]);
+  deleteOrphanPhotos(oldPhotos.filter((u) => !kept.has(u)));
   await logMutation(admin, "update-product", { productId: id, name: p.name });
   revalidateCatalog();
   return { success: "Produkti u ruajt." };
@@ -751,7 +861,11 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
+  // Read before the row goes: after the DELETE there is nothing left to say
+  // which photos it owned.
+  const photos = await productPhotos(id);
   await sql`DELETE FROM products WHERE id = ${id}`;
+  deleteOrphanPhotos(photos);
   // The FK cascade drops the product_categories rows, but nothing recomputes
   // the counts those rows fed — every other product mutation reaches
   // recountCategories through syncProductCategories, and this one does not.
@@ -1193,6 +1307,15 @@ async function writeCatalogSectionOrder(
  *
  * Every move renumbers the whole section, because `catalog_sort` came out of the
  * import with duplicates in it and swapping two equal numbers moves nothing.
+ *
+ * Read, compute, write — three steps and two round trips, so two editors moving
+ * products in the same section in the same second can lose one of the moves.
+ * Not closed here, deliberately: the neon HTTP driver's `sql.transaction` takes
+ * a fixed array of statements and cannot wrap a JavaScript step, so the only
+ * real fixes are to express the whole move as one SQL statement — which
+ * discards moveInOrder and its tests and puts the ordering rule in two places —
+ * or to open a WebSocket Pool for this one action. Neither is worth it against
+ * a race that needs two people editing the same printed section at once.
  */
 export async function moveCatalogProductAction(formData: FormData): Promise<void> {
   await requireAdmin();
