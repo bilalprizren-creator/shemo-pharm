@@ -426,6 +426,7 @@ export const en: Dictionary = {
     prevPage: "Previous page",
     nextPage: "Next page",
     pageN: "Page {n}",
+    pageRange: "{from}–{to} of {n}",
   },
 
   printedCatalog: {

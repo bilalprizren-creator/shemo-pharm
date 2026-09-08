@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { CatalogSearch } from "@/components/catalog/CatalogSearch";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
   catalogSectionSlug,
@@ -107,38 +107,40 @@ export async function SearchResults({
         of its own the page arrived with nothing to type into: a heading, a
         sentence telling you to type a code, and the footer.
 
-        A plain GET form, like the header's, because the catalogue has to work
-        with scripting off the way the paper edition it replaces always did. It
-        posts to this same route, so a refined query replaces the results rather
-        than leaving the catalogue.
+        A real <form method="get"> underneath, like the header's, because the
+        catalogue has to work with scripting off the way the paper edition it
+        replaces always did. CatalogSearch is that form plus a clear button, a
+        pending spinner and a count that is announced — the shop's listings have
+        had all three since they were written, and this page had a bare input
+        with no sign that pressing Enter had started anything.
+
+        It also puts the count inside the live region on a *client* transition,
+        which is the only time such an announcement can fire. The aria-live
+        below is on a full document load and announces nothing to anyone.
       */}
-      <form
-        action={href("/katalog/kerko")}
-        role="search"
-        className="mt-5 flex max-w-xl items-center gap-2 rounded-field border border-line bg-surface px-3 py-2 focus-within:border-brand-300"
-      >
-        <Search className="size-4 shrink-0 text-ink-400" aria-hidden />
-        <input
-          type="search"
-          name="kerko"
+      <div className="mt-5 max-w-xl">
+        <CatalogSearch
+          action={href("/katalog/kerko")}
           defaultValue={query}
-          autoFocus={!trimmed}
-          placeholder={dict.printedCatalog.searchPlaceholder}
-          aria-label={dict.search.label}
-          className="min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400"
+          hidden={[]}
+          labels={{
+            field: dict.search.label,
+            placeholder: dict.printedCatalog.searchPlaceholder,
+            submit: dict.search.button,
+            clear: dict.catalog.searchClear,
+            count: fmt(dict.catalog.productsCount, { n: hits.length }),
+            searching: dict.catalog.searching,
+          }}
         />
-        <button
-          type="submit"
-          className="shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50"
-        >
-          {dict.search.button}
-        </button>
-      </form>
+      </div>
 
       {!trimmed ? (
         <p className="mt-3 text-ink-500">{dict.printedCatalog.searchPrompt}</p>
       ) : (
-        <p className="mt-3 text-sm text-ink-400" aria-live="polite">
+        /* Not a live region: this is a full document load, so there is no
+            "update" for a screen reader to announce. CatalogSearch carries the
+            count in a region that fires on the client transition instead. */
+        <p className="mt-3 text-sm text-ink-400">
           {fmt(dict.catalog.productsCount, { n: hits.length })}
           {totalPages > 1 && (
             <> · {fmt(dict.printedCatalog.pageOf, { page: current, total: totalPages })}</>
@@ -217,6 +219,8 @@ export async function SearchResults({
             params={new URLSearchParams({ kerko: trimmed })}
             page={current}
             totalPages={totalPages}
+            total={hits.length}
+            perPage={PER_PAGE}
             dict={dict}
           />
         </div>

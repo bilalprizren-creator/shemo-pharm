@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { isLang, langHref, languageAlternates, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import { parsePage } from "@/lib/catalog";
@@ -25,7 +25,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     description: dict.printedCatalog.allMetaDescription,
     alternates: {
       canonical: `${langHref(dict.lang, self)}${suffix}`,
-      languages: { sq: `${self}${suffix}`, en: `/en${self}${suffix}` },
+      languages: languageAlternates(`${self}${suffix}`),
     },
   };
 }

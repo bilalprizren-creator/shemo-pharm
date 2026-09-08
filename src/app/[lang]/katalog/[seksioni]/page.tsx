@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
+import { isLang, langHref, languageAlternates, fmt, type Lang } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import { getDictionary } from "@/lib/dictionaries";
 import { getCatalogSectionBySlug } from "@/lib/catalog";
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }),
     alternates: {
       canonical: langHref(dict.lang, self),
-      languages: { sq: self, en: `/en${self}` },
+      languages: languageAlternates(self),
     },
   };
 }

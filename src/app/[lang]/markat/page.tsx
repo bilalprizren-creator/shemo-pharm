@@ -8,7 +8,7 @@ import {
   getBrandLinks,
   getUnbrandedCategories,
 } from "@/lib/catalog";
-import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
+import { isLang, langHref, languageAlternates, fmt, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: dict.brandsPage.metaDescription,
     alternates: {
       canonical: langHref(dict.lang, "/markat"),
-      languages: { sq: "/markat", en: "/en/markat" },
+      languages: languageAlternates("/markat"),
     },
   };
 }

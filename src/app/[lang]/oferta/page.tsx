@@ -8,7 +8,7 @@ import {
   getShowcaseProducts,
   toCardProducts,
 } from "@/lib/catalog";
-import { isLang, langHref, type Lang } from "@/lib/i18n";
+import { isLang, langHref, languageAlternates, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: dict.offersPage.metaDescription,
     alternates: {
       canonical: langHref(dict.lang, "/oferta"),
-      languages: { sq: "/oferta", en: "/en/oferta" },
+      languages: languageAlternates("/oferta"),
     },
     // A page whose only content is "nothing here yet" should not be offered
     // as a search result; it re-enters the index once it has offers on it.

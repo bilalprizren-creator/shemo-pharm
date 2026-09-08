@@ -14,7 +14,7 @@ import {
   toCardProducts,
   type ProductSort,
 } from "@/lib/catalog";
-import { langHref, fmt } from "@/lib/i18n";
+import { langHref, languageAlternates, fmt } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -113,10 +113,7 @@ const lang = dict.lang;
     description,
     alternates: {
       canonical,
-      languages: {
-        sq: `${path}${suffix}`,
-        en: `/en${path}${suffix}`,
-      },
+      languages: languageAlternates(`${path}${suffix}`),
     },
     ...(isView ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
@@ -561,6 +558,8 @@ export async function CatalogView({
                 params={params}
                 page={result.page}
                 totalPages={result.totalPages}
+                total={result.total}
+                perPage={PER_PAGE}
                 dict={dict}
               />
             </>

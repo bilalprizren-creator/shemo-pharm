@@ -57,7 +57,11 @@ describe("every product photo has a thumbnail", () => {
     expect(sources.length).toBeGreaterThan(1000);
   });
 
-  it("has one small copy per source, with nothing missing", () => {
+  // Both of these stat or list several thousand files while twenty-two other
+  // test files run beside them, which on a loaded machine ran past the default
+  // five seconds every few runs — a suite that fails at random teaches people
+  // to re-run it rather than read it.
+  it("has one small copy per source, with nothing missing", { timeout: 20_000 }, () => {
     const missing = sources.filter((name) => {
       const thumb = thumbnailFor(`/products/${name}`).replace("/products/", "");
       return !existsSync(path.join(PRODUCTS, thumb));
@@ -66,16 +70,19 @@ describe("every product photo has a thumbnail", () => {
     expect(missing).toHaveLength(0);
   });
 
-  it("has no thumbnail whose source has gone", () => {
+  it("has no thumbnail whose source has gone", { timeout: 20_000 }, () => {
     // The other direction: a deleted photograph leaves a small copy nothing
     // points at, which is dead weight in the repository and in the deploy.
+    //
+    // Through a Set rather than sources.some(): 4 574 thumbnails against 4 574
+    // sources is twenty-one million string comparisons, each one re-deriving
+    // the same stem, which under a full parallel run was slow enough to trip
+    // the five-second timeout every few runs.
+    const stems = new Set(sources.map((s) => s.replace(/\.[^.]+$/, "")));
     const orphans = readdirSync(THUMBS, { withFileTypes: true })
       .filter((e) => e.isFile())
       .map((e) => e.name)
-      .filter((name) => {
-        const stem = name.replace(/\.webp$/i, "");
-        return !sources.some((s) => s.replace(/\.[^.]+$/, "") === stem);
-      });
+      .filter((name) => !stems.has(name.replace(/\.webp$/i, "")));
     expect(orphans.slice(0, 10)).toEqual([]);
   });
 });

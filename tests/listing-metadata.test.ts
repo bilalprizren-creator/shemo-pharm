@@ -38,6 +38,9 @@ describe("listingMetadata", () => {
     const meta = listing({ faqja: "3" });
     expect(meta.alternates?.canonical).toBe("/produktet?faqja=3");
     expect(meta.alternates?.languages).toEqual({
+      // x-default is the Albanian URL: it sits on the bare path and is what a
+      // visitor whose language matches neither should be offered.
+      "x-default": "/produktet?faqja=3",
       sq: "/produktet?faqja=3",
       en: "/en/produktet?faqja=3",
     });
@@ -47,6 +50,9 @@ describe("listingMetadata", () => {
     const meta = listing({}, en);
     expect(meta.alternates?.canonical).toBe("/en/produktet");
     expect(meta.alternates?.languages).toEqual({
+      // x-default is the Albanian URL: it sits on the bare path and is what a
+      // visitor whose language matches neither should be offered.
+      "x-default": "/produktet",
       sq: "/produktet",
       en: "/en/produktet",
     });

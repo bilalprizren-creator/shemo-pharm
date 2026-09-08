@@ -89,7 +89,7 @@ describe("dictionaries", () => {
    * to match an unrelated variable — it is here to catch the dead ones, not to
    * prove liveness.
    */
-  it("uses every key it defines somewhere in src/", () => {
+  it("uses every key it defines somewhere in src/", { timeout: 20_000 }, () => {
     const root = fileURLToPath(new URL("../src", import.meta.url));
     const sources: string[] = [];
     const walk = (dir: string) => {

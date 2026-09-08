@@ -461,6 +461,8 @@ export const sq = {
     prevPage: "Faqja e mëparshme",
     nextPage: "Faqja tjetër",
     pageN: "Faqja {n}",
+    /** Where you are in the run — the total alone does not say. */
+    pageRange: "{from}–{to} nga {n}",
   },
 
   printedCatalog: {

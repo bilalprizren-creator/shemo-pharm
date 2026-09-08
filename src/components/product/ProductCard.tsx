@@ -36,7 +36,13 @@ export function ProductCard({
   const isKatalog = mode === "katalog";
   const photo = photoPresentation(product.image, { pad: "p-5" });
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
+    /* focus-within, so tabbing to the title lights the whole card the
+       way hovering does. The link's own focus-visible:outline-none does not
+       suppress anything, by the way: the :focus-visible rule in globals.css is
+       unlayered and beats every Tailwind utility, so the ring is drawn around
+       the title text regardless. This adds the card-level treatment that was
+       evidently meant to replace it. */
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover focus-within:-translate-y-0.5 focus-within:border-brand-200 focus-within:shadow-card-hover">
       {/* One well on both sites. It used to be a plain white box here and the
           tinted one only on the catalogue; see PhotoWell for why that was the
           wrong way round. */}

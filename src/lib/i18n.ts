@@ -50,3 +50,20 @@ export function fmt(
     key in vars ? String(vars[key]) : `{${key}}`
   );
 }
+
+/**
+ * The `alternates.languages` map for one page, including `x-default`.
+ *
+ * Albanian sits on the bare URLs and English under /en, so `x-default` — the
+ * page a search engine offers a visitor whose language matches neither — is the
+ * Albanian one. Seven `generateMetadata` blocks declared { sq, en } and stopped
+ * there; this is that triple in one place so the eighth cannot forget it.
+ *
+ * `path` is unprefixed and may carry a query string: "/produktet?faqja=3".
+ */
+export function languageAlternates(path: string): Record<string, string> {
+  const sq = path;
+  // "/" is the one path where the English twin is "/en" and not "/en/".
+  const en = path === "/" ? "/en" : `/en${path}`;
+  return { sq, en, "x-default": sq };
+}

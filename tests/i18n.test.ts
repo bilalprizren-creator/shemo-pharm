@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fmt, langFromPathname, langHref, switchLangPath } from "@/lib/i18n";
+import { fmt, langFromPathname, langHref, switchLangPath, languageAlternates } from "@/lib/i18n";
 
 describe("langHref", () => {
   it("leaves Albanian paths bare — sq lives at the root", () => {
@@ -61,5 +61,37 @@ describe("fmt", () => {
 
   it("leaves an unknown placeholder visible rather than printing undefined", () => {
     expect(fmt("Rezultatet për {q}", { name: "x" })).toBe("Rezultatet për {q}");
+  });
+});
+
+describe("languageAlternates", () => {
+  it("declares Albanian as the x-default", () => {
+    // Albanian sits on the bare URLs, so it is what a visitor whose language
+    // matches neither should be offered. Seven generateMetadata blocks
+    // declared { sq, en } and stopped there.
+    expect(languageAlternates("/produktet")).toEqual({
+      sq: "/produktet",
+      en: "/en/produktet",
+      "x-default": "/produktet",
+    });
+  });
+
+  it("keeps a query string on all three", () => {
+    expect(languageAlternates("/produktet?faqja=3")).toEqual({
+      sq: "/produktet?faqja=3",
+      en: "/en/produktet?faqja=3",
+      "x-default": "/produktet?faqja=3",
+    });
+  });
+
+  it("does not leave a trailing slash on the English root", () => {
+    // The catalogue domain's contents page is "/", where the twin is "/en"
+    // and not "/en/" — the redirect that would follow is a wasted hop in a
+    // hreflang map, and the two URLs are not the same string to a crawler.
+    expect(languageAlternates("/")).toEqual({
+      sq: "/",
+      en: "/en",
+      "x-default": "/",
+    });
   });
 });

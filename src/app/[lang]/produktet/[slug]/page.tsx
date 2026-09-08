@@ -23,7 +23,7 @@ import {
 } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 import { SITE } from "@/lib/site";
-import { isLang, langHref, fmt, type Lang } from "@/lib/i18n";
+import { isLang, langHref, languageAlternates, fmt, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Breadcrumbs, type Crumb } from "@/components/catalog/Breadcrumbs";
 import { BreadcrumbJsonLd, ProductJsonLd } from "@/components/seo/JsonLd";
@@ -55,10 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: {
       canonical,
-      languages: {
-        sq: `/produktet/${slug}`,
-        en: `/en/produktet/${slug}`,
-      },
+      languages: languageAlternates(`/produktet/${slug}`),
     },
     // Declaring `openGraph` replaces the layout's block wholesale rather than
     // merging into it, so everything it set has to be repeated here — this was

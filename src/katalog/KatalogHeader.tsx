@@ -27,7 +27,12 @@ export function KatalogHeader({
 }) {
   const lang = dict.lang as Lang;
   const pathname = usePathname();
-  const search = useSearchParams().toString();
+  const params = useSearchParams();
+  const search = params.toString();
+  // Seeds the header field on a results page. It was always blank, so refining
+  // a query meant retyping it — and the value is right there in the URL the
+  // language switch below already reads.
+  const currentQuery = params.get("kerko") ?? "";
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/95 backdrop-blur">
@@ -67,7 +72,10 @@ export function KatalogHeader({
           <input
             type="search"
             name="kerko"
-            defaultValue=""
+            // key, so a new query re-seeds the field across navigations —
+            // defaultValue alone is only read when the input first mounts.
+            key={currentQuery}
+            defaultValue={currentQuery}
             placeholder={dict.printedCatalog.searchPlaceholder}
             aria-label={dict.search.label}
             className="min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400"

@@ -116,7 +116,9 @@ export async function AllProducts({
         </div>
       </div>
 
-      <p className="mt-6 text-sm text-ink-400" aria-live="polite">
+      {/* Not a live region: /te-gjitha is only ever a full document load, so
+          there is no update for a screen reader to be told about. */}
+      <p className="mt-6 text-sm text-ink-400">
         {fmt(dict.catalog.productsCount, { n: all.length })} ·{" "}
         {fmt(dict.printedCatalog.pageOf, { page: current, total: totalPages })}
       </p>
@@ -163,6 +165,8 @@ export async function AllProducts({
           params={new URLSearchParams()}
           page={current}
           totalPages={totalPages}
+          total={all.length}
+          perPage={PER_PAGE}
           dict={dict}
         />
       </div>

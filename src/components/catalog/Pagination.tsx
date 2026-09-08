@@ -17,6 +17,8 @@ export function Pagination({
   params,
   page,
   totalPages,
+  total,
+  perPage,
   dict,
 }: {
   /** Already language-prefixed by the caller. */
@@ -24,9 +26,19 @@ export function Pagination({
   params: URLSearchParams;
   page: number;
   totalPages: number;
+  /**
+   * How many items there are in all, and how many fit a page — together they
+   * say *where* this page is, which the numbers alone do not. The only cue a
+   * visitor had after clicking "2" was the grand total beside the search box.
+   */
+  total: number;
+  perPage: number;
   dict: Dictionary;
 }) {
   if (totalPages <= 1) return null;
+
+  const from = (page - 1) * perPage + 1;
+  const to = Math.min(page * perPage, total);
 
   const windowPages = new Set<number>([1, totalPages, page - 1, page, page + 1]);
   const pages = Array.from(windowPages)
@@ -40,7 +52,16 @@ export function Pagination({
   }
 
   return (
-    <nav aria-label={dict.catalog.paginationLabel} className="mt-10 flex justify-center">
+    <nav
+      aria-label={dict.catalog.paginationLabel}
+      className="mt-10 flex flex-col items-center gap-3"
+    >
+      {/* Where you are, in words. The pager says which page; this says which
+          products, which is the question somebody scanning a 2 044-item
+          catalogue is actually asking. */}
+      <p className="text-sm text-ink-500">
+        {fmt(dict.catalog.pageRange, { from, to, n: total })}
+      </p>
       <ul className="flex flex-wrap items-center gap-1.5">
         <li>
           {page > 1 ? (
@@ -52,11 +73,15 @@ export function Pagination({
               <ChevronLeft className="size-4.5" aria-hidden />
             </Link>
           ) : (
+            // A disabled control, not an absent one: aria-hidden meant a
+            // screen reader heard nothing at the first page where a sighted
+            // visitor sees a greyed arrow, so the edge of the run was invisible.
             <span
-              aria-hidden
+              aria-disabled="true"
+              aria-label={dict.catalog.prevPage}
               className="flex size-11 items-center justify-center rounded-full border border-ink-900/6 text-ink-300"
             >
-              <ChevronLeft className="size-4.5" />
+              <ChevronLeft className="size-4.5" aria-hidden />
             </span>
           )}
         </li>
@@ -93,10 +118,11 @@ export function Pagination({
             </Link>
           ) : (
             <span
-              aria-hidden
+              aria-disabled="true"
+              aria-label={dict.catalog.nextPage}
               className="flex size-11 items-center justify-center rounded-full border border-ink-900/6 text-ink-300"
             >
-              <ChevronRight className="size-4.5" />
+              <ChevronRight className="size-4.5" aria-hidden />
             </span>
           )}
         </li>
