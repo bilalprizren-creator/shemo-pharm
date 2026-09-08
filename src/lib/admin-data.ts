@@ -187,7 +187,9 @@ export async function matchingProductIds(f: ProductFilter): Promise<number[]> {
       FROM categories c JOIN subtree s ON c.parent = s.node
       WHERE s.depth < 10
     )
-    SELECT p.id, p.name
+    -- The id alone. Ordering by a column is not selecting it, and the names
+    -- were 2 049 strings fetched on every panel page load to be thrown away.
+    SELECT p.id
     FROM products p
     WHERE (${f.query} = '' OR p.name ILIKE ${like} OR p.sku ILIKE ${like})
       AND (${inStock}::boolean IS NULL OR p.in_stock = ${inStock}::boolean)
