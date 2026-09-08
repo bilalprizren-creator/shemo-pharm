@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import { Package } from "lucide-react";
 import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "./PhotoWell";
 
@@ -67,7 +68,7 @@ export function ProductGallery({
                   cutOut={photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                 >
                   <Image
-                    src={src}
+                    src={thumbnailFor(src)}
                     alt=""
                     fill
                     sizes="72px"

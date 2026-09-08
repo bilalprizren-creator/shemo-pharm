@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 import { SITE } from "@/lib/site";
@@ -74,13 +75,16 @@ export async function PrintSheets({
                   <div className="relative flex h-[30mm] w-full items-center justify-center">
                     {image ? (
                       <Image
-                        src={image}
+                        // The 560px copy, not the 1000px original. next/image
+                        // stopped resizing anything when images.unoptimized
+                        // went on, so the width below no longer builds a
+                        // srcset — it only sizes the box, and the browser
+                        // fetches whatever this src names. A full run is 1 733
+                        // photographs, which was ~50 MB of originals before the
+                        // print dialog even opened, on a phone, in a pharmacy.
+                        // 560px across 30mm is 474 dpi, still past print need.
+                        src={thumbnailFor(image)}
                         alt=""
-                        // 192, not the 30mm the box is drawn at: next/image
-                        // builds a 1x/2x srcset off this number, and 192 lands
-                        // on 256/384 where 220 landed on 256/640. 384px across
-                        // 30mm is 325 dpi — still print quality, at a third of
-                        // the pixels and one fewer variant to transform.
                         width={192}
                         height={192}
                         // Eager throughout: an image the browser has not

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -185,7 +186,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                     >
                       {p.image ? (
                         <Image
-                          src={p.image}
+                          src={thumbnailFor(p.image)}
                           alt=""
                           fill
                           sizes="64px"

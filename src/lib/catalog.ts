@@ -431,7 +431,7 @@ export async function getCatalogSectionBySlug(
  * — which is not the same set the shop lists. /admin/katalogu shows both counts
  * side by side for exactly this reason.
  */
-export async function getCatalogSections(): Promise<CatalogSectionWithProducts[]> {
+async function computeCatalogSections(): Promise<CatalogSectionWithProducts[]> {
   const data = await loadCatalog();
   const { sections } = data;
   const products = printedProducts(data.products, data.catalogOnly);
@@ -455,6 +455,18 @@ export async function getCatalogSections(): Promise<CatalogSectionWithProducts[]
     }))
     .filter((s) => s.products.length > 0);
 }
+
+/**
+ * Per-render memoization, the same wrapper loadCatalog() gets.
+ *
+ * loadCatalog() is already cached, so this saves no database round trip — it
+ * saves the grouping and the sorting on top of it. /katalog/[seksioni] called
+ * this three times per request (generateMetadata, the page body, SectionView),
+ * and each pass walked every printed product into a Map and sorted 61 section
+ * arrays. getAllProductsInCatalogOrder sorted 2 044 entries per call the same
+ * way, and the sitemap and the contents page both reach for it.
+ */
+export const getCatalogSections = cache(computeCatalogSections);
 
 /**
  * The printed sections `getCatalogSections()` drops, because not one of their
@@ -499,7 +511,7 @@ export interface ProductInCatalogOrder {
  * Reads the same `loadCatalog()` payload everything else does, so this costs no
  * extra database round trip.
  */
-export async function getAllProductsInCatalogOrder(): Promise<ProductInCatalogOrder[]> {
+async function computeAllProductsInCatalogOrder(): Promise<ProductInCatalogOrder[]> {
   const data = await loadCatalog();
   const { sections } = data;
   const products = printedProducts(data.products, data.catalogOnly);
@@ -526,6 +538,9 @@ export async function getAllProductsInCatalogOrder(): Promise<ProductInCatalogOr
 
   return [...printed, ...unprinted];
 }
+
+/** Memoized per render — see getCatalogSections. */
+export const getAllProductsInCatalogOrder = cache(computeAllProductsInCatalogOrder);
 
 /** The type tree, for the sidebar filter and /kategorite. Brands are omitted. */
 export async function getCategoryTree(): Promise<CategoryNode[]> {
@@ -755,6 +770,18 @@ export async function getProductsByIds(ids: number[]): Promise<Product[]> {
     const found = byId.get(id);
     return found ? [found] : [];
   });
+}
+
+/**
+ * Every product, unsorted and unpaged.
+ *
+ * The sitemap used to ask getProducts({ perPage: 3000 }), which sorts all
+ * 2 049 through the collator and slices a page out of them — work thrown away,
+ * and a ceiling that would have started dropping products silently at 3 001.
+ * Order does not matter to a sitemap.
+ */
+export async function getAllProducts(): Promise<Product[]> {
+  return (await loadCatalog()).products;
 }
 
 export async function getProductCount(): Promise<number> {

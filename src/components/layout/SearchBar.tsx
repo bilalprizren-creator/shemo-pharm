@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
 import { Search, X, Loader2, PackageSearch } from "lucide-react";
 import type { PublicProduct } from "@/lib/types";
@@ -265,7 +266,7 @@ export function SearchBar({
                       >
                         {p.image ? (
                           <Image
-                            src={p.image}
+                            src={thumbnailFor(p.image)}
                             alt=""
                             fill
                             sizes="44px"

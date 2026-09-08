@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -90,7 +91,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               >
                 {p.image ? (
                   <Image
-                    src={p.image}
+                    src={thumbnailFor(p.image)}
                     alt=""
                     fill
                     sizes="80px"

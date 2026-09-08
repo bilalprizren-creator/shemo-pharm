@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 import {
   catalogSectionSlug,
   getAllCategories,
+  getAllProducts,
   getAllProductsInCatalogOrder,
   getCatalogSections,
-  getProducts,
 } from "@/lib/catalog";
 import { offersAvailable } from "@/lib/offers";
 import { SITE_ORIGINS, modeFromHost } from "@/lib/site-mode";
@@ -106,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((c) => c.count > 0)
     .map((c) => at(`/kategorite/${c.slug}`, "weekly", 0.7));
 
-  const { items } = await getProducts({ perPage: 3000 });
+  const items = await getAllProducts();
   const products: MetadataRoute.Sitemap = items.map((p) =>
     // updated_at is the row's own timestamp, so a crawler is told to come back
     // for the products an editor actually touched instead of for all 2 049.

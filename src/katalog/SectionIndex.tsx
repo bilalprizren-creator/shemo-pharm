@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
 import { List, Package, Printer, Search } from "lucide-react";
 import {
@@ -124,7 +125,7 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                 >
                   {cover ? (
                     <Image
-                      src={cover}
+                      src={thumbnailFor(cover)}
                       alt=""
                       fill
                       sizes="64px"
