@@ -604,6 +604,33 @@ export function searchProducts(list: Product[], query: string): Product[] {
   });
 }
 
+/**
+ * Printed sections whose number or name matches the query.
+ *
+ * The printed catalogue is organised by manufacturer and distributor — 6.7
+ * Cansin, 38 Denk Pharma, 23 Froika — and searching it could not find any of
+ * them, because a product is matched on its own name and article code and most
+ * are not named after the house that makes them. "denk" answered with nothing
+ * at all while section 38 sat in the contents; "cansin" answered with three
+ * products while its section held ninety-odd. The one thing the paper edition
+ * is arranged by was the one thing its search could not see.
+ *
+ * Matched the same way as products, token by token, so "denk pharma" and
+ * "pharma denk" both land. The catalogue number is in the haystack too: a
+ * partner reading "6.7" off a page can type it.
+ */
+export function searchCatalogSections(
+  sections: CatalogSectionWithProducts[],
+  query: string
+): CatalogSectionWithProducts[] {
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return [];
+  return sections.filter((s) => {
+    const haystack = `${s.catalogNo} ${s.name}`.toLowerCase();
+    return tokens.every((t) => haystack.includes(t));
+  });
+}
+
 export async function getProducts({
   categorySlug,
   typeSlug,

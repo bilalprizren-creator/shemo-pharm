@@ -4,6 +4,7 @@ import { canSeePrices, getSession } from "@/lib/auth";
 import {
   catalogSectionSlug,
   getCatalogSections,
+  searchCatalogSections,
   searchProducts,
   toCardProducts,
 } from "@/lib/catalog";
@@ -18,15 +19,17 @@ import { Pagination } from "@/components/catalog/Pagination";
 /**
  * Search across the printed catalogue.
  *
- * Deliberately narrower than the shop's /produktet: no filters, no sorting, no
- * pagination — just "which page of the catalogue is this code on". Each hit
- * carries its printed section, because that is the answer a partner holding the
- * paper edition actually wants.
+ * Deliberately narrower than the shop's /produktet: no filters and no sorting,
+ * just "which page of the catalogue is this on". Each hit carries its printed
+ * section, because that is the answer a partner holding the paper edition
+ * actually wants — and a query that names a section brings back the section
+ * itself, above the grid.
  *
  * Only products that appear in the printed catalogue are searched. The 311 the
  * shop carries but the catalogue never printed would be noise here: the code
  * somebody types comes off a printed page.
  */
+
 /**
  * Forty-eight per page, the same as /te-gjitha.
  *
@@ -64,6 +67,11 @@ export async function SearchResults({
 
   const trimmed = query.trim();
   const hits = trimmed ? searchProducts(printed, trimmed) : [];
+  // A manufacturer's name is what the printed catalogue is organised by, and
+  // usually not what its products are called — so the section is the answer
+  // even when barely any product matches. Shown above the grid, never instead
+  // of it: "bioblas" matches both a section and sixteen products.
+  const matchedSections = trimmed ? searchCatalogSections(sections, trimmed) : [];
   const totalPages = Math.max(1, Math.ceil(hits.length / PER_PAGE));
   // Clamped rather than 404: a hand-edited number or a bookmark kept after the
   // range shrank should land on a real page of results, not on an error.
@@ -138,7 +146,34 @@ export async function SearchResults({
         </p>
       )}
 
-      {trimmed && hits.length === 0 && (
+      {matchedSections.length > 0 && (
+        <section className="mt-6" aria-labelledby="seksionet-perputhen">
+          <h2
+            id="seksionet-perputhen"
+            className="text-xs font-semibold uppercase tracking-wide text-ink-400"
+          >
+            {dict.printedCatalog.matchingSections}
+          </h2>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {matchedSections.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={href(`/katalog/${catalogSectionSlug(s)}`)}
+                  className="inline-flex items-baseline gap-1.5 rounded-field border border-line bg-white px-3 py-1.5 text-sm font-medium text-ink-800 transition-colors hover:border-brand-300 hover:text-brand-700"
+                >
+                  <span className="font-mono text-xs text-ink-400">{s.catalogNo}</span>
+                  {s.name}
+                  <span className="text-xs text-ink-400">
+                    {fmt(dict.catalog.productsCount, { n: s.products.length })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {trimmed && hits.length === 0 && matchedSections.length === 0 && (
         <div className="mt-8">
           <EmptyState
             title={fmt(dict.printedCatalog.searchEmpty, { q: trimmed })}

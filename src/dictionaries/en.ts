@@ -446,6 +446,7 @@ export const en: Dictionary = {
     siteTitle: "SHEMO Katalog | Medical product catalogue",
     searchPlaceholder: "Search by product or article code…",
     searchTitle: "Search results",
+    matchingSections: "Matching sections",
     searchEmpty: "No products found for “{q}”.",
     searchPrompt: "Type a product name or an article code.",
     inSection: "Section {no} — {name}",

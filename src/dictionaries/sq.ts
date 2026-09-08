@@ -476,6 +476,9 @@ export const sq = {
     siteTitle: "SHEMO Katalog | Katalogu i produkteve mjekësore",
     searchPlaceholder: "Kërko produkt ose kod artikulli…",
     searchTitle: "Rezultatet e kërkimit",
+    /** Seksione të katalogut që përputhen me kërkimin — katalogu i shtypur
+     *  është i ndarë sipas prodhuesve, ndaj emri i tyre është shpesh përgjigjja. */
+    matchingSections: "Seksione që përputhen",
     searchEmpty: "Asnjë produkt nuk u gjet për “{q}”.",
     searchPrompt: "Shkruani emrin e produktit ose kodin e artikullit.",
     inSection: "Seksioni {no} — {name}",
