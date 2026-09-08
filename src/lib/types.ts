@@ -65,6 +65,14 @@ export interface CardProduct extends PublicProduct {
   price: string | null;
   oldPrice: string | null;
   discountPct: number | null;
+  /**
+   * The same price as a number, under the same gate.
+   *
+   * The basket used to regex "12,34 €" back into cents to add a total up —
+   * a formatted string parsed by the code that formatted it, one locale change
+   * away from silently returning zero. It is null exactly when `price` is.
+   */
+  priceCents: number | null;
 }
 
 /**

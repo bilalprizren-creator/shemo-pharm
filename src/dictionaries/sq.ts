@@ -376,6 +376,9 @@ export const sq = {
     codeLabel: "Kodi i produktit:",
     loginForPrice: "Kyçu për të parë çmimin",
     outOfStock: "Pa stok",
+    /** Shown beside the add button when the product is not in stock. */
+    outOfStockOrderNote:
+      "Ky produkt nuk është në stok për momentin. Mund ta shtoni gjithsesi — ju konfirmojmë afatin e furnizimit.",
     inStock: "Në stok",
     availability: "Disponueshmëria:",
     wholesalePrice: "Çmimi me shumicë",
@@ -723,6 +726,28 @@ export const sq = {
     orderSentText:
       "Ekipi i SHEMO PHARM ju kontakton për të konfirmuar disponueshmërinë dhe çmimet.",
     keepCart: "Mbaje shportën",
+    /** Per-line money — a wholesale basket is checked line by line. */
+    lineTotal: "Gjithsej: {sum}",
+    /** Out of stock, shown where the line is, not only on the product page. */
+    outOfStock: "Pa stok",
+    outOfStockNote:
+      "Disa produkte janë pa stok. Mund t'i dërgoni gjithsesi — ju konfirmojmë afatin e furnizimit.",
+    /**
+     * The mail channel opens the customer's own mail client, which on a desktop
+     * browser with none registered does nothing at all — so the panel says what
+     * was attempted rather than declaring success.
+     */
+    mailOpenedTitle: "Ju hapëm programin e email-it",
+    mailOpenedText:
+      "Nëse nuk u hap asgjë, kopjoni tekstin e porosisë dhe dërgojeni te {email}.",
+    copyOrder: "Kopjo tekstin e porosisë",
+    orderCopied: "Teksti u kopjua",
+    /** The row went nowhere; the order itself still did. */
+    notRecorded:
+      "Porosia u dërgua, por nuk u regjistrua te ne. Nëse nuk merrni përgjigje, na telefononi.",
+    clearConfirm: "Konfirmo zbrazjen",
+    clearUndo: "Zhbëj",
+    cartCleared: "Shporta u zbraz",
   },
 
   wishlistPage: {
@@ -732,6 +757,12 @@ export const sq = {
     loadFailed: "Lista nuk u ngarkua. Provoni ta rifreskoni faqen.",
     emptyTitle: "Lista juaj është bosh",
     emptyText: "Shtoni produkte në listën e dëshirave duke klikuar ikonën e zemrës.",
+    /**
+     * In B2B a wishlist is a reorder template, not a daydream — the whole list
+     * going into the basket at once is the gesture it exists for.
+     */
+    addAllToCart: "Shto të gjitha në shportë",
+    addAllCount: "{n} produkte",
   },
 
   sticky: {

@@ -349,6 +349,8 @@ export const en: Dictionary = {
     codeLabel: "Product code:",
     loginForPrice: "Log in to see the price",
     outOfStock: "Out of stock",
+    outOfStockOrderNote:
+      "This product is not in stock right now. You can still add it — we will confirm the lead time.",
     inStock: "In stock",
     availability: "Availability:",
     wholesalePrice: "Wholesale price",
@@ -682,6 +684,20 @@ export const en: Dictionary = {
     orderSentText:
       "The SHEMO PHARM team will contact you to confirm availability and prices.",
     keepCart: "Keep the cart",
+    lineTotal: "Line total: {sum}",
+    outOfStock: "Out of stock",
+    outOfStockNote:
+      "Some products are out of stock. You can still send the order — we will confirm the lead time.",
+    mailOpenedTitle: "We opened your mail app",
+    mailOpenedText:
+      "If nothing happened, copy the order text and send it to {email}.",
+    copyOrder: "Copy the order text",
+    orderCopied: "Text copied",
+    notRecorded:
+      "The order was sent, but we could not record it. If you hear nothing back, please call us.",
+    clearConfirm: "Confirm emptying",
+    clearUndo: "Undo",
+    cartCleared: "Cart emptied",
   },
 
   wishlistPage: {
@@ -691,6 +707,8 @@ export const en: Dictionary = {
     loadFailed: "The list failed to load. Try refreshing the page.",
     emptyTitle: "Your list is empty",
     emptyText: "Add products to the wishlist by clicking the heart icon.",
+    addAllToCart: "Add all to cart",
+    addAllCount: "{n} products",
   },
 
   sticky: {

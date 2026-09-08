@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { thumbnailFor } from "@/lib/images";
 import Link from "next/link";
@@ -20,7 +19,16 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
-import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
+import {
+  formatCents,
+  orderWentUnrecorded,
+  useCartItems,
+  useCartOrder,
+  useOrderSend,
+} from "./useCartOrder";
+import { CopyOrderButton } from "./CopyOrderButton";
+import { ClearCartButton } from "./ClearCartButton";
+import { SITE } from "@/lib/site";
 
 export function CartPageClient({ dict }: { dict: Dictionary }) {
   const { setQty, remove, clear } = useCart();
@@ -29,7 +37,8 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
   const lang = dict.lang;
   // The order leaves through WhatsApp or a mail client, so the site never
   // hears back — this is the only confirmation the customer gets.
-  const [sent, setSent] = useState(false);
+  const send = useOrderSend(order);
+  const sent = send.channel !== null;
 
   if (error) {
     return (
@@ -70,12 +79,12 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
     );
   }
 
-  const { qtyOf, pricesVisible, totalCents, whatsappHref, mailHref, logOrder } = order;
+  const { qtyOf, subtotalOf, pricesVisible, totalCents, whatsappHref, mailHref } = order;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
       <ul className="divide-y divide-ink-900/6 rounded-xl border border-ink-900/8 bg-white">
-        {resolved.map((p) => (
+        {order.lineItems.map((p) => (
           <li
             key={p.id}
             // Wraps rather than squeezes: with 44px steppers the quantity block
@@ -115,9 +124,27 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
                   .filter(Boolean)
                   .join(" · ")}
               </p>
-              {p.price && (
-                <p className="mt-1 text-sm font-bold text-brand-800">{p.price}</p>
-              )}
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                {p.price && (
+                  <p className="text-sm font-bold text-brand-800">{p.price}</p>
+                )}
+                {/* The line's own money — the unit price alone does not answer
+                    "what is this row costing me", which is what a wholesale
+                    buyer checks before sending forty of them. */}
+                {subtotalOf(p.id) !== null && qtyOf(p.id) > 1 && (
+                  <p className="text-xs text-ink-400">
+                    {fmt(dict.cartPage.lineTotal, { sum: formatCents(subtotalOf(p.id)!) })}
+                  </p>
+                )}
+                {/* Out of stock where the line is. The card and the product
+                    page both said so; the basket did not, so a long order could
+                    quietly carry items nobody can ship. */}
+                {!p.inStock && (
+                  <span className="rounded-full bg-ink-900/6 px-2 py-0.5 text-[11px] font-semibold text-ink-500">
+                    {dict.cartPage.outOfStock}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
@@ -127,7 +154,8 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               <div className="flex h-11 items-center rounded-lg border border-ink-900/12">
                 <button
                   type="button"
-                  onClick={() => setQty(p.id, qtyOf(p.id) - 1)}
+                  // Clamps at one — the trash button is how a line goes away.
+                  onClick={() => setQty(p.id, Math.max(1, qtyOf(p.id) - 1))}
                   aria-label={fmt(dict.cartPage.decreaseFor, { name: p.name })}
                   className="flex size-11 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
                 >
@@ -167,7 +195,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
         <dl className="mt-3 space-y-1.5 text-sm text-ink-500">
           <div className="flex justify-between">
             <dt>{dict.cartPage.productsRow}</dt>
-            <dd className="font-semibold text-ink-900">{resolved.length}</dd>
+            <dd className="font-semibold text-ink-900">{order.lineItems.length}</dd>
           </div>
           <div className="flex justify-between">
             <dt>{dict.cartPage.totalQty}</dt>
@@ -199,19 +227,42 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
 
         {sent ? (
           <div className="mt-5 rounded-xl bg-accent-50 px-4 py-4" role="status">
+            {/* The mail channel opens the customer's own mail client, which on
+                a desktop with none registered does nothing and says nothing —
+                so this reports what was attempted, and hands over the text. */}
             <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
               <CheckCircle2 className="size-5 text-accent-600" aria-hidden />
-              {dict.cartPage.orderSentTitle}
+              {send.channel === "email"
+                ? dict.cartPage.mailOpenedTitle
+                : dict.cartPage.orderSentTitle}
             </p>
             <p className="mt-1 text-[13px] leading-relaxed text-ink-600">
-              {dict.cartPage.orderSentText}
+              {send.channel === "email"
+                ? fmt(dict.cartPage.mailOpenedText, { email: SITE.emails[0] })
+                : dict.cartPage.orderSentText}
             </p>
+            {send.channel === "email" && (
+              <div className="mt-3">
+                <CopyOrderButton
+                  text={order.orderText}
+                  labels={{
+                    copy: dict.cartPage.copyOrder,
+                    copied: dict.cartPage.orderCopied,
+                  }}
+                />
+              </div>
+            )}
+            {orderWentUnrecorded(send.log) && (
+              <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-[13px] leading-relaxed text-ink-600">
+                {dict.cartPage.notRecorded}
+              </p>
+            )}
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 onClick={() => {
                   clear();
-                  setSent(false);
+                  send.reset();
                 }}
                 className="min-h-11 flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
               >
@@ -219,7 +270,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               </button>
               <button
                 type="button"
-                onClick={() => setSent(false)}
+                onClick={send.reset}
                 className="min-h-11 flex-1 rounded-full border border-ink-900/12 bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
               >
                 {dict.cartPage.keepCart}
@@ -232,10 +283,7 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => {
-                logOrder("whatsapp");
-                setSent(true);
-              }}
+              onClick={() => send.send("whatsapp")}
               className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
             >
               <MessageCircle className="size-4.5" aria-hidden />
@@ -243,23 +291,32 @@ export function CartPageClient({ dict }: { dict: Dictionary }) {
             </a>
             <a
               href={mailHref}
-              onClick={() => {
-                logOrder("email");
-                setSent(true);
-              }}
+              onClick={() => send.send("email")}
               className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
             >
               <Mail className="size-4.5 text-brand-600" aria-hidden />
               {dict.cartPage.sendEmail}
             </a>
-            <button
-              type="button"
-              onClick={clear}
+            <ClearCartButton
+              labels={{
+                clear: dict.cartPage.clearCart,
+                confirm: dict.cartPage.clearConfirm,
+                undo: dict.cartPage.clearUndo,
+                cleared: dict.cartPage.cartCleared,
+              }}
               className="min-h-11 w-full py-1 text-center text-xs font-medium text-ink-400 hover:text-red-600"
-            >
-              {dict.cartPage.clearCart}
-            </button>
+              confirmClassName="min-h-11 w-full py-1 text-center text-xs font-bold text-red-600 underline underline-offset-2"
+            />
           </div>
+        )}
+
+        {/* Said once for the whole basket as well as per line: the chips are
+            easy to scroll past on a long order, and this is the sentence that
+            explains what sending one anyway means. */}
+        {order.lineItems.some((p) => !p.inStock) && (
+          <p className="mt-4 rounded-lg bg-tint px-3 py-2 text-[12px] leading-relaxed text-ink-500">
+            {dict.cartPage.outOfStockNote}
+          </p>
         )}
 
         <p className="mt-4 text-[12px] leading-relaxed text-ink-400">

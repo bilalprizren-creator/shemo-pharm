@@ -223,6 +223,16 @@ export default async function ProductPage({ params }: Props) {
               </div>
             )}
             <div className="mt-4 border-t border-ink-900/6 pt-4">
+              {/* Adding an out-of-stock product is allowed and always was —
+                  this is a wholesale order request, not a checkout, and a
+                  pharmacy ordering ahead of a delivery is the normal case. The
+                  button stayed fully enabled and said nothing about it, which
+                  is the part that was wrong. */}
+              {!product.inStock && (
+                <p className="mb-3 rounded-lg bg-tint px-3 py-2 text-[13px] leading-relaxed text-ink-500">
+                  {dict.product.outOfStockOrderNote}
+                </p>
+              )}
               <AddToCartWithQty
                 productId={product.id}
                 productName={title}

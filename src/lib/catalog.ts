@@ -1055,6 +1055,7 @@ function buildCard(
     categoryName,
     inStock: product.inStock,
     price: showPrices ? formatPrice(product.priceCents) : null,
+    priceCents: showPrices ? product.priceCents : null,
     oldPrice: showPrices && hasDiscount ? formatPrice(product.regularCents) : null,
     discountPct: hasDiscount
       ? Math.round((1 - product.priceCents / product.regularCents) * 100)

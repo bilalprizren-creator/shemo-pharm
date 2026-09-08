@@ -23,7 +23,16 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
 import { useCart } from "./CartProvider";
 import { QtyInput } from "./QtyInput";
-import { formatCents, useCartItems, useCartOrder } from "./useCartOrder";
+import {
+  formatCents,
+  orderWentUnrecorded,
+  useCartItems,
+  useCartOrder,
+  useOrderSend,
+} from "./useCartOrder";
+import { CopyOrderButton } from "./CopyOrderButton";
+import { ClearCartButton } from "./ClearCartButton";
+import { SITE } from "@/lib/site";
 
 /**
  * The basket as a side panel: the cart icon slides it in over the current
@@ -53,7 +62,8 @@ function CartPanel({ dict }: { dict: Dictionary }) {
   // The order leaves through WhatsApp or a mail client, so the site never
   // hears back. Saying so — and offering to empty the basket — is what stops
   // a customer wondering whether it worked and sending it a second time.
-  const [sent, setSent] = useState(false);
+  const send = useOrderSend(order);
+  const sent = send.channel !== null;
   const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -146,7 +156,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
         ) : (
           <>
             <ul className="flex-1 divide-y divide-ink-900/6 overflow-y-auto">
-              {items.map((p) => (
+              {order.lineItems.map((p) => (
                 <li key={p.id} className="flex gap-3 p-4">
                   <Link
                     href={langHref(lang, `/produktet/${p.slug}`)}
@@ -179,9 +189,28 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                     >
                       {p.name}
                     </Link>
-                    {p.price && (
-                      <p className="mt-0.5 text-sm font-bold text-brand-800">{p.price}</p>
-                    )}
+                    <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      {p.price && (
+                        <p className="text-sm font-bold text-brand-800">{p.price}</p>
+                      )}
+                      {/* The line's own money. A wholesale basket is checked line
+                          by line, and the unit price alone does not answer that. */}
+                      {order.subtotalOf(p.id) !== null && order.qtyOf(p.id) > 1 && (
+                        <p className="text-xs text-ink-400">
+                          {fmt(dict.cartPage.lineTotal, {
+                            sum: formatCents(order.subtotalOf(p.id)!),
+                          })}
+                        </p>
+                      )}
+                      {/* Out of stock where the line is. It was on the card and
+                          the product page and nowhere in the basket, so a
+                          thirty-line order could quietly carry withdrawn items. */}
+                      {!p.inStock && (
+                        <span className="rounded-full bg-ink-900/6 px-2 py-0.5 text-[11px] font-semibold text-ink-500">
+                          {dict.cartPage.outOfStock}
+                        </span>
+                      )}
+                    </div>
 
                     <div className="mt-2 flex items-center justify-between gap-2">
                       {/* The drawer is the cart most customers actually use on
@@ -190,7 +219,10 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                       <div className="flex h-11 items-center rounded-lg border border-ink-900/12">
                         <button
                           type="button"
-                          onClick={() => setQty(p.id, order.qtyOf(p.id) - 1)}
+                          // Clamps at one, like the product page's stepper: the trash button
+                          // is how a line is removed, and a mis-tap on minus
+                          // should not be a second way to do it.
+                          onClick={() => setQty(p.id, Math.max(1, order.qtyOf(p.id) - 1))}
                           aria-label={fmt(dict.cartPage.decreaseFor, { name: p.name })}
                           className="flex size-11 items-center justify-center rounded-l-lg text-ink-700 hover:bg-brand-50"
                         >
@@ -229,19 +261,43 @@ function CartPanel({ dict }: { dict: Dictionary }) {
             <div className="border-t border-ink-900/8 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
               {sent ? (
                 <div role="status">
+                  {/* Two different claims. WhatsApp opens or the browser says
+                      it cannot; a mailto: link in a browser with no mail client
+                      registered does nothing at all and reports nothing, so the
+                      panel says what was attempted and hands over the text. */}
                   <p className="flex items-center gap-2 text-sm font-bold text-ink-900">
                     <CheckCircle2 className="size-5 text-accent-600" aria-hidden />
-                    {dict.cartPage.orderSentTitle}
+                    {send.channel === "email"
+                      ? dict.cartPage.mailOpenedTitle
+                      : dict.cartPage.orderSentTitle}
                   </p>
                   <p className="mt-1 text-[13px] leading-relaxed text-ink-500">
-                    {dict.cartPage.orderSentText}
+                    {send.channel === "email"
+                      ? fmt(dict.cartPage.mailOpenedText, { email: SITE.emails[0] })
+                      : dict.cartPage.orderSentText}
                   </p>
+                  {send.channel === "email" && (
+                    <div className="mt-3">
+                      <CopyOrderButton
+                        text={order.orderText}
+                        labels={{
+                          copy: dict.cartPage.copyOrder,
+                          copied: dict.cartPage.orderCopied,
+                        }}
+                      />
+                    </div>
+                  )}
+                  {orderWentUnrecorded(send.log) && (
+                    <p className="mt-3 rounded-lg bg-tint px-3 py-2 text-[13px] leading-relaxed text-ink-500">
+                      {dict.cartPage.notRecorded}
+                    </p>
+                  )}
                   <div className="mt-3 flex gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         clear();
-                        setSent(false);
+                        send.reset();
                       }}
                       className="min-h-11 flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
                     >
@@ -249,7 +305,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setSent(false)}
+                      onClick={send.reset}
                       className="min-h-11 flex-1 rounded-full border border-ink-900/12 bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
                     >
                       {dict.cartPage.keepCart}
@@ -285,10 +341,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                   href={order.whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => {
-                    order.logOrder("whatsapp");
-                    setSent(true);
-                  }}
+                  onClick={() => send.send("whatsapp")}
                   className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
                 >
                   <MessageCircle className="size-4.5" aria-hidden />
@@ -296,10 +349,7 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                 </a>
                 <a
                   href={order.mailHref}
-                  onClick={() => {
-                    order.logOrder("email");
-                    setSent(true);
-                  }}
+                  onClick={() => send.send("email")}
                   className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-ink-900/12 bg-white px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-400 hover:text-brand-700"
                 >
                   <Mail className="size-4.5 text-brand-600" aria-hidden />
@@ -315,13 +365,16 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                 >
                   {dict.cartPage.viewFullCart}
                 </Link>
-                <button
-                  type="button"
-                  onClick={clear}
+                <ClearCartButton
+                  labels={{
+                    clear: dict.cartPage.clearCart,
+                    confirm: dict.cartPage.clearConfirm,
+                    undo: dict.cartPage.clearUndo,
+                    cleared: dict.cartPage.cartCleared,
+                  }}
                   className="text-xs font-medium text-ink-400 hover:text-red-600"
-                >
-                  {dict.cartPage.clearCart}
-                </button>
+                  confirmClassName="text-xs font-bold text-red-600 underline underline-offset-2"
+                />
               </div>
                 </>
               )}

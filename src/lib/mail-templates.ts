@@ -233,6 +233,93 @@ export function newContactMessage({
   return { to, subject, html, text, replyTo: entry.email };
 }
 
+
+/**
+ * "A basket was sent as an order" — to the business.
+ *
+ * The order itself travels through WhatsApp or the customer's own mail client,
+ * straight from their device; this is the copy that does not depend on either
+ * arriving. It matters most for the mail channel: the whole order rides in a
+ * `mailto:` query string, and Outlook truncates around 2 000 characters while
+ * the Windows shell caps at ~2 048 — a forty-line wholesale order goes over
+ * that and is sent short, with nothing to say so at either end.
+ *
+ * Albanian only and hardcoded, like the other two notices to this inbox, and
+ * for the same reason: it pairs with /admin/porosite, which is not translated.
+ */
+export function newOrderMessage({
+  order,
+  to,
+  adminUrl,
+}: {
+  order: {
+    id: number;
+    channel: "whatsapp" | "email";
+    customerName: string;
+    customerEmail: string;
+    items: { name: string; sku: string; qty: number }[];
+    /** Omitted from the mail when the customer cannot see prices either. */
+    totalCents: number | null;
+  };
+  to: string;
+  adminUrl: string;
+}): MailMessage {
+  const subject = `Porosi e re #${order.id}${
+    order.customerName ? ` — ${order.customerName}` : ""
+  }`;
+  const channelName = order.channel === "whatsapp" ? "WhatsApp" : "Email";
+  const rows: [string, string][] = [
+    ["Kanali", channelName],
+    ["Klienti", order.customerName || "—"],
+    ["Email", order.customerEmail || "—"],
+    ["Artikuj", String(order.items.length)],
+  ];
+  if (order.totalCents !== null) {
+    rows.push(["Totali", `${(order.totalCents / 100).toFixed(2).replace(".", ",")} €`]);
+  }
+
+  const lines = order.items.map(
+    (i, n) => `${n + 1}. ${i.name}${i.sku ? ` (kodi: ${i.sku})` : ""} — ${i.qty} copë`
+  );
+
+  const html = shell(
+    subject,
+    [
+      `<h1 style="margin:0 0 14px;font-size:20px;color:${INK};">Porosi e re #${order.id}</h1>`,
+      paragraph(
+        `Klienti e hapi ${channelName}-in nga shporta. Kjo është kopja e plotë e listës, në rast se mesazhi origjinal arrin i shkurtuar ose nuk arrin fare.`
+      ),
+      `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;">`,
+      rows
+        .map(
+          ([k, v]) =>
+            `<tr><td style="padding:4px 12px 4px 0;color:${MUTED};">${escapeHtml(k)}</td><td style="padding:4px 0;font-weight:bold;">${escapeHtml(v)}</td></tr>`
+        )
+        .join("\n"),
+      `</table>`,
+      `<div style="margin:18px 0;padding:14px 16px;border-left:3px solid ${BRAND};background:#faf8fc;white-space:pre-wrap;font-size:14px;line-height:1.6;">${escapeHtml(
+        lines.join("\n")
+      )}</div>`,
+      button(adminUrl, "Hap porositë"),
+    ].join("\n"),
+    "Njoftim automatik nga uebfaqja e SHEMO PHARM."
+  );
+
+  const text = [
+    `Porosi e re #${order.id}`,
+    "",
+    ...rows.map(([k, v]) => `${k}: ${v}`),
+    "",
+    ...lines,
+    "",
+    adminUrl,
+  ].join("\n");
+
+  // So a reply from the inbox reaches the customer, when there is one to reach.
+  return order.customerEmail
+    ? { to, subject, html, text, replyTo: order.customerEmail }
+    : { to, subject, html, text };
+}
 /**
  * "Choose a new password" — the only way back into an account whose password
  * is lost. Names no account details beyond the greeting: the mail may land in
