@@ -113,6 +113,35 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    /*
+     * The optimizer is off, and every setting below it is dormant until it
+     * comes back.
+     *
+     * Vercel's Hobby plan allows 5 000 image transformations, where a
+     * transformation is one image at one width in one format. This site has
+     * 2 049 products and asks for several widths of each, so the ceiling is not
+     * something it brushes against — it does not fit underneath it at all. The
+     * counter passed 5 000, `/_next/image` began answering 402
+     * (OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED), and the shop lost its
+     * photographs one by one as the cached variants expired. Products whose
+     * variants were still cached kept theirs, which is why the grid looked
+     * half-broken rather than broken.
+     *
+     * `unoptimized` makes next/image render a plain <img> at the file itself,
+     * served from public/ by the CDN. It costs bytes: the sources are 1000x1000
+     * and a card shows 288, so roughly 37 KB travels where 12 KB would do. That
+     * is the right trade against no photographs at all, and small in absolute
+     * terms — none of the 4 574 files exceeds 200 KB, and they are already WebP
+     * at q82 out of scripts/cutout-images.mjs, so the optimizer was mostly
+     * re-encoding work that was already done.
+     *
+     * To undo: delete this line. Everything under it is still correct and takes
+     * effect again immediately — but only do it on a plan whose transformation
+     * budget fits the catalogue, or the 402s come back. The durable fix on
+     * Hobby is to pre-generate 384px variants into public/ and keep this off.
+     */
+    unoptimized: true,
+
     // Single source of truth — the admin form and the catalog layer validate
     // against the same list, so an unconfigured host can never reach next/image.
     remotePatterns: [...REMOTE_IMAGE_PATTERNS],
