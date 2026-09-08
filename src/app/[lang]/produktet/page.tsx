@@ -4,6 +4,7 @@ import { getDictionary } from "@/lib/dictionaries";
 import {
   CatalogView,
   listingMetadata,
+  redirectPastLastPage,
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogView";
 
@@ -19,6 +20,7 @@ export async function generateMetadata({
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
   const sp = await searchParams;
+  await redirectPastLastPage({ dict, path: "/produktet", searchParams: sp });
   return listingMetadata({
     dict,
     path: "/produktet",

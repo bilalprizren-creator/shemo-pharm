@@ -10,6 +10,7 @@ import { getDictionary } from "@/lib/dictionaries";
 import {
   CatalogView,
   listingMetadata,
+  redirectPastLastPage,
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogView";
 import type { Crumb } from "@/components/catalog/Breadcrumbs";
@@ -29,6 +30,7 @@ export async function generateMetadata({
   if (!cat) return {};
   const name = categoryDisplayName(cat);
   const sp = await searchParams;
+  await redirectPastLastPage({ dict, path: `/kategorite/${slug}`, categorySlug: slug, searchParams: sp });
   return listingMetadata({
     dict,
     path: `/kategorite/${slug}`,

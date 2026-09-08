@@ -698,15 +698,26 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export async function getProducts({
-  categorySlug,
-  typeSlug,
-  query,
-  sort = "emri-asc",
-  page = 1,
-  perPage = 24,
-  inStockOnly = false,
-}: ProductQuery = {}): Promise<ProductPage> {
+/**
+ * Memoized on its arguments spread flat, because React's cache() keys on
+ * argument identity and an options object is a fresh reference every call —
+ * so the obvious wrapping would never hit.
+ *
+ * It matters because a listing page asks this twice per request: once in
+ * generateMetadata, which needs the page count to decide whether the requested
+ * page exists at all, and once in the body for the products themselves. Both
+ * filter and sort the same 2 049 items. Sharing the answer costs nothing and
+ * halves the work.
+ */
+const productsFor = cache(async function productsFor(
+  categorySlug: string | undefined,
+  typeSlug: string | undefined,
+  query: string | undefined,
+  sort: ProductSort,
+  page: number,
+  perPage: number,
+  inStockOnly: boolean
+): Promise<ProductPage> {
   const { products, categories } = await loadCatalog();
   let list = products;
 
@@ -748,6 +759,18 @@ export async function getProducts({
   const safePage = Math.min(Math.max(1, page), Math.max(1, totalPages));
   const items = list.slice((safePage - 1) * perPage, safePage * perPage);
   return { items, total, page: safePage, totalPages };
+});
+
+export async function getProducts({
+  categorySlug,
+  typeSlug,
+  query,
+  sort = "emri-asc",
+  page = 1,
+  perPage = 24,
+  inStockOnly = false,
+}: ProductQuery = {}): Promise<ProductPage> {
+  return productsFor(categorySlug, typeSlug, query, sort, page, perPage, inStockOnly);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {

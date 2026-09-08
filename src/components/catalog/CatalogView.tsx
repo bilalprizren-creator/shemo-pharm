@@ -38,6 +38,15 @@ export interface CatalogSearchParams {
   lloji?: string;
 }
 
+/**
+ * Products per page.
+ *
+ * Shared with listingMetadata above: it needs the page count to tell an
+ * out-of-range ?faqja= from a real one, and a second literal here would let
+ * the two drift into disagreeing about how many pages there are.
+ */
+const PER_PAGE = 24;
+
 const VALID_SORTS: ProductSort[] = ["emri-asc", "emri-desc", "te-rejat"];
 
 /**
@@ -83,7 +92,7 @@ export function listingMetadata({
   Metadata,
   "title" | "description" | "alternates" | "robots" | "openGraph"
 > {
-  const lang = dict.lang;
+const lang = dict.lang;
   const page = parsePage(searchParams.faqja);
   const query = searchParams.kerko?.trim();
   const isView =
@@ -126,6 +135,56 @@ export function listingMetadata({
   };
 }
 
+/**
+ * Sends a request for a page past the last one to the last real page.
+ *
+ * getProducts() clamps, so ?faqja=999 rendered page 86 — but the address bar,
+ * the <title> and, worst, the canonical tag all still named 999. A page that
+ * declares itself canonical at a URL serving something else is exactly what a
+ * crawler is entitled to believe.
+ *
+ * It has to run from generateMetadata rather than from the view below: a
+ * redirect thrown in the body arrives after the head has been sent, so the
+ * visitor moves but the wrong canonical is already on the wire. From here the
+ * head is never rendered at all — the listing routes stream behind a
+ * loading.tsx, so what Next emits is a client-side redirect inside the payload
+ * rather than a 308, and the response carries no canonical and no title. That
+ * is the point: no claim at all beats a false one, and the destination has the
+ * right head. Kept out of listingMetadata() so that stays a pure function.
+ *
+ * Only the plain listing is checked. A filtered view already drops the page
+ * number from its canonical and carries robots: noindex, so it has nothing to
+ * get wrong — and counting its pages would mean resolving the type breakdown
+ * the way the view does. Without filters the query below is the one the view
+ * makes, so productsFor() answers both from one computation.
+ */
+export async function redirectPastLastPage({
+  dict,
+  path,
+  categorySlug,
+  searchParams,
+}: {
+  dict: Dictionary;
+  /** Unprefixed, the same one listingMetadata() is given. */
+  path: string;
+  categorySlug?: string;
+  searchParams: CatalogSearchParams;
+}): Promise<void> {
+  const page = parsePage(searchParams.faqja);
+  if (page === 1) return;
+  const filtered =
+    Boolean(searchParams.kerko?.trim()) ||
+    (searchParams.renditja !== undefined && searchParams.renditja !== "emri-asc") ||
+    searchParams.stok === "1" ||
+    Boolean(searchParams.lloji?.trim());
+  if (filtered) return;
+
+  const { totalPages } = await getProducts({ categorySlug, page, perPage: PER_PAGE });
+  const last = Math.max(1, totalPages);
+  if (page > last) {
+    redirect(`${langHref(dict.lang, path)}${last > 1 ? `?faqja=${last}` : ""}`);
+  }
+}
 /**
  * Shared product-listing view for /produktet and /kategorite/[slug]:
  * header + breadcrumbs, filter sidebar (desktop) / sheet (mobile),
@@ -192,7 +251,7 @@ export async function CatalogView({
     query,
     sort,
     page,
-    perPage: 24,
+    perPage: PER_PAGE,
     inStockOnly,
   });
   const cards = await toCardProducts(result.items, showPrices);
@@ -208,22 +267,6 @@ export async function CatalogView({
   if (sort !== "emri-asc") params.set("renditja", sort);
   if (inStockOnly) params.set("stok", "1");
   if (activeType) params.set("lloji", activeType.slug);
-
-  /**
-   * An out-of-range page number redirects to the last real page.
-   *
-   * getProducts() already clamps, so ?faqja=999 rendered page 86 — but the
-   * address bar, the <title> and, worst, the canonical tag all still named 999.
-   * A page declaring itself canonical at a URL that serves different content is
-   * exactly what a crawler is entitled to believe. Redirecting fixes all three
-   * at once, and leaves the visitor somewhere they can bookmark.
-   */
-  if (page !== result.page) {
-    const target = new URLSearchParams(params);
-    if (result.page > 1) target.set("faqja", String(result.page));
-    const qs = target.toString();
-    redirect(`${localBase}${qs ? `?${qs}` : ""}`);
-  }
 
   /**
    * This same listing with one thing changed and the page number dropped.
