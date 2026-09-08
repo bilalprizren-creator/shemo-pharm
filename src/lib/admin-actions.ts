@@ -9,8 +9,9 @@ import {
   createSessionCookie,
   endSession,
   findUser,
+  getSession,
   requireAdmin,
-  verifyPassword,
+  verifyPasswordOrDecoy,
   type Session,
 } from "@/lib/auth";
 import { logSecurityEvent } from "@/lib/security-log";
@@ -78,7 +79,11 @@ export async function adminLoginAction(
   }
 
   const user = await findUser(email);
-  if (!user || !verifyPassword(password, user.passwordHash)) {
+  // Before the branch, not inside it: a `|| !verify(...)` short-circuits on the
+  // miss and hands back an answer a good scrypt round faster, which makes this
+  // form an oracle for which addresses are admins.
+  const ok = verifyPasswordOrDecoy(password, user?.passwordHash);
+  if (!user || !ok) {
     // The address is recorded, the password never is. One line per failure is
     // what makes a credential-stuffing run visible in the logs.
     await logSecurityEvent("admin-login-failed", { email });
@@ -105,9 +110,13 @@ export async function adminLoginAction(
 }
 
 export async function adminLogoutAction(): Promise<void> {
+  // Read before the session goes, so the line says who left. It used to carry
+  // no detail at all while admin-login carries the address — you could see a
+  // session open and a session close and not pair the two.
+  const session = await getSession();
   // endSession, not clearSessionCookie: deleting the browser's copy leaves any
   // other copy of the cookie working until it expires on its own.
-  await logSecurityEvent("admin-logout");
+  await logSecurityEvent("admin-logout", { email: session?.email });
   await endSession();
   redirect("/admin/login");
 }
@@ -849,7 +858,7 @@ export async function updateCategoryAction(
   _prev: AdminFormState,
   formData: FormData
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id) || id <= 0) return { error: "ID e pavlefshme." };
 
@@ -876,6 +885,15 @@ export async function updateCategoryAction(
   `;
   // Moving a category changes which products count for which parent.
   await recountCategories();
+  // Logged, though the flag toggles are not: re-parenting rewrites `count` for
+  // every ancestor, and count > 0 is what puts a category in the nav, on the
+  // homepage, on /kategorite and in the sitemap. That is the docstring's own
+  // rule — it changed what the site shows, on every page that lists categories.
+  await logMutation(admin, "update-category", {
+    categoryId: id,
+    parent: d.parent,
+    kind: d.kind,
+  });
   revalidateCatalog();
   revalidatePath("/admin/kategorite");
   return { success: "Kategoria u ruajt." };
@@ -885,7 +903,7 @@ export async function createCategoryAction(
   _prev: AdminFormState,
   formData: FormData
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const name = String(formData.get("name") ?? "").trim();
   if (name.length < 2) {
@@ -915,9 +933,10 @@ export async function createCategoryAction(
     VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM categories), ${name}, ${slugBase},
             ${d.parent}, 0, ${d.displayName || null}, ${d.kind}, ${d.sort})
   `;
+  await logMutation(admin, "create-category", { name, parent: d.parent, kind: d.kind });
   revalidateCatalog();
   revalidatePath("/admin/kategorite");
-  return { success: `Kategoria "${name}" u krijua.` };
+  return { success: `Kategoria "" u krijua.` };
 }
 
 /* ------------------------------- Orders ---------------------------------- */

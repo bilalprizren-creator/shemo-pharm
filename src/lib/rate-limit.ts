@@ -45,11 +45,19 @@ const DURABLE_BUCKETS = new Set([
  * Whether to use the database at all.
  *
  * Off in local development, where the alternative is a Neon round trip on every
- * keystroke in the search bar against the production database. Overridable so the
- * durable path can actually be exercised by hand before it is trusted.
+ * keystroke in the search bar against the production database. Overridable so
+ * the durable path can actually be exercised by hand before it is trusted.
+ *
+ * VERCEL_ENV rather than VERCEL: the latter is "1" on preview builds too, and
+ * Vercel hands previews the production DATABASE_URL — so every preview deploy
+ * was incrementing the live rate-limit counters, and a bot walking a preview
+ * URL could lock a real customer out of the search. (Which database a preview
+ * talks to is a Vercel setting and still wants separating; this is the half
+ * that lives in the code.)
  */
 const useDurableStore =
-  process.env.VERCEL === "1" || process.env.RATE_LIMIT_STORE === "postgres";
+  process.env.VERCEL_ENV === "production" ||
+  process.env.RATE_LIMIT_STORE === "postgres";
 
 // Module scope, so the in-memory counters survive between requests on one
 // instance — which is the only reason they are worth anything.

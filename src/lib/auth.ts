@@ -106,6 +106,37 @@ export function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(candidate, expected);
 }
 
+/**
+ * A real hash of a password nobody has, for the miss path.
+ *
+ * Both logins returned before verifyPassword when the address was unknown, and
+ * scrypt is the slowest thing in the request — so an address that has no
+ * account answered a good 50-100 ms faster than one that does, and the login
+ * form became an oracle for which pharmacies are customers. Verifying against
+ * this instead spends the same time either way.
+ *
+ * Built once at module load rather than per request, and from random bytes, so
+ * the constant is neither a password anyone can try nor a fixed value across
+ * deployments.
+ */
+const ABSENT_USER_HASH = hashPassword(randomBytes(32).toString("hex"));
+
+/**
+ * Checks a password against a user that may not exist.
+ *
+ * Always false for a missing user — and always slow, which is the point.
+ */
+export function verifyPasswordOrDecoy(
+  password: string,
+  stored: string | undefined
+): boolean {
+  if (stored === undefined) {
+    verifyPassword(password, ABSENT_USER_HASH);
+    return false;
+  }
+  return verifyPassword(password, stored);
+}
+
 function mapUser(r: UserRow): StoredUser {
   return {
     id: r.id,

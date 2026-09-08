@@ -30,6 +30,9 @@ export type SecurityEvent =
   | "admin-login-not-admin"
   | "admin-login-rate-limited"
   | "admin-logout"
+  /* customer authentication — the accounts that see wholesale prices */
+  | "login"
+  | "login-failed"
   /* authorization */
   | "admin-api-unauthorized"
   | "admin-api-bad-origin"

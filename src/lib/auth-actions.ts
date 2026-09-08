@@ -16,10 +16,11 @@ import {
   setPassword,
   signResetToken,
   signVerificationToken,
-  verifyPassword,
+  verifyPasswordOrDecoy,
 } from "@/lib/auth";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { logSecurityEvent } from "@/lib/security-log";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 import {
   adminNotificationAddress,
@@ -94,10 +95,18 @@ export async function loginAction(
   }
 
   const user = await findUser(parsed.data.email);
-  if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
+  // Evaluated before the branch, not inside it: `!user || !verify(...)` would
+  // short-circuit and skip the decoy on exactly the path it exists for.
+  const ok = verifyPasswordOrDecoy(parsed.data.password, user?.passwordHash);
+  if (!user || !ok) {
+    // Customer logins were the one authentication path this project did not
+    // log. These are the accounts that see wholesale prices, so a credential-
+    // stuffing run against them was invisible while the admin form was watched.
+    await logSecurityEvent("login-failed", { email: parsed.data.email });
     return { error: dict.actions.invalidCredentials, values };
   }
 
+  await logSecurityEvent("login", { email: user.email });
   await createSessionCookie(user);
   redirect(langHref(lang, "/llogaria"));
 }

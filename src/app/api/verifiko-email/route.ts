@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { markEmailVerified, readVerificationToken } from "@/lib/auth";
 import { isLang, langHref } from "@/lib/i18n";
+import { MINUTE_MS, rateLimited } from "@/lib/rate-limit";
 
 /**
  * Where the link in the verification email lands.
@@ -14,13 +15,25 @@ import { isLang, langHref } from "@/lib/i18n";
  * No session is created here. Clicking a link out of an inbox proves the
  * mailbox, and nothing more.
  */
+/**
+ * Rate-limited like every other public entry point in this project.
+ *
+ * Not against token forgery — the JWT does that — but against free database
+ * load: each call costs a verify plus up to two queries, and this URL is in
+ * every verification mail that has ever gone out. Thirty a minute is far more
+ * than a person clicking a link in their inbox.
+ */
+const VERIFY_LIMIT = { limit: 30, windowMs: MINUTE_MS };
+
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token") ?? "";
   const raw = request.nextUrl.searchParams.get("lang") ?? "sq";
   const lang = isLang(raw) ? raw : "sq";
 
   let state: "ok" | "tashme" | "skaduar" | "gabim" = "gabim";
-  const parsed = await readVerificationToken(token);
+  const parsed = (await rateLimited("verify-link", VERIFY_LIMIT))
+    ? ({ ok: false, reason: "rate-limited" } as const)
+    : await readVerificationToken(token);
 
   if (parsed.ok) {
     try {
