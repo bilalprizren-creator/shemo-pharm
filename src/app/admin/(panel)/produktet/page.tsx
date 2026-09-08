@@ -26,6 +26,8 @@ import {
   ProductRowCheckbox,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
+import { AdminPager } from "@/components/admin/AdminPager";
+import { AdminAction } from "@/components/admin/AdminAction";
 import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
 
 export const metadata: Metadata = { title: "Produktet" };
@@ -256,88 +258,82 @@ export default async function AdminProductsPage({
                   <ProductPriceCell id={p.id} name={p.name} priceCents={p.priceCents} />
                 </td>
                 <td className="px-4 py-2.5">
-                  <form action={toggleProductFlagAction}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="flag" value="inStock" />
-                    <button
-                      type="submit"
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        p.inStock
-                          ? "bg-brand-50 text-brand-800 hover:bg-brand-100"
-                          : "bg-red-50 text-red-700 hover:bg-red-100"
-                      }`}
-                      title="Ndrysho stokun"
-                    >
-                      {p.inStock ? "Në stok" : "Pa stok"}
-                    </button>
-                  </form>
+                  <AdminAction
+                    action={toggleProductFlagAction}
+                    fields={{ id: p.id, flag: "inStock" }}
+                    label={p.inStock ? "Në stok" : "Pa stok"}
+                    title="Ndrysho stokun"
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      p.inStock
+                        ? "bg-brand-50 text-brand-800 hover:bg-brand-100"
+                        : "bg-red-50 text-red-700 hover:bg-red-100"
+                    }`}
+                  />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <form action={toggleProductFlagAction} className="inline">
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="flag" value="featured" />
-                    <button
-                      type="submit"
-                      className="rounded-full p-1.5 hover:bg-tint"
-                      title={p.featured ? "Hiqe nga kryesorët" : "Shto te kryesorët"}
-                    >
+                  <AdminAction
+                    action={toggleProductFlagAction}
+                    fields={{ id: p.id, flag: "featured" }}
+                    title={p.featured ? "Hiqe nga kryesorët" : "Shto te kryesorët"}
+                    icon={
                       <Star
                         className={`size-4 ${
-                          p.featured
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-ink-300"
+                          p.featured ? "fill-amber-400 text-amber-400" : "text-ink-300"
                         }`}
                         aria-hidden
                       />
+                    }
+                    label={
                       <span className="sr-only">
                         {p.featured ? "I zgjedhur" : "Jo i zgjedhur"}
                       </span>
-                    </button>
-                  </form>
+                    }
+                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
+                  />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <form action={toggleProductFlagAction} className="inline">
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="flag" value="hidden" />
-                    <button
-                      type="submit"
-                      className="rounded-full p-1.5 hover:bg-tint"
-                      title={p.hidden ? "Shfaqe në dyqan" : "Fshihe nga dyqani"}
-                    >
-                      {p.hidden ? (
+                  <AdminAction
+                    action={toggleProductFlagAction}
+                    fields={{ id: p.id, flag: "hidden" }}
+                    title={p.hidden ? "Shfaqe në dyqan" : "Fshihe nga dyqani"}
+                    icon={
+                      p.hidden ? (
                         <EyeOff className="size-4 text-red-500" aria-hidden />
                       ) : (
                         <Eye className="size-4 text-ink-400" aria-hidden />
-                      )}
+                      )
+                    }
+                    label={
                       <span className="sr-only">
                         {p.hidden ? "E fshehur në dyqan" : "E dukshme në dyqan"}
                       </span>
-                    </button>
-                  </form>
+                    }
+                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
+                  />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <form action={toggleProductFlagAction} className="inline">
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="flag" value="catalogHidden" />
-                    <button
-                      type="submit"
-                      className="rounded-full p-1.5 hover:bg-tint"
-                      title={
-                        p.catalogHidden
-                          ? "Shfaqe në katalogun e shtypur"
-                          : "Fshihe nga katalogu i shtypur"
-                      }
-                    >
-                      {p.catalogHidden ? (
+                  <AdminAction
+                    action={toggleProductFlagAction}
+                    fields={{ id: p.id, flag: "catalogHidden" }}
+                    title={
+                      p.catalogHidden
+                        ? "Shfaqe në katalogun e shtypur"
+                        : "Fshihe nga katalogu i shtypur"
+                    }
+                    icon={
+                      p.catalogHidden ? (
                         <BookX className="size-4 text-red-500" aria-hidden />
                       ) : (
                         <BookOpen className="size-4 text-ink-400" aria-hidden />
-                      )}
+                      )
+                    }
+                    label={
                       <span className="sr-only">
                         {p.catalogHidden ? "Jashtë katalogut" : "Në katalog"}
                       </span>
-                    </button>
-                  </form>
+                    }
+                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
+                  />
                 </td>
               </tr>
             ))}
@@ -360,29 +356,7 @@ export default async function AdminProductsPage({
         sections={sectionOptions}
       />
 
-      {totalPages > 1 && (
-        <nav className="mt-5 flex items-center justify-center gap-2" aria-label="Faqet">
-          {page > 1 && (
-            <Link
-              href={pageHref(page - 1)}
-              className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm font-semibold text-ink-700 hover:border-brand-300"
-            >
-              ← Mbrapa
-            </Link>
-          )}
-          <span className="px-2 text-sm text-ink-500">
-            Faqja {page} / {totalPages}
-          </span>
-          {page < totalPages && (
-            <Link
-              href={pageHref(page + 1)}
-              className="rounded-full border border-ink-900/10 bg-white px-4 py-2 text-sm font-semibold text-ink-700 hover:border-brand-300"
-            >
-              Para →
-            </Link>
-          )}
-        </nav>
-      )}
+      <AdminPager page={page} totalPages={totalPages} hrefFor={pageHref} />
     </div>
   );
 }

@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CheckCircle2, Mail, MessageCircle, RotateCcw, User } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { deleteOrderAction, markOrderHandledAction } from "@/lib/admin-actions";
+import { AdminAction } from "@/components/admin/AdminAction";
+import { AdminPager } from "@/components/admin/AdminPager";
 
 export const metadata: Metadata = { title: "Porositë" };
+
+const PER_PAGE = 40;
 
 interface OrderItem {
   id: number;
@@ -27,18 +32,44 @@ interface OrderRow {
   created_at: Date;
 }
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ faqja?: string; e?: string }>;
+}) {
   await requireAdmin();
+  const sp = await searchParams;
+  const openOnly = sp.e === "hapura";
+  const page = Math.max(1, Math.floor(Number(sp.faqja)) || 1);
+
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (openOnly) params.set("e", "hapura");
+    if (p > 1) params.set("faqja", String(p));
+    const qs = params.toString();
+    return `/admin/porosite${qs ? `?${qs}` : ""}`;
+  };
+
+  // Counted rather than measured off a capped page — see /admin/mesazhet.
+  const [counts] = (await sql`
+    SELECT count(*)::int AS total,
+           count(*) FILTER (WHERE is_handled = false)::int AS open
+    FROM orders
+  `) as { total: number; open: number }[];
+  const total = counts?.total ?? 0;
+  const open = counts?.open ?? 0;
+  const shown = openOnly ? open : total;
+  const totalPages = Math.max(1, Math.ceil(shown / PER_PAGE));
+  const current = Math.min(page, totalPages);
 
   const orders = (await sql`
     SELECT id, customer_name, customer_email, channel, items, items_count,
            total_cents, is_handled, created_at
     FROM orders
+    WHERE ${openOnly} = false OR is_handled = false
     ORDER BY created_at DESC
-    LIMIT 200
+    LIMIT ${PER_PAGE} OFFSET ${(current - 1) * PER_PAGE}
   `) as OrderRow[];
-
-  const open = orders.filter((o) => !o.is_handled).length;
 
   return (
     <div>
@@ -46,14 +77,27 @@ export default async function AdminOrdersPage() {
         Porositë
       </h1>
       <p className="mt-1 text-sm text-ink-500">
-        {orders.length} porosi · {open} të hapura — regjistrohen kur klienti
+        {total} porosi · {open} të hapura — regjistrohen kur klienti
         hap WhatsApp-in ose email-in nga shporta. Vetë mesazhi ju arrin në
-        WhatsApp / email si zakonisht.
+        WhatsApp / email si zakonisht, dhe një kopje ju vjen me email.
       </p>
+
+      <div className="mt-4">
+        <Link
+          href={openOnly ? "/admin/porosite" : "/admin/porosite?e=hapura"}
+          className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+            openOnly
+              ? "border-brand-500 bg-brand-50 text-brand-800"
+              : "border-ink-900/10 bg-white text-ink-600 hover:border-brand-300"
+          }`}
+        >
+          {openOnly ? "Të gjitha" : "Vetëm të hapura"}
+        </Link>
+      </div>
 
       {orders.length === 0 ? (
         <p className="mt-6 rounded-xl border border-dashed border-ink-900/12 bg-white px-4 py-10 text-center text-sm text-ink-400">
-          Ende asnjë porosi nga shporta.
+          {openOnly ? "Asnjë porosi e hapur." : "Ende asnjë porosi nga shporta."}
         </p>
       ) : (
         <ul className="mt-6 space-y-3">
@@ -144,40 +188,34 @@ export default async function AdminOrdersPage() {
                     {o.customer_email}
                   </a>
                 )}
-                <form action={markOrderHandledAction}>
-                  <input type="hidden" name="id" value={o.id} />
-                  <input type="hidden" name="unhandled" value={o.is_handled ? "1" : "0"} />
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/10 px-3.5 py-1.5 text-xs font-semibold text-ink-600 transition-colors hover:border-brand-300 hover:text-brand-700"
-                  >
-                    {o.is_handled ? (
-                      <>
-                        <RotateCcw className="size-3.5" aria-hidden />
-                        Rihap
-                      </>
+                <AdminAction
+                  action={markOrderHandledAction}
+                  fields={{ id: o.id, unhandled: o.is_handled ? "1" : "0" }}
+                  icon={
+                    o.is_handled ? (
+                      <RotateCcw className="size-3.5" aria-hidden />
                     ) : (
-                      <>
-                        <CheckCircle2 className="size-3.5" aria-hidden />
-                        Shëno si të kryer
-                      </>
-                    )}
-                  </button>
-                </form>
-                <form action={deleteOrderAction}>
-                  <input type="hidden" name="id" value={o.id} />
-                  <button
-                    type="submit"
-                    className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
-                  >
-                    Fshij
-                  </button>
-                </form>
+                      <CheckCircle2 className="size-3.5" aria-hidden />
+                    )
+                  }
+                  label={o.is_handled ? "Rihap" : "Shëno si të kryer"}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/10 px-3.5 py-1.5 text-xs font-semibold text-ink-600 transition-colors hover:border-brand-300 hover:text-brand-700"
+                />
+                <AdminAction
+                  action={deleteOrderAction}
+                  fields={{ id: o.id }}
+                  label="Fshij"
+                  confirmLabel="Po, fshije"
+                  className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
+                  confirmClassName="rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                />
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      <AdminPager page={current} totalPages={totalPages} hrefFor={pageHref} />
     </div>
   );
 }

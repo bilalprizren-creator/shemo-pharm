@@ -3,6 +3,7 @@ import { BadgeCheck, Clock, MailCheck, MailWarning } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
+import { AdminAction } from "@/components/admin/AdminAction";
 import {
   approveUserAction,
   rejectUserAction,
@@ -92,24 +93,23 @@ export default async function AdminRequestsPage() {
                   </p>
                 </div>
                 <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
-                  <form action={approveUserAction}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button
-                      type="submit"
-                      className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-                    >
-                      Aprovo
-                    </button>
-                  </form>
-                  <form action={rejectUserAction}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <button
-                      type="submit"
-                      className="rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50"
-                    >
-                      Refuzo & fshij
-                    </button>
-                  </form>
+                  <AdminAction
+                    action={approveUserAction}
+                    fields={{ id: c.id }}
+                    label="Aprovo"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                  />
+                  {/* Asks first: this deletes the account outright, and used to
+                      do it on one press — while deleting a *product* asked
+                      twice and put itself behind a "danger zone" heading. */}
+                  <AdminAction
+                    action={rejectUserAction}
+                    fields={{ id: c.id }}
+                    label="Refuzo &amp; fshij"
+                    confirmLabel="Po, fshije llogarinë"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50"
+                    confirmClassName="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                  />
                 </div>
               </li>
             ))}
@@ -156,15 +156,14 @@ export default async function AdminRequestsPage() {
                       {formatDateTime(c.created_at)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <form action={revokeUserAction} className="inline">
-                        <input type="hidden" name="id" value={c.id} />
-                        <button
-                          type="submit"
-                          className="rounded-full border border-ink-900/10 px-3.5 py-1.5 text-xs font-semibold text-ink-500 transition-colors hover:border-amber-300 hover:text-amber-700"
-                        >
-                          Kthe në pritje
-                        </button>
-                      </form>
+                      <div className="inline-flex flex-col items-end">
+                        <AdminAction
+                          action={revokeUserAction}
+                          fields={{ id: c.id }}
+                          label="Kthe në pritje"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/10 px-3.5 py-1.5 text-xs font-semibold text-ink-500 transition-colors hover:border-amber-300 hover:text-amber-700"
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -35,6 +35,7 @@ import {
   ProductRowCheckbox,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
+import { AdminAction } from "@/components/admin/AdminAction";
 
 export const metadata: Metadata = { title: "Seksioni i katalogut" };
 
@@ -211,28 +212,31 @@ export default async function AdminCatalogSectionPage({
                     order is decided — hiding a product from the shop no longer
                     takes it off the paper, so it needs its own switch here. */}
                 <td className="px-4 py-2 text-center">
-                  <form action={toggleProductFlagAction} className="inline">
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="flag" value="catalogHidden" />
-                    <button
-                      type="submit"
-                      className={iconButton}
-                      title={
-                        p.catalogHidden
-                          ? "Kthejeni në katalogun e shtypur"
-                          : "Mos e shtyp këtë produkt"
-                      }
-                    >
-                      {p.catalogHidden ? (
+                  <AdminAction
+                    action={toggleProductFlagAction}
+                    /* sectionId so the action can revalidate this page too: it
+                       used to refresh only the product list and the catalogue
+                       overview, so the row it was pressed on redrew unchanged. */
+                    fields={{ id: p.id, flag: "catalogHidden", sectionId: section.id }}
+                    title={
+                      p.catalogHidden
+                        ? "Kthejeni në katalogun e shtypur"
+                        : "Mos e shtyp këtë produkt"
+                    }
+                    icon={
+                      p.catalogHidden ? (
                         <BookX className="size-4 text-red-500" aria-hidden />
                       ) : (
                         <BookOpen className="size-4" aria-hidden />
-                      )}
+                      )
+                    }
+                    label={
                       <span className="sr-only">
                         {p.catalogHidden ? "Nuk shtypet" : "Shtypet"}
                       </span>
-                    </button>
-                  </form>
+                    }
+                    className={iconButton}
+                  />
                 </td>
                 <td className="px-4 py-2 text-center">
                   <div className="flex items-center justify-center gap-1">

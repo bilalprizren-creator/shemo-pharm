@@ -133,10 +133,22 @@ async function logMutation(
 
 /* --------------------------- User approvals ----------------------------- */
 
-export async function approveUserAction(formData: FormData): Promise<void> {
+/**
+ * What an action says when the row it was told to act on is not there.
+ *
+ * Every one of these used to `return` on that branch, which rendered exactly
+ * like success. A stale tab, a row a colleague deleted a minute ago, a hand-
+ * edited id — all of them looked like the operation had gone through.
+ */
+const NOT_FOUND = "Nuk u gjet — rifreskoni faqen";
+
+export async function approveUserAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
 
   // Conditional on the status actually changing, so pressing Approve twice
   // does not mail the customer twice. RETURNING gives us who to write to.
@@ -164,29 +176,47 @@ export async function approveUserAction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
+  // No row means the account was already approved — worth saying, because the
+  // page looks identical either way and the mail is deliberately not resent.
+  return user
+    ? { success: "U aprovua, email-i u dërgua" }
+    : { success: "Ishte tashmë i aprovuar" };
 }
 
-export async function revokeUserAction(formData: FormData): Promise<void> {
+export async function revokeUserAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
-  await sql`
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
+  const rows = (await sql`
     UPDATE users SET status = 'pending' WHERE id = ${id} AND role = 'customer'
-  `;
+    RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   await logMutation(admin, "revoke-user", { userId: id });
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
+  return { success: "Qasja u hoq" };
 }
 
 /** Rejecting a request deletes the account — customers only, never admins. */
-export async function rejectUserAction(formData: FormData): Promise<void> {
+export async function rejectUserAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
-  await sql`DELETE FROM users WHERE id = ${id} AND role = 'customer'`;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
+  const rows = (await sql`
+    DELETE FROM users WHERE id = ${id} AND role = 'customer' RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   await logMutation(admin, "delete-user", { userId: id });
   revalidatePath("/admin/kerkesat");
   revalidatePath("/admin");
+  return { success: "Llogaria u fshi" };
 }
 
 /* ------------------------------ Products -------------------------------- */
@@ -466,31 +496,54 @@ export async function updateProductAction(
   return { success: "Produkti u ruajt." };
 }
 
-export async function toggleProductFlagAction(formData: FormData): Promise<void> {
+export async function toggleProductFlagAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   await requireAdmin();
   const id = Number(formData.get("id"));
   const flag = String(formData.get("flag"));
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
+  let changed = 0;
   if (flag === "featured") {
-    await sql`UPDATE products SET featured = NOT featured, updated_at = now() WHERE id = ${id}`;
+    changed = (
+      await sql`UPDATE products SET featured = NOT featured, updated_at = now() WHERE id = ${id} RETURNING id`
+    ).length;
   } else if (flag === "hidden") {
-    await sql`UPDATE products SET hidden = NOT hidden, updated_at = now() WHERE id = ${id}`;
+    changed = (
+      await sql`UPDATE products SET hidden = NOT hidden, updated_at = now() WHERE id = ${id} RETURNING id`
+    ).length;
     // recountCategories counts `hidden = false` only, so this button moves
     // every ancestor's total. Without the recount, hiding the last product of
     // a category leaves it advertised — count > 0 is what puts a category in
     // the nav, on /kategorite, on the homepage and in the sitemap.
-    await recountCategories();
+    if (changed) await recountCategories();
   } else if (flag === "catalogHidden") {
     // The printed catalogue's own visibility. No recount: the category totals
     // are the shop's, and they count `hidden` alone.
-    await sql`
-      UPDATE products SET catalog_hidden = NOT catalog_hidden, updated_at = now()
-      WHERE id = ${id}
-    `;
+    changed = (
+      await sql`
+        UPDATE products SET catalog_hidden = NOT catalog_hidden, updated_at = now()
+        WHERE id = ${id} RETURNING id
+      `
+    ).length;
   } else if (flag === "inStock") {
-    await sql`UPDATE products SET in_stock = NOT in_stock, updated_at = now() WHERE id = ${id}`;
+    changed = (
+      await sql`UPDATE products SET in_stock = NOT in_stock, updated_at = now() WHERE id = ${id} RETURNING id`
+    ).length;
+  } else {
+    return { error: "Flamur i panjohur." };
   }
+  if (changed === 0) return { error: NOT_FOUND };
   revalidateCatalog();
+  // This button is also rendered on /admin/katalogu/[id], where every sibling
+  // action revalidates the section explicitly — so it needs the same, or the
+  // row it was pressed on redraws with the old state.
+  const sectionId = Number(formData.get("sectionId"));
+  if (Number.isInteger(sectionId) && sectionId > 0) {
+    revalidatePath(`/admin/katalogu/${sectionId}`);
+  }
+  return { success: "U ndryshua" };
 }
 
 /* ---------------------------- Bulk edits -------------------------------- */
@@ -700,26 +753,58 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
 }
 
 /* ------------------------------ Messages -------------------------------- */
-
-export async function markMessageReadAction(formData: FormData): Promise<void> {
+export async function markMessageReadAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
   // With unread=1 the button un-reads the message again.
   const markUnread = formData.get("unread") === "1";
-  await sql`UPDATE contact_messages SET is_read = ${!markUnread} WHERE id = ${id}`;
+  const rows = (await sql`
+    UPDATE contact_messages SET is_read = ${!markUnread} WHERE id = ${id}
+    RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   revalidatePath("/admin/mesazhet");
   revalidatePath("/admin");
+  return { success: markUnread ? "E shënuar si e palexuar" : "E shënuar si e lexuar" };
 }
 
-export async function deleteMessageAction(formData: FormData): Promise<void> {
+export async function deleteMessageAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
-  await sql`DELETE FROM contact_messages WHERE id = ${id}`;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
+  const rows = (await sql`
+    DELETE FROM contact_messages WHERE id = ${id} RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   await logMutation(admin, "delete-message", { messageId: id });
   revalidatePath("/admin/mesazhet");
   revalidatePath("/admin");
+  return { success: "Mesazhi u fshi" };
+}
+
+/**
+ * Marks every unread message read at once.
+ *
+ * The inbox had no bulk anything, so clearing a morning's messages was one
+ * press per row down a list of two hundred.
+ */
+export async function markAllMessagesReadAction(): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const rows = (await sql`
+    UPDATE contact_messages SET is_read = true WHERE is_read = false RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { success: "Nuk kishte mesazhe të palexuara" };
+  await logMutation(admin, "mark-all-messages-read", { count: rows.length });
+  revalidatePath("/admin/mesazhet");
+  revalidatePath("/admin");
+  return { success: `${rows.length} mesazhe u shënuan si të lexuara` };
 }
 
 /* ----------------------------- Categories -------------------------------- */
@@ -837,25 +922,39 @@ export async function createCategoryAction(
 
 /* ------------------------------- Orders ---------------------------------- */
 
-export async function markOrderHandledAction(formData: FormData): Promise<void> {
+export async function markOrderHandledAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
   // With unhandled=1 the button reopens the order.
   const markUnhandled = formData.get("unhandled") === "1";
-  await sql`UPDATE orders SET is_handled = ${!markUnhandled} WHERE id = ${id}`;
+  const rows = (await sql`
+    UPDATE orders SET is_handled = ${!markUnhandled} WHERE id = ${id} RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   revalidatePath("/admin/porosite");
   revalidatePath("/admin");
+  return { success: markUnhandled ? "U rihap" : "U shënua si e kryer" };
 }
 
-export async function deleteOrderAction(formData: FormData): Promise<void> {
+export async function deleteOrderAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
-  await sql`DELETE FROM orders WHERE id = ${id}`;
+  if (!Number.isInteger(id)) return { error: NOT_FOUND };
+  const rows = (await sql`
+    DELETE FROM orders WHERE id = ${id} RETURNING id
+  `) as { id: number }[];
+  if (rows.length === 0) return { error: NOT_FOUND };
   await logMutation(admin, "delete-order", { orderId: id });
   revalidatePath("/admin/porosite");
   revalidatePath("/admin");
+  return { success: "Porosia u fshi" };
 }
 
 /* -------------------------- Printed catalogue ---------------------------- */
