@@ -1,6 +1,316 @@
 {
-  "generatedAt": null,
-  "fingerprint": null,
-  "full": null,
-  "sections": {}
+  "generatedAt": "2026-09-08T18:59:03.110Z",
+  "fingerprint": "567d3930",
+  "full": {
+    "file": "/pdf/shemo-katalog-2026-09.pdf",
+    "bytes": 20184449,
+    "sheets": 162
+  },
+  "sections": {
+    "1-1-shemo": {
+      "file": "/pdf/seksionet/1-1-shemo-2026-09.pdf",
+      "bytes": 363197,
+      "sheets": 2
+    },
+    "1-2-oksigjen-dhe-aparatura": {
+      "file": "/pdf/seksionet/1-2-oksigjen-dhe-aparatura-2026-09.pdf",
+      "bytes": 134546,
+      "sheets": 1
+    },
+    "2-diabetike": {
+      "file": "/pdf/seksionet/2-diabetike-2026-09.pdf",
+      "bytes": 333072,
+      "sheets": 2
+    },
+    "3-aparatur-per-tension": {
+      "file": "/pdf/seksionet/3-aparatur-per-tension-2026-09.pdf",
+      "bytes": 214950,
+      "sheets": 1
+    },
+    "4-mates-i-temperatures": {
+      "file": "/pdf/seksionet/4-mates-i-temperatures-2026-09.pdf",
+      "bytes": 168894,
+      "sheets": 1
+    },
+    "5-bebe-dhe-nena": {
+      "file": "/pdf/seksionet/5-bebe-dhe-nena-2026-09.pdf",
+      "bytes": 176014,
+      "sheets": 1
+    },
+    "5-5-rabir": {
+      "file": "/pdf/seksionet/5-5-rabir-2026-09.pdf",
+      "bytes": 600264,
+      "sheets": 5
+    },
+    "6-pajisje-per-vesh": {
+      "file": "/pdf/seksionet/6-pajisje-per-vesh-2026-09.pdf",
+      "bytes": 195455,
+      "sheets": 2
+    },
+    "6-2-pavloderm": {
+      "file": "/pdf/seksionet/6-2-pavloderm-2026-09.pdf",
+      "bytes": 173745,
+      "sheets": 1
+    },
+    "6-4-top-pomada": {
+      "file": "/pdf/seksionet/6-4-top-pomada-2026-09.pdf",
+      "bytes": 176023,
+      "sheets": 1
+    },
+    "6-1-vaseline": {
+      "file": "/pdf/seksionet/6-1-vaseline-2026-09.pdf",
+      "bytes": 163550,
+      "sheets": 1
+    },
+    "6-3-labella": {
+      "file": "/pdf/seksionet/6-3-labella-2026-09.pdf",
+      "bytes": 458043,
+      "sheets": 3
+    },
+    "6-5-senti2": {
+      "file": "/pdf/seksionet/6-5-senti2-2026-09.pdf",
+      "bytes": 489162,
+      "sheets": 3
+    },
+    "6-6-krauterhof": {
+      "file": "/pdf/seksionet/6-6-krauterhof-2026-09.pdf",
+      "bytes": 645114,
+      "sheets": 5
+    },
+    "6-7-cansin": {
+      "file": "/pdf/seksionet/6-7-cansin-2026-09.pdf",
+      "bytes": 1180734,
+      "sheets": 8
+    },
+    "7-1-elina-med": {
+      "file": "/pdf/seksionet/7-1-elina-med-2026-09.pdf",
+      "bytes": 178980,
+      "sheets": 1
+    },
+    "7-love-hitman-dolphi": {
+      "file": "/pdf/seksionet/7-love-hitman-dolphi-2026-09.pdf",
+      "bytes": 280904,
+      "sheets": 2
+    },
+    "8-qokollada": {
+      "file": "/pdf/seksionet/8-qokollada-2026-09.pdf",
+      "bytes": 206923,
+      "sheets": 1
+    },
+    "8-1-corega": {
+      "file": "/pdf/seksionet/8-1-corega-2026-09.pdf",
+      "bytes": 167105,
+      "sheets": 1
+    },
+    "7-2-nt41": {
+      "file": "/pdf/seksionet/7-2-nt41-2026-09.pdf",
+      "bytes": 316247,
+      "sheets": 2
+    },
+    "9-swiss-energy": {
+      "file": "/pdf/seksionet/9-swiss-energy-2026-09.pdf",
+      "bytes": 948820,
+      "sheets": 6
+    },
+    "8-1-eferveta-me-brende-te-ndryshme": {
+      "file": "/pdf/seksionet/8-1-eferveta-me-brende-te-ndryshme-2026-09.pdf",
+      "bytes": 149195,
+      "sheets": 1
+    },
+    "8-2-haribo": {
+      "file": "/pdf/seksionet/8-2-haribo-2026-09.pdf",
+      "bytes": 253659,
+      "sheets": 1
+    },
+    "8-3-multiplus-suplement": {
+      "file": "/pdf/seksionet/8-3-multiplus-suplement-2026-09.pdf",
+      "bytes": 366913,
+      "sheets": 2
+    },
+    "8-4-dermosept": {
+      "file": "/pdf/seksionet/8-4-dermosept-2026-09.pdf",
+      "bytes": 243688,
+      "sheets": 2
+    },
+    "8-4-aqua-dhe-dermosept": {
+      "file": "/pdf/seksionet/8-4-aqua-dhe-dermosept-2026-09.pdf",
+      "bytes": 138904,
+      "sheets": 1
+    },
+    "10-naturagen": {
+      "file": "/pdf/seksionet/10-naturagen-2026-09.pdf",
+      "bytes": 309433,
+      "sheets": 2
+    },
+    "13-nutrifactor": {
+      "file": "/pdf/seksionet/13-nutrifactor-2026-09.pdf",
+      "bytes": 770083,
+      "sheets": 5
+    },
+    "13-1-cellcense-by-nutrifactor": {
+      "file": "/pdf/seksionet/13-1-cellcense-by-nutrifactor-2026-09.pdf",
+      "bytes": 124266,
+      "sheets": 1
+    },
+    "15-pharmavital": {
+      "file": "/pdf/seksionet/15-pharmavital-2026-09.pdf",
+      "bytes": 347748,
+      "sheets": 2
+    },
+    "8-6-vajera": {
+      "file": "/pdf/seksionet/8-6-vajera-2026-09.pdf",
+      "bytes": 341674,
+      "sheets": 2
+    },
+    "8-7-suplemente-te-ndryshme": {
+      "file": "/pdf/seksionet/8-7-suplemente-te-ndryshme-2026-09.pdf",
+      "bytes": 1337921,
+      "sheets": 8
+    },
+    "18-shurup": {
+      "file": "/pdf/seksionet/18-shurup-2026-09.pdf",
+      "bytes": 478523,
+      "sheets": 3
+    },
+    "21-atc": {
+      "file": "/pdf/seksionet/21-atc-2026-09.pdf",
+      "bytes": 610919,
+      "sheets": 3
+    },
+    "8-5-orbita": {
+      "file": "/pdf/seksionet/8-5-orbita-2026-09.pdf",
+      "bytes": 237193,
+      "sheets": 1
+    },
+    "23-froika": {
+      "file": "/pdf/seksionet/23-froika-2026-09.pdf",
+      "bytes": 579796,
+      "sheets": 6
+    },
+    "23-1-bioblas-dhe-restorex": {
+      "file": "/pdf/seksionet/23-1-bioblas-dhe-restorex-2026-09.pdf",
+      "bytes": 368460,
+      "sheets": 2
+    },
+    "23-2-kozmetika-te-ndryshme": {
+      "file": "/pdf/seksionet/23-2-kozmetika-te-ndryshme-2026-09.pdf",
+      "bytes": 1142329,
+      "sheets": 8
+    },
+    "0-autan": {
+      "file": "/pdf/seksionet/0-autan-2026-09.pdf",
+      "bytes": 191736,
+      "sheets": 2
+    },
+    "23-3-kozmetike-becutan": {
+      "file": "/pdf/seksionet/23-3-kozmetike-becutan-2026-09.pdf",
+      "bytes": 184033,
+      "sheets": 1
+    },
+    "23-4-johnson-s-baby": {
+      "file": "/pdf/seksionet/23-4-johnson-s-baby-2026-09.pdf",
+      "bytes": 146503,
+      "sheets": 1
+    },
+    "26-dentare": {
+      "file": "/pdf/seksionet/26-dentare-2026-09.pdf",
+      "bytes": 365006,
+      "sheets": 3
+    },
+    "26-1-mr-white": {
+      "file": "/pdf/seksionet/26-1-mr-white-2026-09.pdf",
+      "bytes": 429851,
+      "sheets": 3
+    },
+    "26-2-chicco": {
+      "file": "/pdf/seksionet/26-2-chicco-2026-09.pdf",
+      "bytes": 278635,
+      "sheets": 2
+    },
+    "26-3-bio-tree-baby": {
+      "file": "/pdf/seksionet/26-3-bio-tree-baby-2026-09.pdf",
+      "bytes": 255985,
+      "sheets": 2
+    },
+    "27-pampersa": {
+      "file": "/pdf/seksionet/27-pampersa-2026-09.pdf",
+      "bytes": 480611,
+      "sheets": 3
+    },
+    "28-peceta-higjienike-dhe-tampon": {
+      "file": "/pdf/seksionet/28-peceta-higjienike-dhe-tampon-2026-09.pdf",
+      "bytes": 542938,
+      "sheets": 3
+    },
+    "31-ortopedike": {
+      "file": "/pdf/seksionet/31-ortopedike-2026-09.pdf",
+      "bytes": 1513846,
+      "sheets": 13
+    },
+    "32-ortopedi": {
+      "file": "/pdf/seksionet/32-ortopedi-2026-09.pdf",
+      "bytes": 192584,
+      "sheets": 1
+    },
+    "33-tio": {
+      "file": "/pdf/seksionet/33-tio-2026-09.pdf",
+      "bytes": 145127,
+      "sheets": 2
+    },
+    "35-infuzione": {
+      "file": "/pdf/seksionet/35-infuzione-2026-09.pdf",
+      "bytes": 117044,
+      "sheets": 1
+    },
+    "37-belupo": {
+      "file": "/pdf/seksionet/37-belupo-2026-09.pdf",
+      "bytes": 419242,
+      "sheets": 3
+    },
+    "40-galenika": {
+      "file": "/pdf/seksionet/40-galenika-2026-09.pdf",
+      "bytes": 478685,
+      "sheets": 4
+    },
+    "41-1-hemofarm": {
+      "file": "/pdf/seksionet/41-1-hemofarm-2026-09.pdf",
+      "bytes": 383211,
+      "sheets": 3
+    },
+    "41-2-stada": {
+      "file": "/pdf/seksionet/41-2-stada-2026-09.pdf",
+      "bytes": 258140,
+      "sheets": 2
+    },
+    "41-3-remedica": {
+      "file": "/pdf/seksionet/41-3-remedica-2026-09.pdf",
+      "bytes": 209783,
+      "sheets": 1
+    },
+    "41-4-pika-dhe-spreja": {
+      "file": "/pdf/seksionet/41-4-pika-dhe-spreja-2026-09.pdf",
+      "bytes": 517177,
+      "sheets": 3
+    },
+    "41-6-abdiibrahim": {
+      "file": "/pdf/seksionet/41-6-abdiibrahim-2026-09.pdf",
+      "bytes": 322862,
+      "sheets": 2
+    },
+    "41-7-nobel": {
+      "file": "/pdf/seksionet/41-7-nobel-2026-09.pdf",
+      "bytes": 100558,
+      "sheets": 1
+    },
+    "43-ampulla": {
+      "file": "/pdf/seksionet/43-ampulla-2026-09.pdf",
+      "bytes": 211598,
+      "sheets": 1
+    },
+    "45-medikamente": {
+      "file": "/pdf/seksionet/45-medikamente-2026-09.pdf",
+      "bytes": 777264,
+      "sheets": 5
+    }
+  }
 }
