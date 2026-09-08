@@ -235,6 +235,15 @@ h4 {
     background: #fff;
   }
 
+  /* The wrapper around the sheets is screen chrome, not paper: its tinted
+     background and vertical padding printed as a grey band across the top of
+     the first sheet and the bottom of the last. Invisible on screen, obvious
+     on a catalogue somebody is holding. */
+  .print-run {
+    background: none;
+    padding: 0;
+  }
+
   .print-sheet {
     margin: 0;
     padding: 0;

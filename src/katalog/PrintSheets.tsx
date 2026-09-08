@@ -54,7 +54,10 @@ export async function PrintSheets({
     // database, and the per-sheet slug is how the script learns which sections
     // exist and how many sheets each one takes, from one load instead of
     // sixty-two.
-    <div className="bg-surface-deep py-6" data-fingerprint={catalogFingerprint(sections)}>
+    <div
+      className="print-run bg-surface-deep py-6"
+      data-fingerprint={catalogFingerprint(sections)}
+    >
       <div className="print-hide mx-auto mb-6 flex max-w-[190mm] flex-wrap items-center justify-between gap-3 px-4">
         <Link
           href={langHref(dict.lang, sitePath(mode, "/katalog"))}

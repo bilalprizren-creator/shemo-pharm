@@ -65,20 +65,31 @@ const STAMP = new Date().toISOString().slice(0, 7);
 const mb = (n) => `${(n / 1024 / 1024).toFixed(1)} MB`;
 
 /**
- * Loads a print run, waits for it the way PrintButton does, and writes the PDF.
+ * Loads a print run, waits for it properly, and writes the PDF.
  *
  * The wait is not a nicety. page.pdf() freezes the page as it stands, and a run
- * whose photographs are still arriving becomes a catalogue of empty boxes —
- * the one failure this script exists to keep out of a partner's hands.
+ * whose photographs are still arriving becomes a catalogue of empty boxes — the
+ * one failure this script exists to keep out of a partner's hands.
  *
- * `complete` turns true on failure as well as success, so naturalWidth is
- * checked separately. A missing photograph is fatal here where on the live page
- * it is only a gap: this file is handed over and not looked at again for a year.
+ * Two conditions, and the first one is the one that is easy to miss. This route
+ * has a loading.tsx, so React streams the sheets into a hidden staging element
+ * and swaps them into place afterwards. In the window between those two things,
+ * `.print-sheet img` already matches 1 713 loaded images while the page still
+ * shows the skeleton — waiting only on the photographs printed a PDF of grey
+ * placeholder boxes. An element inside the staging div measures zero, so the
+ * height of the first sheet is what says the swap has happened.
+ *
+ * Then the photographs. `complete` turns true on failure as well as success, so
+ * naturalWidth is checked separately below. A missing photograph is fatal here
+ * where on the live page it is only a gap: this file is handed over and not
+ * looked at again for a year.
  */
 async function render(page, url, file) {
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_MS });
   await page.waitForFunction(
     () => {
+      const sheets = Array.from(document.querySelectorAll(".print-sheet"));
+      if (!sheets.length || !sheets[0].getBoundingClientRect().height) return false;
       const images = Array.from(document.querySelectorAll(".print-sheet img"));
       return images.length > 0 && images.every((i) => i.complete);
     },
