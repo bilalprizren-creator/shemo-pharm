@@ -51,7 +51,12 @@ audit/thumbs/
 # The pre-Postgres file store. Users, messages and the signing secret all live
 # in the database now and data/ no longer exists, but the entry stays so an old
 # checkout or a script writing there can never commit customer data.
-data/
+#
+# Anchored to the root, and it has to be: unanchored, `data/` matches at any
+# depth, so it also swallowed src/data/ — where the catalogue JSON lives. The
+# files already tracked there were unaffected and the trap only sprang on the
+# next new one, which is the kind that is found late.
+/data/
 
 # The old catalogue site's product photos: 390 MB of remove.bg cut-outs that
 # scripts/fetch-katalog-images.mjs downloads and scripts/cutout-images.mjs reads

@@ -19,7 +19,9 @@
     "migrate:sessions": "node scripts/add-session-revocation.mjs",
     "migrate:rate-limits": "node scripts/add-rate-limits-table.mjs",
     "migrate:catalog-visibility": "node scripts/add-catalog-visibility.mjs",
-    "images:thumbs": "node scripts/thumbnail-images.mjs"
+    "images:thumbs": "node scripts/thumbnail-images.mjs",
+    "images:print": "node scripts/thumbnail-images.mjs --variant print",
+    "katalog:pdf": "node scripts/build-catalog-pdf.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -40,6 +42,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "playwright": "^1.63.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "typescript": "^5",

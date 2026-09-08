@@ -102,6 +102,35 @@ export function thumbnailFor(src: string): string {
   return `${THUMB_DIR}${name.replace(/\.(png|jpe?g)$/i, ".webp")}`;
 }
 
+/** Where the 384px copies for the printed catalogue's sheets live. */
+const PRINT_DIR = "/products/print/";
+
+/**
+ * The 384px copy of a local product photo, flattened onto white, for the A4
+ * sheets of the printed catalogue.
+ *
+ * Two things separate it from thumbnailFor(). The size: 384px across the 30mm
+ * box a sheet draws it in is 325 dpi, which is print quality; the 560px
+ * thumbnail is 474 dpi, pixels no paper resolves — paid for 1 713 times in one
+ * document, and again by every browser asked to rasterise it.
+ *
+ * And the white. The cut-outs carry an alpha channel, and a browser writing a
+ * PDF cannot put a transparent image in the way it puts a photograph: it emits
+ * Flate-compressed RGB plus a soft mask, neither of which compresses like one.
+ * Flattened onto the sheet's own white they go in as JPEG instead. That is the
+ * difference between a catalogue somebody can download and one nobody can.
+ *
+ * Same arithmetic as thumbnailFor, same guards, and the same promise underneath
+ * it — every source under public/products/ has a copy here, which
+ * tests/thumbnails.test.ts is there to keep true.
+ */
+export function printImageFor(src: string): string {
+  if (!src.startsWith("/products/")) return src;
+  const name = src.slice("/products/".length);
+  if (name.includes("/")) return src;
+  return `${PRINT_DIR}${name.replace(/\.(png|jpe?g)$/i, ".webp")}`;
+}
+
 /** Where uploaded product photos live in the blob store. */
 export const UPLOAD_PREFIX = "products/";
 

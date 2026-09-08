@@ -70,26 +70,61 @@ leaves the cart and wishlist providers out entirely on this branch — a
 Prices are the exception: they are the same prices as the shop, behind the same
 partner login, because that is what a partner comes here for.
 
-## The print sheet
+## The print sheet, and the PDF
 
-`/shtyp` is the whole PDF pipeline — no Puppeteer, no stored file, nothing that
-can go stale against the database. The browser's own "Save as PDF" does the rest.
+`/shtyp` used to be the whole PDF pipeline: no stored file, nothing that could
+go stale, the browser's own "Save as PDF" doing the rest. It did not hold. A
+full run made the visitor's browser fetch 1 713 photographs — 69 MB of
+originals — and then typeset 163 A4 pages, which on two different laptops took
+long enough that the feature was not usable. The work is the same work whoever
+does it; the mistake was doing it once per visitor.
 
-Three numbers govern it, and each one has a rule attached:
+So there are now two things, and the split matters:
+
+- **`scripts/build-catalog-pdf.mjs`** renders `/shtyp` in Playwright's Chromium,
+  once, offline, and writes `public/pdf/shemo-katalog-<month>.pdf` plus one file
+  per section. That is what the buttons link to. Chromium is a devDependency and
+  is never deployed. Run it against a server holding the **production** database
+  — the catalogue is edited in `/admin/katalogu` against live data.
+- **`/shtyp` itself stays**, because it is the only version that is current to
+  the minute, and because one section is a perfectly cheap thing to print from
+  a browser. It is the second button everywhere now, not the first.
+
+The stored file can go stale, which is exactly what the old arrangement was
+avoiding, so it is watched: `catalogFingerprint()` in `sheets.ts` hashes what a
+sheet actually prints, `PrintSheets` puts it on the page as `data-fingerprint`,
+the script records it in `src/data/catalog-pdf.json`, and the contents page says
+so when today's no longer matches. `src/katalog/pdf.ts` reads that manifest and
+every caller tolerates it being empty — a checkout before the first run is a
+real state, not a broken one.
+
+Four numbers govern the sheet, and each one has a rule attached:
 
 - **163 A4 sheets** for the full run. `sheets.ts` is the arithmetic, exported on
   its own so the contents page and the section page can print the count in the
   button *before* someone commits to it. `?seksioni=<slug>` limits the run to
-  one section, which is what most people actually want.
+  one section, which is what most people actually want; an unknown slug is
+  not-found rather than the full 163, which is what it used to be.
 - **1 733 photos, all eager.** An image the browser has not fetched prints as
   blank space, and a print run never scrolls to trigger lazy loading. So
   `PrintButton` waits: the click queues, and the dialog opens only once every
-  image has settled. Never call `window.print()` here without that wait.
-- **`width={192}`** on the sheet image, not the 30mm the box is drawn at.
-  `next/image` builds a 1x/2x srcset off that number: 192 lands on 256/384
-  where 220 landed on 256/**640**. Raising it costs a third variant on Vercel's
-  transformation quota for every one of the 1 733 photos, and buys nothing —
-  384px across 30mm is already 325 dpi.
+  image has settled. Never call `window.print()` here without that wait — and
+  `build-catalog-pdf.mjs` waits on the same condition, because `page.pdf()`
+  freezes the page as it stands.
+- **384px, flattened onto white** — `printImageFor()`, not `thumbnailFor()`.
+  Half the pixels of the 560px thumbnail and still 325 dpi across the 30mm box,
+  which took the full run from 69 MB to 12.6 MB. The white is the load-bearing
+  half: a browser writing a PDF stores a transparent image as Flate RGB plus a
+  soft mask, and the cut-outs all carry alpha, so without flattening the
+  generated catalogue is not a size anybody can download.
+- **`width={192}`** on the sheet image, which now only sizes the box.
+  `images.unoptimized` is on, so `next/image` builds no srcset off it and the
+  browser fetches exactly the file `src` names. Leave it: the number still has
+  to be the right one the day the optimizer comes back.
+
+`next.config.ts` also gives `/products/**` a day of `Cache-Control` and
+`/pdf/**` a year of `immutable`. Both matter here more than anywhere else on the
+site — without the first, every print run revalidated 1 713 files one by one.
 
 No prices on the sheet, by decision. The paper edition carries none either, and
 a price printed onto a sheet that lives in a customer's drawer for a year is

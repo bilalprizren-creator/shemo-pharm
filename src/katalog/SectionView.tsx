@@ -10,6 +10,8 @@ import {
 import { langHref, fmt } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import { sheetsFor } from "@/katalog/sheets";
+import { sectionCatalogPdf } from "@/katalog/pdf";
+import { PdfDownload } from "@/katalog/PdfDownload";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
@@ -43,6 +45,7 @@ export async function SectionView({
   const next = at < all.length - 1 ? all[at + 1] : undefined;
 
   const slug = catalogSectionSlug(section);
+  const pdf = sectionCatalogPdf(slug);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
@@ -66,16 +69,25 @@ export async function SectionView({
             </p>
           </div>
         </div>
-        <Link
-          href={href(`/katalog/shtyp?seksioni=${slug}`)}
-          className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
-        >
-          <Printer className="size-4" aria-hidden />
-          {dict.printedCatalog.print}
-          <span className="font-normal text-ink-400">
-            · {fmt(dict.printedCatalog.printPages, { n: sheetsFor([section]).length })}
-          </span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* A few hundred kilobytes for the section somebody actually asked
+              about, where the whole catalogue is twelve megabytes. Null for a
+              section added since the last run of scripts/build-catalog-pdf.mjs,
+              and then the print sheet — cheap at this size — is the only offer. */}
+          {pdf && <PdfDownload pdf={pdf} dict={dict} tone="quiet" />}
+          <Link
+            href={href(`/katalog/shtyp?seksioni=${slug}`)}
+            className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
+          >
+            <Printer className="size-4" aria-hidden />
+            {pdf ? dict.printedCatalog.printFromBrowser : dict.printedCatalog.print}
+            {!pdf && (
+              <span className="font-normal text-ink-400">
+                · {fmt(dict.printedCatalog.printPages, { n: sheetsFor([section]).length })}
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

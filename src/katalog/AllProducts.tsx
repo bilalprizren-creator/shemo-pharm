@@ -13,6 +13,8 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { Pagination } from "@/components/catalog/Pagination";
+import { fullCatalogPdf } from "@/katalog/pdf";
+import { PdfDownload } from "@/katalog/PdfDownload";
 
 /**
  * Forty-eight per page. Measured on this catalogue: 155 cards weigh 203 KB
@@ -42,6 +44,10 @@ export async function AllProducts({
   const all = await getAllProductsInCatalogOrder();
   const mode = await getSiteMode();
   const href = (p: string) => langHref(dict.lang, sitePath(mode, p));
+  // The printed run, which is not quite this list — 311 of these products have
+  // never been printed and are not in the file. Same as the print link it
+  // replaces, which went to the same 163 sheets.
+  const pdf = fullCatalogPdf();
 
   const totalPages = Math.max(1, Math.ceil(all.length / PER_PAGE));
   const current = Math.min(Math.max(1, page), totalPages);
@@ -106,13 +112,17 @@ export async function AllProducts({
             <Search className="size-4" aria-hidden />
             {dict.printedCatalog.searchInstead}
           </Link>
-          <Link
-            href={href("/katalog/shtyp")}
-            className="inline-flex items-center gap-2 rounded-field bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            <Printer className="size-4" aria-hidden />
-            {dict.printedCatalog.print}
-          </Link>
+          {pdf ? (
+            <PdfDownload pdf={pdf} dict={dict} />
+          ) : (
+            <Link
+              href={href("/katalog/shtyp")}
+              className="inline-flex items-center gap-2 rounded-field bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            >
+              <Printer className="size-4" aria-hidden />
+              {dict.printedCatalog.print}
+            </Link>
+          )}
         </div>
       </div>
 

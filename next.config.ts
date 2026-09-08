@@ -88,6 +88,43 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        /**
+         * The product photographs, which Vercel otherwise serves with
+         * `max-age=0, must-revalidate` — one conditional request per file, per
+         * visit. On a listing page that is twenty-four of them and nobody
+         * notices. On the print sheet it is 1 713, every time somebody reopens
+         * it, before a single page can begin to lay out.
+         *
+         * Not `immutable`, because these filenames are not content-hashed:
+         * scripts/cutout-images.mjs rewrites a photograph under the name it
+         * already had. A day of certainty, then a month of serving the old copy
+         * while the new one arrives, is the trade that fits that.
+         */
+        source: "/products/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=2592000",
+          },
+        ],
+      },
+      {
+        /**
+         * The generated catalogue PDFs. `immutable` is safe here and nowhere
+         * else under public/, because scripts/build-catalog-pdf.mjs puts the
+         * month it ran in the filename — a new run is a new URL, and no file is
+         * ever rewritten in place.
+         *
+         * They live under /pdf/ rather than /katalog/ deliberately: /katalog is
+         * a route prefix, and a rule matching it would pin the contents page
+         * and all 61 section pages in the visitor's cache for a year.
+         */
+        source: "/pdf/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
     ];
   },
 

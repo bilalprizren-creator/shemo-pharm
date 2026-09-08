@@ -466,6 +466,14 @@ export const en: Dictionary = {
     printPage: "Page {page}/{total}",
     printWaiting: "Waiting for the photos…",
     printProgress: "Photos: {done}/{total}",
+    /** The catalogue as a finished file, so no browser has to build it again. */
+    downloadPdf: "Download PDF",
+    pdfMeta: "{n} A4 pages · {size}",
+    pdfDated: "PDF from {date}",
+    pdfStale:
+      "The catalogue has changed since then. For today's range, print from the browser.",
+    pdfMirror: "Copy on Google Drive",
+    printFromBrowser: "Print from the browser",
     /** Sections the paper edition prints but the range no longer carries. */
     missingSections:
       "These sections of the printed catalogue are not here, because none of their articles are in the current range: {names}.",

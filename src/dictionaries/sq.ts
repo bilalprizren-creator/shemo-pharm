@@ -505,6 +505,14 @@ export const sq = {
     printPage: "Faqe {page}/{total}",
     printWaiting: "Duke pritur fotot…",
     printProgress: "Fotot: {done}/{total}",
+    /** Katalogu i gatshëm si skedar, që shfletuesi të mos e ndërtojë vetë. */
+    downloadPdf: "Shkarko PDF",
+    pdfMeta: "{n} faqe A4 · {size}",
+    pdfDated: "PDF nga {date}",
+    pdfStale:
+      "Katalogu ka ndryshuar që nga ajo datë. Për gjendjen e sotme, shtypni nga shfletuesi.",
+    pdfMirror: "Kopje në Google Drive",
+    printFromBrowser: "Shtyp nga shfletuesi",
     /** Sections the paper edition prints but the range no longer carries. */
     missingSections:
       "Këto seksione të katalogut të shtypur nuk janë këtu, sepse asnjë artikull i tyre nuk figuron në asortimentin e tanishëm: {names}.",

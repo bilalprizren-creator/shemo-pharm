@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { isLang, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { catalogSectionSlug, getCatalogSections } from "@/lib/catalog";
@@ -23,10 +24,22 @@ export default async function PrintCatalogPage({ params, searchParams }: Props) 
   const { seksioni } = await searchParams;
 
   const all = await getCatalogSections();
-  // An unknown slug prints the whole catalogue rather than an empty sheet: this
-  // route is reached from a print button, and a blank print dialog reads as a
-  // broken feature where too many pages reads as a wrong click.
-  const one = seksioni ? all.filter((s) => catalogSectionSlug(s) === seksioni) : [];
+  // An unknown slug used to fall back to the whole catalogue, on the reasoning
+  // that a blank print dialog reads as a broken feature where too many pages
+  // reads as a wrong click. It is the wrong trade at this size: the full run is
+  // 163 sheets and 1 713 photographs, so a mistyped slug served the most
+  // expensive page on the site to somebody who had asked for six sheets.
+  //
+  // The not-found page it shows instead answers 200 rather than 404, because
+  // loading.tsx puts this render behind a Suspense boundary and the shell has
+  // already been sent by the time this runs. That is true of every route here
+  // with a loading.tsx — /produktet/<unknown> and /katalog/<unknown> both do
+  // it — and is a separate thing to fix. Nothing is lost here either way: this
+  // route is noindex.
+  const sections = seksioni
+    ? all.filter((s) => catalogSectionSlug(s) === seksioni)
+    : all;
+  if (!sections.length) notFound();
 
-  return <PrintSheets sections={one.length ? one : all} dict={dict} />;
+  return <PrintSheets sections={sections} dict={dict} />;
 }

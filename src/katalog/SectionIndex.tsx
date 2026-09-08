@@ -9,9 +9,13 @@ import {
   getEmptyCatalogSections,
   productImage,
 } from "@/lib/catalog";
-import { sheetsFor } from "@/katalog/sheets";
+import { catalogFingerprint, sheetsFor } from "@/katalog/sheets";
+import { catalogPdfGeneratedAt, catalogPdfIsCurrent, fullCatalogPdf } from "@/katalog/pdf";
+import { PdfDownload } from "@/katalog/PdfDownload";
 import { langHref, fmt } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
+import { formatDate } from "@/lib/format";
+import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "@/components/product/PhotoWell";
@@ -43,6 +47,12 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
   // Costs nothing here — getCatalogSections() is already loaded and cached —
   // and 163 is the number that makes somebody print one section instead.
   const sheets = sheetsFor(sections).length;
+  // The generated file, when there is one. Everything below falls back to the
+  // print sheet without it — a checkout before anybody has run
+  // scripts/build-catalog-pdf.mjs is a real state, not a broken one.
+  const pdf = fullCatalogPdf();
+  const pdfDate = catalogPdfGeneratedAt();
+  const pdfCurrent = catalogPdfIsCurrent(catalogFingerprint(sections));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
@@ -75,18 +85,56 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
             <Search className="size-4" aria-hidden />
             {dict.printedCatalog.searchInstead}
           </Link>
+          {/* The download leads and the print sheet follows, because the two
+              are not equal any more: one is a file the CDN hands over, the
+              other is 1 713 photographs and 163 pages for the visitor's own
+              browser to typeset. The print sheet stays because it is the only
+              version that is current to the minute — and for one section it is
+              a perfectly cheap thing to ask for. */}
+          {pdf && <PdfDownload pdf={pdf} dict={dict} />}
           <Link
             href={href("/katalog/shtyp")}
-            className="inline-flex items-center gap-2 rounded-field bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className={
+              pdf
+                ? "inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
+                : "inline-flex items-center gap-2 rounded-field bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            }
           >
             <Printer className="size-4" aria-hidden />
-            {dict.printedCatalog.print}
-            <span className="font-normal text-brand-100">
-              · {fmt(dict.printedCatalog.printPages, { n: sheets })}
-            </span>
+            {pdf ? dict.printedCatalog.printFromBrowser : dict.printedCatalog.print}
+            {!pdf && (
+              <span className="font-normal text-brand-100">
+                · {fmt(dict.printedCatalog.printPages, { n: sheets })}
+              </span>
+            )}
           </Link>
         </div>
       </div>
+
+      {pdf && pdfDate && (
+        <p className="mt-4 text-sm text-ink-400">
+          {fmt(dict.printedCatalog.pdfDated, {
+            date: formatDate(pdfDate, dict.lang === "en" ? "en-GB" : "sq-AL"),
+          })}
+          {/* The file is a stored artefact and can fall behind the database.
+              catalogFingerprint() is how the page knows, so a partner is told
+              rather than left to find out from a code that is not in it. */}
+          {!pdfCurrent && <> · {dict.printedCatalog.pdfStale}</>}
+          {SITE.katalogPdfMirror && (
+            <>
+              {" · "}
+              <a
+                href={SITE.katalogPdfMirror}
+                target="_blank"
+                rel="noopener"
+                className="underline decoration-line underline-offset-2 transition-colors hover:text-brand-700"
+              >
+                {dict.printedCatalog.pdfMirror}
+              </a>
+            </>
+          )}
+        </p>
+      )}
 
       <p className="mt-6 text-sm text-ink-400">
         {fmt(dict.printedCatalog.summary, { sections: sections.length, products: total })}

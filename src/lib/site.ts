@@ -39,6 +39,20 @@ export const SITE = {
   },
   hours: "E hënë – E premte, 09:00 – 18:00",
 
+  /**
+   * A second copy of the generated catalogue PDF, on Google Drive, for handing
+   * over in a chat window rather than as a link to a page.
+   *
+   * The site's own copy under /pdf/ is the primary one and always will be: it
+   * is on this domain, it is served by the CDN, and it needs no interstitial
+   * before the download starts. This is the one somebody forwards.
+   *
+   * Null until a run has been uploaded — the link renders only when it is set,
+   * so an empty string here is a link to nowhere rather than a hidden button.
+   * Paste the Drive share URL, not the folder.
+   */
+  katalogPdfMirror: null as string | null,
+
   social: {
     facebook: "https://www.facebook.com/shemofarm/",
     instagram: "https://www.instagram.com/shemopharmshpk/",
