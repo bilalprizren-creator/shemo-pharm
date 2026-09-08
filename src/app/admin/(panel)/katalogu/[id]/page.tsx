@@ -32,6 +32,7 @@ import {
 } from "@/lib/product-filter";
 import {
   ProductBulkBar,
+  ProductRowCheckbox,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
 
@@ -157,10 +158,7 @@ export default async function AdminCatalogSectionPage({
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
               <th className="w-10 py-3 pl-4 pr-1">
-                <ProductSelectAll
-                  formId={BULK_FORM}
-                  pageCount={section.products.length}
-                />
+                <ProductSelectAll pageIds={section.products.map((p) => p.id)} />
               </th>
               <th className="px-4 py-3 font-semibold">#</th>
               <th className="px-4 py-3 font-semibold">Produkti</th>
@@ -183,13 +181,10 @@ export default async function AdminCatalogSectionPage({
                     it: every other cell in this row holds a form of its own,
                     and a form inside a form is not something HTML has. */}
                 <td className="w-10 py-2.5 pl-4 pr-1">
-                  <input
-                    type="checkbox"
-                    name="ids"
-                    value={p.id}
-                    form={BULK_FORM}
-                    aria-label={`Zgjidh ${p.name}`}
-                    className="size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40"
+                  <ProductRowCheckbox
+                    id={p.id}
+                    formId={BULK_FORM}
+                    label={`Zgjidh ${p.name}`}
                   />
                 </td>
                 <td className="px-4 py-2.5 tabular-nums text-ink-400">{i + 1}</td>
@@ -302,7 +297,7 @@ export default async function AdminCatalogSectionPage({
       */}
       <ProductBulkBar
         formId={BULK_FORM}
-        pageCount={section.products.length}
+        pageIds={section.products.map((p) => p.id)}
         total={section.products.length}
         filter={productFilterFields({ ...NO_PRODUCT_FILTER, sectionId: section.id })}
         sections={sectionOptions}

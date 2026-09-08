@@ -23,6 +23,7 @@ import { ProductFilterSelects } from "@/components/admin/ProductFilterSelects";
 import { ProductPriceCell } from "@/components/admin/ProductPriceCell";
 import {
   ProductBulkBar,
+  ProductRowCheckbox,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
 import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
@@ -209,7 +210,7 @@ export default async function AdminProductsPage({
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
               <th className="w-10 pl-4 pr-1 py-3">
-                <ProductSelectAll formId={BULK_FORM} pageCount={rows.length} />
+                <ProductSelectAll pageIds={rows.map((p) => p.id)} />
               </th>
               <th className="px-4 py-3 font-semibold">Produkti</th>
               <th className="px-4 py-3 font-semibold">Kodi</th>
@@ -235,13 +236,10 @@ export default async function AdminProductsPage({
                     it: this cell's siblings are forms of their own, and a form
                     inside a form is not something HTML has. */}
                 <td className="w-10 py-2.5 pl-4 pr-1">
-                  <input
-                    type="checkbox"
-                    name="ids"
-                    value={p.id}
-                    form={BULK_FORM}
-                    aria-label={`Zgjidh ${p.name}`}
-                    className="size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40"
+                  <ProductRowCheckbox
+                    id={p.id}
+                    formId={BULK_FORM}
+                    label={`Zgjidh ${p.name}`}
                   />
                 </td>
                 <td className="max-w-[320px] px-4 py-2.5">
@@ -356,7 +354,7 @@ export default async function AdminProductsPage({
 
       <ProductBulkBar
         formId={BULK_FORM}
-        pageCount={rows.length}
+        pageIds={rows.map((p) => p.id)}
         total={total}
         filter={productFilterFields(filter)}
         sections={sectionOptions}

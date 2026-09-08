@@ -1,7 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { BookOpen, BookX, Eye, EyeOff } from "lucide-react";
 import {
   bulkPlaceInCatalogAction,
@@ -19,98 +24,152 @@ import type { CatalogSectionOption } from "@/components/admin/ProductForm";
  * over a few hundred rows at a time, which is not a thing anyone will do with a
  * per-row button pressed two thousand times.
  *
- * The row checkboxes are plain server-rendered inputs carrying `form="…"`, not
- * children of this form: the table cells already hold the per-row toggle forms,
- * and a form inside a form is not something HTML has. Browsers submit
- * form-associated controls wherever they sit in the DOM, and `new FormData(form)`
- * — which is how React collects a server action's arguments — reads them the
- * same way, so the selection arrives without a line of wiring.
+ * The row checkboxes carry `form="…"` rather than sitting inside this form: the
+ * table cells beside them already hold the per-row toggle forms, and a form
+ * inside a form is not something HTML has. Browsers submit form-associated
+ * controls wherever they sit in the DOM, and `new FormData(form)` — which is how
+ * React collects a server action's arguments — reads them the same way.
+ *
+ * What they cannot be is uncontrolled. A server action revalidates the page, and
+ * the rows come back re-rendered with every box empty: the ticks are DOM state
+ * and the new render does not know about them. That is why the selection lives
+ * in the little store below instead, outside the subtree that gets replaced —
+ * a press on "hide from the shop" leaves the same nineteen products ticked and
+ * ready for "hide from the catalogue", which is the whole point of a bulk bar.
  */
 
-/** Every mounted piece of the bar, so one can tell the others to recount. */
+/* ------------------------------ Selection -------------------------------- */
+
+let selected: ReadonlySet<number> = new Set();
 const listeners = new Set<() => void>();
 
-function inputs(formId: string): HTMLInputElement[] {
-  return Array.from(
-    document.querySelectorAll<HTMLInputElement>(
-      `input[type="checkbox"][name="ids"][form="${CSS.escape(formId)}"]`
-    )
-  );
+function publish(next: ReadonlySet<number>): void {
+  selected = next;
+  for (const l of listeners) l();
 }
+
+function subscribe(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+/** The store's snapshot must be referentially stable between real changes. */
+const snapshot = () => selected;
+const serverSnapshot = (): ReadonlySet<number> => EMPTY;
+const EMPTY: ReadonlySet<number> = new Set();
+
+function useSelected(): ReadonlySet<number> {
+  return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
+}
+
+function toggle(id: number, on: boolean): void {
+  const next = new Set(selected);
+  if (on) next.add(id);
+  else next.delete(id);
+  publish(next);
+}
+
+function setMany(ids: readonly number[], on: boolean): void {
+  const next = new Set(selected);
+  for (const id of ids) {
+    if (on) next.add(id);
+    else next.delete(id);
+  }
+  publish(next);
+}
+
+const boxClass =
+  "size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40";
 
 /**
- * How many rows are ticked right now, read from the DOM rather than held in
- * React state — the checkboxes are rendered on the server and are not this
- * component's to own. `change` covers a click on any of them; the listener set
- * covers "select all", which sets `.checked` in script and therefore fires
- * nothing at all.
+ * One row's checkbox. Controlled by the store, so it comes back ticked after
+ * the page revalidates, and `name="ids"` so the browser still submits it.
  */
-function useSelectedCount(formId: string): number {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const read = () => setCount(inputs(formId).filter((el) => el.checked).length);
-    read();
-    listeners.add(read);
-    document.addEventListener("change", read);
-    return () => {
-      listeners.delete(read);
-      document.removeEventListener("change", read);
-    };
-  }, [formId]);
-  return count;
-}
+export function ProductRowCheckbox({
+  id,
+  formId,
+  label,
+}: {
+  id: number;
+  formId: string;
+  label: string;
+}) {
+  const sel = useSelected();
+  const on = sel.has(id);
+  const ref = useRef<HTMLInputElement>(null);
 
-function setAll(formId: string, checked: boolean): void {
-  for (const el of inputs(formId)) el.checked = checked;
-  for (const l of listeners) l();
+  /*
+   * Write the value onto the element as well, every commit.
+   *
+   * `checked` alone is not enough here. A server action revalidates the route
+   * and the row markup is swapped underneath this input; the element comes back
+   * unticked while React still holds `true` from the render before, sees no
+   * change in the prop, and so writes nothing. The result is a bar that
+   * correctly says nineteen are selected above a table where none look it, and
+   * a form that submits no ids at all — which is exactly the state this was
+   * meant to fix. Asserting the DOM is cheap and removes the whole class of
+   * disagreement.
+   */
+  useEffect(() => {
+    if (ref.current && ref.current.checked !== on) ref.current.checked = on;
+  });
+
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      name="ids"
+      value={id}
+      form={formId}
+      checked={on}
+      onChange={(e) => toggle(id, e.currentTarget.checked)}
+      aria-label={label}
+      className={boxClass}
+    />
+  );
 }
 
 /**
  * The header checkbox: ticks every row on this page, and shows a dash while
  * only some of them are ticked.
  */
-export function ProductSelectAll({
-  formId,
-  pageCount,
-}: {
-  formId: string;
-  pageCount: number;
-}) {
-  const count = useSelectedCount(formId);
+export function ProductSelectAll({ pageIds }: { pageIds: readonly number[] }) {
+  const sel = useSelected();
+  const onPage = pageIds.filter((id) => sel.has(id)).length;
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (ref.current) ref.current.indeterminate = count > 0 && count < pageCount;
-  }, [count, pageCount]);
+    if (ref.current) {
+      ref.current.indeterminate = onPage > 0 && onPage < pageIds.length;
+    }
+  }, [onPage, pageIds.length]);
 
   return (
     <input
       ref={ref}
       type="checkbox"
-      checked={pageCount > 0 && count === pageCount}
-      onChange={(e) => setAll(formId, e.currentTarget.checked)}
+      checked={pageIds.length > 0 && onPage === pageIds.length}
+      onChange={(e) => setMany(pageIds, e.currentTarget.checked)}
       aria-label="Zgjidh të gjitha në këtë faqe"
-      className="size-4 cursor-pointer rounded border-ink-900/25 text-brand-600 focus:ring-brand-500/40"
+      className={boxClass}
     />
   );
 }
 
-/**
- * Empties the selection once the action has actually finished.
+/*
+ * The selection deliberately survives an action.
  *
- * The checkboxes are uncontrolled DOM state, so a revalidated page comes back
- * with them still ticked — pointing at rows whose flags have already been
- * changed. Clearing on submit instead would race React's own collection of the
- * form data; waiting for pending to fall back to false does not.
+ * It used to empty itself once the write finished, on the reasoning that the
+ * ticked rows now pointed at products whose flags had already changed. That
+ * reasoning ignored what the bar is actually for: deciding where a group
+ * belongs usually takes more than one press. Taking a brand out of the shop and
+ * out of the printed catalogue is two buttons on one selection, and clearing
+ * between them meant ticking nineteen boxes again to finish the thought.
+ *
+ * Nothing is lost by keeping it. The buttons set an absolute value rather than
+ * toggling, so pressing one twice writes the same state twice; the row icons
+ * change under the selection as feedback; and "Pastro zgjedhjen" is right
+ * there for when the group really is done with.
  */
-function ClearWhenDone({ onDone }: { onDone: () => void }) {
-  const { pending } = useFormStatus();
-  const was = useRef(false);
-  useEffect(() => {
-    if (was.current && !pending) onDone();
-    was.current = pending;
-  }, [pending, onDone]);
-  return null;
-}
 
 function BarButton({
   name,
@@ -144,33 +203,50 @@ function BarButton({
 
 export function ProductBulkBar({
   formId,
-  pageCount,
+  pageIds,
   total,
   filter,
   sections,
 }: {
   formId: string;
-  /** Rows on this page — what the header checkbox ticks. */
-  pageCount: number;
+  /** The ids this page lists, in order — the selection is pruned to them. */
+  pageIds: readonly number[];
   /** Rows the filter matches in total — what "all matching" reaches. */
   total: number;
   /** productFilterFields() — mirrored so a bulk write hits what the table listed. */
   filter: Record<string, string>;
   sections: CatalogSectionOption[];
 }) {
-  const count = useSelectedCount(formId);
+  const sel = useSelected();
+  const selectedHere = pageIds.filter((id) => sel.has(id));
+  const count = selectedHere.length;
   const [allWanted, setAllMatching] = useState(false);
   // Derived, not stored: "all matching" describes a selection the table cannot
-  // show, so it must not outlive the selection it was ticked next to — and the
-  // count it depends on lives in the DOM, where an effect would only be able to
-  // chase it one render late.
+  // show, so it must not outlive the selection it was ticked next to.
   const all = allWanted && count > 0;
   const affected = all ? total : count;
 
+  /*
+   * Anything ticked that this page no longer lists is dropped.
+   *
+   * The store outlives a render, which is the point, but it must not outlive
+   * the table: change the filter, turn the page, or hide the products a
+   * visibility filter was selecting for, and the ids that vanished from the
+   * table would otherwise still be in the next write — editing products
+   * nobody can see. Keyed on the page's own ids, so a revalidation that
+   * returns the same rows changes nothing and the selection survives it.
+   */
+  const pageKey = pageIds.join(",");
+  useEffect(() => {
+    const here = new Set(pageKey ? pageKey.split(",").map(Number) : []);
+    const kept = [...selected].filter((id) => here.has(id));
+    if (kept.length !== selected.size) publish(new Set(kept));
+  }, [pageKey]);
+
   const clear = useCallback(() => {
-    setAll(formId, false);
+    publish(new Set());
     setAllMatching(false);
-  }, [formId]);
+  }, []);
 
   const confirmLarge = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -200,7 +276,6 @@ export function ProductBulkBar({
         <input key={name} type="hidden" name={name} value={value} />
       ))}
       {all && <input type="hidden" name="scope" value="all" />}
-      <ClearWhenDone onDone={clear} />
 
       <div className="rounded-2xl border border-ink-900/10 bg-white p-3 shadow-lg shadow-ink-900/10">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -211,7 +286,7 @@ export function ProductBulkBar({
             </span>
           </p>
 
-          {total > pageCount && (
+          {total > pageIds.length && (
             <label className="flex items-center gap-1.5 text-sm text-ink-600">
               <input
                 type="checkbox"
