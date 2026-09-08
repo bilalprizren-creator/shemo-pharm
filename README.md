@@ -195,6 +195,30 @@ produktet; kategoritë me `count = 0` nuk shfaqen askund.
 
 2 049 foto WebP 1000×1000 ndodhen në `public/products/` (≈64 MB, në repo).
 
+**Optimizuesi i Next-it është i fikur** (`images.unoptimized` te
+`next.config.ts`). Vercel numëron një transformim për çdo foto × gjerësi ×
+format, plani Hobby lejon 5 000, dhe një katalog me 2 049 produkte nuk hyn nën
+atë tavan: numëratori kaloi, `/_next/image` filloi të kthejë **402
+`OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED`**, dhe dyqani i humbi fotot një nga
+një sapo skadonin variantet e ruajtura. Skedarët vetë ishin gjithnjë në rregull.
+
+Prandaj zvogëlimi bëhet një herë, jo për çdo kërkesë:
+
+```bash
+npm run images:thumbs          # vetëm ato që mungojnë
+npm run images:thumbs -- --force
+```
+
+`scripts/thumbnail-images.mjs` shkruan një kopje 560 px të secilës foto te
+`public/products/thumb/`. 560 sepse një kartelë vizatohet më së shumti 280 px
+(shih `sizes` te `ProductCard`) dhe një ekran 2× do dyfishin; faqja e produktit
+vizaton 432 dhe vazhdon me foton e plotë, si edhe fletët e shtypit.
+`thumbnailFor()` te `src/lib/images.ts` e ndërton shtegun me aritmetikë, pa
+listë që vjetrohet — çka funksionon vetëm nëse **çdo** foto ka kopjen e vet,
+dhe [`tests/thumbnails.test.ts`](tests/thumbnails.test.ts) bie nëse jo. Një foto
+e shtuar pa e rrotulluar skriptin do të dukej si figurë e thyer në çdo listë, në
+të dyja faqet, pa asnjë gjurmë në log.
+
 **Nga vijnë sfondet e pastra.** Fotot origjinale erdhën nga WordPress-i i vjetër,
 të rrafshuara mbi të bardhë, dhe `scripts/cutout-images.mjs` u heq atë sfond. Ka
 katër burime, sipas besueshmërisë:

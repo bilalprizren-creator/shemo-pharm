@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Lock, Package } from "lucide-react";
+import { thumbnailFor } from "@/lib/images";
 import type { CardProduct } from "@/lib/types";
 import { langHref } from "@/lib/i18n";
 import type { SiteMode } from "@/lib/site-mode";
@@ -42,15 +43,18 @@ export function ProductCard({
       <PhotoWell className="aspect-square w-full" cutOut={photo.cutOut}>
         {product.image ? (
           <Image
-            src={product.image}
+            // The 560px copy, not the 1000px source. `sizes` below says a card
+            // is never drawn wider than 280 CSS pixels, so the source was four
+            // times the bytes a grid of these needs — which mattered the moment
+            // next/image stopped resizing anything (see thumbnailFor).
+            src={thumbnailFor(product.image)}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 60vw, (max-width: 1024px) 33vw, 280px"
-            // The source files are already WebP q82 (scripts/cutout-images.mjs),
-            // so the default 75 is a second lossy pass over the fine print on a
-            // carton. Only the two large surfaces ask for 85; the 44-80px
-            // thumbnails stay on 75, where the difference is invisible and the
-            // extra transformations would not be.
+            // Kept for the day the optimizer is switched back on: the source
+            // files are already WebP q82 (scripts/cutout-images.mjs), so the
+            // default 75 would be a second lossy pass over the fine print on a
+            // carton. Inert while `images.unoptimized` is set.
             quality={85}
             priority={priority}
             className={`${photo.className} transition-transform duration-300 group-hover:scale-[1.04]`}

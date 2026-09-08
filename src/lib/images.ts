@@ -73,6 +73,35 @@ function hostMatches(hostname: string, pattern: string): boolean {
   return label.length > 0 && !label.includes(".");
 }
 
+/** Where the small copies of the local product photos live. */
+const THUMB_DIR = "/products/thumb/";
+
+/**
+ * The 560px copy of a local product photo, for the places that draw one small.
+ *
+ * next/image no longer resizes anything — Vercel counts a transformation per
+ * image per width per format, the plan allows 5 000, and a catalogue of 2 049
+ * products cannot fit under that — so the sizes that used to be produced per
+ * request are produced once by scripts/thumbnail-images.mjs instead. A card is
+ * drawn at most 280 CSS pixels wide, which is 560 on a 2x screen; the detail
+ * page draws 432 and keeps the full-size file.
+ *
+ * The rewrite is arithmetic rather than a lookup, so it holds no list that
+ * could go stale — and that only works while every source really does have a
+ * thumbnail, which tests/thumbnails.test.ts is there to keep true.
+ *
+ * Anything that is not a local /products/ file is returned untouched: remote
+ * blob URLs have no small copy, and neither does the placeholder.
+ */
+export function thumbnailFor(src: string): string {
+  if (!src.startsWith("/products/")) return src;
+  // Already a thumbnail, or a path with a directory of its own in it — leave
+  // it be rather than build /products/thumb/thumb/…
+  const name = src.slice("/products/".length);
+  if (name.includes("/")) return src;
+  return `${THUMB_DIR}${name.replace(/\.(png|jpe?g)$/i, ".webp")}`;
+}
+
 /** Where uploaded product photos live in the blob store. */
 export const UPLOAD_PREFIX = "products/";
 
