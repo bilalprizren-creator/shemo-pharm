@@ -13,6 +13,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { EmptyState } from "@/components/catalog/EmptyState";
+import { Pagination } from "@/components/catalog/Pagination";
 
 /**
  * Search across the printed catalogue.
@@ -26,11 +27,25 @@ import { EmptyState } from "@/components/catalog/EmptyState";
  * shop carries but the catalogue never printed would be noise here: the code
  * somebody types comes off a printed page.
  */
+/**
+ * Forty-eight per page, the same as /te-gjitha.
+ *
+ * It used to be all of them, on the reasoning that somebody types an article
+ * code and gets one hit. Somebody also types a single letter: "a" matches 1 527
+ * of the 1 733 printed products, which rendered a 6.1 MB page carrying 3 059
+ * image references — roughly 25 MB of photographs once the browser fetched
+ * them. One keystroke away, on a phone, in a pharmacy. The shop's own listing
+ * has paged since it was written; this is the same fix in the same shape.
+ */
+const PER_PAGE = 48;
+
 export async function SearchResults({
   query,
+  page,
   dict,
 }: {
   query: string;
+  page: number;
   dict: Dictionary;
 }) {
   const sections = await getCatalogSections();
@@ -49,7 +64,17 @@ export async function SearchResults({
 
   const trimmed = query.trim();
   const hits = trimmed ? searchProducts(printed, trimmed) : [];
-  const cards = await toCardProducts(hits, showPrices);
+  const totalPages = Math.max(1, Math.ceil(hits.length / PER_PAGE));
+  // Clamped rather than 404: a hand-edited number or a bookmark kept after the
+  // range shrank should land on a real page of results, not on an error.
+  const current = Math.min(Math.max(1, page), totalPages);
+  // Only this page's cards are built. toCardProducts formats prices and reads
+  // the blur placeholders, so doing it for 1 527 hits to show 48 was work
+  // thrown away as well as bytes.
+  const cards = await toCardProducts(
+    hits.slice((current - 1) * PER_PAGE, current * PER_PAGE),
+    showPrices
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6 lg:py-10">
@@ -107,6 +132,9 @@ export async function SearchResults({
       ) : (
         <p className="mt-3 text-sm text-ink-400" aria-live="polite">
           {fmt(dict.catalog.productsCount, { n: hits.length })}
+          {totalPages > 1 && (
+            <> · {fmt(dict.printedCatalog.pageOf, { page: current, total: totalPages })}</>
+          )}
         </p>
       )}
 
@@ -143,6 +171,20 @@ export async function SearchResults({
             );
           })}
         </ul>
+      )}
+
+      {hits.length > 0 && (
+        <div className="mt-10">
+          {/* The query rides along in the params, so page two is still a page
+              of the same search rather than an empty one. */}
+          <Pagination
+            basePath={href("/katalog/kerko")}
+            params={new URLSearchParams({ kerko: trimmed })}
+            page={current}
+            totalPages={totalPages}
+            dict={dict}
+          />
+        </div>
       )}
     </div>
   );

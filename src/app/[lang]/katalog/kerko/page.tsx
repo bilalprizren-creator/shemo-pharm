@@ -20,7 +20,7 @@ import { SearchResults } from "@/katalog/SearchResults";
  */
 interface Props {
   params: Promise<{ lang: string }>;
-  searchParams: Promise<{ kerko?: string }>;
+  searchParams: Promise<{ kerko?: string; faqja?: string }>;
 }
 
 export const metadata: Metadata = {
@@ -32,6 +32,9 @@ export const metadata: Metadata = {
 export default async function KatalogSearchPage({ params, searchParams }: Props) {
   const { lang } = await params;
   const dict = getDictionary(isLang(lang) ? (lang as Lang) : "sq");
-  const { kerko } = await searchParams;
-  return <SearchResults query={kerko ?? ""} dict={dict} />;
+  const { kerko, faqja } = await searchParams;
+  // Math.floor as well as the clamp, so "faqja=2.5" cannot offset by half a
+  // page. SearchResults clamps the upper end against the real total.
+  const page = Math.max(1, Math.floor(Number(faqja)) || 1);
+  return <SearchResults query={kerko ?? ""} page={page} dict={dict} />;
 }
