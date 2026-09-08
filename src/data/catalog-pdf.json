@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-08T18:59:03.110Z",
-  "fingerprint": "567d3930",
+  "generatedAt": "2026-09-08T19:12:04.339Z",
+  "fingerprint": "06078a9f",
   "full": {
     "file": "/pdf/shemo-katalog-2026-09.pdf",
-    "bytes": 20184449,
+    "bytes": 20157772,
     "sheets": 162
   },
   "sections": {
@@ -184,7 +184,7 @@
     },
     "23-froika": {
       "file": "/pdf/seksionet/23-froika-2026-09.pdf",
-      "bytes": 579796,
+      "bytes": 552887,
       "sheets": 6
     },
     "23-1-bioblas-dhe-restorex": {

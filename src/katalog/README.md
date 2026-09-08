@@ -98,14 +98,36 @@ so when today's no longer matches. `src/katalog/pdf.ts` reads that manifest and
 every caller tolerates it being empty — a checkout before the first run is a
 real state, not a broken one.
 
-Four numbers govern the sheet, and each one has a rule attached:
+It is a strict hash: one renamed product, one replaced photograph, one reordered
+section and the note is on. That is deliberate — the alternative is a warning
+that is right on average and wrong about the article somebody is holding — but
+it does mean the note appears often while the catalogue is being edited, and the
+answer to it is always the same:
 
-- **163 A4 sheets** for the full run. `sheets.ts` is the arithmetic, exported on
+```
+npm run katalog:pdf -- --base https://shemo-pharm.vercel.app
+git add public/pdf src/data/catalog-pdf.json && git commit && git push
+```
+
+Twenty minutes, unattended. Do it after a run of catalogue edits, not during
+one: it renders the live site sixty-two times and will happily photograph a
+half-finished reordering.
+
+**Do not point `--base` at a local server on the development database.** It will
+work, produce a plausible catalogue, and publish a range nobody sells; the
+fingerprint mismatch on the contents page is the only thing that would say so.
+
+Four numbers govern the sheet, and each one has a rule attached. They move as
+the range does — 162 sheets and 1 713 photographs on 8 September 2026, against
+the 163 and 1 733 the development database still shows — so read them as scale,
+not as constants. `sheetsFor()` is the only thing that knows the real count.
+
+- **162 A4 sheets** for the full run. `sheets.ts` is the arithmetic, exported on
   its own so the contents page and the section page can print the count in the
   button *before* someone commits to it. `?seksioni=<slug>` limits the run to
   one section, which is what most people actually want; an unknown slug is
-  not-found rather than the full 163, which is what it used to be.
-- **1 733 photos, all eager.** An image the browser has not fetched prints as
+  not-found rather than the whole run, which is what it used to be.
+- **1 713 photos, all eager.** An image the browser has not fetched prints as
   blank space, and a print run never scrolls to trigger lazy loading. So
   `PrintButton` waits: the click queues, and the dialog opens only once every
   image has settled. Never call `window.print()` here without that wait — and
