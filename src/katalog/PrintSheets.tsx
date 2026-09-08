@@ -100,17 +100,21 @@ export async function PrintSheets({
                   <div className="relative flex h-[30mm] w-full items-center justify-center">
                     {image ? (
                       <Image
-                        // The 384px print copy, flattened onto white — not
-                        // the 560px thumbnail the shop's grid uses, and not the
-                        // 1000px original. next/image stopped resizing anything
-                        // when images.unoptimized went on, so the width below
-                        // no longer builds a srcset: it only sizes the box, and
+                        // The 384px print copy — not the 560px thumbnail the
+                        // shop's grid uses, and not the 1000px original.
+                        // next/image stopped resizing anything when
+                        // images.unoptimized went on, so the width below no
+                        // longer builds a srcset: it only sizes the box, and
                         // the browser fetches whatever this src names. A full
                         // run is 1 713 photographs, and it was 69 MB of
                         // originals before the print dialog even opened, on a
-                        // phone, in a pharmacy. 384px across 30mm is 325 dpi,
-                        // and the white is what keeps a generated PDF down to a
-                        // size somebody can download — see printImageFor().
+                        // phone, in a pharmacy. 384px across 30mm is 325 dpi.
+                        //
+                        // JPEG rather than WebP, which is the one thing here
+                        // that is not a preference: these sheets are turned
+                        // into a PDF by scripts/build-catalog-pdf.mjs, and
+                        // Chrome can only carry a JPEG through untouched. See
+                        // printImageFor().
                         src={printImageFor(image)}
                         alt=""
                         width={192}

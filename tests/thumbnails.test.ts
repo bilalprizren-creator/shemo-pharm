@@ -25,24 +25,32 @@ const sources = readdirSync(PRODUCTS, { withFileTypes: true })
   .filter((e) => e.isFile() && /\.(webp|png|jpe?g)$/i.test(e.name))
   .map((e) => e.name);
 
-/** The two derived directories, and the function that names each one. */
+/**
+ * The two derived directories, the function that names each one, and the one
+ * extension each one writes.
+ *
+ * The extensions differ on purpose. The grid wants WebP for the bytes; the
+ * print sheet wants JPEG because Chrome can only carry a JPEG into a PDF
+ * untouched, and stores anything else lossless at about thirteen times the
+ * size. See printImageFor() and scripts/thumbnail-images.mjs.
+ */
 const VARIANTS = [
-  { name: "thumb", dir: "thumb", of: thumbnailFor },
-  { name: "print", dir: "print", of: printImageFor },
+  { name: "thumb", dir: "thumb", ext: "webp", of: thumbnailFor },
+  { name: "print", dir: "print", ext: "jpg", of: printImageFor },
 ] as const;
 
-describe.each(VARIANTS)("$name paths", ({ dir, of }) => {
+describe.each(VARIANTS)("$name paths", ({ dir, ext, of }) => {
   it("points a local product photo at its copy", () => {
-    expect(of("/products/1049-abox.webp")).toBe(`/products/${dir}/1049-abox.webp`);
+    expect(of("/products/1049-abox.webp")).toBe(`/products/${dir}/1049-abox.${ext}`);
   });
 
-  it("normalises the extension, because the script always writes webp", () => {
-    expect(of("/products/x.png")).toBe(`/products/${dir}/x.webp`);
-    expect(of("/products/x.JPG")).toBe(`/products/${dir}/x.webp`);
+  it("normalises the extension, because the script writes only one", () => {
+    expect(of("/products/x.png")).toBe(`/products/${dir}/x.${ext}`);
+    expect(of("/products/x.JPG")).toBe(`/products/${dir}/x.${ext}`);
   });
 
   it("leaves a copy alone rather than nesting another folder", () => {
-    expect(of(`/products/${dir}/x.webp`)).toBe(`/products/${dir}/x.webp`);
+    expect(of(`/products/${dir}/x.${ext}`)).toBe(`/products/${dir}/x.${ext}`);
   });
 
   it("leaves anything that is not a local product photo untouched", () => {
@@ -76,7 +84,7 @@ describe("every product photo has its copies", () => {
   // run beside them, which on a loaded machine ran past the default five
   // seconds every few runs — a suite that fails at random teaches people to
   // re-run it rather than read it.
-  describe.each(VARIANTS)("$name", ({ dir, of }) => {
+  describe.each(VARIANTS)("$name", ({ dir, ext, of }) => {
     it("has one copy per source, with nothing missing", { timeout: 20_000 }, () => {
       const missing = sources.filter((name) => {
         const copy = of(`/products/${name}`).replace("/products/", "");
@@ -95,10 +103,11 @@ describe("every product photo has its copies", () => {
       // the same stem, which under a full parallel run was slow enough to trip
       // the five-second timeout every few runs.
       const stems = new Set(sources.map((s) => s.replace(/\.[^.]+$/, "")));
+      const suffix = new RegExp(`\\.${ext}$`, "i");
       const orphans = readdirSync(path.join(PRODUCTS, dir), { withFileTypes: true })
         .filter((e) => e.isFile())
         .map((e) => e.name)
-        .filter((name) => !stems.has(name.replace(/\.webp$/i, "")));
+        .filter((name) => !stems.has(name.replace(suffix, "")));
       expect(orphans.slice(0, 10)).toEqual([]);
     });
   });

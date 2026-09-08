@@ -111,12 +111,18 @@ Four numbers govern the sheet, and each one has a rule attached:
   image has settled. Never call `window.print()` here without that wait — and
   `build-catalog-pdf.mjs` waits on the same condition, because `page.pdf()`
   freezes the page as it stands.
-- **384px, flattened onto white** — `printImageFor()`, not `thumbnailFor()`.
-  Half the pixels of the 560px thumbnail and still 325 dpi across the 30mm box,
-  which took the full run from 69 MB to 12.6 MB. The white is the load-bearing
-  half: a browser writing a PDF stores a transparent image as Flate RGB plus a
-  soft mask, and the cut-outs all carry alpha, so without flattening the
-  generated catalogue is not a size anybody can download.
+- **384px JPEG on white** — `printImageFor()`, not `thumbnailFor()`. Half the
+  pixels of the 560px thumbnail and still 325 dpi across the 30mm box, which
+  took the full run from 69 MB to 17.5 MB.
+
+  The JPEG is not a preference. Chrome can carry a picture into a PDF untouched
+  only when it is already JPEG; anything else it decodes and stores Flate,
+  losslessly. Measured on 60 of these files at 384px: JPEG, 642 KB in and a
+  657 KB PDF out; WebP, 451 KB in and a 5 999 KB PDF out. The first run of
+  `build-catalog-pdf.mjs` produced a **183.8 MB** catalogue out of WebP sheets.
+  WebP would save the print *page* about 5 MB, and that is the wrong side to
+  optimise now. The flattening onto white follows from the JPEG — a JPEG has no
+  alpha and every cut-out has one.
 - **`width={192}`** on the sheet image, which now only sizes the box.
   `images.unoptimized` is on, so `next/image` builds no srcset off it and the
   browser fetches exactly the file `src` names. Leave it: the number still has

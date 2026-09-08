@@ -45,6 +45,7 @@ const VARIANTS = [
     dir: "thumb",
     /** 2x the widest a card is ever drawn. See ProductCard's `sizes`. */
     width: 560,
+    format: "webp",
     /*
      * Transparency kept: a cut-out on a listing page sits on the card's own
      * background, which is not white everywhere and changes with the theme.
@@ -63,15 +64,37 @@ const VARIANTS = [
      */
     width: 384,
     /*
-     * Flattened onto white, and this is the load-bearing part. A browser
-     * writing a PDF stores a transparent image as Flate-compressed RGB plus a
-     * soft mask, neither of which compresses the way a photograph does; opaque,
-     * it stores JPEG. The sheet is white paper, so nothing is lost — and the
-     * generated catalogue is ~15 MB rather than something nobody can download.
+     * JPEG, and this is the one setting here that is not a judgement call.
+     *
+     * Chrome writes a PDF by embedding the pictures, and it can only hand a
+     * picture through untouched when it is already JPEG — Skia's PDF backend
+     * copies the DCT stream. Anything else it decodes and stores Flate, which
+     * is lossless and therefore enormous for a photograph. Measured on 60 of
+     * these files at 384px: as JPEG, 642 KB in and a 657 KB PDF out; as WebP,
+     * 451 KB in and a 5 999 KB PDF out. Thirteen times. The first run of
+     * scripts/build-catalog-pdf.mjs produced a 183.8 MB catalogue that way.
+     *
+     * It costs the print *page* about 5 MB against WebP (12.6 vs 17.5 for a
+     * full run), and that is the right way round now: the page is the fallback
+     * and the file is what people actually open.
+     *
+     * mozjpeg because it is 10-15% smaller at the same quality, and this
+     * number is multiplied by 1 713.
+     */
+    format: "jpeg",
+    /*
+     * Flattened onto white. The cut-outs carry alpha, and a JPEG cannot; the
+     * sheet is white paper, so nothing is lost. Without this the encoder either
+     * refuses the alpha or composites it onto black.
      */
     flatten: true,
   },
 ];
+
+/** What a variant's files are called, given a source name. */
+function outputName(name, format) {
+  return name.replace(/\.(webp|png|jpe?g)$/i, format === "jpeg" ? ".jpg" : ".webp");
+}
 
 const SOURCE_DIR = path.join(process.cwd(), "public", "products");
 
@@ -108,10 +131,10 @@ async function build(variant, files) {
 
   for (const name of files) {
     const source = path.join(SOURCE_DIR, name);
-    // Always .webp out, whatever went in — neither surface has a reason to
-    // carry a PNG, and the name stays otherwise identical so the path
+    // One extension per variant, whatever went in — no surface here has a
+    // reason to carry a PNG, and the stem stays identical so the path
     // arithmetic in src/lib/images.ts holds.
-    const out = path.join(outDir, name.replace(/\.(png|jpe?g)$/i, ".webp"));
+    const out = path.join(outDir, outputName(name, variant.format));
 
     try {
       if (await isStale(source, out)) {
@@ -120,7 +143,11 @@ async function build(variant, files) {
           // copied rather than blown up into a blurry larger file.
           .resize({ width: variant.width, withoutEnlargement: true });
         if (variant.flatten) pipeline = pipeline.flatten({ background: "#ffffff" });
-        await pipeline.webp({ quality: QUALITY }).toFile(out);
+        pipeline =
+          variant.format === "jpeg"
+            ? pipeline.jpeg({ quality: QUALITY, mozjpeg: true })
+            : pipeline.webp({ quality: QUALITY });
+        await pipeline.toFile(out);
         written += 1;
       } else {
         skipped += 1;
@@ -135,7 +162,8 @@ async function build(variant, files) {
 
   const mb = (n) => `${(n / 1024 / 1024).toFixed(1)} MB`;
   console.log(
-    `${variant.name} (${variant.width}px${variant.flatten ? ", on white" : ""}): ` +
+    `${variant.name} (${variant.width}px ${variant.format}` +
+      `${variant.flatten ? ", on white" : ""}): ` +
       `${written} written · ${skipped} already current · ` +
       `${mb(sourceBytes)} → ${mb(outBytes)} ` +
       `(${Math.round((outBytes / sourceBytes) * 100)}% of the bytes)`
