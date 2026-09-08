@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { BadgeCheck, Clock, MailCheck, MailWarning } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
 import { AdminAction } from "@/components/admin/AdminAction";
+import { AdminPager } from "@/components/admin/AdminPager";
 import {
   approveUserAction,
   rejectUserAction,
@@ -11,6 +13,9 @@ import {
 } from "@/lib/admin-actions";
 
 export const metadata: Metadata = { title: "Kërkesat B2B" };
+
+/** Approved customers per page. The waiting list is never long enough to need one. */
+const PER_PAGE = 50;
 
 interface CustomerRow {
   id: number;
@@ -39,17 +44,61 @@ function EmailBadge({ verified }: { verified: boolean }) {
   );
 }
 
-export default async function AdminRequestsPage() {
+export default async function AdminRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ faqja?: string; kerko?: string }>;
+}) {
   await requireAdmin();
+  const sp = await searchParams;
+  const query = sp.kerko?.trim() ?? "";
+  const page = Math.max(1, Math.floor(Number(sp.faqja)) || 1);
 
-  const customers = (await sql`
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (query) params.set("kerko", query);
+    if (p > 1) params.set("faqja", String(p));
+    const qs = params.toString();
+    return `/admin/kerkesat${qs ? `?${qs}` : ""}`;
+  };
+
+  /**
+   * The waiting list is read whole, the approved list is paged.
+   *
+   * Two queries rather than one, because the two halves of this page have
+   * nothing in common but a table: a pending request is something to act on
+   * today and there are never many, while the approved list is every customer
+   * the business has ever taken on and grows forever. It used to be one
+   * unbounded SELECT rendered in full, which was fine at the size it is and
+   * linear in the customer count from here on.
+   */
+  const pending = (await sql`
     SELECT id, email, name, company, phone, status, created_at, email_verified_at
-    FROM users WHERE role = 'customer'
-    ORDER BY (status = 'pending') DESC, created_at DESC
+    FROM users WHERE role = 'customer' AND status = 'pending'
+    ORDER BY created_at DESC
   `) as CustomerRow[];
 
-  const pending = customers.filter((c) => c.status === "pending");
-  const approved = customers.filter((c) => c.status === "approved");
+  // ILIKE on name, company and email — what somebody looking for one pharmacy
+  // in a list of hundreds actually types. The two LIKE wildcards are stripped
+  // rather than escaped: nobody searches a pharmacy by "%", and a stray one
+  // typed into the box would otherwise match every customer on the list.
+  const like = `%${query.replace(/[%_]/g, " ")}%`;
+  const [counted] = (await sql`
+    SELECT count(*)::int AS total FROM users
+    WHERE role = 'customer' AND status = 'approved'
+      AND (${query} = '' OR name ILIKE ${like} OR company ILIKE ${like} OR email ILIKE ${like})
+  `) as { total: number }[];
+  const total = counted?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const current = Math.min(page, totalPages);
+
+  const approved = (await sql`
+    SELECT id, email, name, company, phone, status, created_at, email_verified_at
+    FROM users WHERE role = 'customer' AND status = 'approved'
+      AND (${query} = '' OR name ILIKE ${like} OR company ILIKE ${like} OR email ILIKE ${like})
+    ORDER BY created_at DESC
+    LIMIT ${PER_PAGE} OFFSET ${(current - 1) * PER_PAGE}
+  `) as CustomerRow[];
 
   return (
     <div>
@@ -120,11 +169,39 @@ export default async function AdminRequestsPage() {
       <section className="mt-10">
         <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-ink-900">
           <BadgeCheck className="size-4 text-brand-600" aria-hidden />
-          Të aprovuar ({approved.length})
+          Të aprovuar ({total})
         </h2>
+
+        {/* A plain GET form, like the catalogue's: no JavaScript needed, and
+            the search survives the back button because it is in the URL. */}
+        <form action="/admin/kerkesat" className="mt-3 flex max-w-md items-center gap-2">
+          <input
+            type="search"
+            name="kerko"
+            defaultValue={query}
+            placeholder="Kërko sipas emrit, kompanisë ose email-it"
+            aria-label="Kërko klientët e aprovuar"
+            className="h-10 min-w-0 flex-1 rounded-lg border border-ink-900/10 bg-white px-3 text-sm text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
+          />
+          <button
+            type="submit"
+            className="h-10 shrink-0 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          >
+            Kërko
+          </button>
+          {query && (
+            <Link
+              href="/admin/kerkesat"
+              className="shrink-0 text-sm font-semibold text-ink-500 hover:text-brand-700"
+            >
+              Pastro
+            </Link>
+          )}
+        </form>
+
         {approved.length === 0 ? (
           <p className="mt-3 rounded-xl border border-dashed border-ink-900/12 bg-white px-4 py-6 text-center text-sm text-ink-400">
-            Ende asnjë klient i aprovuar.
+            {query ? "Asnjë klient nuk përputhet me kërkimin." : "Ende asnjë klient i aprovuar."}
           </p>
         ) : (
           <div className="mt-3 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
@@ -171,6 +248,13 @@ export default async function AdminRequestsPage() {
             </table>
           </div>
         )}
+
+        <AdminPager
+          page={current}
+          totalPages={totalPages}
+          hrefFor={pageHref}
+          label="Faqet e klientëve"
+        />
       </section>
     </div>
   );

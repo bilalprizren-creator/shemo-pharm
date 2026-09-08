@@ -7,7 +7,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { BookOpen, BookX, Eye, EyeOff } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import { BookOpen, BookX, Eye, EyeOff, Loader2 } from "lucide-react";
 import {
   bulkPlaceInCatalogAction,
   bulkProductVisibilityAction,
@@ -184,18 +185,30 @@ function BarButton({
   children: React.ReactNode;
   tone?: "plain" | "danger";
 }) {
+  /**
+   * Disabled while the form is in flight.
+   *
+   * "Hide 400 products" is a slow round trip with no sign anything is
+   * happening, which is an invitation to press it again — and the second press
+   * was a second full bulk write. useFormStatus reads the pending state of the
+   * form this button submits, which is why it has to be its own component.
+   */
+  const { pending } = useFormStatus();
+
   return (
     <button
       type="submit"
       name={name}
       value={value}
       formAction={formAction}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+      disabled={pending}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-progress disabled:opacity-60 ${
         tone === "danger"
           ? "border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100"
           : "border-ink-900/10 bg-white text-ink-700 hover:border-brand-300 hover:text-ink-900"
       }`}
     >
+      {pending && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
       {children}
     </button>
   );
