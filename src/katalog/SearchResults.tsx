@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Search } from "lucide-react";
 import { canSeePrices, getSession } from "@/lib/auth";
 import {
   catalogSectionSlug,
@@ -63,6 +64,43 @@ export async function SearchResults({
       <h1 className="mt-4 text-3xl font-extrabold text-ink-900 sm:text-4xl">
         {dict.printedCatalog.searchTitle}
       </h1>
+
+      {/*
+        The page's own search box, not only the header's.
+
+        KatalogHeader carries one, but it is only mounted on the catalogue's own
+        domain — under /katalog on the shop's domain this page runs inside the
+        shop's chrome, whose search goes to the shop's listing. Without a field
+        of its own the page arrived with nothing to type into: a heading, a
+        sentence telling you to type a code, and the footer.
+
+        A plain GET form, like the header's, because the catalogue has to work
+        with scripting off the way the paper edition it replaces always did. It
+        posts to this same route, so a refined query replaces the results rather
+        than leaving the catalogue.
+      */}
+      <form
+        action={href("/katalog/kerko")}
+        role="search"
+        className="mt-5 flex max-w-xl items-center gap-2 rounded-field border border-line bg-surface px-3 py-2 focus-within:border-brand-300"
+      >
+        <Search className="size-4 shrink-0 text-ink-400" aria-hidden />
+        <input
+          type="search"
+          name="kerko"
+          defaultValue={query}
+          autoFocus={!trimmed}
+          placeholder={dict.printedCatalog.searchPlaceholder}
+          aria-label={dict.search.label}
+          className="min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400"
+        />
+        <button
+          type="submit"
+          className="shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50"
+        >
+          {dict.search.button}
+        </button>
+      </form>
 
       {!trimmed ? (
         <p className="mt-3 text-ink-500">{dict.printedCatalog.searchPrompt}</p>
