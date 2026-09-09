@@ -5,8 +5,6 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
-  BookOpen,
-  BookX,
   ExternalLink,
   EyeOff,
   ListOrdered,
@@ -24,7 +22,6 @@ import {
   moveCatalogProductAction,
   placeProductInCatalogAction,
   renumberCatalogSectionAction,
-  toggleProductFlagAction,
 } from "@/lib/admin-actions";
 import {
   NO_PRODUCT_FILTER,
@@ -35,7 +32,7 @@ import {
   ProductRowCheckbox,
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
-import { AdminAction } from "@/components/admin/AdminAction";
+import { CatalogToggle } from "@/components/admin/ProductToggles";
 
 export const metadata: Metadata = { title: "Seksioni i katalogut" };
 
@@ -154,7 +151,102 @@ export default async function AdminCatalogSectionPage({
         )}
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
+      {/* Cards on a phone, the table from `sm` up. Deciding the printed order
+          is done by looking at the list and nudging things up and down, which
+          a 720px table on a 400px screen makes impossible: the arrows sat off
+          the right edge, past the columns. */}
+      <ul className="mt-3 divide-y divide-ink-900/6 overflow-hidden rounded-2xl border border-ink-900/8 bg-white sm:hidden">
+        {section.products.map((p, i) => (
+          <li
+            key={p.id}
+            className={`p-3 ${p.catalogHidden ? "opacity-55" : ""}`}
+          >
+            <div className="flex items-start gap-2.5">
+              <span className="pt-0.5">
+                <ProductRowCheckbox
+                  id={p.id}
+                  formId={BULK_FORM}
+                  label={`Zgjidh ${p.name}`}
+                />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="shrink-0 tabular-nums text-xs text-ink-400">
+                    {i + 1}.
+                  </span>
+                  <Link
+                    href={`/admin/produktet/${p.id}`}
+                    className="min-w-0 font-medium leading-snug text-ink-900 hover:text-brand-700"
+                  >
+                    {p.name}
+                  </Link>
+                </div>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-400">
+                  <span>{p.sku ? `Kodi: ${p.sku}` : "Pa kod"}</span>
+                  <span className="tabular-nums">Pozicioni: {p.catalogSort}</span>
+                  {p.hidden && (
+                    <span className="inline-flex items-center gap-1">
+                      <EyeOff className="size-3" aria-hidden />
+                      e fshehur nga dyqani
+                    </span>
+                  )}
+                </p>
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <CatalogToggle
+                    id={p.id}
+                    catalogHidden={p.catalogHidden}
+                    sectionId={section.id}
+                    className={iconButton}
+                  />
+                  {i > 0 && (
+                    <form action={moveCatalogProductAction}>
+                      <input type="hidden" name="sectionId" value={section.id} />
+                      <input type="hidden" name="productId" value={p.id} />
+                      <input type="hidden" name="dir" value="up" />
+                      <button type="submit" className={iconButton} title="Lëvize lart">
+                        <ArrowUp className="size-4" aria-hidden />
+                        <span className="sr-only">Lëvize lart</span>
+                      </button>
+                    </form>
+                  )}
+                  {i < last && (
+                    <form action={moveCatalogProductAction}>
+                      <input type="hidden" name="sectionId" value={section.id} />
+                      <input type="hidden" name="productId" value={p.id} />
+                      <input type="hidden" name="dir" value="down" />
+                      <button type="submit" className={iconButton} title="Lëvize poshtë">
+                        <ArrowDown className="size-4" aria-hidden />
+                        <span className="sr-only">Lëvize poshtë</span>
+                      </button>
+                    </form>
+                  )}
+                  <form action={placeProductInCatalogAction} className="ml-auto">
+                    <input type="hidden" name="productId" value={p.id} />
+                    <input type="hidden" name="sectionId" value="" />
+                    <input type="hidden" name="fromSectionId" value={section.id} />
+                    <button
+                      type="submit"
+                      title="Hiqe nga katalogu i shtypur — produkti mbetet në dyqan"
+                      className="inline-flex size-9 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-red-50 hover:text-red-700"
+                    >
+                      <X className="size-4" aria-hidden />
+                      <span className="sr-only">Hiqe nga seksioni</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </li>
+        ))}
+        {section.products.length === 0 && (
+          <li className="px-4 py-10 text-center text-sm text-ink-400">
+            Asnjë produkt në këtë seksion.
+          </li>
+        )}
+      </ul>
+
+      <div className="mt-3 hidden overflow-x-auto rounded-2xl border border-ink-900/8 bg-white sm:block">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
@@ -212,29 +304,13 @@ export default async function AdminCatalogSectionPage({
                     order is decided — hiding a product from the shop no longer
                     takes it off the paper, so it needs its own switch here. */}
                 <td className="px-4 py-2 text-center">
-                  <AdminAction
-                    action={toggleProductFlagAction}
-                    /* sectionId so the action can revalidate this page too: it
-                       used to refresh only the product list and the catalogue
-                       overview, so the row it was pressed on redrew unchanged. */
-                    fields={{ id: p.id, flag: "catalogHidden", sectionId: section.id }}
-                    title={
-                      p.catalogHidden
-                        ? "Kthejeni në katalogun e shtypur"
-                        : "Mos e shtyp këtë produkt"
-                    }
-                    icon={
-                      p.catalogHidden ? (
-                        <BookX className="size-4 text-red-500" aria-hidden />
-                      ) : (
-                        <BookOpen className="size-4" aria-hidden />
-                      )
-                    }
-                    label={
-                      <span className="sr-only">
-                        {p.catalogHidden ? "Nuk shtypet" : "Shtypet"}
-                      </span>
-                    }
+                  {/* sectionId so the action revalidates this page too: it used
+                      to refresh only the product list and the catalogue
+                      overview, so the row it was pressed on redrew unchanged. */}
+                  <CatalogToggle
+                    id={p.id}
+                    catalogHidden={p.catalogHidden}
+                    sectionId={section.id}
                     className={iconButton}
                   />
                 </td>

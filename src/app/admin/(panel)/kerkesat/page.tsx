@@ -204,7 +204,40 @@ export default async function AdminRequestsPage({
             {query ? "Asnjë klient nuk përputhet me kërkimin." : "Ende asnjë klient i aprovuar."}
           </p>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
+          <>
+          {/* Cards on a phone, the table from `sm` up — approving and revoking
+              is done from a phone, and the five-column table put the only
+              button on it 640px to the right of the name. The pending list
+              above has always been cards, so this is the two halves of the
+              page agreeing with each other. */}
+          <ul className="mt-3 divide-y divide-ink-900/6 overflow-hidden rounded-2xl border border-ink-900/8 bg-white sm:hidden">
+            {approved.map((c) => (
+              <li key={c.id} className="p-4">
+                <p className="font-semibold text-ink-900">
+                  {c.name}
+                  {c.company && (
+                    <span className="font-normal text-ink-500"> — {c.company}</span>
+                  )}
+                </p>
+                <p className="mt-0.5 break-all text-sm text-ink-500">{c.email}</p>
+                {c.phone && <p className="text-sm text-ink-500">{c.phone}</p>}
+                <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-ink-400">
+                  <EmailBadge verified={c.email_verified_at !== null} />
+                  Regjistruar: {formatDateTime(c.created_at)}
+                </p>
+                <div className="mt-3">
+                  <AdminAction
+                    action={revokeUserAction}
+                    fields={{ id: c.id }}
+                    label="Kthe në pritje"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/10 px-3.5 py-2 text-xs font-semibold text-ink-500 transition-colors hover:border-amber-300 hover:text-amber-700"
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-3 hidden overflow-x-auto rounded-2xl border border-ink-900/8 bg-white sm:block">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
                 <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
@@ -247,6 +280,7 @@ export default async function AdminRequestsPage({
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         <AdminPager

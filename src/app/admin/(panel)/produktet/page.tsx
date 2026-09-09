@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, BookX, Eye, EyeOff, Plus, Search, Star } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import {
   getAdminCatalogSectionOptions,
@@ -9,7 +9,6 @@ import {
   getSiteVisibilityCounts,
   listAdminProducts,
 } from "@/lib/admin-data";
-import { toggleProductFlagAction } from "@/lib/admin-actions";
 import {
   isFiltering,
   parseProductFilter,
@@ -19,6 +18,7 @@ import {
   STOCK_OPTIONS,
   VISIBILITY_OPTIONS,
 } from "@/lib/product-filter";
+import { AdminFilterDisclosure } from "@/components/admin/AdminFilterDisclosure";
 import { ProductFilterSelects } from "@/components/admin/ProductFilterSelects";
 import { ProductPriceCell } from "@/components/admin/ProductPriceCell";
 import {
@@ -27,7 +27,13 @@ import {
   ProductSelectAll,
 } from "@/components/admin/ProductBulkBar";
 import { AdminPager } from "@/components/admin/AdminPager";
-import { AdminAction } from "@/components/admin/AdminAction";
+import {
+  CatalogToggle,
+  FeaturedToggle,
+  ProductToggleRow,
+  ShopToggle,
+  StockToggle,
+} from "@/components/admin/ProductToggles";
 import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
 
 export const metadata: Metadata = { title: "Produktet" };
@@ -145,6 +151,13 @@ export default async function AdminProductsPage({
             className="h-11 w-full rounded-xl border border-ink-900/10 bg-white pl-10 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
           />
         </div>
+        <AdminFilterDisclosure
+          activeCount={
+            [stock, visibility, catalogVisibility, section].filter(Boolean).length +
+            (categoryId === null ? 0 : 1) +
+            (sectionId === null ? 0 : 1)
+          }
+        >
         <ProductFilterSelects
           filters={[
             { name: "stoku", label: "Stoku", value: stock, options: STOCK_OPTIONS },
@@ -199,6 +212,7 @@ export default async function AdminProductsPage({
             },
           ]}
         />
+        </AdminFilterDisclosure>
         <button
           type="submit"
           className="h-11 rounded-xl border border-ink-900/10 bg-white px-4 text-sm font-semibold text-ink-700 transition-colors hover:border-brand-300 hover:text-ink-900"
@@ -207,7 +221,54 @@ export default async function AdminProductsPage({
         </button>
       </form>
 
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
+      {/* Cards on a phone, the table from `sm` up.
+
+          The table is eight columns and 980px wide, which on a 400px screen
+          showed the checkbox and the first two thirds of the product name —
+          the price and all four switches were off to the right inside the
+          scroll container, so the page could only be used by zooming out until
+          the text was unreadable. Both presentations render the same switch
+          components, so they cannot drift apart. */}
+      <ul className="mt-4 divide-y divide-ink-900/6 overflow-hidden rounded-2xl border border-ink-900/8 bg-white sm:hidden">
+        {rows.map((p) => (
+          <li
+            key={p.id}
+            className={`p-3 ${p.hidden && p.catalogHidden ? "opacity-55" : ""}`}
+          >
+            <div className="flex items-start gap-2.5">
+              <span className="pt-0.5">
+                <ProductRowCheckbox
+                  id={p.id}
+                  formId={BULK_FORM}
+                  label={`Zgjidh ${p.name}`}
+                />
+              </span>
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/admin/produktet/${p.id}`}
+                  className="block font-medium leading-snug text-ink-900 hover:text-brand-700"
+                >
+                  {p.name}
+                </Link>
+                <p className="mt-0.5 text-xs text-ink-400">
+                  {p.sku ? `Kodi: ${p.sku}` : "Pa kod"}
+                </p>
+                <div className="mt-2">
+                  <ProductPriceCell id={p.id} name={p.name} priceCents={p.priceCents} />
+                </div>
+                <ProductToggleRow product={p} />
+              </div>
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 && (
+          <li className="px-4 py-10 text-center text-sm text-ink-400">
+            Asnjë produkt nuk përputhet me kërkimin dhe filtrat.
+          </li>
+        )}
+      </ul>
+
+      <div className="mt-4 hidden overflow-x-auto rounded-2xl border border-ink-900/8 bg-white sm:block">
         <table className="w-full min-w-[980px] text-left text-sm">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
@@ -258,82 +319,16 @@ export default async function AdminProductsPage({
                   <ProductPriceCell id={p.id} name={p.name} priceCents={p.priceCents} />
                 </td>
                 <td className="px-4 py-2.5">
-                  <AdminAction
-                    action={toggleProductFlagAction}
-                    fields={{ id: p.id, flag: "inStock" }}
-                    label={p.inStock ? "Në stok" : "Pa stok"}
-                    title="Ndrysho stokun"
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      p.inStock
-                        ? "bg-brand-50 text-brand-800 hover:bg-brand-100"
-                        : "bg-red-50 text-red-700 hover:bg-red-100"
-                    }`}
-                  />
+                  <StockToggle id={p.id} inStock={p.inStock} />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <AdminAction
-                    action={toggleProductFlagAction}
-                    fields={{ id: p.id, flag: "featured" }}
-                    title={p.featured ? "Hiqe nga kryesorët" : "Shto te kryesorët"}
-                    icon={
-                      <Star
-                        className={`size-4 ${
-                          p.featured ? "fill-amber-400 text-amber-400" : "text-ink-300"
-                        }`}
-                        aria-hidden
-                      />
-                    }
-                    label={
-                      <span className="sr-only">
-                        {p.featured ? "I zgjedhur" : "Jo i zgjedhur"}
-                      </span>
-                    }
-                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
-                  />
+                  <FeaturedToggle id={p.id} featured={p.featured} />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <AdminAction
-                    action={toggleProductFlagAction}
-                    fields={{ id: p.id, flag: "hidden" }}
-                    title={p.hidden ? "Shfaqe në dyqan" : "Fshihe nga dyqani"}
-                    icon={
-                      p.hidden ? (
-                        <EyeOff className="size-4 text-red-500" aria-hidden />
-                      ) : (
-                        <Eye className="size-4 text-ink-400" aria-hidden />
-                      )
-                    }
-                    label={
-                      <span className="sr-only">
-                        {p.hidden ? "E fshehur në dyqan" : "E dukshme në dyqan"}
-                      </span>
-                    }
-                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
-                  />
+                  <ShopToggle id={p.id} hidden={p.hidden} />
                 </td>
                 <td className="px-4 py-2.5 text-center">
-                  <AdminAction
-                    action={toggleProductFlagAction}
-                    fields={{ id: p.id, flag: "catalogHidden" }}
-                    title={
-                      p.catalogHidden
-                        ? "Shfaqe në katalogun e shtypur"
-                        : "Fshihe nga katalogu i shtypur"
-                    }
-                    icon={
-                      p.catalogHidden ? (
-                        <BookX className="size-4 text-red-500" aria-hidden />
-                      ) : (
-                        <BookOpen className="size-4 text-ink-400" aria-hidden />
-                      )
-                    }
-                    label={
-                      <span className="sr-only">
-                        {p.catalogHidden ? "Jashtë katalogut" : "Në katalog"}
-                      </span>
-                    }
-                    className="inline-flex rounded-full p-1.5 hover:bg-tint"
-                  />
+                  <CatalogToggle id={p.id} catalogHidden={p.catalogHidden} />
                 </td>
               </tr>
             ))}

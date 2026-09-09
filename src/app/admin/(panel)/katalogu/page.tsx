@@ -77,7 +77,20 @@ export default async function AdminCatalogPage() {
 
       <NewCatalogSectionForm />
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-ink-900/8 bg-white">
+      {/* Cards on a phone, the table from `sm` up — the same row component
+          either way, so the two cannot drift. */}
+      <ul className="mt-6 divide-y divide-ink-900/6 overflow-hidden rounded-2xl border border-ink-900/8 bg-white sm:hidden">
+        {sections.map((s) => (
+          <CatalogSectionRow key={s.id} section={s} variant="card" />
+        ))}
+        {sections.length === 0 && (
+          <li className="px-3 py-10 text-center text-sm text-ink-400">
+            Asnjë seksion. Krijoni të parin më lart.
+          </li>
+        )}
+      </ul>
+
+      <div className="mt-6 hidden overflow-x-auto rounded-2xl border border-ink-900/8 bg-white sm:block">
         <table className="w-full min-w-[900px] text-left">
           <thead>
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
