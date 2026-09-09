@@ -138,9 +138,34 @@ async function dropOtherStamps(dir) {
   return dropped;
 }
 
+/**
+ * Chromium, or an answer that is actually the answer.
+ *
+ * Playwright's own message here says "Looks like Playwright was just installed
+ * or updated. Please run: npx playwright install" — which on Windows is usually
+ * wrong twice over. The browser was installed and worked; an antivirus scan
+ * took `chrome.exe` and `chrome-headless-shell.exe` out of the cache afterwards
+ * and left the rest of the folder, INSTALLATION_COMPLETE marker and all. So a
+ * plain `playwright install` sees a finished install and does nothing, and the
+ * next run fails identically. `--force` is what gets past that.
+ */
+async function launch() {
+  try {
+    return await chromium.launch();
+  } catch (err) {
+    if (!/Executable doesn't exist/i.test(err.message)) throw err;
+    throw new Error(
+      `Playwright's Chromium is missing its executable.\n\n` +
+        `  npx playwright install --force chromium\n\n` +
+        `If it goes missing again, the antivirus is eating it: exclude\n` +
+        `%LOCALAPPDATA%\\ms-playwright.\n\nPlaywright said:\n${err.message}`
+    );
+  }
+}
+
 async function main() {
   console.log(`base ${BASE} · stamp ${STAMP}`);
-  const browser = await chromium.launch();
+  const browser = await launch();
   const page = await browser.newPage();
 
   try {

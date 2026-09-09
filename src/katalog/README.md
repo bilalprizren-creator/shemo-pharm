@@ -113,6 +113,13 @@ Twenty minutes, unattended. Do it after a run of catalogue edits, not during
 one: it renders the live site sixty-two times and will happily photograph a
 half-finished reordering.
 
+If it stops at `browserType.launch: Executable doesn't exist`, the antivirus has
+taken `chrome.exe` and `chrome-headless-shell.exe` out of
+`%LOCALAPPDATA%\ms-playwright` and left the folders behind, marked complete —
+so Playwright's own advice to run `npx playwright install` does nothing at all.
+The command that works is `npx playwright install --force chromium`, and the
+cure is an antivirus exclusion for that directory.
+
 **Do not point `--base` at a local server on the development database.** It will
 work, produce a plausible catalogue, and publish a range nobody sells; the
 fingerprint mismatch on the contents page is the only thing that would say so.
