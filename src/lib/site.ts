@@ -86,11 +86,9 @@ export const BRANDS = [
   { name: "Santasya", image: "/brands/santasya.png" },
   { name: "Orjinalmed", image: "/brands/orjinalmed.png" },
   { name: "NT41", image: "/brands/nt41.png" },
-  { name: "Koruglu", image: "/brands/koruglu.png" },
-  { name: "Iyon", image: "/brands/iyon.png" },
-  { name: "Folium", image: "/brands/folium.png" },
-  { name: "Bebeevan", image: "/brands/bebeevan.png" },
   { name: "Alg", image: "/brands/alg.png" },
+  // Koruglu, Iyon, Folium and Bebeevan were removed on request. Their logos are
+  // still in public/brands — add the line back if the catalog ever carries them.
 ] as const;
 
 /**
@@ -105,7 +103,7 @@ const HOME_BRAND_NAMES = [
   "Sudocrem",
   "TIO Medikal",
   "Cansin",
-  "Folium",
+  "NT41",
   "Support Line",
   "Comfort Plus",
   "Foot Guard",
