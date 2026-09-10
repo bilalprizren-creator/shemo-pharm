@@ -19,6 +19,7 @@
     "migrate:sessions": "node scripts/add-session-revocation.mjs",
     "migrate:rate-limits": "node scripts/add-rate-limits-table.mjs",
     "migrate:catalog-visibility": "node scripts/add-catalog-visibility.mjs",
+    "repair:product-codes": "node scripts/repair-product-codes.mjs",
     "images:thumbs": "node scripts/thumbnail-images.mjs",
     "images:print": "node scripts/thumbnail-images.mjs --variant print",
     "katalog:pdf": "node scripts/build-catalog-pdf.mjs"

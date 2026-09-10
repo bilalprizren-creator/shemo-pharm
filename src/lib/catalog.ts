@@ -998,32 +998,66 @@ export function productImage(product: Product): string | null {
   return product.imageOverride ?? product.images[0] ?? null;
 }
 
+/** A size token, the only thing allowed to differ between a code and its spelling. */
+const SIZE_SUFFIX = /^(x{0,3}[sml]|sl|lx|s\/m|m\/l|l\/xl|s\/l)$/;
+
+/** Lowercase, punctuation removed: "4307-L" and "4307L" become one string. */
+const normaliseCode = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+/** The codes a field names — "8803, 8804" and "4519 , 4532" hold two. */
+const splitCodes = (s: string) => s.split(/[,;/]/).map(normaliseCode).filter(Boolean);
+
+/**
+ * Do these two spellings name the same article? Equal after normalising, or one
+ * is the other plus a size — "8705M" is the M of 8705, "0433" is the base of
+ * "0433L". The digits and length floor stop a two-character prefix from
+ * swallowing an unrelated code.
+ */
+function sameArticle(a: string, b: string): boolean {
+  if (a === b) return true;
+  const [long, short] = a.length > b.length ? [a, b] : [b, a];
+  if (!long.startsWith(short)) return false;
+  return short.length >= 3 && /\d/.test(short) && SIZE_SUFFIX.test(long.slice(short.length));
+}
+
 /**
  * The product's display name: admin override first, then the catalog name with
- * its own article code stripped off the end.
+ * its own article code stripped out of it.
  *
  * 2 012 of the 2 044 visible products are named "Fix ear baby A6 (9408)" — the
  * WooCommerce export appended the code — and every card already prints "Kodi
  * 9408" on the line below, so the parentheses are the same fact twice.
  *
- * Only a trailing group whose contents are exactly the SKU goes. The other 23
- * products end in parentheses that say something real (a size, a variant), and
- * those stay. An admin `display_name` is returned untouched: somebody who typed
- * a name meant it.
+ * A group goes when **every code in it is one the SKU already names**, compared
+ * on a normalised spelling. Exact equality was too literal for fifteen products
+ * that write the code a second way: "(4307-L)" against SKU `4307L`, "(8803,8804)"
+ * against `8803, 8804`, "(8705M)" against `8705`, "( NT-019 )" against `NT019`,
+ * and "(0433) L" where the name splits base and size across the bracket.
+ *
+ * Subset, not equality, is the direction that is safe. `4519 , 4532` covers a
+ * name saying only "(4519)"; a name saying "(4672, 4683)" against SKU `4672`
+ * names an article the SKU does not, so it stays — as do the manufacturer
+ * references this range is full of ("(SL-911)", "(REF-730)", "( DR.COMFORT )"),
+ * which match no code at all. An admin `display_name` is returned untouched:
+ * somebody who typed a name meant it.
  */
 export function productDisplayName(product: Product): string {
   if (product.displayName) return product.displayName;
   const sku = product.sku.trim().toLowerCase();
   if (!sku) return product.name;
+  const skuCodes = splitCodes(sku);
+  if (!skuCodes.length) return product.name;
 
   // Anywhere, not only at the end: eight products carry the code mid-name and
   // then a brand or a size — "Losion … 100ml (5087) (AUTAN)", "Shokë … (8166)
   // 32cm". Checked against the whole range, there is no product where a
   // parenthesised group happens to equal its own code and mean something else,
   // so this cannot eat a real qualifier.
-  let out = product.name.replace(/\(([^()]*)\)/g, (whole, inner: string) =>
-    inner.trim().toLowerCase() === sku ? "" : whole
-  );
+  let out = product.name.replace(/\(([^()]*)\)/g, (whole, inner: string) => {
+    const groupCodes = splitCodes(inner);
+    if (!groupCodes.length) return whole;
+    return groupCodes.every((c) => skuCodes.some((k) => sameArticle(c, k))) ? "" : whole;
+  });
   if (out === product.name) return product.name;
 
   out = out.replace(/\s{2,}/g, " ").trim();

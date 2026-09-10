@@ -294,6 +294,75 @@ describe("productDisplayName", () => {
     const p = product(1, "Produkt pa kod (X)", { sku: "" });
     expect(productDisplayName(p)).toBe("Produkt pa kod (X)");
   });
+
+  /**
+   * Fifteen products write their own code a second way in the name. Exact
+   * equality left the code on the card for all of them; these are the five
+   * spellings that occur, taken from real rows.
+   */
+  describe("the same code spelled another way", () => {
+    it("ignores a hyphen the SKU does not have", () => {
+      const p = product(1, "Adult Pants-Brek A30 ( DR.COMFORT ) L (4307-L)", { sku: "4307L" });
+      expect(productDisplayName(p)).toBe("Adult Pants-Brek A30 ( DR.COMFORT ) L");
+    });
+
+    it("ignores spacing inside a list of codes", () => {
+      const p = product(1, "Gomë për patarica hiri dhe e zeze (8803,8804)", {
+        sku: "8803, 8804",
+      });
+      expect(productDisplayName(p)).toBe("Gomë për patarica hiri dhe e zeze");
+    });
+
+    it("strips a group naming only some of the SKU's codes", () => {
+      const p = product(1, "Shiring 5ml me gjilper 21G-A100 (4517)", { sku: "4517 , 4533" });
+      expect(productDisplayName(p)).toBe("Shiring 5ml me gjilper 21G-A100");
+    });
+
+    it("strips the code carrying a size the SKU leaves off", () => {
+      const p = product(1, "Korset ortoze tarkale lamber sacral (SL-911) M (8705M)", {
+        sku: "8705",
+      });
+      expect(productDisplayName(p)).toBe("Korset ortoze tarkale lamber sacral (SL-911) M");
+    });
+
+    it("strips the base code where the name puts the size outside the bracket", () => {
+      const p = product(1, "Mbajtese krahu per femije (0433) L", { sku: "0433L" });
+      expect(productDisplayName(p)).toBe("Mbajtese krahu per femije L");
+    });
+
+    it("handles a letter code with padding inside the brackets", () => {
+      const p = product(1, "Kllompe ortopedike – Lëkurë ( NT-019 )", { sku: "NT019" });
+      expect(productDisplayName(p)).toBe("Kllompe ortopedike – Lëkurë");
+    });
+  });
+
+  /**
+   * The other direction, and the reason the rule is subset rather than overlap:
+   * a group that names an article the SKU does not is information, not a repeat.
+   */
+  describe("what the wider rule must still keep", () => {
+    it("keeps a manufacturer reference that is not the article code", () => {
+      const p = product(1, "Shoke lumbosakrale me shufra metali (REF-730) S", { sku: "8513" });
+      expect(productDisplayName(p)).toBe("Shoke lumbosakrale me shufra metali (REF-730) S");
+    });
+
+    it("keeps a group that names a code beyond the SKU's own", () => {
+      const p = product(1, "Palloma fresh & soft A57 (4672, 4683)", { sku: "4672" });
+      expect(productDisplayName(p)).toBe("Palloma fresh & soft A57 (4672, 4683)");
+    });
+
+    it("keeps a different code that merely looks alike", () => {
+      // Real row: the name says 5283, the SKU says 8283. One of them is wrong,
+      // and hiding it would be the worse answer.
+      const p = product(1, "Biotin 10.000 mcg A30 (5283)", { sku: "8283" });
+      expect(productDisplayName(p)).toBe("Biotin 10.000 mcg A30 (5283)");
+    });
+
+    it("does not let a short prefix swallow a longer code", () => {
+      const p = product(1, "Diclofenac Supp (10750)", { sku: "1075" });
+      expect(productDisplayName(p)).toBe("Diclofenac Supp (10750)");
+    });
+  });
 });
 
 /**
