@@ -319,7 +319,7 @@ const SCENE_PHOTOS = new Set([
   "8705", "8704", "8221", "8511", "8514", "0346", "8004",
 
   // A coloured or patterned studio backdrop.
-  "4405", "4979", "5175", "4116", "2068", "1707", "2043", "6012", "7781",
+  "4405", "4979", "5175", "4116", "2068", "1707", "6012", "7781",
 
   // A branded pattern behind a children's line.
   "3063", "3039", "3040", "3058", "3059", "3060", "3062", "3066", "3037",
@@ -329,12 +329,16 @@ const SCENE_PHOTOS = new Set([
   // drop shadow (Mickey 3032/3033, Minions 3049, Princess 3064, Turtles 3071)
   // or walked in through the white in the pattern and left fragments (Paw
   // Patrol 3067/3068). Same artwork as their siblings above, same answer.
-  "3032", "3033", "3049", "3064", "3067", "3068", "3071",
+  //
+  // Mickey 3033 has since left, see the note at the foot of this list: the
+  // pattern was never the product, and a packshot of that tube turned up. Its
+  // twin 3032 stays, because nothing turned up for that one.
+  "3032", "3049", "3064", "3067", "3068", "3071",
   // A cartoon landscape behind a repellent roll-on; the fill took the sky.
   "2318",
 
   // A photographed scene or surface — marble, foliage, a table, a beach.
-  "7066", "2770", "7472", "7473", "7011", "9462", "2307", "2308", "2309",
+  "2770", "7472", "7473", "9462", "2307", "2308", "2309",
   // Moved from KEEP_FLAT 2026-09-07 (see there): the SOS sprays on a plinth
   // among leaves, the corset on a model, water on a mattress.
   "2316", "2317", "8523", "8620",
@@ -350,6 +354,19 @@ const SCENE_PHOTOS = new Set([
   // 7182. Two stayed although the site has them too: the posture corrector
   // 0346 is a model shot there as well, and the mattress 8620 is the same
   // picture on white.
+  //
+  // Four more left on 2026-09-10, for the same reason from a different source:
+  // a retailer packshot on plain white now exists for the Bioblas argan liquid
+  // 7066 and the argan conditioner 7011, the Mr White Mickey tube 3033 and the
+  // Kraeuterhof Hyaluron ampoules 2043. Each was reframed over its original
+  // with scripts/ingest-photo.mjs, so the fill starts from a packshot and these
+  // ship a cut-out like the rest of the catalogue.
+  //
+  // The Duratape 9462 was looked at in the same pass and stays. What exists for
+  // it is a crop of a pink advertising banner, and pink is not a background the
+  // fill can take: neutral() rejects the colour, propagation stops at the first
+  // step, and the card would ship a hard pink rectangle under a drop shadow --
+  // which is the failure this whole list was written to prevent.
 ]);
 
 /**
