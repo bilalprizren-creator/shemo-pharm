@@ -1,4 +1,4 @@
-import type { CatalogSectionWithProducts } from "@/lib/catalog";
+import { productDisplayName, type CatalogSectionWithProducts } from "@/lib/catalog";
 import type { Product } from "@/lib/types";
 
 /** Three columns of four, the same twelve-per-sheet the paper edition uses. */
@@ -54,6 +54,13 @@ export function sheetsFor(sections: CatalogSectionWithProducts[]): Sheet[] {
  * change or a stock change does not raise a false alarm about a sheet that
  * carries neither.
  *
+ * "The name" means productDisplayName(), the string PrintSheets actually puts on
+ * the sheet, not the raw column. Hashing `name` instead left the fingerprint
+ * blind to the one thing it could not see coming: a change to the display rule
+ * itself. Widening it to strip a code spelled a second way renamed fifteen
+ * printed products, and a fingerprint reading the raw column would have gone on
+ * calling the stored PDF current.
+ *
  * FNV-1a rather than a real digest: this has to run in the same module the
  * contents page already imports, and "did this change" needs no more than 32
  * bits. It is not a signature and nothing security-carrying rests on it.
@@ -75,7 +82,7 @@ export function catalogFingerprint(sections: CatalogSectionWithProducts[]): stri
     for (const product of section.products) {
       eat(String(product.id));
       eat(product.sku);
-      eat(product.displayName ?? product.name);
+      eat(productDisplayName(product));
       eat(product.imageOverride ?? product.images[0] ?? "");
     }
   }
