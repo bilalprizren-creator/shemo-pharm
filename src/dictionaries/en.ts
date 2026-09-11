@@ -457,6 +457,8 @@ export const en: Dictionary = {
     searchEmpty: "No products found for “{q}”.",
     searchPrompt: "Type a product name or an article code.",
     inSection: "Section {no} — {name}",
+    showMore: "Show more",
+    showingOf: "{shown} of {total}",
     moreTitle: "More",
     toShop: "The main SHEMO PHARM site",
     print: "Print or save as PDF",

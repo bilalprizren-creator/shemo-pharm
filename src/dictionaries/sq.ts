@@ -496,6 +496,9 @@ export const sq = {
     searchEmpty: "Asnjë produkt nuk u gjet për “{q}”.",
     searchPrompt: "Shkruani emrin e produktit ose kodin e artikullit.",
     inSection: "Seksioni {no} — {name}",
+    /** The search shows 48 cards at a time; this button reveals the next 48. */
+    showMore: "Shfaq më shumë",
+    showingOf: "{shown} nga {total}",
     moreTitle: "Më shumë",
     toShop: "Faqja kryesore e SHEMO PHARM",
     print: "Shtyp ose ruaj PDF",

@@ -58,6 +58,31 @@ its own and its search button pointed at `/produktet`, dropping the reader into
 the shop's listing over the shop's range. It is a catalogue page like the rest
 now: `/katalog/kerko` on the shop's domain, `/kerko` here, one route.
 
+## The search answers as you type
+
+Modelled on the Jara Pharmacy site, at the owner's request: the products are in
+the browser and every keystroke filters them, from the first character, with no
+Enter. `SearchResults.tsx` (server) builds the index — every printed product as
+a card, prices only for a session that may see them, plus which section prints
+it and the section links, which depend on the host and the language — and hands
+it to `InstantSearch.tsx` (client), which filters it locally. ~1 700 cards is
+about 80 KB compressed, less than the thumbnails of one page of results, and it
+is only ever loaded on the search page; the contents page stays light.
+
+Two things are deliberate about it:
+
+- **One matching function for both sides.** `searchProducts` and
+  `searchCatalogSections` live in `src/lib/catalog-search.ts`, a pure module,
+  because `catalog.ts` is `server-only` and the browser has to match exactly
+  the way the server does — the page still renders the results for `?kerko=`
+  on the server, so a shared or reloaded URL, and a reader with scripting off,
+  get the same answer the keystrokes would. `catalog.ts` re-exports them.
+- **The URL follows the field.** `history.replaceState` (debounced, browsers
+  rate-limit it) keeps `?kerko=` and `?faqja=` current without a server round
+  trip, so a search can be copied and returned to. "Show more" reveals the
+  next forty-eight and is a real link to `?faqja=n+1` underneath — with
+  scripting off, `faqja` means "the first n pages at once".
+
 ## What this site does not have
 
 No basket, no wishlist, no product pages, no offers, no category menu. The
