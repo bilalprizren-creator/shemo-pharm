@@ -226,13 +226,20 @@ admin list counts *printed*, not *sold*, and flags the difference.
   i.e. the old WordPress site. Nothing here is live until it points at Vercel.
   The two redirects the old site needs (`/index.php`, `/login.php`) are already
   in `next.config.ts`.
-- **176 printed articles are not in the database**, listed one by one in
-  `audit/catalog-order-import.md`. Nobody has decided yet whether they are
-  discontinued or simply missing from the shop.
-- **Two printed sections are therefore empty** — 38 Denk Pharma and 7.3 Ivy Bear
-  — which is why the site shows 61 sections against the paper edition's 63. The
-  contents page says so, using `getEmptyCatalogSections()`; it reads the section
-  table rather than a hard-coded list, so it corrects itself as articles arrive.
+- **176 printed articles were not in the database** when
+  `audit/catalog-order-import.md` was last written, listed there one by one.
+  The nine of 7.3 Ivy Bear have since been created by `scripts/add-ivy-bear.mjs`
+  (plus a tenth the Jara import still held); the old site keeps changing under
+  the report, so re-run the import's dry run before quoting a number. Nobody
+  has decided yet whether the rest are discontinued or simply missing from the
+  shop.
+- **Two printed sections still render empty** — 38 Denk Pharma, which has no
+  rows at all, and 7.3 Ivy Bear, whose ten rows are hidden on both sites until
+  the owner prices them in `/admin/produktet` (there was no wholesale price to
+  be had anywhere) — which is why the site shows 61 sections against the paper
+  edition's 63. The contents page says so, using `getEmptyCatalogSections()`;
+  it reads the section table rather than a hard-coded list, so it corrects
+  itself as articles arrive or are released.
 - **311 products were never printed.** They are not hidden: `/te-gjitha` lists
   the whole range in printed order with those at the end under their own
   heading. `/kerko` deliberately searches only the printed ones, because the

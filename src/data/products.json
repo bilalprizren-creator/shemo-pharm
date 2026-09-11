@@ -42144,5 +42144,216 @@
   "inStock": true,
   "description": "",
   "shortDescription": ""
+ },
+ {
+  "id": 19715,
+  "name": "Ivy Bear Women's Hair 60gummies",
+  "slug": "ivy-bear-women-s-hair-60gummies-4139",
+  "sku": "4139",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4139-ivy-bear-women-s-hair-60gummies-4139-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19716,
+  "name": "Ivy Bear Men's Hair 60gummies",
+  "slug": "ivy-bear-men-s-hair-60gummies-4141",
+  "sku": "4141",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4141-ivy-bear-men-s-hair-60gummies-4141-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19717,
+  "name": "Ivy Bear Boost Immune 60gummies",
+  "slug": "ivy-bear-boost-immune-60gummies-4142",
+  "sku": "4142",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4142-ivy-bear-boost-immune-60gummies-4142-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19718,
+  "name": "Ivy Bear SuperPower Kids 60gummies",
+  "slug": "ivy-bear-superpower-kids-60gummies-4150",
+  "sku": "4150",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4150-ivy-bear-superpower-kids-60gummies-4150-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   209,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19719,
+  "name": "Ivy Bear Boost Tan 60gummies",
+  "slug": "ivy-bear-boost-tan-60gummies-4149",
+  "sku": "4149",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4149-ivy-bear-boost-tan-60gummies-4149-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19720,
+  "name": "Ivy Bear Restfull Sleep 60gummies",
+  "slug": "ivy-bear-restfull-sleep-60gummies-4148",
+  "sku": "4148",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4148-ivy-bear-restfull-sleep-60gummies-4148-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19721,
+  "name": "IvyBear Vibrant Skin 60 gummies",
+  "slug": "ivybear-vibrant-skin-60-gummies-4171",
+  "sku": "4171",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4171-ivybear-vibrant-skin-60-gummies-4171-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19722,
+  "name": "Ivy Bear Boost Energy 60 Gummies",
+  "slug": "ivy-bear-boost-energy-60-gummies-4170",
+  "sku": "4170",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4170-ivy-bear-boost-energy-60-gummies-4170-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19723,
+  "name": "Ivy Bear Protein Boost 70gummies",
+  "slug": "ivy-bear-protein-boost-70gummies-4138",
+  "sku": "4138",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4138-ivy-bear-protein-boost-70gummies-4138-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
+ },
+ {
+  "id": 19724,
+  "name": "Ivy Bear Women's Hair Professional 60gummies",
+  "slug": "ivy-bear-women-s-hair-professional-60gummies-4151",
+  "sku": "4151",
+  "priceCents": 0,
+  "regularCents": 0,
+  "onSale": false,
+  "currency": "EUR",
+  "images": [
+   "/products/4151-ivy-bear-women-s-hair-professional-60gummies-4151-cutout.webp"
+  ],
+  "categoryIds": [
+   204,
+   207,
+   433
+  ],
+  "inStock": true,
+  "description": "",
+  "shortDescription": ""
  }
 ]

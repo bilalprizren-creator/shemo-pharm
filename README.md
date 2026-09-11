@@ -398,6 +398,9 @@ e vet duhet `outline-none!` (me `!` në fund, sintaksa e v4).
 - Kuptimi i "200+ Distributor i autorizuar" nga faqja e vjetër.
 - URL e YouTube (vetëm Facebook dhe Instagram u verifikuan).
 - Numri që pranon WhatsApp (supozuar 049 600 934).
-- 176 artikuj që janë në katalogun e shtypur nuk gjenden në bazë — lista te
-  `audit/catalog-order-import.md`. Dy seksione mbeten bosh për këtë arsye
-  (38 Denk Pharma, 7.3 Ivy Bear), prandaj faqja tregon 61 seksione e jo 63.
+- 176 artikuj që janë në katalogun e shtypur nuk gjendeshin në bazë kur u
+  shkrua `audit/catalog-order-import.md` — lista atje. 7.3 Ivy Bear u shtua
+  ndërkohë me `scripts/add-ivy-bear.mjs`, por pa çmime: 10 produktet janë të
+  fshehura në të dy faqet derisa të vendosen çmimet te `/admin/produktet`.
+  Dy seksione mbeten bosh për këtë arsye (38 Denk Pharma, 7.3 Ivy Bear),
+  prandaj faqja tregon 61 seksione e jo 63.

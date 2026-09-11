@@ -368,9 +368,10 @@ export interface AdminCatalogSection {
  * Every printed section, in printed order, with what sits in each.
  *
  * Read straight from the table, so the empty sections are in it. The public
- * catalogue drops those (getCatalogSections) — 38 Denk Pharma and 7.3 Ivy Bear
- * are numbered headings over nothing — and this list is the only place where
- * somebody can see that they exist and refill them.
+ * catalogue drops those (getCatalogSections) — 38 Denk Pharma is a numbered
+ * heading over nothing, and 7.3 Ivy Bear holds ten products that are hidden on
+ * both sites until they are priced — and this list is the only place where
+ * somebody can see that they exist and refill or release them.
  *
  * Ordered by `sort`, never by `catalog_no`: the printed run is 6.4, 6.1, 6.3,
  * 6.5, and "8.1" names two different sections.

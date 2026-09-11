@@ -470,13 +470,15 @@ export const getCatalogSections = cache(computeCatalogSections);
 
 /**
  * The printed sections `getCatalogSections()` drops, because not one of their
- * products is in the database.
+ * products is there to print.
  *
- * Today that is 38 Denk Pharma (29 articles) and 7.3 Ivy Bear (9), which is why
- * the site shows 61 sections where the paper edition prints 63. Read out of
- * `catalog_sections` rather than written down anywhere: the import inserts all
- * 63 rows whether or not their products landed (scripts/import-catalog-order.mjs),
- * so this stays true on its own as articles are added or discontinued.
+ * Today that is 38 Denk Pharma (29 articles, none in the database) and 7.3 Ivy
+ * Bear (10 rows since 2026-09-11, every one hidden on both sites until it has a
+ * price — scripts/add-ivy-bear.mjs), which is why the site shows 61 sections
+ * where the paper edition prints 63. Read out of `catalog_sections` rather than
+ * written down anywhere: the import inserts all 63 rows whether or not their
+ * products landed (scripts/import-catalog-order.mjs), so this stays true on its
+ * own as articles are added, priced or discontinued.
  *
  * Somebody holding the paper edition and looking for section 38 needs to be
  * told, or they will read the gap as a broken website.

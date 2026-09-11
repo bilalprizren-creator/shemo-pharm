@@ -1108,5 +1108,15 @@
   "displayName": "Freely",
   "kind": "brand",
   "sort": 0
+ },
+ {
+  "id": 433,
+  "name": "Ivy Bear",
+  "slug": "ivy-bear",
+  "parent": 0,
+  "count": 0,
+  "displayName": "Ivy Bear",
+  "kind": "brand",
+  "sort": 0
  }
 ]
