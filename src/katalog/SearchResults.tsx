@@ -1,5 +1,10 @@
 import { canSeePrices, getSession } from "@/lib/auth";
-import { catalogSectionSlug, getCatalogSections, toCardProducts } from "@/lib/catalog";
+import {
+  catalogSectionSlug,
+  getAllProductsInCatalogOrder,
+  getCatalogSections,
+  toCardProducts,
+} from "@/lib/catalog";
 import { langHref } from "@/lib/i18n";
 import { getSiteMode, sitePath } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
@@ -15,19 +20,24 @@ import { InstantSearch, type IndexProduct, type IndexSection } from "@/katalog/I
  * actually wants — and a query that names a section brings back the section
  * itself, above the grid.
  *
- * Only products that appear in the printed catalogue are searched. The 311 the
- * shop carries but the catalogue never printed would be noise here: the code
- * somebody types comes off a printed page.
+ * Everything the catalogue shows is searched — the same range /te-gjitha
+ * lists, `catalog_hidden = false` whether or not a printed section holds it.
+ * It used to be the printed products only, on the reasoning that the code
+ * somebody types comes off a printed page; but a product switched to "në
+ * katalog" in the admin panel and never placed in a section (330 of them at
+ * the time of writing) was then findable nowhere on this site except on the
+ * last pages of /te-gjitha, and the switch looked broken. A hit without a
+ * section says so under its card instead of pretending to a page number.
  *
  * The searching itself happens in the browser, as the reader types — see
  * InstantSearch.tsx for why and how. What this server half does is build what
- * the browser needs and cannot make for itself: every printed product as a
+ * the browser needs and cannot make for itself: every catalogue product as a
  * card (prices only for a session that may see them, the same gate as every
  * other page), which section prints it, and the links, which depend on the
  * host and the language. The index costs one toCardProducts over the whole
- * printed range per request — a map lookup and a price format per product —
- * and the page still renders the results for the URL it was opened with, so it
- * works with scripting off exactly as the submit-and-wait form before it did.
+ * range per request — a map lookup and a price format per product — and the
+ * page still renders the results for the URL it was opened with, so it works
+ * with scripting off exactly as the submit-and-wait form before it did.
  */
 export async function SearchResults({
   query,
@@ -47,15 +57,17 @@ export async function SearchResults({
   const mode = await getSiteMode();
   const href = (p: string) => langHref(dict.lang, sitePath(mode, p));
 
-  const sectionOf = new Map(
-    sections.flatMap((s) => s.products.map((p) => [p.id, s.id] as const))
+  // Printed order first, then the unplaced ones by name — the order /te-gjitha
+  // runs in, and the order the hits keep. 0 stands for "no section": the
+  // browser side has no section to look up and labels the card instead.
+  const all = await getAllProductsInCatalogOrder();
+  const cards = await toCardProducts(
+    all.map((entry) => entry.product),
+    showPrices
   );
-  const printed = sections.flatMap((s) => s.products);
-  const cards = await toCardProducts(printed, showPrices);
-  // Printed order, kept: the hits come back in the order they are in here.
-  const index: IndexProduct[] = cards.map((card) => ({
+  const index: IndexProduct[] = cards.map((card, i) => ({
     ...card,
-    sectionId: sectionOf.get(card.id) ?? 0,
+    sectionId: all[i].section?.id ?? 0,
   }));
   const links: IndexSection[] = sections.map((s) => ({
     id: s.id,

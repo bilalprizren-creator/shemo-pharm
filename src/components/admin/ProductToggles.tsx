@@ -113,6 +113,39 @@ export function CatalogToggle({
 }
 
 /**
+ * The state the catalogue button cannot show: in the catalogue, in no printed
+ * section.
+ *
+ * The button reads "Në katalog" for any product with `catalog_hidden = false`,
+ * but shemo-katalog.com is arranged by printed section, and a product placed in
+ * none appears there only in the search and on the last pages of /te-gjitha —
+ * never in a numbered section, never on the print sheets. An editor who
+ * switched a product on, opened the catalogue and could not find it read that
+ * as a broken switch, because nothing in this table said otherwise. Now this
+ * does, next to the switch, in the colour the summary uses for "askund".
+ *
+ * Nothing when the product is hidden from the catalogue anyway: the section is
+ * then not the reason it is missing.
+ */
+export function UnplacedHint({
+  catalogHidden,
+  catalogSectionId,
+}: {
+  catalogHidden: boolean;
+  catalogSectionId: number | null;
+}) {
+  if (catalogHidden || catalogSectionId !== null) return null;
+  return (
+    <span
+      className="block text-[11px] font-medium leading-tight text-amber-700"
+      title="Në katalog, por pa seksion të shtypur: gjendet vetëm te kërkimi dhe te «Të gjitha»"
+    >
+      Pa seksion
+    </span>
+  );
+}
+
+/**
  * All four in a row, for the phone card where there are no columns to put them
  * in. Labelled, because a bare icon in a card has no column heading above it to
  * say what it means.
@@ -126,6 +159,7 @@ export function ProductToggleRow({
     featured: boolean;
     hidden: boolean;
     catalogHidden: boolean;
+    catalogSectionId: number | null;
   };
 }) {
   return (
@@ -140,6 +174,10 @@ export function ProductToggleRow({
       <LabelledToggle label="Katalogu">
         <CatalogToggle id={product.id} catalogHidden={product.catalogHidden} />
       </LabelledToggle>
+      <UnplacedHint
+        catalogHidden={product.catalogHidden}
+        catalogSectionId={product.catalogSectionId}
+      />
     </div>
   );
 }

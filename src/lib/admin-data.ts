@@ -144,6 +144,13 @@ export interface AdminProductListItem {
   hidden: boolean;
   /** Hidden from the printed catalogue — a separate decision, separate button. */
   catalogHidden: boolean;
+  /**
+   * The printed section, or null. Carried so the table can say when a product
+   * is in the catalogue but in no section — a state the catalogue button alone
+   * cannot show, and the one that makes the button look broken: the product
+   * appears on shemo-katalog.com only in its search and under /te-gjitha.
+   */
+  catalogSectionId: number | null;
 }
 
 /**
@@ -228,7 +235,8 @@ export async function listAdminProducts(
   if (slice.length === 0) return { rows: [], total };
 
   const rows = (await sql`
-    SELECT id, name, sku, price_cents, in_stock, featured, hidden, catalog_hidden
+    SELECT id, name, sku, price_cents, in_stock, featured, hidden, catalog_hidden,
+           catalog_section_id
     FROM products
     WHERE id = ANY(${slice}::int[])
   `) as Array<{
@@ -240,6 +248,7 @@ export async function listAdminProducts(
     featured: boolean;
     hidden: boolean;
     catalog_hidden: boolean;
+    catalog_section_id: number | null;
   }>;
 
   // ANY() answers in whatever order the planner likes, so the page order comes
@@ -259,6 +268,7 @@ export async function listAdminProducts(
               featured: r.featured,
               hidden: r.hidden,
               catalogHidden: r.catalog_hidden,
+              catalogSectionId: r.catalog_section_id,
             },
           ]
         : [];
@@ -422,6 +432,13 @@ export interface SiteVisibilityCounts {
   shop: number;
   /** Printed by shemo-katalog.com: `catalog_hidden = false`. */
   katalog: number;
+  /**
+   * Of `katalog`, the ones in no printed section. Shown on that site only by
+   * its search and under /te-gjitha — never in a numbered section, never on the
+   * print sheets — which is not what "në katalog" reads as, so the number is
+   * named beside it.
+   */
+  katalogUnplaced: number;
   /** Hidden from both — in the database, on neither site. */
   nowhere: number;
 }
@@ -446,10 +463,20 @@ export async function getSiteVisibilityCounts(): Promise<SiteVisibilityCounts> {
     SELECT count(*)::int                                            AS total,
            (count(*) FILTER (WHERE NOT hidden))::int                 AS shop,
            (count(*) FILTER (WHERE NOT catalog_hidden))::int         AS katalog,
+           (count(*) FILTER (WHERE NOT catalog_hidden
+                               AND catalog_section_id IS NULL))::int AS katalog_unplaced,
            (count(*) FILTER (WHERE hidden AND catalog_hidden))::int  AS nowhere
     FROM products
-  `) as SiteVisibilityCounts[];
-  return rows[0] ?? { total: 0, shop: 0, katalog: 0, nowhere: 0 };
+  `) as Array<Omit<SiteVisibilityCounts, "katalogUnplaced"> & { katalog_unplaced: number }>;
+  const row = rows[0];
+  if (!row) return { total: 0, shop: 0, katalog: 0, katalogUnplaced: 0, nowhere: 0 };
+  return {
+    total: row.total,
+    shop: row.shop,
+    katalog: row.katalog,
+    katalogUnplaced: row.katalog_unplaced,
+    nowhere: row.nowhere,
+  };
 }
 
 /**

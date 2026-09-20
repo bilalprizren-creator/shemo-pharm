@@ -16,8 +16,9 @@ import { SearchResults } from "@/katalog/SearchResults";
  * at /produktet and dropped the reader into the shop's listing, where the range
  * is a different one. The two sites are meant to be searched separately.
  *
- * What it searches is decided in SearchResults, not here: the printed products,
- * `catalog_hidden = false`, whether or not the shop shows them.
+ * What it searches is decided in SearchResults, not here: every product the
+ * catalogue shows, `catalog_hidden = false`, whether or not the shop shows it
+ * and whether or not a printed section holds it.
  */
 interface Props {
   params: Promise<{ lang: string }>;

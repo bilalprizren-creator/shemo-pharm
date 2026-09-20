@@ -457,6 +457,7 @@ export const en: Dictionary = {
     searchEmpty: "No products found for “{q}”.",
     searchPrompt: "Type a product name or an article code.",
     inSection: "Section {no} — {name}",
+    notPrinted: "Not in the printed catalogue",
     showMore: "Show more",
     showingOf: "{shown} of {total}",
     moreTitle: "More",

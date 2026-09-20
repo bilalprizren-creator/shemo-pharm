@@ -19,11 +19,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ items: [] });
   }
   // Suggestions carry no price and no session-dependent field (PublicProduct),
-  // so the same answer serves every visitor and the CDN can hold it. A minute
-  // is short next to how often the catalog changes, and the stale window means
-  // a popular query is never waiting on a function.
+  // so the same answer serves every visitor and the CDN can hold it. The
+  // window is short on purpose: it used to be a minute plus five of
+  // stale-while-revalidate, and an editor who had just switched a product on
+  // in /admin typed its name here and got the answer from before the switch —
+  // the listing at /produktet already showed the product, the box under the
+  // search field did not, for up to six minutes. The catalog behind this
+  // handler comes out of the data cache (catalog.ts), not from Neon, so a
+  // cache miss costs a function invocation and no database round trip; a
+  // minute of staleness at most is the same ceiling loadCatalog() sets.
   const cacheHeaders = {
-    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=30",
   };
   const { items, total } = await getProducts({ query: q, perPage: 8 });
   const results: PublicProduct[] = await Promise.all(

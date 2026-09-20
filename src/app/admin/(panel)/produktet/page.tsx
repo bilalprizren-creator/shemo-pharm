@@ -33,6 +33,7 @@ import {
   ProductToggleRow,
   ShopToggle,
   StockToggle,
+  UnplacedHint,
 } from "@/components/admin/ProductToggles";
 import { SiteVisibilitySummary } from "@/components/admin/SiteVisibilitySummary";
 
@@ -329,6 +330,10 @@ export default async function AdminProductsPage({
                 </td>
                 <td className="px-4 py-2.5 text-center">
                   <CatalogToggle id={p.id} catalogHidden={p.catalogHidden} />
+                  <UnplacedHint
+                    catalogHidden={p.catalogHidden}
+                    catalogSectionId={p.catalogSectionId}
+                  />
                 </td>
               </tr>
             ))}

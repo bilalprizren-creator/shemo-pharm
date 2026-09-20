@@ -16,8 +16,8 @@ import { EmptyState } from "@/components/catalog/EmptyState";
  * Modelled on the Jara Pharmacy site, where the products are in the browser
  * and every keystroke filters them: a partner types "41" and the cards are
  * there before the next digit. Here the same thing is done with an index of
- * every printed product — ~1 700 cards, about 80 KB compressed, less than the
- * thumbnails of one page of results — handed over by SearchResults.tsx and
+ * every catalogue product — ~2 000 cards, under 100 KB compressed, less than
+ * the thumbnails of one page of results — handed over by SearchResults.tsx and
  * filtered locally by the very functions the server matches with
  * (src/lib/catalog-search.ts), so what the page showed on arrival and what it
  * shows after a keystroke can never disagree.
@@ -30,7 +30,7 @@ import { EmptyState } from "@/components/catalog/EmptyState";
  * and returned to. That write is debounced: browsers rate-limit history calls,
  * and a fast typist with corrections could trip the limit inside ten seconds.
  *
- * No debounce on the filtering itself. Matching 1 700 names is under a
+ * No debounce on the filtering itself. Matching 2 000 names is under a
  * millisecond; the only cost is rendering the cards, and useDeferredValue lets
  * the field keep up with the fingers while the grid follows.
  */
@@ -39,7 +39,7 @@ import { EmptyState } from "@/components/catalog/EmptyState";
  * Forty-eight at a time, the same as /te-gjitha.
  *
  * It used to be all of them, on the reasoning that somebody types an article
- * code and gets one hit. Somebody also types a single letter: "a" matches 1 527
+ * code and gets one hit. Somebody also types a single letter: "a" matched 1 527
  * of the 1 733 printed products, which rendered a 6.1 MB page carrying 3 059
  * image references — roughly 25 MB of photographs once the browser fetched
  * them. One keystroke away, on a phone, in a pharmacy. "Show more" adds the
@@ -48,7 +48,10 @@ import { EmptyState } from "@/components/catalog/EmptyState";
  */
 export const PER_PAGE = 48;
 
-/** One printed product as the card shows it, plus where the paper prints it. */
+/**
+ * One catalogue product as the card shows it, plus where the paper prints it —
+ * 0 when it does not: the product is in the catalogue but in no printed section.
+ */
 export type IndexProduct = CardProduct & { sectionId: number };
 
 /**
@@ -71,7 +74,7 @@ export function InstantSearch({
   initialPage,
   dict,
 }: {
-  /** Every printed product, in printed order — the order the hits keep. */
+  /** Every catalogue product, printed ones first in printed order — the order the hits keep. */
   index: IndexProduct[];
   sections: IndexSection[];
   /** This page's own path, language prefix included: the form's action and the URL that is kept current. */
@@ -265,7 +268,7 @@ export function InstantSearch({
             return (
               <li key={product.id} className="flex flex-col">
                 <ProductCard product={product} dict={dict} mode="katalog" priority={i < 5} />
-                {section && (
+                {section ? (
                   <Link
                     href={section.href}
                     className="mt-1.5 truncate text-xs font-medium text-brand-600 transition-colors hover:text-brand-800"
@@ -275,6 +278,13 @@ export function InstantSearch({
                       name: section.name,
                     })}
                   </Link>
+                ) : (
+                  /* In the catalogue, in no printed section: said outright,
+                     because a partner holding the paper edition would
+                     otherwise go looking for a page that is not there. */
+                  <p className="mt-1.5 truncate text-xs text-ink-400">
+                    {dict.printedCatalog.notPrinted}
+                  </p>
                 )}
               </li>
             );

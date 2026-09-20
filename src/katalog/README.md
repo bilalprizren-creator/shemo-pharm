@@ -62,12 +62,13 @@ now: `/katalog/kerko` on the shop's domain, `/kerko` here, one route.
 
 Modelled on the Jara Pharmacy site, at the owner's request: the products are in
 the browser and every keystroke filters them, from the first character, with no
-Enter. `SearchResults.tsx` (server) builds the index — every printed product as
-a card, prices only for a session that may see them, plus which section prints
-it and the section links, which depend on the host and the language — and hands
-it to `InstantSearch.tsx` (client), which filters it locally. ~1 700 cards is
-about 80 KB compressed, less than the thumbnails of one page of results, and it
-is only ever loaded on the search page; the contents page stays light.
+Enter. `SearchResults.tsx` (server) builds the index — every catalogue product
+as a card, prices only for a session that may see them, plus which section
+prints it (if any) and the section links, which depend on the host and the
+language — and hands it to `InstantSearch.tsx` (client), which filters it
+locally. ~2 000 cards is under 100 KB compressed, less than the thumbnails of
+one page of results, and it is only ever loaded on the search page; the
+contents page stays light.
 
 Two things are deliberate about it:
 
@@ -265,7 +266,13 @@ admin list counts *printed*, not *sold*, and flags the difference.
   edition's 63. The contents page says so, using `getEmptyCatalogSections()`;
   it reads the section table rather than a hard-coded list, so it corrects
   itself as articles arrive or are released.
-- **311 products were never printed.** They are not hidden: `/te-gjitha` lists
-  the whole range in printed order with those at the end under their own
-  heading. `/kerko` deliberately searches only the printed ones, because the
-  code somebody types comes off a printed page.
+- **Hundreds of products were never printed** — 311 at the import, 330 by
+  September 2026, since the admin's "Në katalog" switch does not place a product
+  in a section. They are not hidden: `/te-gjitha` lists the whole range in
+  printed order with those at the end under their own heading, and `/kerko`
+  searches them too, labelling a hit without a section "Jo në katalogun e
+  shtypur". It used to search the printed ones only, on the reasoning that the
+  code somebody types comes off a printed page — which left a product switched
+  on in the admin findable nowhere on this site but the last pages of
+  `/te-gjitha`, and made the switch look broken. The print sheets and the PDF
+  stay section-based: not printed means not printed.

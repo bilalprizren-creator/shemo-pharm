@@ -496,6 +496,9 @@ export const sq = {
     searchEmpty: "Asnjë produkt nuk u gjet për “{q}”.",
     searchPrompt: "Shkruani emrin e produktit ose kodin e artikullit.",
     inSection: "Seksioni {no} — {name}",
+    /** Nën kartën e një produkti që është në katalog, por në asnjë seksion të
+     *  shtypur — ndryshe partneri me katalogun në dorë kërkon një faqe që s'ekziston. */
+    notPrinted: "Jo në katalogun e shtypur",
     /** The search shows 48 cards at a time; this button reveals the next 48. */
     showMore: "Shfaq më shumë",
     showingOf: "{shown} nga {total}",
