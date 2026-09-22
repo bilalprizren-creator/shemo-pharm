@@ -252,20 +252,24 @@ admin list counts *printed*, not *sold*, and flags the difference.
   i.e. the old WordPress site. Nothing here is live until it points at Vercel.
   The two redirects the old site needs (`/index.php`, `/login.php`) are already
   in `next.config.ts`.
-- **176 printed articles were not in the database** when
-  `audit/catalog-order-import.md` was last written, listed there one by one.
-  The nine of 7.3 Ivy Bear have since been created by `scripts/add-ivy-bear.mjs`
-  (plus a tenth the Jara import still held); the old site keeps changing under
-  the report, so re-run the import's dry run before quoting a number. Nobody
-  has decided yet whether the rest are discontinued or simply missing from the
-  shop.
-- **Two printed sections still render empty** — 38 Denk Pharma, which has no
-  rows at all, and 7.3 Ivy Bear, whose ten rows are hidden on both sites until
-  the owner prices them in `/admin/produktet` (there was no wholesale price to
-  be had anywhere) — which is why the site shows 61 sections against the paper
-  edition's 63. The contents page says so, using `getEmptyCatalogSections()`;
-  it reads the section table rather than a hard-coded list, so it corrects
-  itself as articles arrive or are released.
+- **The old site's own database is the reference now.** On 2026-09-22 the
+  owner handed over the MySQL dump behind shemo-katalog.com and its photos
+  (`reference/old-katalog/`, gitignored — the dump also holds password hashes,
+  never commit it). `npm run import:old-catalog` (`scripts/import-old-catalog-db.mjs`,
+  dry run by default) reads it and: takes its prices, moves articles it has
+  switched off out of the printed catalogue (`catalog_hidden` only), creates
+  the articles it has and we did not — with price, photo and printed position —
+  and created the sections 8.8 CONALT and 32.1 SCHOLL. Ivy Bear got its prices
+  there too, and 38 Denk Pharma its 29 articles. The report,
+  `audit/old-catalog-db-import.md`, lists every change plus the cases left for
+  the owner: codes written differently on the two sides, and codes the old
+  database has reused for another product (`scripts/lib/old-catalog-match.mjs`
+  explains why a code alone is never trusted). The office keeps editing that
+  database; ask for a fresh dump and re-run the dry run to catch up.
+- **Empty printed sections** show on the contents page via
+  `getEmptyCatalogSections()`, read from the section table, so the list
+  corrects itself as articles arrive or are released. After the import the only
+  one is 0 Autan, every article of which the old database has switched off.
 - **Hundreds of products were never printed** — 311 at the import, 330 by
   September 2026, since the admin's "Në katalog" switch does not place a product
   in a section. They are not hidden: `/te-gjitha` lists the whole range in

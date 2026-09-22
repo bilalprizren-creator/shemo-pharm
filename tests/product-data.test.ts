@@ -71,16 +71,15 @@ describe("the checked-in product range", () => {
   });
 
   /**
-   * The Ivy Bear range came in from the printed catalogue on 2026-09-11 with no
-   * wholesale price to be had anywhere — not on shemo-katalog.com, not in the
-   * Jara import, and the old shop's API is closed — and is hidden on both sites
-   * until the owner prices it in /admin/produktet (scripts/add-ivy-bear.mjs).
-   * Pinned by code so that the list can only shrink: a price entered here is
-   * a code taken off the list, and any other product at 0 is still a defect.
+   * Products allowed to sit at 0 until the owner prices them — pinned by code
+   * so that the list can only shrink: a price entered is a code taken off the
+   * list, and any other product at 0 is still a defect.
+   *
+   * Empty since 2026-09-22. The Ivy Bear range (scripts/add-ivy-bear.mjs) was
+   * the whole list; the old catalogue's database dump carried its prices, and
+   * scripts/import-old-catalog-db.mjs entered them.
    */
-  const AWAITING_PRICE = new Set([
-    "4139", "4141", "4142", "4150", "4149", "4148", "4171", "4170", "4138", "4151",
-  ]);
+  const AWAITING_PRICE = new Set<string>([]);
 
   it("charges something for everything not awaiting a price", () => {
     const unpriced = products.filter((p) => !(p.priceCents > 0) && !AWAITING_PRICE.has(p.sku));

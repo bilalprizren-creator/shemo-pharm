@@ -398,9 +398,10 @@ e vet duhet `outline-none!` (me `!` në fund, sintaksa e v4).
 - Kuptimi i "200+ Distributor i autorizuar" nga faqja e vjetër.
 - URL e YouTube (vetëm Facebook dhe Instagram u verifikuan).
 - Numri që pranon WhatsApp (supozuar 049 600 934).
-- 176 artikuj që janë në katalogun e shtypur nuk gjendeshin në bazë kur u
-  shkrua `audit/catalog-order-import.md` — lista atje. 7.3 Ivy Bear u shtua
-  ndërkohë me `scripts/add-ivy-bear.mjs`, por pa çmime: 10 produktet janë të
-  fshehura në të dy faqet derisa të vendosen çmimet te `/admin/produktet`.
-  Dy seksione mbeten bosh për këtë arsye (38 Denk Pharma, 7.3 Ivy Bear),
-  prandaj faqja tregon 61 seksione e jo 63.
+- Baza e të dhënave e katalogut të vjetër (shemo-katalog.com) u dorëzua më
+  2026-09-22 dhe tani është referenca: `npm run import:old-catalog` merr prej
+  saj çmimet, artikujt që mungonin (përfshirë seksionet 8.8 CONALT dhe 32.1
+  SCHOLL, 38 Denk Pharma dhe çmimet e Ivy Bear) dhe fsheh nga katalogu i
+  shtypur ata që zyra i ka çaktivizuar. Raporti `audit/old-catalog-db-import.md`
+  liston edhe rastet që presin vendim: kode të shkruara ndryshe në dy anët dhe
+  kode që baza e vjetër ua ka dhënë produkteve të tjera.

@@ -434,6 +434,20 @@ const KATALOG_SKIP = new Set(
     "4524", "4523", "4522", "4527", "4971", "4957", "4960",
     // our multi-code matched a single code that is something else there
     "9606, 9607, 9608",
+    // 2026-09-22, from the old site's database dump (fetch-katalog-images
+    // --dump), reviewed pair by pair. Braces, bandages and stockings the old
+    // database shows as their retail box where ours shows the product worn —
+    // a card that shows how it sits beats a card that shows the carton.
+    "8538", "8521", "8534", "8522", "8356", "8179", "8180",
+    "8354", "8355", "8426", "8424", "8423", "8439", "8433", "8407",
+    "8381", "8390", "8389", "8382", "8383", "8388", "8387", "8435",
+    "8427", "8434", "8428", "8432", "8441", "8437", "8399", "8396",
+    "8398", "8422", "8421", "8420", "8401", "8403", "8402", "8400",
+    "8366", "8373", "8379", "8361", "8380", "8385", "8368", "8362",
+    "8375", "8371", "8416", "8417", "8418",
+    // the code was reused there: 7259 is an acne cream now, ours is Alpecin,
+    // and the prices happen to sit close enough to pass the matcher
+    "7259",
   ].map((s) => s.toLowerCase().replace(/\s+/g, ""))
 );
 
