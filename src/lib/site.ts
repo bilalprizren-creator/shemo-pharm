@@ -83,12 +83,11 @@ export const BRANDS = [
   { name: "Comfort Plus", image: "/brands/comfort-plus.png" },
   { name: "Foot Guard", image: "/brands/foot-guard.png" },
   { name: "Sudocrem", image: "/brands/sudocrem.png" },
-  { name: "Santasya", image: "/brands/santasya.png" },
-  { name: "Orjinalmed", image: "/brands/orjinalmed.png" },
   { name: "NT41", image: "/brands/nt41.png" },
-  { name: "Alg", image: "/brands/alg.png" },
-  // Koruglu, Iyon, Folium and Bebeevan were removed on request. Their logos are
-  // still in public/brands — add the line back if the catalog ever carries them.
+  // Koruglu, Iyon, Folium and Bebeevan were removed on request. Santasya,
+  // Orjinalmed and Alg followed on 2026-09-22 — no longer suppliers. Their
+  // logos are still in public/brands — add the line back if the catalog ever
+  // carries them again.
 ] as const;
 
 /**
