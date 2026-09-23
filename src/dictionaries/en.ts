@@ -156,7 +156,6 @@ export const en: Dictionary = {
       "Dependable supply for pharmacies, institutions and professionals",
     ],
     networkImageAlt: "The depot and distribution center",
-    networkImageAlt2: "One of our pharmacies",
     adviceEyebrow: "Professional advice",
     adviceTitle1: "Professional advice",
     adviceTitle2: "whenever you need it.",

@@ -161,7 +161,6 @@ export const sq = {
       "Furnizim i qëndrueshëm për barnatore, institucione dhe profesionistë",
     ],
     networkImageAlt: "Depoja dhe qendra e distribuimit",
-    networkImageAlt2: "Një nga barnatoret tona",
     adviceEyebrow: "Këshillim profesional",
     adviceTitle1: "Këshillim profesional",
     adviceTitle2: "kurdo që keni nevojë.",

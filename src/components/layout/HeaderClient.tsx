@@ -488,7 +488,7 @@ export function HeaderClient({
                     className="group relative flex flex-col justify-end overflow-hidden rounded-2xl bg-plum-950 p-5 text-white"
                   >
                     <Image
-                      src="/photos/depo.jpg"
+                      src="/photos/depo-distribuim.jpg"
                       alt=""
                       fill
                       sizes="270px"

@@ -64,33 +64,20 @@ export function NetworkSection({ dict }: { dict: Dictionary }) {
         </div>
 
         <div className="relative">
+          {/* Single real depot photo. There used to be a second, layered photo
+              here labelled as one of our own pharmacies — it was not: a real
+              photo of a different pharmacy's interior, wrongly captioned. */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-line shadow-card">
             <Image
-              src="/photos/depo.jpg"
-              alt={dict.home.networkImageAlt2}
+              src="/photos/depo-distribuim.jpg"
+              alt={dict.home.networkImageAlt}
               fill
               sizes="(max-width: 1024px) 92vw, 46vw"
               className="object-cover"
             />
-            {/* A retail pharmacy interior — labelled as such, not a depot. */}
             <span className="absolute bottom-3 left-3 rounded-full bg-ink-900/70 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-              {dict.home.networkImageAlt2}
+              {dict.home.networkImageAlt}
             </span>
-          </div>
-          <div className="absolute -bottom-6 left-4 w-40 overflow-hidden rounded-2xl border-4 border-white shadow-float sm:-left-6 sm:w-52">
-            <div className="relative aspect-[4/3]">
-              <Image
-                src="/photos/depo-distribuim.jpg"
-                alt={dict.home.networkImageAlt}
-                fill
-                sizes="208px"
-                className="object-cover"
-              />
-              {/* The shelves/inventory photo — the depot, not a pharmacy. */}
-              <span className="absolute inset-x-1 bottom-1 rounded-md bg-ink-900/70 px-2 py-0.5 text-center text-[10px] font-medium text-white backdrop-blur">
-                {dict.home.networkImageAlt}
-              </span>
-            </div>
           </div>
         </div>
       </div>

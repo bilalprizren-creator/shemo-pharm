@@ -59,7 +59,7 @@ export default async function AboutPage({ params }: Props) {
             <figure className="relative">
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-float">
                 <Image
-                  src="/photos/depo.jpg"
+                  src="/photos/depo-distribuim.jpg"
                   alt={dict.hero.depotAlt}
                   fill
                   priority
