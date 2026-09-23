@@ -8,16 +8,26 @@ import { PhotoWell, PHOTO_SHADOW_SM, photoPresentation } from "./PhotoWell";
 
 export function ProductGallery({
   images,
+  fits = [],
   name,
   labels,
 }: {
   images: string[];
+  /**
+   * How large to draw each image against the standard framing, index for index
+   * with `images` — measured server-side (src/lib/photo-fit.ts), because the
+   * table is too big to ship to the browser. A missing entry draws at 1.
+   */
+  fits?: number[];
   name: string;
   /** Localized list label + "{i} of {total}" template. */
   labels: { list: string; image: string };
 }) {
   const [index, setIndex] = useState(0);
   const current = images[index] ?? images[0];
+  // p-8 on the 540 px gallery, as a share of its width: the inset a photo at
+  // fit 1 gets, and the same 86 % framing the card works from.
+  const main = photoPresentation(current, { inset: 0.06, fit: fits[index] ?? 1 });
   const listRef = useRef<HTMLUListElement>(null);
 
   const position = (i: number) =>
@@ -48,10 +58,9 @@ export function ProductGallery({
   return (
     <div>
       {/* Per image, not per product: a gallery can mix a cut-out packshot with
-          an uncut detail photo, and each needs its own ground. */}
+          an uncut detail photo, and only the cut-out gets a shadow. */}
       <PhotoWell
         className="aspect-square w-full overflow-hidden rounded-2xl border border-ink-900/8"
-        cutOut={photoPresentation(current, { pad: "p-8" }).cutOut}
       >
         {current ? (
           <Image
@@ -64,7 +73,8 @@ export function ProductGallery({
             priority
             sizes="(max-width: 1024px) 92vw, 540px"
             quality={85}
-            className={photoPresentation(current, { pad: "p-8" }).className}
+            className={main.className}
+            style={main.style}
           />
         ) : (
           <div className="flex h-full items-center justify-center" aria-hidden>
@@ -103,7 +113,6 @@ export function ProductGallery({
                         ? "border-brand-500"
                         : "border-ink-900/8 hover:border-brand-300"
                     }`}
-                    cutOut={photoPresentation(src, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                   >
                     <Image
                       src={thumbnailFor(src)}

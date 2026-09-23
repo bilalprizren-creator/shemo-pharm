@@ -4,6 +4,8 @@ import { unstable_cache } from "next/cache";
 import { sql } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { isAllowedImageSrc } from "@/lib/images";
+import { photoFit } from "@/lib/photo-fit";
+import { normalizeSizes } from "@/lib/pack-size";
 import { CATALOG_TAG } from "@/lib/catalog-tag";
 import {
   catalogSectionSlug,
@@ -533,6 +535,52 @@ async function computeAllProductsInCatalogOrder(): Promise<ProductInCatalogOrder
 /** Memoized per render — see getCatalogSections. */
 export const getAllProductsInCatalogOrder = cache(computeAllProductsInCatalogOrder);
 
+/**
+ * The product counts the two sites print, each from the one list it describes.
+ *
+ * Four different figures used to stand on the site with nothing to say what
+ * each one counted — "3000+" on the homepage, 2 285 on /produktet, 1 939 on the
+ * catalogue's "all products" button and 1 888 in its contents — and a partner
+ * comparing them could only conclude that one was wrong. None was (except the
+ * first, which counted nothing), they are different ranges:
+ *
+ *   online      what the shop lists and sells — `hidden = false`
+ *   catalogue   what the catalogue shows and its search finds —
+ *               `catalog_hidden = false`, placed in a section or not
+ *   printed     of those, what a printed section holds: the paper edition
+ *   unplaced    catalogue - printed: switched on, in no section (search and
+ *               /te-gjitha only)
+ *   onlineOnly  sold in the shop, switched off in the catalogue
+ *
+ * so every page that prints one now says which, from here.
+ */
+export interface AssortmentCounts {
+  online: number;
+  catalogue: number;
+  printed: number;
+  sections: number;
+  unplaced: number;
+  onlineOnly: number;
+}
+
+async function computeAssortmentCounts(): Promise<AssortmentCounts> {
+  const data = await loadCatalog();
+  const sections = await getCatalogSections();
+  const catalogue = (await getAllProductsInCatalogOrder()).length;
+  const printed = sections.reduce((n, s) => n + s.products.length, 0);
+  return {
+    online: data.products.length,
+    catalogue,
+    printed,
+    sections: sections.length,
+    unplaced: catalogue - printed,
+    onlineOnly: data.products.filter((p) => p.catalogHidden).length,
+  };
+}
+
+/** Memoized per render — the homepage asks for it three times. */
+export const getAssortmentCounts = cache(computeAssortmentCounts);
+
 /** The type tree, for the sidebar filter and /kategorite. Brands are omitted. */
 export async function getCategoryTree(): Promise<CategoryNode[]> {
   const { categories } = await loadCatalog();
@@ -963,9 +1011,18 @@ function sameArticle(a: string, b: string): boolean {
  * references this range is full of ("(SL-911)", "(REF-730)", "( DR.COMFORT )"),
  * which match no code at all. An admin `display_name` is returned untouched:
  * somebody who typed a name meant it.
+ *
+ * Sizes are written one way on the way out — "200ml", "200ML" and "200 ML" all
+ * read "200 ml" (normalizeSizes in src/lib/pack-size.ts) — so a grid of cards
+ * does not spell the same unit five ways. Display only, like the code
+ * stripping: the `name` column keeps whatever the import wrote.
  */
 export function productDisplayName(product: Product): string {
   if (product.displayName) return product.displayName;
+  return normalizeSizes(nameWithoutOwnCode(product));
+}
+
+function nameWithoutOwnCode(product: Product): string {
   const sku = product.sku.trim().toLowerCase();
   if (!sku) return product.name;
   const skuCodes = splitCodes(sku);
@@ -1003,12 +1060,14 @@ function buildCard(
   categoryName: string | null
 ): CardProduct {
   const hasDiscount = product.regularCents > product.priceCents;
+  const image = productImage(product);
   return {
     id: product.id,
     name: productDisplayName(product),
     slug: product.slug,
     sku: product.sku,
-    image: productImage(product),
+    image,
+    imageFit: photoFit(image),
     categoryName,
     inStock: product.inStock,
     price: showPrices ? formatPrice(product.priceCents) : null,

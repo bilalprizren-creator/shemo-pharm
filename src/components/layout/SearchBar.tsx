@@ -262,7 +262,6 @@ export function SearchBar({
                     >
                       <PhotoWell
                         className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6"
-                        cutOut={photoPresentation(p.image, { pad: "p-1", shadow: PHOTO_SHADOW_SM }).cutOut}
                       >
                         {p.image ? (
                           <Image

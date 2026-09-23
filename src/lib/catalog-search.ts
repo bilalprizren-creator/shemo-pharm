@@ -15,6 +15,7 @@
  * take the server's Product rows and the browser's card index alike.
  */
 import type { CatalogSection } from "@/lib/types";
+import { normalizeSizes } from "@/lib/pack-size";
 
 /** What `searchProducts` needs of a product: its name and its article code. */
 export interface SearchableProduct {
@@ -32,8 +33,17 @@ export interface SearchableSection {
   products: ArrayLike<unknown>;
 }
 
+/**
+ * Every product whose name and article code hold every word of the query.
+ *
+ * The query is written the way names are shown before it is split: cards print
+ * "200 ml" where the data says "200ml" (src/lib/pack-size.ts), so "200ml" typed
+ * as it appears on a bottle has to become "200" and "ml" — two words either
+ * spelling of the name holds — or it would find nothing in the catalogue, whose
+ * index carries the shown names, while finding the same bottle in the shop.
+ */
 export function searchProducts<T extends SearchableProduct>(list: T[], query: string): T[] {
-  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const tokens = normalizeSizes(query).toLowerCase().split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return list;
   return list.filter((p) => {
     const haystack = `${p.name} ${p.sku}`.toLowerCase();

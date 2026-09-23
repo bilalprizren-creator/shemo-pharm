@@ -6,6 +6,7 @@ import { canSeePrices, getSession } from "@/lib/auth";
 import {
   categoryDisplayName,
   getAllCategories,
+  getAssortmentCounts,
   getBrandTypeBreakdown,
   getCategoryTree,
   getProducts,
@@ -15,6 +16,7 @@ import {
   type ProductSort,
 } from "@/lib/catalog";
 import { langHref, languageAlternates, fmt } from "@/lib/i18n";
+import { formatCount } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -252,6 +254,9 @@ export async function CatalogView({
     inStockOnly,
   });
   const cards = await toCardProducts(result.items, showPrices);
+  // Only on the full listing: it is the one page whose own total is the online
+  // range, so it is where that range is told apart from the printed catalogue.
+  const scope = categorySlug ? null : await getAssortmentCounts();
 
   const tree = await getCategoryTree();
   const displayName = Object.fromEntries(
@@ -350,6 +355,21 @@ export async function CatalogView({
         <div>
           <h1 className="text-3xl font-extrabold text-ink-900 sm:text-4xl">{title}</h1>
           {subtitle && <p className="mt-2 max-w-2xl text-ink-500">{subtitle}</p>}
+          {scope && (
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-400">
+              {fmt(dict.catalog.scopeNote, {
+                online: formatCount(scope.online, dict.lang),
+                printed: formatCount(scope.printed, dict.lang),
+                sections: scope.sections,
+              })}{" "}
+              <Link
+                href={langHref(dict.lang, "/katalog")}
+                className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-2 hover:text-brand-800"
+              >
+                {dict.catalog.scopeLink}
+              </Link>
+            </p>
+          )}
         </div>
         {/* From `sm` up the count travels with the search field it describes
             (CatalogSearch); this is the narrow-screen copy. Only one of the two

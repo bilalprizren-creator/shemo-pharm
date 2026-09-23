@@ -10,7 +10,14 @@ import { PasswordField } from "./PasswordField";
 
 const initialState: AuthFormState = {};
 
-export function LoginForm({ dict }: { dict: Dictionary }) {
+export function LoginForm({
+  dict,
+  returnTo = null,
+}: {
+  dict: Dictionary;
+  /** A checked path on this site to land on afterwards (see safeReturnPath). */
+  returnTo?: string | null;
+}) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
   const [password, setPassword] = useState("");
 
@@ -27,6 +34,7 @@ export function LoginForm({ dict }: { dict: Dictionary }) {
       )}
 
       <input type="hidden" name="lang" value={dict.lang} />
+      {returnTo && <input type="hidden" name="kthehu" value={returnTo} />}
 
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-ink-900">

@@ -82,11 +82,12 @@ export const sq = {
     eyebrow: "Distributor i licencuar farmaceutik në Kosovë",
     h1a: "Furnizim farmaceutik",
     h1b: "që i beson Kosova.",
-    sub: "Mbi 3,000 produkte dhe furnizim profesional për barnatore, institucione dhe partnerë shëndetësorë në gjithë Kosovën.",
+    /** {n}: the online range, counted live and rounded down to the hundred. */
+    sub: "Mbi {n} produkte dhe furnizim profesional për barnatore, institucione dhe partnerë shëndetësorë në gjithë Kosovën.",
     ctaProducts: "Shiko produktet",
     ctaContact: "Na kontaktoni",
     trustLicensed: "Distributor i licencuar",
-    trustProducts: "3000+ produkte",
+    trustProducts: "{n}+ produkte",
     trustSupply: "Furnizim në gjithë Kosovën",
     badge: "I licencuar nga MSh e Kosovës",
     imageAlt:
@@ -100,7 +101,7 @@ export const sq = {
   },
 
   home: {
-    categoriesEyebrow: "Katalogu ynë",
+    categoriesEyebrow: "Asortimenti ynë",
     categoriesTitle: "Kategoritë kryesore",
     categoriesSub:
       "Zgjidhni sipas kategorisë dhe gjeni shpejt produktet që ju nevojiten.",
@@ -117,8 +118,8 @@ export const sq = {
     },
     featuredEyebrow: "Të zgjedhura për ju",
     featuredTitle: "Produktet e veçuara",
-    featuredSubtitle: "Një përzgjedhje nga katalogu ynë",
-    featuredCta: "Shiko katalogun me 3,000+ produkte",
+    featuredSubtitle: "Një përzgjedhje nga asortimenti ynë",
+    featuredCta: "Shiko të gjitha {n} produktet",
     whyEyebrow: "Pse SHEMO Pharm",
     whyTitle: "Pse partnerët na besojnë neve?",
     whySub:
@@ -129,7 +130,7 @@ export const sq = {
         text: "I licencuar nga Agjencia për Produkte dhe Pajisje Mjekësore, Ministria e Shëndetësisë e Kosovës.",
       },
       {
-        title: "Katalog i gjerë",
+        title: "Asortiment i gjerë",
         text: "Gamë e plotë produktesh farmaceutike, medicinale dhe të kujdesit personal në një vend.",
       },
       {
@@ -373,17 +374,31 @@ export const sq = {
 
   product: {
     codeLabel: "Kodi i produktit:",
-    loginForPrice: "Kyçu për të parë çmimin",
+    /** On a card with no price shown — true for a visitor and for an account still being checked. */
+    partnerPrice: "Çmimi për partnerë",
     outOfStock: "Pa stok",
+    /** A card's availability line when the product is not in stock. */
+    outOfStockOrderable: "Pa stok – mund të porositet",
     /** Shown beside the add button when the product is not in stock. */
     outOfStockOrderNote:
       "Ky produkt nuk është në stok për momentin. Mund ta shtoni gjithsesi — ju konfirmojmë afatin e furnizimit.",
     inStock: "Në stok",
     availability: "Disponueshmëria:",
     wholesalePrice: "Çmimi me shumicë",
-    pricesHidden: "Çmimet janë të dukshme vetëm për klientët e kyçur",
+    pricesHidden: "Çmimet me shumicë shfaqen për partnerët e kyçur.",
     loginToSeePrice: "Kyçu për të parë çmimin",
-    orderHeading: "Porositni ose kërkoni informacion",
+    /** Under the basket for anyone who cannot see prices yet. */
+    requestWithoutPrice:
+      "Mund ta shtoni në shportë edhe tani dhe ta dërgoni si kërkesë — ekipi jua konfirmon çmimin dhe afatin.",
+    detailsHeading: "Të dhënat e produktit",
+    brand: "Marka",
+    /** Read off the product's own name — only shown when the name states exactly one size. */
+    packSize: "Paketimi",
+    category: "Kategoria",
+    printedCatalog: "Katalogu i shtypur",
+    printedSection: "Seksioni {no} – {name}",
+    descriptionHeading: "Përshkrimi",
+    contactHeading: "Pyetje për këtë produkt?",
     orderWhatsapp: "Porosit përmes WhatsApp",
     callUs: "Na telefononi",
     email: "Email",
@@ -408,7 +423,11 @@ export const sq = {
 
   catalog: {
     title: "Produktet",
-    subtitle: "Katalogu i plotë i produkteve dhe pajisjeve mjekësore",
+    subtitle: "I gjithë asortimenti online i produkteve dhe pajisjeve mjekësore",
+    /** Under the title of /produktet: what this list is, and what the printed catalogue is. */
+    scopeNote:
+      "Këtu janë të gjitha {online} produktet që mund t'i porositni online. Katalogu i shtypur është një përzgjedhje prej {printed} produktesh në {sections} seksione.",
+    scopeLink: "Shiko katalogun e shtypur",
     metaDescription:
       "Shfletoni katalogun e plotë të SHEMO PHARM: pajisje mjekësore, produkte ortopedike, suplemente, kozmetikë dhe produkte të kujdesit personal.",
     breadcrumbLabel: "Vendndodhja",
@@ -474,16 +493,22 @@ export const sq = {
     metaDescription:
       "Katalogu i shtypur i SHEMO PHARM sipas seksioneve të numëruara: pajisje mjekësore, ortopedi, suplemente dhe kozmetikë, me kodet e artikujve.",
     contents: "Përmbajtja",
-    summary: "{sections} seksione, {products} produkte",
+    /** The contents page's box saying what the catalogue holds, next to the online range. */
+    scopeTitle: "Çfarë përfshin katalogu",
+    scopePrinted: "në {sections} seksionet e shtypura",
+    scopeSearchable: "të kërkueshme në katalog, prej tyre {unplaced} pa seksion",
+    scopeOnline: "në asortimentin online",
+    scopeExplain:
+      "Katalogu i shtypur është përzgjedhja që shtypet në letër. Asortimenti online është gjithçka që mund të porositet — {onlineOnly} produkte janë vetëm aty.",
     sectionMetaDescription:
       "Seksioni {no} {name} nga katalogu i shtypur i SHEMO PHARM — {count} produkte me kodet e artikujve.",
     searchInstead: "Kërko në katalog",
-    allTitle: "Të gjitha produktet",
+    allTitle: "Të gjitha produktet e katalogut",
     allSubtitle:
-      "I gjithë asortimenti, njëri pas tjetrit, në radhën e katalogut të shtypur.",
+      "Çdo produkt i katalogut, njëri pas tjetrit, në radhën e katalogut të shtypur — edhe ato që nuk janë në asnjë seksion të shtypur.",
     allMetaDescription:
       "Të gjitha produktet e SHEMO PHARM në një listë, në radhën e katalogut të shtypur — me kodet e artikujve.",
-    allLink: "Shiko të gjitha {n} produktet",
+    allLink: "Shiko të gjitha {n} produktet e katalogut",
     pageOf: "Faqja {page} nga {total}",
     notPrintedHeading: "Produkte që nuk janë në katalogun e shtypur",
     siteTitle: "SHEMO Katalog | Katalogu i produkteve mjekësore",
@@ -494,6 +519,13 @@ export const sq = {
     matchingSections: "Seksione që përputhen",
     searchEmpty: "Asnjë produkt nuk u gjet për “{q}”.",
     searchPrompt: "Shkruani emrin e produktit ose kodin e artikullit.",
+    /** Why a search here can miss what the shop finds, and where to look instead. */
+    searchEmptyHint:
+      "Katalogu i shtypur nuk përmban çdo artikull të asortimentit. Provoni kërkimin në gjithë asortimentin online.",
+    shopSearch: "Kërko në asortimentin online",
+    /** {n} is what the online range's own search finds for the same words. */
+    shopSearchCount: "Në asortimentin online: {n}",
+    notFoundHint: "Nuk e gjeni? Katalogu është një përzgjedhje —",
     inSection: "Seksioni {no} — {name}",
     /** Nën kartën e një produkti që është në katalog, por në asnjë seksion të
      *  shtypur — ndryshe partneri me katalogun në dorë kërkon një faqe që s'ekziston. */
@@ -532,7 +564,7 @@ export const sq = {
       "{name} — shfletoni {count} produkte nga katalogu i SHEMO PHARM, distributor me shumicë i produkteve dhe pajisjeve mjekësore në Kosovë.",
     /** Why the numbers on the cards add up to more than the catalog holds. */
     overlapNote:
-      "Një produkt mund të jetë në më shumë se një kategori — një shurup për fëmijë është njëkohësisht bar dhe produkt për fëmijë. Prandaj shumat e numrave më poshtë e kalojnë totalin: katalogu ka {total} produkte të ndryshme.",
+      "Një produkt mund të jetë në më shumë se një kategori — një shurup për fëmijë është njëkohësisht bar dhe produkt për fëmijë. Prandaj shumat e numrave më poshtë e kalojnë totalin: asortimenti online ka {total} produkte të ndryshme.",
     overlapLink: "Shiko të gjitha {total} produktet",
   },
 

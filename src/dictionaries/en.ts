@@ -77,11 +77,11 @@ export const en: Dictionary = {
     eyebrow: "Licensed pharmaceutical distributor in Kosovo",
     h1a: "The pharmaceutical supply",
     h1b: "Kosovo trusts.",
-    sub: "Over 3,000 products and professional supply for pharmacies, institutions and healthcare partners across Kosovo.",
+    sub: "Over {n} products and professional supply for pharmacies, institutions and healthcare partners across Kosovo.",
     ctaProducts: "View products",
     ctaContact: "Contact us",
     trustLicensed: "Licensed distributor",
-    trustProducts: "3,000+ products",
+    trustProducts: "{n}+ products",
     trustSupply: "Delivery across Kosovo",
     badge: "Licensed by the Kosovo Ministry of Health",
     imageAlt:
@@ -95,7 +95,7 @@ export const en: Dictionary = {
   },
 
   home: {
-    categoriesEyebrow: "Our catalog",
+    categoriesEyebrow: "Our range",
     categoriesTitle: "Main categories",
     categoriesSub:
       "Choose by category and quickly find the products you need.",
@@ -112,8 +112,8 @@ export const en: Dictionary = {
     },
     featuredEyebrow: "Picked for you",
     featuredTitle: "Featured products",
-    featuredSubtitle: "A selection from our catalog",
-    featuredCta: "Browse the 3,000+ product catalog",
+    featuredSubtitle: "A selection from our range",
+    featuredCta: "Browse all {n} products",
     whyEyebrow: "Why SHEMO Pharm",
     whyTitle: "Why partners trust us",
     whySub:
@@ -124,7 +124,7 @@ export const en: Dictionary = {
         text: "Licensed by the Agency for Medical Products and Devices, Kosovo Ministry of Health.",
       },
       {
-        title: "Wide catalog",
+        title: "Wide range",
         text: "A full range of pharmaceutical, medical and personal-care products in one place.",
       },
       {
@@ -346,16 +346,26 @@ export const en: Dictionary = {
 
   product: {
     codeLabel: "Product code:",
-    loginForPrice: "Log in to see the price",
+    partnerPrice: "Partner price",
     outOfStock: "Out of stock",
+    outOfStockOrderable: "Out of stock – can be ordered",
     outOfStockOrderNote:
       "This product is not in stock right now. You can still add it — we will confirm the lead time.",
     inStock: "In stock",
     availability: "Availability:",
     wholesalePrice: "Wholesale price",
-    pricesHidden: "Prices are visible only to logged-in customers",
+    pricesHidden: "Wholesale prices are shown to logged-in partners.",
     loginToSeePrice: "Log in to see the price",
-    orderHeading: "Order or request information",
+    requestWithoutPrice:
+      "You can add it to the cart now and send it as a request — the team will confirm price and lead time.",
+    detailsHeading: "Product details",
+    brand: "Brand",
+    packSize: "Pack size",
+    category: "Category",
+    printedCatalog: "Printed catalogue",
+    printedSection: "Section {no} – {name}",
+    descriptionHeading: "Description",
+    contactHeading: "Questions about this product?",
     orderWhatsapp: "Order via WhatsApp",
     callUs: "Call us",
     email: "Email",
@@ -380,7 +390,10 @@ export const en: Dictionary = {
 
   catalog: {
     title: "Products",
-    subtitle: "The complete catalog of medical products and devices",
+    subtitle: "The whole online range of medical products and devices",
+    scopeNote:
+      "These are all {online} products you can order online. The printed catalogue is a selection of {printed} products in {sections} sections.",
+    scopeLink: "View the printed catalogue",
     metaDescription:
       "Browse the complete SHEMO PHARM catalog: medical devices, orthopedic products, supplements, cosmetics and personal-care products.",
     breadcrumbLabel: "Breadcrumb",
@@ -437,16 +450,21 @@ export const en: Dictionary = {
     metaDescription:
       "The SHEMO PHARM printed catalogue by numbered section: medical devices, orthopedics, supplements and cosmetics, with article codes.",
     contents: "Contents",
-    summary: "{sections} sections, {products} products",
+    scopeTitle: "What the catalogue covers",
+    scopePrinted: "in the {sections} printed sections",
+    scopeSearchable: "searchable in the catalogue, {unplaced} of them in no section",
+    scopeOnline: "in the online range",
+    scopeExplain:
+      "The printed catalogue is the selection printed on paper. The online range is everything that can be ordered — {onlineOnly} products are only there.",
     sectionMetaDescription:
       "Section {no} {name} of the SHEMO PHARM printed catalogue — {count} products with their article codes.",
     searchInstead: "Search the catalogue",
-    allTitle: "All products",
+    allTitle: "All catalogue products",
     allSubtitle:
-      "The whole range, one after another, in the order of the printed catalogue.",
+      "Every catalogue product, one after another, in the order of the printed catalogue — including those in no printed section.",
     allMetaDescription:
       "Every SHEMO PHARM product in one list, in the order of the printed catalogue — with article codes.",
-    allLink: "Browse all {n} products",
+    allLink: "Browse all {n} catalogue products",
     pageOf: "Page {page} of {total}",
     notPrintedHeading: "Products not in the printed catalogue",
     siteTitle: "SHEMO Katalog | Medical product catalogue",
@@ -455,6 +473,11 @@ export const en: Dictionary = {
     matchingSections: "Matching sections",
     searchEmpty: "No products found for “{q}”.",
     searchPrompt: "Type a product name or an article code.",
+    searchEmptyHint:
+      "The printed catalogue does not hold every article in the range. Try the whole online range.",
+    shopSearch: "Search the online range",
+    shopSearchCount: "In the online range: {n}",
+    notFoundHint: "Not there? The catalogue is a selection —",
     inSection: "Section {no} — {name}",
     notPrinted: "Not in the printed catalogue",
     showMore: "Show more",
@@ -489,7 +512,7 @@ export const en: Dictionary = {
     categoryMetaDescription:
       "{name} — browse {count} products from the SHEMO PHARM catalog, a wholesale distributor of medical products and devices in Kosovo.",
     overlapNote:
-      "A product can sit in more than one category — a children's cough syrup is both a medicine and a children's product. That is why the numbers below add up to more than the total: the catalog holds {total} distinct products.",
+      "A product can sit in more than one category — a children's cough syrup is both a medicine and a children's product. That is why the numbers below add up to more than the total: the online range holds {total} distinct products.",
     overlapLink: "Browse all {total} products",
   },
 

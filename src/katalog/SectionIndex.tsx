@@ -4,7 +4,7 @@ import Link from "next/link";
 import { List, Package, Printer, Search } from "lucide-react";
 import {
   catalogSectionSlug,
-  getAllProductsInCatalogOrder,
+  getAssortmentCounts,
   getCatalogSections,
   getEmptyCatalogSections,
   productImage,
@@ -13,8 +13,8 @@ import { catalogFingerprint, sheetsFor } from "@/katalog/sheets";
 import { catalogPdfGeneratedAt, catalogPdfIsCurrent, fullCatalogPdf } from "@/katalog/pdf";
 import { PdfDownload } from "@/katalog/PdfDownload";
 import { langHref, fmt } from "@/lib/i18n";
-import { getSiteMode, sitePath } from "@/lib/site-mode";
-import { formatDate } from "@/lib/format";
+import { getSiteMode, shopOrigin, sitePath } from "@/lib/site-mode";
+import { formatCount, formatDate } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
@@ -37,10 +37,10 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
   const sections = await getCatalogSections();
   const mode = await getSiteMode();
   const href = (p: string) => langHref(dict.lang, sitePath(mode, p));
-  const total = sections.reduce((n, s) => n + s.products.length, 0);
-  // Includes the 311 that were never printed, which is the whole point of the
-  // link this number labels.
-  const allCount = (await getAllProductsInCatalogOrder()).length;
+  // Printed, searchable, online: the three ranges this page used to leave the
+  // reader to tell apart from bare numbers (see getAssortmentCounts).
+  const counts = await getAssortmentCounts();
+  const count = (n: number) => formatCount(n, dict.lang);
   // Sections the paper edition prints that the range no longer carries, so the
   // gap between 61 and 63 is explained rather than left to be discovered.
   const missing = await getEmptyCatalogSections();
@@ -71,19 +71,7 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
             className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
           >
             <List className="size-4" aria-hidden />
-            {fmt(dict.printedCatalog.allLink, { n: allCount })}
-          </Link>
-          <Link
-            // The catalogue's own search, on both domains. It used to send the
-            // shop's visitors to /produktet, which is the shop's listing over
-            // the shop's range — the one place the two sites were not kept
-            // apart, and the loudest one, since it is the button somebody
-            // presses to look a printed code up.
-            href={href("/katalog/kerko")}
-            className="inline-flex items-center gap-2 rounded-field border border-line bg-white px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-700"
-          >
-            <Search className="size-4" aria-hidden />
-            {dict.printedCatalog.searchInstead}
+            {fmt(dict.printedCatalog.allLink, { n: count(counts.catalogue) })}
           </Link>
           {/* The download leads and the print sheet follows, because the two
               are not equal any more: one is a file the CDN hands over, the
@@ -111,6 +99,32 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
         </div>
       </div>
 
+      {/* The catalogue's own search, in the page rather than behind a button:
+          looking a printed code up is what most visitors come here to do. A
+          plain GET form, so it works with scripting off; the results page
+          (InstantSearch) takes over from there. On both domains — on the
+          shop's, the header search goes to the shop's listing instead. */}
+      <form
+        action={href("/katalog/kerko")}
+        role="search"
+        className="mt-6 flex max-w-2xl items-center gap-2 rounded-full border border-line bg-white py-1.5 pl-4 pr-1.5 shadow-card transition-colors focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-500/20"
+      >
+        <Search className="size-5 shrink-0 text-ink-400" aria-hidden />
+        <input
+          type="search"
+          name="kerko"
+          placeholder={dict.printedCatalog.searchPlaceholder}
+          aria-label={dict.printedCatalog.searchInstead}
+          className="min-w-0 flex-1 bg-transparent py-2 text-base text-ink-900 outline-none! placeholder:text-ink-400"
+        />
+        <button
+          type="submit"
+          className="shrink-0 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+        >
+          {dict.search.button}
+        </button>
+      </form>
+
       {pdf && pdfDate && (
         <p className="mt-4 text-sm text-ink-400">
           {fmt(dict.printedCatalog.pdfDated, {
@@ -136,12 +150,60 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
         </p>
       )}
 
-      <p className="mt-6 text-sm text-ink-400">
-        {fmt(dict.printedCatalog.summary, { sections: sections.length, products: total })}
-      </p>
+      {/* Three numbers that used to stand on three different pages with
+          nothing to say what each counted. Side by side, each labelled with
+          its range, the difference is the explanation. */}
+      <section
+        aria-labelledby="katalog-scope"
+        className="mt-6 rounded-2xl border border-line bg-white p-5"
+      >
+        <h2
+          id="katalog-scope"
+          className="text-sm font-bold uppercase tracking-wide text-ink-900"
+        >
+          {dict.printedCatalog.scopeTitle}
+        </h2>
+        <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col-reverse gap-0.5">
+            <dt className="text-sm text-ink-500">
+              {fmt(dict.printedCatalog.scopePrinted, { sections: counts.sections })}
+            </dt>
+            <dd className="font-display text-2xl font-bold text-brand-700">
+              {count(counts.printed)}
+            </dd>
+          </div>
+          <div className="flex flex-col-reverse gap-0.5">
+            <dt className="text-sm text-ink-500">
+              {fmt(dict.printedCatalog.scopeSearchable, { unplaced: count(counts.unplaced) })}
+            </dt>
+            <dd className="font-display text-2xl font-bold text-brand-700">
+              <Link
+                href={href("/katalog/te-gjitha")}
+                className="underline decoration-brand-200 underline-offset-4 hover:text-brand-800"
+              >
+                {count(counts.catalogue)}
+              </Link>
+            </dd>
+          </div>
+          <div className="flex flex-col-reverse gap-0.5">
+            <dt className="text-sm text-ink-500">{dict.printedCatalog.scopeOnline}</dt>
+            <dd className="font-display text-2xl font-bold text-accent-700">
+              <a
+                href={`${shopOrigin(mode)}${langHref(dict.lang, "/produktet")}`}
+                className="underline decoration-accent-200 underline-offset-4 hover:text-accent-800"
+              >
+                {count(counts.online)}
+              </a>
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-4 max-w-3xl text-sm leading-relaxed text-ink-500">
+          {fmt(dict.printedCatalog.scopeExplain, { onlineOnly: count(counts.onlineOnly) })}
+        </p>
+      </section>
 
       {missing.length > 0 && (
-        <p className="mt-2 max-w-3xl text-sm text-ink-500">
+        <p className="mt-4 max-w-3xl text-sm text-ink-500">
           {fmt(dict.printedCatalog.missingSections, {
             names: missing.map((s) => `${s.catalogNo} ${s.name}`).join(", "),
           })}
@@ -169,7 +231,6 @@ export async function SectionIndex({ dict }: { dict: Dictionary }) {
                     sixteen. */}
                 <PhotoWell
                   className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-                  cutOut={photoPresentation(cover, { pad: "p-2", shadow: PHOTO_SHADOW_SM }).cutOut}
                 >
                   {cover ? (
                     <Image

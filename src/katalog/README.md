@@ -84,6 +84,19 @@ Two things are deliberate about it:
   next forty-eight and is a real link to `?faqja=n+1` underneath — with
   scripting off, `faqja` means "the first n pages at once".
 
+The contents page carries the search field itself (a plain GET form to
+`/kerko`), because looking a printed code up is what most visitors come for.
+
+**A search here covers the catalogue, not the range** — `catalog_hidden =
+false`, 1 939 products on 2026-09-23 against the shop's 2 285. A code the
+catalogue does not carry is often still sold (article 7732 was switched off in
+the catalogue by hand and stayed in the shop), so a dead end is not the answer:
+the empty state leads with "search the online range", a link to the shop's
+`/produktet?kerko=` — absolute on this domain, since `/produktet` is not a
+shared path — and shows how many the shop's own endpoint (`/api/kerko`) finds.
+The same link sits quietly under every result list. The three counts and what
+each covers are on the contents page too (`getAssortmentCounts()`).
+
 ## What this site does not have
 
 No basket, no wishlist, no product pages, no offers, no category menu. The

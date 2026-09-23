@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts, primaryCategory, categoryDisplayName } from "@/lib/catalog";
+import {
+  categoryDisplayName,
+  getProducts,
+  primaryCategory,
+  productDisplayName,
+  productImage,
+} from "@/lib/catalog";
 import { MINUTE_MS, rateLimited } from "@/lib/rate-limit";
 import type { PublicProduct } from "@/lib/types";
 
@@ -37,10 +43,13 @@ export async function GET(request: NextRequest) {
       const cat = await primaryCategory(p);
       return {
         id: p.id,
-        name: p.name,
+        // What every card shows: the name without the article code the raw
+        // name repeats, sizes written one way, and the admin's photo override
+        // where there is one.
+        name: productDisplayName(p),
         slug: p.slug,
         sku: p.sku,
-        image: p.images[0] ?? null,
+        image: productImage(p),
         categoryName: cat ? categoryDisplayName(cat) : null,
         inStock: p.inStock,
       };

@@ -7,7 +7,8 @@ import {
   ShieldCheck,
   Truck,
 } from "lucide-react";
-import { langHref } from "@/lib/i18n";
+import { fmt, langHref } from "@/lib/i18n";
+import { formatCount } from "@/lib/format";
 import type { Dictionary } from "@/lib/dictionaries";
 
 const TRUST_ICONS = [ShieldCheck, Package, Truck];
@@ -22,10 +23,18 @@ const TRUST_ICONS = [ShieldCheck, Package, Truck];
  * site and must be readable from the first paint, without hydration and even
  * if JavaScript never runs. That also keeps this a server component.
  */
-export function Hero({ dict }: { dict: Dictionary }) {
+export function Hero({
+  dict,
+  productCount,
+}: {
+  dict: Dictionary;
+  /** The online range, rounded down to the hundred — a claim beside a "+" must hold. */
+  productCount: number;
+}) {
+  const count = formatCount(productCount, dict.lang);
   const trustPoints = [
     dict.hero.trustLicensed,
-    dict.hero.trustProducts,
+    fmt(dict.hero.trustProducts, { n: count }),
     dict.hero.trustSupply,
   ];
 
@@ -56,7 +65,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
             style={{ animationDelay: "160ms" }}
             className="rise mt-5 max-w-xl text-base leading-relaxed text-ink-500 sm:text-lg"
           >
-            {dict.hero.sub}
+            {fmt(dict.hero.sub, { n: count })}
           </p>
 
           <div

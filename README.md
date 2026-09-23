@@ -219,6 +219,21 @@ dhe [`tests/thumbnails.test.ts`](tests/thumbnails.test.ts) bie nëse jo. Një fo
 e shtuar pa e rrotulluar skriptin do të dukej si figurë e thyer në çdo listë, në
 të dyja faqet, pa asnjë gjurmë në log.
 
+**Madhësia e vizatuar.** Çdo foto është e kornizuar sipas brinjës më të gjatë
+(86 % e katrorit), prandaj një shishe e hollë dukej shumë më e vogël se një
+kuti pranë saj. `npm run images:fit` (`scripts/measure-photos.mjs`) mat kutinë e
+produktit në çdo miniaturë dhe shkruan një faktor për foto te
+`src/data/photo-fit.json`; kartela dhe galeria e kthejnë në mbushje (padding),
+kështu që asnjë foto nuk mund të pritet ose të shtrembërohet. Rrotullojeni pas
+çdo grupi fotosh të reja, pas `images:thumbs` — një foto pa faktor vizatohet si
+më parë. `--proof <skedar.png>` vizaton një fletë para/pas.
+
+**Sa të mprehta mund të jenë.** `npm run audit:photos` shkruan
+`audit/photo-quality.md`: sa piksel kishte produkti në burimin më të mirë që ka
+projekti (Jara, katalogu i vjetër, dyqani i vjetër, prerjet e segmentuara). Nën
+~450 px një foto është e butë në çdo ekran — këto kanë nevojë për foto të re nga
+furnitori, jo për prerje të re.
+
 **Nga vijnë sfondet e pastra.** Fotot origjinale erdhën nga WordPress-i i vjetër,
 të rrafshuara mbi të bardhë, dhe `scripts/cutout-images.mjs` u heq atë sfond. Ka
 katër burime, sipas besueshmërisë:
@@ -341,6 +356,9 @@ npm run migrate:rate-limits   # tabela rate_limits — kufij që i ndajnë insta
 | `fetch-katalog-images.mjs` | Shkarkon prerjet e shemo-katalog.com te `sources/` |
 | `segment-scenes.mjs` | Pret produktin nga një foto e skenuar (model segmentimi) |
 | `sync-image-paths.mjs` | Çon shtigjet e `products.json` në bazën e zgjedhur |
+| `measure-photos.mjs` | Faktori i madhësisë për çdo foto → `src/data/photo-fit.json` |
+| `audit-photo-sources.mjs` | Burimi më i mirë i çdo fotoje → `audit/photo-quality.md` |
+| `report-catalog-visibility.mjs` | Në dyqan, të fshehura në katalog, aktive në bazën e vjetër → `audit/catalog-visibility-vs-old-db.md` (vetëm lexon) |
 | `restructure-categories.mjs` | Ndarja markë/lloj produkti (`kind`, `sort`) |
 | `apply-taxonomy.mjs` | Zbatoi auditin e `audit/` mbi katalogun |
 | `fix-categories.mjs` | 121 produkte pa kategori + rillogaritje e `count` |

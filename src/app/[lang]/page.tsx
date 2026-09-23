@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { canSeePrices, getSession } from "@/lib/auth";
-import { getFeaturedProducts, toCardProducts } from "@/lib/catalog";
+import { getAssortmentCounts, getFeaturedProducts, toCardProducts } from "@/lib/catalog";
+import { roundDownCount } from "@/lib/format";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { Hero } from "@/components/home/Hero";
@@ -46,16 +47,19 @@ export default async function HomePage({
     await getFeaturedProducts(4),
     showPrices
   );
+  // The online range, counted: exact on the button that leads to it, rounded
+  // down where it stands beside a "+".
+  const { online } = await getAssortmentCounts();
 
   return (
     <>
-      <Hero dict={dict} />
-      <TrustStats dict={dict} />
+      <Hero dict={dict} productCount={roundDownCount(online)} />
+      <TrustStats dict={dict} productCount={roundDownCount(online)} />
       <BrandStrip dict={dict} />
       <CategoryGrid dict={dict} />
       <WhyShemo dict={dict} />
       <NetworkSection dict={dict} />
-      <FeaturedProducts products={featured} dict={dict} />
+      <FeaturedProducts products={featured} productCount={online} dict={dict} />
       <AdviceSection dict={dict} />
     </>
   );

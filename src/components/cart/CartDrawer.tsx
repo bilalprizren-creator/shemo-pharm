@@ -165,7 +165,6 @@ function CartPanel({ dict }: { dict: Dictionary }) {
                   >
                     <PhotoWell
                       className="flex size-16 items-center justify-center overflow-hidden rounded-lg border border-ink-900/6"
-                      cutOut={photoPresentation(p.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                     >
                       {p.image ? (
                         <Image

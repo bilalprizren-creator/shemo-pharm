@@ -1,36 +1,33 @@
+import type { CSSProperties } from "react";
+
 /**
  * The well every product photo sits in.
  *
- * Most of the 2 049 photos carry a real alpha channel (scripts/cutout-images.mjs),
- * and a cut-out on flat white is the one surface where that is invisible: the
- * product has no ground, so it reads as pasted on rather than standing in a
- * space. The catalogue site worked this out early; the shop kept a plain white
- * box on the grounds that "against white the transparency simply does not read",
- * which is true and was the wrong conclusion — the fix is to stop using flat
- * white, not to give up the alpha.
+ * Most of the range carries a real alpha channel (scripts/cutout-images.mjs),
+ * and what that buys is a product that can stand on any ground. The ground it
+ * stands on is plain white, and the page around it is a very light cool grey
+ * (`surface`, #f7f8fa), so the white wells and cards lift off the page by
+ * themselves and the packaging is seen in neutral light.
  *
- * Two things, and neither may be loud enough to compete with the photo:
+ * It was not always white. Until 2026-09-23 the well was a gradient from white
+ * down to warm ivory (#f7f5f0), under a two-part warm shadow with a 24 px
+ * throw, on an ivory page. Each of those was reasoned — a horizon for the
+ * product, a shadow that matched warm paper — but together they tinted the
+ * white cartons that most of this range is, and the wide throw read as a grey
+ * smudge under every small bottle. The owner asked for neutral white image
+ * surfaces and clearer packaging, and seen side by side on the proof sheet
+ * (scripts/measure-photos.mjs --proof) they are simply cleaner.
  *
- *   1. a barely-there vertical gradient, so the product has a horizon;
- *   2. a two-part shadow on the photo itself (the caller's job, since the
- *      sizes differ), which is what actually seats it.
+ * What seats a product on white is the shadow on the photo itself (the
+ * caller's job, since the sizes differ) — see PHOTO_SHADOW below.
  *
- * The ground is warm. It used to carry the brand's turquoise at a tenth
- * strength, which was a mistake worth recording: the body behind it is ivory
- * (#f8f7f3) and the shadow on it is warm, so a cool green pool in the middle
- * read as a different light source from everything around it, and it put a
- * green cast on the white cartons that most of this range is. #f7f5f0 sits
- * between `surface` and `surface-deep` — the page's own paper, half a step
- * deeper so the well is still visibly a well.
- *
- * What was tried and rejected: painting an elliptical contact pool onto the
- * ground, low and centred, instead of leaning on the shadow. Rendered against
- * the range it reads as a stain rather than as contact, and the reason is that
- * a painted ellipse has to assume one central foot at a fixed height. Products
- * do not oblige — the four-footed walking stick 8840 splays its feet to the
- * corners, a carton sits flat and wide — so the ellipse lands behind the
- * product as often as under it. A shadow cast from the alpha follows whatever
- * shape the product actually has, which is the whole point of having the alpha.
+ * What was tried and rejected, and should stay rejected: painting an elliptical
+ * contact pool onto the ground instead of leaning on the shadow. A painted
+ * ellipse has to assume one central foot at a fixed height, and products do not
+ * oblige — the four-footed walking stick 8840 splays its feet to the corners, a
+ * carton sits flat and wide — so it lands behind the product as often as under
+ * it and reads as a stain. A shadow cast from the alpha follows whatever shape
+ * the product actually has, which is the whole point of having the alpha.
  *
  * Shared rather than repeated because the card, the detail gallery, the
  * gallery's thumbnails, the catalogue's contents page, the basket and the
@@ -39,12 +36,12 @@
  */
 
 /**
- * Not every photo has been cut out, and a tinted ground is exactly wrong for
- * the ones that have not: an opaque photo is a white rectangle, and on anything
- * but white it shows as a hard white box behind the product. Sixteen of the
- * range are in that state on purpose — white-on-white products the fill would
- * destroy (see the rejected set in scripts/cutout-images.mjs) — plus anything
- * uploaded through /admin, which is never a cut-out.
+ * Not every photo has been cut out. An opaque photo is a white rectangle, which
+ * on the white well is invisible — but a shadow would outline the rectangle
+ * rather than the product, so those get none. Sixteen of the range are in that
+ * state on purpose — white-on-white products the fill would destroy (see the
+ * rejected set in scripts/cutout-images.mjs) — plus anything uploaded through
+ * /admin, which is never a cut-out.
  *
  * The filename is the signal, because it is the same one the script itself
  * uses: it writes `-cutout.webp` and nothing else does. `-cutout-v2` is the
@@ -76,6 +73,26 @@ export function isScenePhoto(image: string | null | undefined): boolean {
 }
 
 /**
+ * The padding, as a share of the well's width, that draws a photo at `fit`
+ * times its standard size.
+ *
+ * `inset` is the padding a photo at fit 1 gets — the card's 7 %, the gallery's
+ * 6 %. object-contain then fits the square photo into what is left, so the
+ * product's drawn size is proportional to (1 − 2 · padding): solving
+ * (1 − 2p) = fit · (1 − 2 · inset) for p gives the line below.
+ *
+ * Floored at zero, which is what makes a factor unable to crop anything: at
+ * zero padding the photo's own margin (it is framed at 86 % of its canvas) is
+ * the only room left, and the product still sits wholly inside the well. A
+ * factor too large for the inset is therefore drawn as large as it can be,
+ * never larger.
+ */
+export function photoPadding(fit: number, inset: number): number {
+  const p = (1 - fit * (1 - 2 * inset)) / 2;
+  return Math.min(0.45, Math.max(0, p));
+}
+
+/**
  * How one product photo should be presented, in one place.
  *
  * Eight surfaces render a product photo and each needs the same three-way
@@ -84,13 +101,23 @@ export function isScenePhoto(image: string | null | undefined): boolean {
  * makes about the ground: a grid where two cards answer this differently reads
  * as a bug long before anyone can say which card is wrong.
  *
- * `pad` is the caller's padding utility, since the wells differ by a factor of
- * twelve between a menu circle and the detail gallery.
+ * Two ways to say how much room the photo gets:
+ *   - `pad`, a padding utility, for the small wells (menu circles, basket,
+ *     suggestions), which differ by a factor of twelve from the gallery;
+ *   - `inset` plus `fit`, for the card and the gallery, where photos are big
+ *     enough for their sizes to be compared and are drawn at their measured
+ *     factor (src/lib/photo-fit.ts). Returned as `style`, since the padding is a
+ *     per-photo number no utility class holds.
  */
 export function photoPresentation(
   image: string | null | undefined,
-  { pad, shadow = PHOTO_SHADOW }: { pad: string; shadow?: string }
-): { cutOut: boolean; scene: boolean; className: string } {
+  {
+    pad = "",
+    inset,
+    fit = 1,
+    shadow = PHOTO_SHADOW,
+  }: { pad?: string; inset?: number; fit?: number; shadow?: string }
+): { cutOut: boolean; scene: boolean; className: string; style?: CSSProperties } {
   if (isScenePhoto(image)) {
     return { cutOut: false, scene: true, className: "object-cover" };
   }
@@ -98,57 +125,44 @@ export function photoPresentation(
   return {
     cutOut,
     scene: false,
-    // `relative` lifts the photo above the ground painted behind it.
-    className: `relative object-contain ${pad} ${cutOut ? shadow : ""}`,
+    // `relative` lifts the photo above anything painted in the well behind it.
+    className: `relative object-contain ${inset === undefined ? pad : ""} ${cutOut ? shadow : ""}`,
+    style:
+      inset === undefined
+        ? undefined
+        : { padding: `${(photoPadding(fit, inset) * 100).toFixed(2)}%` },
   };
 }
 
 export function PhotoWell({
   className = "",
-  /**
-   * False gives the flat white of before: no gradient, and callers drop the
-   * shadow too. Deliberately plain — an uncut photo cannot be made to float,
-   * and pretending otherwise only frames its white box.
-   */
-  cutOut = true,
   children,
 }: {
   className?: string;
-  cutOut?: boolean;
   children: React.ReactNode;
 }) {
-  return (
-    <div
-      className={`relative ${
-        cutOut ? "bg-gradient-to-b from-white to-[#f7f5f0]" : "bg-white"
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`relative bg-white ${className}`}>{children}</div>;
 }
 
 /**
- * What seats the product on that ground. Two shadows rather than one, because
- * that is what contact looks like: a tight, fairly dark one immediately under
- * the product, and a wide pale one for the throw. The single soft shadow this
- * replaces was too diffuse at either size to read as anything but a smudge.
+ * What seats the product on the white well: a tight contact shadow right under
+ * and around it, and a short, faint second one for depth. Both neutral (slate,
+ * the shadow ink of the page's cards), both small — the wide 24 px throw this
+ * replaces spread a grey pool under every bottle that read as dirt on white.
  *
- * Warm rather than neutral-grey, because the surface behind it is ivory and a
- * cool shadow on warm paper looks like a rendering mistake. One set of values
- * for both the 280px card and the 540px gallery — checked at both, and the
- * larger variant that seemed obvious for the gallery was not better.
+ * On a white product it is also what draws the edge: a white carton on a white
+ * well has nothing else separating it from the ground. That is why it is not
+ * dropped altogether.
  *
  * Only ever applied to a cut-out photo — on an opaque one it would shade the
  * white box, not the product.
  */
 export const PHOTO_SHADOW =
-  "[filter:drop-shadow(0_14px_24px_rgb(45_40_30/0.10))_drop-shadow(0_3px_5px_rgb(45_40_30/0.22))]";
+  "[filter:drop-shadow(0_1px_2px_rgb(16_24_40/0.16))_drop-shadow(0_3px_6px_rgb(16_24_40/0.07))]";
 
 /**
  * The same idea for the 44-80px thumbnails in the basket, the search
  * suggestions and the menu circles, where the full shadow is bigger than the
  * product it is meant to sit under.
  */
-export const PHOTO_SHADOW_SM =
-  "[filter:drop-shadow(0_2px_3px_rgb(45_40_30/0.18))]";
+export const PHOTO_SHADOW_SM = "[filter:drop-shadow(0_1px_1.5px_rgb(16_24_40/0.18))]";

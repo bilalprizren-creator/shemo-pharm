@@ -34,7 +34,7 @@ export function AddToCartIconButton({
           setTimeout(() => setAdded(false), 1200);
         }}
         aria-label={label ?? `Shto "${productName}" në shportë`}
-        className={`flex size-9 items-center justify-center rounded-lg transition-colors ${
+        className={`flex size-10 items-center justify-center rounded-full transition-colors ${
           added
             ? "bg-accent-500 text-white"
             : "bg-brand-600 text-white hover:bg-brand-700"
@@ -63,16 +63,24 @@ export interface AddToCartQtyLabels {
   qtyInput: string;
 }
 
-/** Quantity stepper + add button for the product detail page. */
+/**
+ * Quantity stepper + add button for the product detail page.
+ *
+ * `emphasis` because the page decides which of its actions leads: for a
+ * partner who sees prices the basket is the thing to do, for a visitor it is
+ * logging in, and two filled purple buttons side by side say neither.
+ */
 export function AddToCartWithQty({
   productId,
   productName,
   labels,
+  emphasis = "primary",
 }: {
   productId: number;
   /** Only used for the confirmation toast. */
   productName?: string;
   labels: AddToCartQtyLabels;
+  emphasis?: "primary" | "secondary";
 }) {
   const { add } = useCart();
   const [qty, setQtyState] = useState(1);
@@ -112,8 +120,12 @@ export function AddToCartWithQty({
           setTimeout(() => setAdded(false), 1500);
         }}
         aria-label={labels.addAria}
-        className={`inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors ${
-          added ? "bg-accent-500" : "bg-brand-600 hover:bg-brand-700"
+        className={`inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors sm:flex-none ${
+          added
+            ? "bg-accent-500 text-white"
+            : emphasis === "primary"
+              ? "bg-brand-600 text-white hover:bg-brand-700"
+              : "border border-brand-300 bg-white text-brand-700 hover:border-brand-400 hover:bg-brand-50"
         }`}
       >
         {added ? (

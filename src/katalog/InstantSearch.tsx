@@ -70,6 +70,7 @@ export function InstantSearch({
   sections,
   searchHref,
   contentsHref,
+  shopSearchHref,
   initialQuery,
   initialPage,
   dict,
@@ -81,6 +82,13 @@ export function InstantSearch({
   searchHref: string;
   /** The contents page, for the empty state's way out. */
   contentsHref: string;
+  /**
+   * The shop's listing, which searches the whole online range — absolute on
+   * the catalogue's own domain. The catalogue is a selection, so a code it
+   * does not print is often still sold, and a dead end here was the wrong
+   * answer for it (article 7732: in the shop, switched off in the catalogue).
+   */
+  shopSearchHref: string;
   /** `?kerko=` as the page was opened. */
   initialQuery: string;
   /** `?faqja=` as the page was opened; pages one to n are shown at once. */
@@ -122,6 +130,38 @@ export function InstantSearch({
   );
   const shown = hits.slice(0, visible);
   const pagesShown = Math.max(1, Math.ceil(visible / PER_PAGE));
+
+  /**
+   * How many the online range holds for a query the catalogue has nothing for.
+   *
+   * Asked of the shop's own suggestion endpoint, and only on a dead end: every
+   * keystroke would spend the visitor's share of its rate limit on a number
+   * nobody needs while the catalogue is answering. The link beside it works
+   * without the number, so a failed request simply shows no count.
+   */
+  const deadEnd = trimmed.length >= 2 && hits.length === 0 && matchedSections.length === 0;
+  const [shopCount, setShopCount] = useState<{ q: string; total: number } | null>(null);
+  useEffect(() => {
+    if (!deadEnd) return;
+    const q = trimmed;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      fetch(`/api/kerko?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { total?: unknown } | null) => {
+          if (data && typeof data.total === "number") setShopCount({ q, total: data.total });
+        })
+        .catch(() => {});
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [deadEnd, trimmed]);
+  const shopTotal = shopCount?.q === trimmed ? shopCount.total : null;
+  const shopHref = trimmed
+    ? `${shopSearchHref}?kerko=${encodeURIComponent(trimmed)}`
+    : shopSearchHref;
 
   const hrefFor = (q: string, page: number) => {
     const params = new URLSearchParams();
@@ -254,9 +294,18 @@ export function InstantSearch({
         <div className="mt-8">
           <EmptyState
             title={fmt(dict.printedCatalog.searchEmpty, { q: trimmed })}
-            text={dict.printedCatalog.searchPrompt}
+            text={dict.printedCatalog.searchEmptyHint}
+            // The likelier answer leads: the product is sold but not printed.
+            secondaryAction={{ label: dict.printedCatalog.shopSearch, href: shopHref }}
             actionLabel={dict.printedCatalog.contents}
             actionHref={contentsHref}
+            note={
+              <p aria-live="polite" className="mt-3 min-h-5 text-sm font-medium text-accent-700">
+                {shopTotal !== null
+                  ? fmt(dict.printedCatalog.shopSearchCount, { n: shopTotal })
+                  : ""}
+              </p>
+            }
           />
         </div>
       )}
@@ -311,6 +360,20 @@ export function InstantSearch({
             {fmt(dict.printedCatalog.showingOf, { shown: shown.length, total: hits.length })}
           </p>
         </div>
+      )}
+
+      {/* Under any answer, not only an empty one: a query can match a section
+          or a neighbour and still miss the one article the reader meant. */}
+      {trimmed && (hits.length > 0 || matchedSections.length > 0) && (
+        <p className="mt-10 text-center text-sm text-ink-500">
+          {dict.printedCatalog.notFoundHint}{" "}
+          <a
+            href={shopHref}
+            className="font-semibold text-brand-700 underline decoration-brand-200 underline-offset-2 hover:text-brand-800"
+          >
+            {dict.printedCatalog.shopSearch}
+          </a>
+        </p>
       )}
     </>
   );

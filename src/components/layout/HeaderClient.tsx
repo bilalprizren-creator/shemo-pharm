@@ -434,7 +434,6 @@ export function HeaderClient({
                           >
                             <PhotoWell
                               className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-ink-900/6"
-                              cutOut={photoPresentation(c.image, { pad: "p-1.5", shadow: PHOTO_SHADOW_SM }).cutOut}
                             >
                               {c.image ? (
                                 <Image

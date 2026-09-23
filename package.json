@@ -22,8 +22,11 @@
     "repair:product-codes": "node scripts/repair-product-codes.mjs",
     "add:ivy-bear": "node scripts/add-ivy-bear.mjs",
     "import:old-catalog": "node scripts/import-old-catalog-db.mjs",
+    "report:catalog-visibility": "node scripts/report-catalog-visibility.mjs",
     "images:thumbs": "node scripts/thumbnail-images.mjs",
     "images:print": "node scripts/thumbnail-images.mjs --variant print",
+    "images:fit": "node scripts/measure-photos.mjs",
+    "audit:photos": "node scripts/audit-photo-sources.mjs",
     "katalog:pdf": "node scripts/build-catalog-pdf.mjs"
   },
   "dependencies": {

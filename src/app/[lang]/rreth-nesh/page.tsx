@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
+import { getAssortmentCounts } from "@/lib/catalog";
+import { roundDownCount } from "@/lib/format";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { TrustStats } from "@/components/home/TrustStats";
 import { BrandStrip } from "@/components/home/BrandStrip";
@@ -75,7 +77,7 @@ export default async function AboutPage({ params }: Props) {
         </div>
       </section>
 
-      <TrustStats dict={dict} />
+      <TrustStats dict={dict} productCount={roundDownCount((await getAssortmentCounts()).online)} />
 
       <section aria-labelledby="misioni-titulli" className="mx-auto max-w-7xl px-4 py-14 lg:px-6 lg:py-20">
         <div className="grid gap-6 lg:grid-cols-2">

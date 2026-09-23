@@ -20,6 +20,7 @@ import {
 } from "@/lib/auth";
 import { isLang, langHref, type Lang } from "@/lib/i18n";
 import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { safeReturnPath } from "@/lib/return-path";
 import { logSecurityEvent } from "@/lib/security-log";
 import { rateLimited, TEN_MINUTES_MS } from "@/lib/rate-limit";
 import {
@@ -108,7 +109,9 @@ export async function loginAction(
 
   await logSecurityEvent("login", { email: user.email });
   await createSessionCookie(user);
-  redirect(langHref(lang, "/llogaria"));
+  // Back to the product whose price the partner came to see, when the login
+  // link said where from — only ever a path on this site (safeReturnPath).
+  redirect(safeReturnPath(formData.get("kthehu")) ?? langHref(lang, "/llogaria"));
 }
 
 function registerSchema(dict: Dictionary) {

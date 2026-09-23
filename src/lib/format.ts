@@ -43,6 +43,24 @@ export function formatDateTime(value: Date | string, locale = "sq-AL"): string {
 }
 
 /**
+ * A product count as each language writes it: "2285" in Albanian (CLDR does
+ * not group four digits there), "2,285" in English, "12 285" / "12,285" above.
+ */
+export function formatCount(n: number, lang: "sq" | "en"): string {
+  return new Intl.NumberFormat(lang === "en" ? "en-GB" : "sq-AL").format(n);
+}
+
+/**
+ * A count for a headline: rounded down, never up — "2200+" for 2 285 — so a
+ * figure printed beside a "+" is always true on the day it is read. It used to
+ * be a hand-written "3000+" that no list on the site had ever reached.
+ */
+export function roundDownCount(n: number): number {
+  const step = n >= 1000 ? 100 : n >= 100 ? 10 : 1;
+  return Math.floor(n / step) * step;
+}
+
+/**
  * A file size in megabytes, e.g. "12,6 MB" — for the catalogue download, where
  * the number is the difference between a link somebody taps in a pharmacy and
  * one they think better of.

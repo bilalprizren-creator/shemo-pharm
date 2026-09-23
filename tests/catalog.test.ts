@@ -11,6 +11,7 @@ import {
   searchProducts,
 } from "@/lib/catalog";
 import type { Category, Product } from "@/lib/types";
+import { NBSP } from "@/lib/pack-size";
 
 function product(id: number, name: string, over: Partial<Product> = {}): Product {
   return {
@@ -257,7 +258,8 @@ describe("productDisplayName", () => {
     const p = product(1, "Losion kunder mushkonjave 100ml (5087) (AUTAN)", {
       sku: "5087",
     });
-    expect(productDisplayName(p)).toBe("Losion kunder mushkonjave 100ml (AUTAN)");
+    // The size is written one way on the way out too (src/lib/pack-size.ts).
+    expect(productDisplayName(p)).toBe(`Losion kunder mushkonjave 100${NBSP}ml (AUTAN)`);
   });
 
   it("closes up the gap rather than leaving a double space", () => {
@@ -268,7 +270,7 @@ describe("productDisplayName", () => {
   it("drops a bracket left dangling by a typo in the source name", () => {
     // "Colidur 200mg X 12tab Rifaximin (5237))" is real data.
     const p = product(1, "Colidur 200mg X 12tab Rifaximin (5237))", { sku: "5237" });
-    expect(productDisplayName(p)).toBe("Colidur 200mg X 12tab Rifaximin");
+    expect(productDisplayName(p)).toBe(`Colidur 200${NBSP}mg X 12tab Rifaximin`);
   });
 
   it("leaves a name without parentheses alone", () => {
@@ -315,7 +317,7 @@ describe("productDisplayName", () => {
 
     it("strips a group naming only some of the SKU's codes", () => {
       const p = product(1, "Shiring 5ml me gjilper 21G-A100 (4517)", { sku: "4517 , 4533" });
-      expect(productDisplayName(p)).toBe("Shiring 5ml me gjilper 21G-A100");
+      expect(productDisplayName(p)).toBe(`Shiring 5${NBSP}ml me gjilper 21G-A100`);
     });
 
     it("strips the code carrying a size the SKU leaves off", () => {
@@ -355,7 +357,7 @@ describe("productDisplayName", () => {
       // Real row: the name says 5283, the SKU says 8283. One of them is wrong,
       // and hiding it would be the worse answer.
       const p = product(1, "Biotin 10.000 mcg A30 (5283)", { sku: "8283" });
-      expect(productDisplayName(p)).toBe("Biotin 10.000 mcg A30 (5283)");
+      expect(productDisplayName(p)).toBe(`Biotin 10.000${NBSP}mcg A30 (5283)`);
     });
 
     it("does not let a short prefix swallow a longer code", () => {

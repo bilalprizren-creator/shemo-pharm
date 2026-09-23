@@ -13,6 +13,7 @@ export function EmptyState({
   actionLabel,
   actionHref,
   secondaryAction,
+  note,
 }: {
   title: string;
   text: string;
@@ -28,6 +29,8 @@ export function EmptyState({
    * is knowable, the caller offers undoing just that reason here.
    */
   secondaryAction?: EmptyStateAction;
+  /** A line under the buttons — a fact about the way out, such as how much is there. */
+  note?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-ink-900/12 bg-white px-6 py-16 text-center">
@@ -58,6 +61,7 @@ export function EmptyState({
           {actionLabel}
         </Link>
       </div>
+      {note}
     </div>
   );
 }

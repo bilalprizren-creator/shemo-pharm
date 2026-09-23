@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { langHref } from "@/lib/i18n";
+import { fmt, langHref } from "@/lib/i18n";
+import { formatCount } from "@/lib/format";
 import type { Dictionary } from "@/lib/dictionaries";
 import type { CardProduct } from "@/lib/types";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -12,9 +13,12 @@ import { ProductCard } from "@/components/product/ProductCard";
  */
 export function FeaturedProducts({
   products,
+  productCount,
   dict,
 }: {
   products: CardProduct[];
+  /** Exactly what /produktet lists, since that is where the button goes. */
+  productCount: number;
   dict: Dictionary;
 }) {
   if (products.length === 0) return null;
@@ -50,7 +54,7 @@ export function FeaturedProducts({
             href={langHref(dict.lang, "/produktet")}
             className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-brand-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 transition-colors hover:bg-brand-700"
           >
-            {dict.home.featuredCta}
+            {fmt(dict.home.featuredCta, { n: formatCount(productCount, dict.lang) })}
             <ArrowRight
               className="size-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden

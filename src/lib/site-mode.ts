@@ -61,6 +61,16 @@ export const SITE_ORIGINS: Record<SiteMode, string> = {
   katalog: "https://shemo-katalog.com",
 };
 
+/**
+ * What to put in front of a shop path so that it reaches the shop from a page
+ * of `mode`'s site. Nothing on the shop itself; the shop's origin on the
+ * catalogue's domain, whose proxy would otherwise fold "/produktet" into the
+ * catalogue tree and 404 it as a section slug.
+ */
+export function shopOrigin(mode: SiteMode): string {
+  return mode === "katalog" ? SITE_ORIGINS.shop : "";
+}
+
 /** The site a hostname belongs to. Unknown hosts are the shop. */
 export function modeForHost(host: string | null | undefined): SiteMode {
   if (!host) return "shop";

@@ -17,16 +17,17 @@ export function ProductSkeleton() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
-          {/* The well's own ground rather than a grey block: the photo boxes
-              are the largest thing on the page, and settling from cool grey to
-              warm paper is a visible flash. `animate-pulse` is the loading
-              signal; the colour does not need to be one too. */}
-          <div className="aspect-square w-full rounded-2xl bg-gradient-to-b from-white to-[#f7f5f0]" />
+          {/* The well's own white rather than a grey block: the photo boxes
+              are the largest thing on the page, and settling from grey to
+              white is a visible flash. `animate-pulse` is the loading signal;
+              the colour does not need to be one too. The border is the real
+              gallery's, which is what shows a white box on the grey page. */}
+          <div className="aspect-square w-full rounded-2xl border border-ink-900/8 bg-white" />
           <div className="mt-3 flex gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="size-18 rounded-xl bg-gradient-to-b from-white to-[#f7f5f0]"
+                className="size-18 rounded-xl border-2 border-ink-900/8 bg-white"
               />
             ))}
           </div>

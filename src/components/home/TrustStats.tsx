@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { formatCount } from "@/lib/format";
 import type { Dictionary } from "@/lib/dictionaries";
 
 /** One small, consistent icon per company figure (order matches SITE.stats). */
@@ -17,7 +18,14 @@ const STAT_ICONS: LucideIcon[] = [Users, Package, Handshake, Building2, Warehous
  * dividers and one small icon per figure. Five discrete stats (never "12 + 2").
  * Used on the homepage right under <Hero /> and standalone on /rreth-nesh.
  */
-export function TrustStats({ dict }: { dict: Dictionary }) {
+export function TrustStats({
+  dict,
+  productCount,
+}: {
+  dict: Dictionary;
+  /** The online range, already rounded down (roundDownCount) — shown as "2200+". */
+  productCount: number;
+}) {
   return (
     <section aria-label={dict.stats.label} className="border-y border-line bg-white">
       <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-line sm:grid-cols-5 sm:divide-x">
@@ -34,7 +42,7 @@ export function TrustStats({ dict }: { dict: Dictionary }) {
                 aria-hidden
               />
               <dd className="order-2 font-display text-2xl font-bold tracking-tight text-brand-700 sm:text-3xl">
-                {s.value}
+                {s.value ?? `${formatCount(productCount, dict.lang)}+`}
               </dd>
               <dt className="order-3 text-sm font-medium text-ink-500">
                 {dict.stats.labels[i] ?? s.label}

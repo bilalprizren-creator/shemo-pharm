@@ -64,7 +64,9 @@ export const SITE = {
   // is shown as two separate stats — never as a combined "12 + 2".
   stats: [
     { value: "1200+", label: "Klientë" },
-    { value: "3000+", label: "Produkte" },
+    // Counted, not written down: TrustStats fills in the online range, rounded
+    // down to the hundred. It said "3000+" here, which no list ever reached.
+    { value: null, label: "Produkte" },
     // TODO: the old site said "200+ Distributor i autorizuar" — meaning unclear.
     // Neutral wording used until the business confirms what the figure counts.
     { value: "200+", label: "Brende partnere" },

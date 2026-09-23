@@ -73,6 +73,11 @@ export interface CardProduct extends PublicProduct {
    * away from silently returning zero. It is null exactly when `price` is.
    */
   priceCents: number | null;
+  /**
+   * How large to draw the photo against the standard framing — see
+   * src/lib/photo-fit.ts. 1 for a photo the measurement does not know.
+   */
+  imageFit: number;
 }
 
 /**

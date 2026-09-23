@@ -6,7 +6,7 @@ import {
   toCardProducts,
 } from "@/lib/catalog";
 import { langHref } from "@/lib/i18n";
-import { getSiteMode, sitePath } from "@/lib/site-mode";
+import { getSiteMode, shopOrigin, sitePath } from "@/lib/site-mode";
 import type { Dictionary } from "@/lib/dictionaries";
 import { Breadcrumbs } from "@/components/catalog/Breadcrumbs";
 import { InstantSearch, type IndexProduct, type IndexSection } from "@/katalog/InstantSearch";
@@ -104,6 +104,11 @@ export async function SearchResults({
         sections={links}
         searchHref={href("/katalog/kerko")}
         contentsHref={href("/katalog")}
+        // The whole online range, for what the catalogue does not print. On
+        // the catalogue's own domain that is another origin: /produktet is
+        // not one of the SHARED_PATHS, and the proxy would read it as a
+        // section slug.
+        shopSearchHref={`${shopOrigin(mode)}${langHref(dict.lang, "/produktet")}`}
         initialQuery={query.trim()}
         initialPage={page}
         dict={dict}
