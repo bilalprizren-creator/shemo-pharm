@@ -1,190 +1,200 @@
 {
-  "generatedAt": "2026-09-10T14:26:57.501Z",
-  "fingerprint": "536123bf",
+  "generatedAt": "2026-09-23T07:05:44.122Z",
+  "fingerprint": "5d056c80",
   "full": {
     "file": "/pdf/shemo-katalog-2026-09.pdf",
-    "bytes": 20157112,
-    "sheets": 162
+    "bytes": 22771524,
+    "sheets": 178
   },
   "sections": {
     "1-1-shemo": {
       "file": "/pdf/seksionet/1-1-shemo-2026-09.pdf",
-      "bytes": 362231,
+      "bytes": 362650,
       "sheets": 2
     },
     "1-2-oksigjen-dhe-aparatura": {
       "file": "/pdf/seksionet/1-2-oksigjen-dhe-aparatura-2026-09.pdf",
-      "bytes": 133588,
+      "bytes": 134433,
       "sheets": 1
     },
     "2-diabetike": {
       "file": "/pdf/seksionet/2-diabetike-2026-09.pdf",
-      "bytes": 332116,
+      "bytes": 332956,
       "sheets": 2
     },
     "3-aparatur-per-tension": {
       "file": "/pdf/seksionet/3-aparatur-per-tension-2026-09.pdf",
-      "bytes": 213990,
+      "bytes": 214003,
       "sheets": 1
     },
     "4-mates-i-temperatures": {
       "file": "/pdf/seksionet/4-mates-i-temperatures-2026-09.pdf",
-      "bytes": 167936,
+      "bytes": 168772,
       "sheets": 1
     },
     "5-bebe-dhe-nena": {
       "file": "/pdf/seksionet/5-bebe-dhe-nena-2026-09.pdf",
-      "bytes": 175050,
+      "bytes": 201227,
       "sheets": 1
     },
     "5-5-rabir": {
       "file": "/pdf/seksionet/5-5-rabir-2026-09.pdf",
-      "bytes": 599323,
+      "bytes": 599298,
       "sheets": 5
     },
     "6-pajisje-per-vesh": {
       "file": "/pdf/seksionet/6-pajisje-per-vesh-2026-09.pdf",
-      "bytes": 194502,
+      "bytes": 230066,
       "sheets": 2
     },
     "6-2-pavloderm": {
       "file": "/pdf/seksionet/6-2-pavloderm-2026-09.pdf",
-      "bytes": 172791,
+      "bytes": 164487,
       "sheets": 1
     },
     "6-4-top-pomada": {
       "file": "/pdf/seksionet/6-4-top-pomada-2026-09.pdf",
-      "bytes": 175063,
+      "bytes": 184377,
       "sheets": 1
     },
     "6-1-vaseline": {
       "file": "/pdf/seksionet/6-1-vaseline-2026-09.pdf",
-      "bytes": 162591,
+      "bytes": 211426,
       "sheets": 1
     },
     "6-3-labella": {
       "file": "/pdf/seksionet/6-3-labella-2026-09.pdf",
-      "bytes": 457084,
+      "bytes": 470307,
       "sheets": 3
     },
     "6-5-senti2": {
       "file": "/pdf/seksionet/6-5-senti2-2026-09.pdf",
-      "bytes": 488200,
+      "bytes": 514594,
       "sheets": 3
     },
     "6-6-krauterhof": {
       "file": "/pdf/seksionet/6-6-krauterhof-2026-09.pdf",
-      "bytes": 644170,
+      "bytes": 653839,
       "sheets": 5
     },
     "6-7-cansin": {
       "file": "/pdf/seksionet/6-7-cansin-2026-09.pdf",
-      "bytes": 1180730,
+      "bytes": 1217466,
       "sheets": 8
     },
     "7-1-elina-med": {
       "file": "/pdf/seksionet/7-1-elina-med-2026-09.pdf",
-      "bytes": 178019,
+      "bytes": 210106,
       "sheets": 1
     },
     "7-love-hitman-dolphi": {
       "file": "/pdf/seksionet/7-love-hitman-dolphi-2026-09.pdf",
-      "bytes": 279955,
+      "bytes": 280792,
       "sheets": 2
     },
     "8-qokollada": {
       "file": "/pdf/seksionet/8-qokollada-2026-09.pdf",
-      "bytes": 206914,
+      "bytes": 207756,
       "sheets": 1
     },
     "8-1-corega": {
       "file": "/pdf/seksionet/8-1-corega-2026-09.pdf",
-      "bytes": 167096,
+      "bytes": 205195,
       "sheets": 1
     },
     "7-2-nt41": {
       "file": "/pdf/seksionet/7-2-nt41-2026-09.pdf",
-      "bytes": 315298,
+      "bytes": 316133,
       "sheets": 2
+    },
+    "7-3-ivy-bear": {
+      "file": "/pdf/seksionet/7-3-ivy-bear-2026-09.pdf",
+      "bytes": 173763,
+      "sheets": 1
     },
     "9-swiss-energy": {
       "file": "/pdf/seksionet/9-swiss-energy-2026-09.pdf",
-      "bytes": 947868,
+      "bytes": 961456,
       "sheets": 6
     },
     "8-1-eferveta-me-brende-te-ndryshme": {
       "file": "/pdf/seksionet/8-1-eferveta-me-brende-te-ndryshme-2026-09.pdf",
-      "bytes": 149187,
+      "bytes": 150035,
       "sheets": 1
     },
     "8-2-haribo": {
       "file": "/pdf/seksionet/8-2-haribo-2026-09.pdf",
-      "bytes": 253655,
+      "bytes": 256283,
       "sheets": 1
     },
     "8-3-multiplus-suplement": {
       "file": "/pdf/seksionet/8-3-multiplus-suplement-2026-09.pdf",
-      "bytes": 366915,
+      "bytes": 363993,
       "sheets": 2
     },
     "8-4-dermosept": {
       "file": "/pdf/seksionet/8-4-dermosept-2026-09.pdf",
-      "bytes": 243695,
+      "bytes": 235690,
       "sheets": 2
     },
     "8-4-aqua-dhe-dermosept": {
       "file": "/pdf/seksionet/8-4-aqua-dhe-dermosept-2026-09.pdf",
-      "bytes": 138897,
+      "bytes": 139733,
       "sheets": 1
     },
     "10-naturagen": {
       "file": "/pdf/seksionet/10-naturagen-2026-09.pdf",
-      "bytes": 308468,
-      "sheets": 2
+      "bytes": 417376,
+      "sheets": 3
     },
     "13-nutrifactor": {
       "file": "/pdf/seksionet/13-nutrifactor-2026-09.pdf",
-      "bytes": 769099,
-      "sheets": 5
+      "bytes": 1449443,
+      "sheets": 10
     },
     "13-1-cellcense-by-nutrifactor": {
       "file": "/pdf/seksionet/13-1-cellcense-by-nutrifactor-2026-09.pdf",
-      "bytes": 123301,
+      "bytes": 123312,
       "sheets": 1
     },
     "15-pharmavital": {
       "file": "/pdf/seksionet/15-pharmavital-2026-09.pdf",
-      "bytes": 346779,
+      "bytes": 375199,
       "sheets": 2
     },
     "8-6-vajera": {
       "file": "/pdf/seksionet/8-6-vajera-2026-09.pdf",
-      "bytes": 341672,
+      "bytes": 318551,
       "sheets": 2
     },
     "8-7-suplemente-te-ndryshme": {
       "file": "/pdf/seksionet/8-7-suplemente-te-ndryshme-2026-09.pdf",
-      "bytes": 1337940,
-      "sheets": 8
+      "bytes": 1383194,
+      "sheets": 9
+    },
+    "8-8-conalt": {
+      "file": "/pdf/seksionet/8-8-conalt-2026-09.pdf",
+      "bytes": 1120972,
+      "sheets": 5
     },
     "18-shurup": {
       "file": "/pdf/seksionet/18-shurup-2026-09.pdf",
-      "bytes": 478504,
+      "bytes": 462499,
       "sheets": 3
     },
     "21-atc": {
       "file": "/pdf/seksionet/21-atc-2026-09.pdf",
-      "bytes": 609972,
+      "bytes": 565414,
       "sheets": 3
     },
     "8-5-orbita": {
       "file": "/pdf/seksionet/8-5-orbita-2026-09.pdf",
-      "bytes": 237190,
+      "bytes": 238028,
       "sheets": 1
     },
     "23-froika": {
       "file": "/pdf/seksionet/23-froika-2026-09.pdf",
-      "bytes": 551937,
+      "bytes": 550793,
       "sheets": 6
     },
     "23-1-bioblas-dhe-restorex": {
@@ -194,13 +204,8 @@
     },
     "23-2-kozmetika-te-ndryshme": {
       "file": "/pdf/seksionet/23-2-kozmetika-te-ndryshme-2026-09.pdf",
-      "bytes": 1142353,
-      "sheets": 8
-    },
-    "0-autan": {
-      "file": "/pdf/seksionet/0-autan-2026-09.pdf",
-      "bytes": 190785,
-      "sheets": 2
+      "bytes": 1064319,
+      "sheets": 7
     },
     "23-3-kozmetike-becutan": {
       "file": "/pdf/seksionet/23-3-kozmetike-becutan-2026-09.pdf",
@@ -209,108 +214,118 @@
     },
     "23-4-johnson-s-baby": {
       "file": "/pdf/seksionet/23-4-johnson-s-baby-2026-09.pdf",
-      "bytes": 145543,
+      "bytes": 145547,
       "sheets": 1
     },
     "26-dentare": {
       "file": "/pdf/seksionet/26-dentare-2026-09.pdf",
-      "bytes": 364048,
+      "bytes": 364047,
       "sheets": 3
     },
     "26-1-mr-white": {
       "file": "/pdf/seksionet/26-1-mr-white-2026-09.pdf",
-      "bytes": 428889,
+      "bytes": 379658,
       "sheets": 3
     },
     "26-2-chicco": {
       "file": "/pdf/seksionet/26-2-chicco-2026-09.pdf",
-      "bytes": 277678,
+      "bytes": 278512,
       "sheets": 2
     },
     "26-3-bio-tree-baby": {
       "file": "/pdf/seksionet/26-3-bio-tree-baby-2026-09.pdf",
-      "bytes": 255033,
+      "bytes": 185289,
       "sheets": 2
     },
     "27-pampersa": {
       "file": "/pdf/seksionet/27-pampersa-2026-09.pdf",
-      "bytes": 479570,
+      "bytes": 495187,
       "sheets": 3
     },
     "28-peceta-higjienike-dhe-tampon": {
       "file": "/pdf/seksionet/28-peceta-higjienike-dhe-tampon-2026-09.pdf",
-      "bytes": 542938,
+      "bytes": 556022,
       "sheets": 3
     },
     "31-ortopedike": {
       "file": "/pdf/seksionet/31-ortopedike-2026-09.pdf",
-      "bytes": 1513735,
+      "bytes": 1540227,
       "sheets": 13
     },
     "32-ortopedi": {
       "file": "/pdf/seksionet/32-ortopedi-2026-09.pdf",
-      "bytes": 191622,
+      "bytes": 191633,
       "sheets": 1
+    },
+    "32-1-scholl": {
+      "file": "/pdf/seksionet/32-1-scholl-2026-09.pdf",
+      "bytes": 279796,
+      "sheets": 2
     },
     "33-tio": {
       "file": "/pdf/seksionet/33-tio-2026-09.pdf",
-      "bytes": 144184,
+      "bytes": 239830,
       "sheets": 2
     },
     "35-infuzione": {
       "file": "/pdf/seksionet/35-infuzione-2026-09.pdf",
-      "bytes": 116084,
+      "bytes": 126082,
       "sheets": 1
     },
     "37-belupo": {
       "file": "/pdf/seksionet/37-belupo-2026-09.pdf",
-      "bytes": 418290,
+      "bytes": 418279,
+      "sheets": 3
+    },
+    "38-denk-pharma": {
+      "file": "/pdf/seksionet/38-denk-pharma-2026-09.pdf",
+      "bytes": 382031,
       "sheets": 3
     },
     "40-galenika": {
       "file": "/pdf/seksionet/40-galenika-2026-09.pdf",
-      "bytes": 477733,
+      "bytes": 471320,
       "sheets": 4
     },
     "41-1-hemofarm": {
       "file": "/pdf/seksionet/41-1-hemofarm-2026-09.pdf",
-      "bytes": 382234,
+      "bytes": 382251,
       "sheets": 3
     },
     "41-2-stada": {
       "file": "/pdf/seksionet/41-2-stada-2026-09.pdf",
-      "bytes": 257182,
+      "bytes": 248123,
       "sheets": 2
     },
     "41-3-remedica": {
       "file": "/pdf/seksionet/41-3-remedica-2026-09.pdf",
-      "bytes": 208822,
+      "bytes": 203184,
       "sheets": 1
     },
     "41-4-pika-dhe-spreja": {
       "file": "/pdf/seksionet/41-4-pika-dhe-spreja-2026-09.pdf",
-      "bytes": 516206,
+      "bytes": 516218,
       "sheets": 3
     },
     "41-6-abdiibrahim": {
       "file": "/pdf/seksionet/41-6-abdiibrahim-2026-09.pdf",
-      "bytes": 321909,
+      "bytes": 322738,
       "sheets": 2
     },
     "41-7-nobel": {
       "file": "/pdf/seksionet/41-7-nobel-2026-09.pdf",
-      "bytes": 99604,
+      "bytes": 100441,
       "sheets": 1
     },
     "43-ampulla": {
       "file": "/pdf/seksionet/43-ampulla-2026-09.pdf",
-      "bytes": 210638,
+      "bytes": 190996,
       "sheets": 1
     },
     "45-medikamente": {
       "file": "/pdf/seksionet/45-medikamente-2026-09.pdf",
-      "bytes": 776322,
-      "sheets": 5
+      "bytes": 856973,
+      "sheets": 6
     }
   }
 }
