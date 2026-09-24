@@ -83,8 +83,12 @@ function Section({
             <tr className="border-b border-ink-900/8 text-xs uppercase tracking-wide text-ink-400">
               <th className="px-3 py-3 font-semibold">Kategoria</th>
               <th className="px-3 py-3 font-semibold">Produkte</th>
-              <th className="px-3 py-3 font-semibold" colSpan={5}>
-                Emri i shfaqur · lloji · prindi · renditja
+              <th className="px-3 py-3 font-semibold">Emri i shfaqur</th>
+              <th className="px-3 py-3 font-semibold">Lloji</th>
+              <th className="px-3 py-3 font-semibold">Prindi</th>
+              <th className="px-3 py-3 font-semibold">Renditja</th>
+              <th className="px-3 py-3 font-semibold">
+                <span className="sr-only">Veprimi</span>
               </th>
             </tr>
           </thead>

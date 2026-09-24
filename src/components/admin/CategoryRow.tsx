@@ -32,9 +32,21 @@ export function CategoryRow({
     initialState
   );
 
+  // One <form> per row, referenced by its `id` from inputs that live in other
+  // <td>s (the HTML5 `form=` attribute) rather than wrapping them — a <form>
+  // cannot legally contain <td> siblings of its own <tr>. That is what lets
+  // each field sit under its own column header instead of all four being
+  // flexed together under one merged "Emri i shfaqur · lloji · prindi ·
+  // renditja" header, which is what this replaces.
+  const formId = `category-${category.id}`;
+  const feedbackId = `${formId}-feedback`;
+
   return (
     <tr className="border-b border-ink-900/4 align-middle last:border-0">
       <td className="px-3 py-2">
+        <form id={formId} action={formAction}>
+          <input type="hidden" name="id" value={category.id} />
+        </form>
         <div style={{ paddingLeft: category.depth * 16 }}>
           <span className="block truncate text-sm font-medium text-ink-900" title={category.name}>
             {category.name}
@@ -45,48 +57,61 @@ export function CategoryRow({
         </div>
       </td>
       <td className="px-3 py-2 text-sm tabular-nums text-ink-500">{category.count}</td>
-      <td className="px-3 py-2" colSpan={5}>
-        <form action={formAction} className="flex flex-wrap items-center gap-2">
-          <input type="hidden" name="id" value={category.id} />
-          <input
-            name="displayName"
-            defaultValue={category.displayName ?? ""}
-            placeholder={category.name}
-            aria-label={`Emri i shfaqur për ${category.name}`}
-            className={`${cell} w-48`}
-          />
-          <select
-            name="kind"
-            defaultValue={category.kind}
-            aria-label={`Lloji për ${category.name}`}
-            className={`${cell} w-28`}
-          >
-            <option value="type">Lloj produkti</option>
-            <option value="brand">Markë</option>
-          </select>
-          <select
-            name="parent"
-            defaultValue={String(category.parent)}
-            aria-label={`Kategoria prind për ${category.name}`}
-            className={`${cell} w-44`}
-          >
-            <option value="0">— pa prind —</option>
-            {parentOptions.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <input
-            name="sort"
-            type="number"
-            min={0}
-            max={9999}
-            defaultValue={category.sort}
-            aria-label={`Renditja për ${category.name}`}
-            className={`${cell} w-20`}
-          />
+      <td className="px-3 py-2">
+        <input
+          form={formId}
+          name="displayName"
+          defaultValue={category.displayName ?? ""}
+          placeholder={category.name}
+          aria-label={`Emri i shfaqur për ${category.name}`}
+          aria-describedby={feedbackId}
+          className={`${cell} w-full min-w-[11rem]`}
+        />
+      </td>
+      <td className="px-3 py-2">
+        <select
+          form={formId}
+          name="kind"
+          defaultValue={category.kind}
+          aria-label={`Lloji për ${category.name}`}
+          className={`${cell} w-full min-w-[8rem]`}
+        >
+          <option value="type">Lloj produkti</option>
+          <option value="brand">Markë</option>
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <select
+          form={formId}
+          name="parent"
+          defaultValue={String(category.parent)}
+          aria-label={`Kategoria prind për ${category.name}`}
+          className={`${cell} w-full min-w-[11rem]`}
+        >
+          <option value="0">— pa prind —</option>
+          {parentOptions.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <input
+          form={formId}
+          name="sort"
+          type="number"
+          min={0}
+          max={9999}
+          defaultValue={category.sort}
+          aria-label={`Renditja për ${category.name}`}
+          className={`${cell} w-20`}
+        />
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
+            form={formId}
             type="submit"
             disabled={pending}
             className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
@@ -95,22 +120,24 @@ export function CategoryRow({
             Ruaj
           </button>
 
-          {state.success && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-700">
-              <CircleCheck className="size-3.5" aria-hidden />
-              {state.success}
-            </span>
-          )}
-          {(state.error || state.fieldErrors) && (
-            <span
-              role="alert"
-              className="inline-flex items-center gap-1 text-xs font-medium text-red-700"
-            >
-              <CircleAlert className="size-3.5" aria-hidden />
-              {state.error ?? Object.values(state.fieldErrors ?? {})[0]}
-            </span>
-          )}
-        </form>
+          <span id={feedbackId}>
+            {state.success && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-700">
+                <CircleCheck className="size-3.5" aria-hidden />
+                {state.success}
+              </span>
+            )}
+            {(state.error || state.fieldErrors) && (
+              <span
+                role="alert"
+                className="inline-flex items-center gap-1 text-xs font-medium text-red-700"
+              >
+                <CircleAlert className="size-3.5" aria-hidden />
+                {state.error ?? Object.values(state.fieldErrors ?? {})[0]}
+              </span>
+            )}
+          </span>
+        </div>
       </td>
     </tr>
   );
